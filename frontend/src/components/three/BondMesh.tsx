@@ -6,9 +6,10 @@ type BondMeshProps = {
   bond: Bond;
   atomsById: Map<string, Atom>;
   isFocused?: boolean;
+  radius?: number;
 };
 
-export function BondMesh({ bond, atomsById, isFocused = false }: BondMeshProps) {
+export function BondMesh({ bond, atomsById, isFocused = false, radius = 0.04 }: BondMeshProps) {
   const geometry = useMemo(() => {
     const startAtom = atomsById.get(bond.atomIds[0]);
     const endAtom = atomsById.get(bond.atomIds[1]);
@@ -39,7 +40,7 @@ export function BondMesh({ bond, atomsById, isFocused = false }: BondMeshProps) 
 
   return (
     <mesh position={geometry.midpoint} quaternion={geometry.quaternion} castShadow>
-      <cylinderGeometry args={[isFocused ? 0.055 : 0.04, isFocused ? 0.055 : 0.04, geometry.length, 24]} />
+      <cylinderGeometry args={[isFocused ? radius * 1.35 : radius, isFocused ? radius * 1.35 : radius, geometry.length, 24]} />
       <meshStandardMaterial color={isFocused ? "#F4A261" : "#B7C7C3"} roughness={0.45} />
     </mesh>
   );

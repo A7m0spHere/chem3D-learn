@@ -9,11 +9,13 @@ const elementColors: Record<string, string> = {
 type AtomMeshProps = {
   atom: Atom;
   isFocused?: boolean;
+  atomScale?: number;
+  showLabel?: boolean;
 };
 
-export function AtomMesh({ atom, isFocused = false }: AtomMeshProps) {
+export function AtomMesh({ atom, isFocused = false, atomScale = 1, showLabel = true }: AtomMeshProps) {
   const color = atom.color ?? elementColors[atom.element] ?? "#94A3B8";
-  const radius = atom.radius ?? 0.24;
+  const radius = (atom.radius ?? 0.24) * atomScale;
 
   return (
     <group position={atom.position}>
@@ -27,11 +29,13 @@ export function AtomMesh({ atom, isFocused = false }: AtomMeshProps) {
           emissiveIntensity={isFocused ? 0.18 : 0}
         />
       </mesh>
-      <Html center distanceFactor={7} position={[0, radius + 0.16, 0]}>
-        <span className="rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-text-primary shadow-sm">
-          {atom.label}
-        </span>
-      </Html>
+      {showLabel ? (
+        <Html center distanceFactor={7} position={[0, radius + 0.16, 0]}>
+          <span className="rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-text-primary shadow-sm">
+            {atom.label}
+          </span>
+        </Html>
+      ) : null}
     </group>
   );
 }

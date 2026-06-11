@@ -20,7 +20,7 @@ export function StepBar({
   return (
     <div className="rounded-lg border border-border bg-surface p-4 shadow-panel">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex items-center justify-between gap-3 xl:justify-start">
+        <div className="flex shrink-0 items-center justify-between gap-3 xl:justify-start">
           <Button
             aria-label="上一步"
             disabled={activeStepIndex === 0}
@@ -31,7 +31,7 @@ export function StepBar({
           >
             <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <span className="text-sm font-medium text-text-primary">
+          <span className="whitespace-nowrap text-sm font-medium text-text-primary">
             步骤 {activeStepIndex + 1} / {lessonSteps.length}
           </span>
           <Button
@@ -46,7 +46,7 @@ export function StepBar({
           </Button>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-3 xl:min-w-[560px]">
+        <div className="grid gap-2 sm:grid-cols-3 xl:flex-1">
           {lessonSteps.map((step, index) => (
             <button
               key={step.id}

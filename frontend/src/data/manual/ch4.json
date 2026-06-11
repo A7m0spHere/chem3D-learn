@@ -1,6 +1,11 @@
 {
   "id": "ch4",
+  "kind": "molecule",
   "formula": "CH4",
+  "names": {
+    "zh": "甲烷",
+    "en": "Methane"
+  },
   "nameZh": "甲烷",
   "category": "vsepr",
   "summaryZh": "甲烷分子以碳原子为中心，四个氢原子指向空间四个方向。它是高中阶段理解正四面体构型和约 109.5° 键角的核心例子。",
@@ -10,40 +15,40 @@
       "element": "C",
       "label": "C",
       "position": [0, 0, 0],
-      "radius": 0.32,
+      "radius": 0.34,
       "color": "#1F2933"
     },
     {
       "id": "h1",
       "element": "H",
       "label": "H",
-      "position": [1, 1, 1],
-      "radius": 0.2,
-      "color": "#FFFFFF"
+      "position": [1.08, 1.08, 1.08],
+      "radius": 0.22,
+      "color": "#F8FAFC"
     },
     {
       "id": "h2",
       "element": "H",
       "label": "H",
-      "position": [-1, -1, 1],
-      "radius": 0.2,
-      "color": "#FFFFFF"
+      "position": [-1.08, -1.08, 1.08],
+      "radius": 0.22,
+      "color": "#F8FAFC"
     },
     {
       "id": "h3",
       "element": "H",
       "label": "H",
-      "position": [-1, 1, -1],
-      "radius": 0.2,
-      "color": "#FFFFFF"
+      "position": [-1.08, 1.08, -1.08],
+      "radius": 0.22,
+      "color": "#F8FAFC"
     },
     {
       "id": "h4",
       "element": "H",
       "label": "H",
-      "position": [1, -1, -1],
-      "radius": 0.2,
-      "color": "#FFFFFF"
+      "position": [1.08, -1.08, -1.08],
+      "radius": 0.22,
+      "color": "#F8FAFC"
     }
   ],
   "bonds": [
@@ -103,5 +108,19 @@
       "focusAngleIds": ["h1-c1-h2"],
       "showAngles": true
     }
-  ]
+  ],
+  "rendering": {
+    "cameraPosition": [3.6, 3, 4.2],
+    "cameraFov": 42,
+    "atomScale": 1,
+    "bondRadius": 0.045,
+    "angleRadius": 0.82,
+    "showAtomLabels": true
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "hand-authored teaching model",
+    "notesZh": "CH4 正四面体教学模型，坐标用于课堂可视化，不作为实验键长数据。",
+    "verified": true
+  }
 }

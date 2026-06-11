@@ -3,7 +3,12 @@ import { LessonPanel } from "@/components/learning/LessonPanel";
 import { MoleculeSidebar } from "@/components/learning/MoleculeSidebar";
 import { StepBar } from "@/components/learning/StepBar";
 import { ViewerPlaceholder } from "@/components/learning/ViewerPlaceholder";
-import { getMockMolecule, mockMolecules } from "@/data/mockMolecules";
+import { MoleculeViewer } from "@/components/three/MoleculeViewer";
+import ch4Data from "@/data/manual/ch4.json";
+import { getMockMolecule, mockMolecules, type MockMoleculeRecord } from "@/data/mockMolecules";
+import type { MoleculeRecord } from "@/types/molecule";
+
+const ch4Molecule = ch4Data as unknown as MoleculeRecord;
 
 type LearningPageProps = {
   selectedMoleculeId: string;
@@ -11,7 +16,18 @@ type LearningPageProps = {
 };
 
 export function LearningPage({ selectedMoleculeId, onSelectMolecule }: LearningPageProps) {
-  const molecule = useMemo(() => getMockMolecule(selectedMoleculeId), [selectedMoleculeId]);
+  const mockMolecule = useMemo(() => getMockMolecule(selectedMoleculeId), [selectedMoleculeId]);
+  const isCh4Selected = mockMolecule.id === "ch4";
+  const molecule = useMemo(
+    () =>
+      (isCh4Selected
+        ? {
+            ...mockMolecule,
+            ...ch4Molecule,
+          }
+        : mockMolecule) as MockMoleculeRecord,
+    [isCh4Selected, mockMolecule],
+  );
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [autoRotate, setAutoRotate] = useState(true);
   const [showAngles, setShowAngles] = useState(false);
@@ -67,15 +83,28 @@ export function LearningPage({ selectedMoleculeId, onSelectMolecule }: LearningP
           />
 
           <div className="flex min-w-0 flex-col gap-4">
-            <ViewerPlaceholder
-              autoRotate={autoRotate}
-              molecule={molecule}
-              onToggleAngles={() => setShowAngles((value) => !value)}
-              onToggleAutoRotate={() => setAutoRotate((value) => !value)}
-              onToggleLonePairs={() => setShowLonePairs((value) => !value)}
-              showAngles={showAngles}
-              showLonePairs={showLonePairs}
-            />
+            {isCh4Selected ? (
+              <MoleculeViewer
+                activeStep={activeStep}
+                autoRotate={autoRotate}
+                molecule={molecule}
+                onToggleAngles={() => setShowAngles((value) => !value)}
+                onToggleAutoRotate={() => setAutoRotate((value) => !value)}
+                onToggleLonePairs={() => setShowLonePairs((value) => !value)}
+                showAngles={showAngles}
+                showLonePairs={showLonePairs}
+              />
+            ) : (
+              <ViewerPlaceholder
+                autoRotate={autoRotate}
+                molecule={molecule}
+                onToggleAngles={() => setShowAngles((value) => !value)}
+                onToggleAutoRotate={() => setAutoRotate((value) => !value)}
+                onToggleLonePairs={() => setShowLonePairs((value) => !value)}
+                showAngles={showAngles}
+                showLonePairs={showLonePairs}
+              />
+            )}
             <StepBar
               activeStepIndex={activeStepIndex}
               lessonSteps={molecule.lessonSteps}

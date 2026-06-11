@@ -1,4 +1,26 @@
 export type MoleculeCategory = "vsepr" | "crystal";
+export type MoleculeKind = "molecule" | "crystal";
+
+export type MoleculeNames = {
+  zh: string;
+  en?: string;
+};
+
+export type MoleculeRendering = {
+  cameraPosition?: [number, number, number];
+  cameraFov?: number;
+  atomScale?: number;
+  bondRadius?: number;
+  angleRadius?: number;
+  showAtomLabels?: boolean;
+};
+
+export type MoleculeMetadata = {
+  level?: "high-school";
+  source?: string;
+  notesZh?: string;
+  verified?: boolean;
+};
 
 export type Atom = {
   id: string;
@@ -45,6 +67,8 @@ export type LessonStep = {
 
 export type MoleculeRecord = {
   id: string;
+  kind?: MoleculeKind;
+  names?: MoleculeNames;
   formula: string;
   nameZh: string;
   category: MoleculeCategory;
@@ -54,4 +78,6 @@ export type MoleculeRecord = {
   lonePairs: LonePair[];
   keyAngles: AngleSpec[];
   lessonSteps: LessonStep[];
+  rendering?: MoleculeRendering;
+  metadata?: MoleculeMetadata;
 };
