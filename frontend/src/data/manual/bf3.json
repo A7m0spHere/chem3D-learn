@@ -1,0 +1,112 @@
+{
+  "id": "bf3",
+  "kind": "molecule",
+  "formula": "BF3",
+  "names": {
+    "zh": "三氟化硼",
+    "en": "Boron trifluoride"
+  },
+  "nameZh": "三氟化硼",
+  "category": "vsepr",
+  "summaryZh": "三氟化硼以硼原子为中心，三个氟原子位于同一平面。三个 B-F 键均匀分布，形成平面三角形，F-B-F 键角约为 120°。",
+  "atoms": [
+    {
+      "id": "b1",
+      "element": "B",
+      "label": "B",
+      "position": [0, 0, 0],
+      "radius": 0.32,
+      "color": "#B45309"
+    },
+    {
+      "id": "f1",
+      "element": "F",
+      "label": "F",
+      "position": [1.35, 0, 0],
+      "radius": 0.33,
+      "color": "#22C55E"
+    },
+    {
+      "id": "f2",
+      "element": "F",
+      "label": "F",
+      "position": [-0.68, 1.17, 0],
+      "radius": 0.33,
+      "color": "#22C55E"
+    },
+    {
+      "id": "f3",
+      "element": "F",
+      "label": "F",
+      "position": [-0.68, -1.17, 0],
+      "radius": 0.33,
+      "color": "#22C55E"
+    }
+  ],
+  "bonds": [
+    {
+      "id": "b1-f1",
+      "atomIds": ["b1", "f1"],
+      "order": 1,
+      "kind": "single"
+    },
+    {
+      "id": "b1-f2",
+      "atomIds": ["b1", "f2"],
+      "order": 1,
+      "kind": "single"
+    },
+    {
+      "id": "b1-f3",
+      "atomIds": ["b1", "f3"],
+      "order": 1,
+      "kind": "single"
+    }
+  ],
+  "lonePairs": [],
+  "keyAngles": [
+    {
+      "id": "f1-b1-f2",
+      "atomIds": ["f1", "b1", "f2"],
+      "valueDeg": 120,
+      "label": "约 120°",
+      "descriptionZh": "三个 B-F 键位于同一平面内，并尽量均匀分布，相邻 B-F 键夹角约为 120°。"
+    }
+  ],
+  "lessonSteps": [
+    {
+      "id": "center-atom",
+      "titleZh": "识别中心硼原子",
+      "bodyZh": "先找到中心的硼原子。三氟化硼中，硼原子连接三个氟原子。",
+      "focusAtomIds": ["b1"]
+    },
+    {
+      "id": "trigonal-planar",
+      "titleZh": "观察平面三角形",
+      "bodyZh": "三个 B-F 键位于同一平面内，三个氟原子围绕硼原子均匀展开，形成平面三角形。",
+      "focusAtomIds": ["f1", "f2", "f3"],
+      "focusBondIds": ["b1-f1", "b1-f2", "b1-f3"]
+    },
+    {
+      "id": "bond-angle",
+      "titleZh": "观察 120° 键角",
+      "bodyZh": "显示 F-B-F 键角后，可以看到平面三角形结构的典型键角约为 120°。硼原子价层电子数不足 8，可作为高中拓展理解。",
+      "focusAngleIds": ["f1-b1-f2"],
+      "showAngles": true
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [0, 0.3, 4.8],
+    "cameraFov": 42,
+    "atomScale": 1,
+    "bondRadius": 0.045,
+    "angleRadius": 0.78,
+    "showAtomLabels": true
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "hand-authored teaching model",
+    "notesZh": "BF3 平面三角形教学模型，坐标用于课堂可视化，不作为实验键长数据。",
+    "verified": true
+  }
+}

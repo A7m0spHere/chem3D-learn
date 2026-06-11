@@ -1,5 +1,7 @@
 import type { MoleculeRecord } from "@/types/molecule";
 import ch4Data from "@/data/manual/ch4.json";
+import bf3Data from "@/data/manual/bf3.json";
+import co2Data from "@/data/manual/co2.json";
 import h2oData from "@/data/manual/h2o.json";
 import nh3Data from "@/data/manual/nh3.json";
 
@@ -30,6 +32,8 @@ const realMoleculesById = new Map<string, MoleculeRecord>([
   ["ch4", ch4Data as unknown as MoleculeRecord],
   ["h2o", h2oData as unknown as MoleculeRecord],
   ["nh3", nh3Data as unknown as MoleculeRecord],
+  ["co2", co2Data as unknown as MoleculeRecord],
+  ["bf3", bf3Data as unknown as MoleculeRecord],
 ]);
 
 /** Returns the hand-authored 3D data for a molecule, or undefined. */

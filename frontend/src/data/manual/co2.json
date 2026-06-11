@@ -1,0 +1,98 @@
+{
+  "id": "co2",
+  "kind": "molecule",
+  "formula": "CO2",
+  "names": {
+    "zh": "二氧化碳",
+    "en": "Carbon dioxide"
+  },
+  "nameZh": "二氧化碳",
+  "category": "vsepr",
+  "summaryZh": "二氧化碳以碳原子为中心，两个氧原子位于相反方向。三个原子在同一直线上，整体结构对称，O-C-O 键角为 180°。",
+  "atoms": [
+    {
+      "id": "c1",
+      "element": "C",
+      "label": "C",
+      "position": [0, 0, 0],
+      "radius": 0.34,
+      "color": "#1F2933"
+    },
+    {
+      "id": "o1",
+      "element": "O",
+      "label": "O",
+      "position": [-1.28, 0, 0],
+      "radius": 0.35,
+      "color": "#DC2626"
+    },
+    {
+      "id": "o2",
+      "element": "O",
+      "label": "O",
+      "position": [1.28, 0, 0],
+      "radius": 0.35,
+      "color": "#DC2626"
+    }
+  ],
+  "bonds": [
+    {
+      "id": "c1-o1",
+      "atomIds": ["c1", "o1"],
+      "order": 2,
+      "kind": "double"
+    },
+    {
+      "id": "c1-o2",
+      "atomIds": ["c1", "o2"],
+      "order": 2,
+      "kind": "double"
+    }
+  ],
+  "lonePairs": [],
+  "keyAngles": [
+    {
+      "id": "o1-c1-o2",
+      "atomIds": ["o1", "c1", "o2"],
+      "valueDeg": 180,
+      "label": "180°",
+      "descriptionZh": "两个 C=O 键方向相反，使二氧化碳形成对称的直线形结构。高中阶段重点掌握直线形和 180° 键角。"
+    }
+  ],
+  "lessonSteps": [
+    {
+      "id": "center-atom",
+      "titleZh": "识别中心碳原子",
+      "bodyZh": "先找到位于中心的碳原子。二氧化碳中，碳原子两侧各连接一个氧原子。",
+      "focusAtomIds": ["c1"]
+    },
+    {
+      "id": "linear-shape",
+      "titleZh": "观察直线形",
+      "bodyZh": "两个 C=O 键方向相反，三个原子排在同一直线上，整体呈对称的直线形结构。",
+      "focusAtomIds": ["o1", "c1", "o2"],
+      "focusBondIds": ["c1-o1", "c1-o2"]
+    },
+    {
+      "id": "bond-angle",
+      "titleZh": "观察 180° 键角",
+      "bodyZh": "显示 O-C-O 键角后，可以看到二氧化碳的关键键角为 180°，这是直线形结构的重要特征。",
+      "focusAngleIds": ["o1-c1-o2"],
+      "showAngles": true
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [0, 2.2, 5.2],
+    "cameraFov": 42,
+    "atomScale": 1,
+    "bondRadius": 0.045,
+    "angleRadius": 0.86,
+    "showAtomLabels": true
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "hand-authored teaching model",
+    "notesZh": "CO2 直线形教学模型，坐标用于课堂可视化，不作为实验键长数据。当前教学视图暂用单柱表示 C=O 方向，后续可优化双键显示。",
+    "verified": true
+  }
+}
