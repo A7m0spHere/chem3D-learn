@@ -1,4 +1,7 @@
 import type { MoleculeRecord } from "@/types/molecule";
+import ch4Data from "@/data/manual/ch4.json";
+import h2oData from "@/data/manual/h2o.json";
+import nh3Data from "@/data/manual/nh3.json";
 
 export type MockMoleculeRecord = MoleculeRecord & {
   geometryZh: string;
@@ -7,6 +10,71 @@ export type MockMoleculeRecord = MoleculeRecord & {
   lonePairsTextZh: string;
   commonMistakeZh: string;
 };
+
+// ---------------------------------------------------------------------------
+// Real 3D molecule data registry
+//
+// Maps molecule IDs to their hand-authored 3D data (atoms, bonds, lone pairs,
+// angles, lesson steps, rendering config, etc.). Only molecules listed here
+// render through the full 3D viewer; others fall back to the placeholder.
+//
+// To add a new molecule:
+//   1. Create frontend/src/data/manual/<id>.json
+//   2. Import it above and register it in this Map.
+// ---------------------------------------------------------------------------
+// JSON imports lose tuple types (position: [number,number,number] becomes
+// number[]). The `as unknown as MoleculeRecord` bridge is intentional — it is
+// the standard pattern for importing typed JSON in Vite/TS projects. Add
+// runtime validation (e.g. Zod) if this grows beyond hand-authored data.
+const realMoleculesById = new Map<string, MoleculeRecord>([
+  ["ch4", ch4Data as unknown as MoleculeRecord],
+  ["h2o", h2oData as unknown as MoleculeRecord],
+  ["nh3", nh3Data as unknown as MoleculeRecord],
+]);
+
+/** Returns the hand-authored 3D data for a molecule, or undefined. */
+export function getRealMoleculeData(id: string): MoleculeRecord | undefined {
+  return realMoleculesById.get(id);
+}
+
+/**
+ * Merges mock metadata (geometryZh, commonMistakeZh, etc.) with real 3D
+ * structural data. When real data is available, it takes precedence for all
+ * structural fields; mock-only UI fields are preserved from the mock record.
+ *
+ * This avoids unsafe spread + double-cast patterns at the call site.
+ */
+export function mergeMoleculeData(
+  mock: MockMoleculeRecord,
+  real?: MoleculeRecord,
+): MockMoleculeRecord {
+  if (!real) return mock;
+
+  return {
+    // Mock-specific UI metadata — only the mock record carries these
+    geometryZh: mock.geometryZh,
+    categoryLabelZh: mock.categoryLabelZh,
+    centralAtomZh: mock.centralAtomZh,
+    lonePairsTextZh: mock.lonePairsTextZh,
+    commonMistakeZh: mock.commonMistakeZh,
+
+    // Structural fields from the hand-authored 3D data
+    id: real.id,
+    kind: real.kind,
+    names: real.names,
+    formula: real.formula,
+    nameZh: real.nameZh,
+    category: real.category,
+    summaryZh: real.summaryZh,
+    atoms: real.atoms,
+    bonds: real.bonds,
+    lonePairs: real.lonePairs,
+    keyAngles: real.keyAngles,
+    lessonSteps: real.lessonSteps,
+    rendering: real.rendering,
+    metadata: real.metadata,
+  };
+}
 
 export const mockMolecules: MockMoleculeRecord[] = [
   {

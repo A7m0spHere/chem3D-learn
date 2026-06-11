@@ -1,12 +1,13 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Atom, Eye, EyeOff, Pause, Play } from "lucide-react";
 import { useMemo } from "react";
 import { AngleArc } from "@/components/three/AngleArc";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
+import { LonePairMesh } from "@/components/three/LonePairMesh";
 import { Button } from "@/components/ui/button";
-import type { LonePair, MoleculeRecord, LessonStep } from "@/types/molecule";
+import type { MoleculeRecord, LessonStep } from "@/types/molecule";
 
 type MoleculeViewerProps = {
   molecule: MoleculeRecord;
@@ -93,7 +94,7 @@ export function MoleculeViewer({
                 ))}
             {showLonePairs &&
               molecule.lonePairs.map((lonePair) => (
-                <LonePairMarker key={lonePair.id} lonePair={lonePair} />
+                <LonePairMesh key={lonePair.id} lonePair={lonePair} />
               ))}
           </group>
           <OrbitControls
@@ -146,27 +147,5 @@ export function MoleculeViewer({
         </div>
       </div>
     </section>
-  );
-}
-
-type LonePairMarkerProps = {
-  lonePair: LonePair;
-};
-
-function LonePairMarker({ lonePair }: LonePairMarkerProps) {
-  return (
-    <group position={lonePair.position}>
-      <mesh>
-        <sphereGeometry args={[0.08, 16, 16]} />
-        <meshStandardMaterial color="#2A9D8F" />
-      </mesh>
-      {lonePair.label ? (
-        <Html center distanceFactor={7} position={[0, 0.18, 0]}>
-          <span className="rounded-md bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-primary-dark shadow-sm">
-            {lonePair.label}
-          </span>
-        </Html>
-      ) : null}
-    </group>
   );
 }

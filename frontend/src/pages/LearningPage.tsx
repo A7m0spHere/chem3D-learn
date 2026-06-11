@@ -4,11 +4,12 @@ import { MoleculeSidebar } from "@/components/learning/MoleculeSidebar";
 import { StepBar } from "@/components/learning/StepBar";
 import { ViewerPlaceholder } from "@/components/learning/ViewerPlaceholder";
 import { MoleculeViewer } from "@/components/three/MoleculeViewer";
-import ch4Data from "@/data/manual/ch4.json";
-import { getMockMolecule, mockMolecules, type MockMoleculeRecord } from "@/data/mockMolecules";
-import type { MoleculeRecord } from "@/types/molecule";
-
-const ch4Molecule = ch4Data as unknown as MoleculeRecord;
+import {
+  getMockMolecule,
+  getRealMoleculeData,
+  mergeMoleculeData,
+  mockMolecules,
+} from "@/data/mockMolecules";
 
 type LearningPageProps = {
   selectedMoleculeId: string;
@@ -17,16 +18,11 @@ type LearningPageProps = {
 
 export function LearningPage({ selectedMoleculeId, onSelectMolecule }: LearningPageProps) {
   const mockMolecule = useMemo(() => getMockMolecule(selectedMoleculeId), [selectedMoleculeId]);
-  const isCh4Selected = mockMolecule.id === "ch4";
+  const realMolecule = useMemo(() => getRealMoleculeData(mockMolecule.id), [mockMolecule.id]);
+  const usesRealViewer = Boolean(realMolecule);
   const molecule = useMemo(
-    () =>
-      (isCh4Selected
-        ? {
-            ...mockMolecule,
-            ...ch4Molecule,
-          }
-        : mockMolecule) as MockMoleculeRecord,
-    [isCh4Selected, mockMolecule],
+    () => mergeMoleculeData(mockMolecule, realMolecule),
+    [mockMolecule, realMolecule],
   );
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [autoRotate, setAutoRotate] = useState(true);
@@ -83,7 +79,7 @@ export function LearningPage({ selectedMoleculeId, onSelectMolecule }: LearningP
           />
 
           <div className="flex min-w-0 flex-col gap-4">
-            {isCh4Selected ? (
+            {usesRealViewer ? (
               <MoleculeViewer
                 activeStep={activeStep}
                 autoRotate={autoRotate}

@@ -1,0 +1,116 @@
+{
+  "id": "h2o",
+  "kind": "molecule",
+  "formula": "H2O",
+  "names": {
+    "zh": "水",
+    "en": "Water"
+  },
+  "nameZh": "水",
+  "category": "vsepr",
+  "summaryZh": "水分子以氧原子为中心，两个氢原子形成 V 形/折线形结构。氧原子上有两对孤电子对，使 H-O-H 键角进一步小于氨气。",
+  "atoms": [
+    {
+      "id": "o1",
+      "element": "O",
+      "label": "O",
+      "position": [0, 0, 0],
+      "radius": 0.35,
+      "color": "#DC2626"
+    },
+    {
+      "id": "h1",
+      "element": "H",
+      "label": "H",
+      "position": [-0.9, -0.7, 0],
+      "radius": 0.22,
+      "color": "#F8FAFC"
+    },
+    {
+      "id": "h2",
+      "element": "H",
+      "label": "H",
+      "position": [0.9, -0.7, 0],
+      "radius": 0.22,
+      "color": "#F8FAFC"
+    }
+  ],
+  "bonds": [
+    {
+      "id": "o1-h1",
+      "atomIds": ["o1", "h1"],
+      "order": 1,
+      "kind": "single"
+    },
+    {
+      "id": "o1-h2",
+      "atomIds": ["o1", "h2"],
+      "order": 1,
+      "kind": "single"
+    }
+  ],
+  "lonePairs": [
+    {
+      "id": "o1-lp1",
+      "atomId": "o1",
+      "position": [-0.46, 0.82, -0.44],
+      "label": "孤电子对",
+      "visibleByDefault": true
+    },
+    {
+      "id": "o1-lp2",
+      "atomId": "o1",
+      "position": [0.46, 0.82, 0.44],
+      "label": "孤电子对",
+      "visibleByDefault": true
+    }
+  ],
+  "keyAngles": [
+    {
+      "id": "h1-o1-h2",
+      "atomIds": ["h1", "o1", "h2"],
+      "valueDeg": 104.5,
+      "label": "约 104.5°",
+      "descriptionZh": "氧原子上有两对孤电子对，排斥更强，使 H-O-H 键角比 NH3 的 H-N-H 键角更小。"
+    }
+  ],
+  "lessonSteps": [
+    {
+      "id": "two-lone-pairs",
+      "titleZh": "识别两对孤电子对",
+      "bodyZh": "氧原子上有两对孤电子对。它们影响电子对空间排布，但不计入分子构型中的原子位置。",
+      "focusAtomIds": ["o1"],
+      "showLonePairs": true
+    },
+    {
+      "id": "bent-shape",
+      "titleZh": "判断 V 形结构",
+      "bodyZh": "只看原子核位置时，两个氢原子和氧原子形成 V 形/折线形结构，而不是直线形。",
+      "focusAtomIds": ["h1", "h2"],
+      "focusBondIds": ["o1-h1", "o1-h2"],
+      "showLonePairs": true
+    },
+    {
+      "id": "bond-angle",
+      "titleZh": "观察键角进一步减小",
+      "bodyZh": "显示 H-O-H 键角后，可以看到水分子的典型键角约为 104.5°，比 NH3 的键角更小。",
+      "focusAngleIds": ["h1-o1-h2"],
+      "showLonePairs": true,
+      "showAngles": true
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [3.2, 2.6, 4.1],
+    "cameraFov": 42,
+    "atomScale": 1,
+    "bondRadius": 0.045,
+    "angleRadius": 0.72,
+    "showAtomLabels": true
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "hand-authored teaching model",
+    "notesZh": "H2O V 形/折线形教学模型，坐标用于课堂可视化，不作为实验键长数据。",
+    "verified": true
+  }
+}
