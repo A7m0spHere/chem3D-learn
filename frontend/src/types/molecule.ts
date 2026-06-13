@@ -1,5 +1,19 @@
 export type MoleculeCategory = "vsepr" | "crystal";
 export type MoleculeKind = "molecule" | "crystal";
+export type CrystalViewMode =
+  | "layer"
+  | "inPlaneBond"
+  | "interlayerForce"
+  | "piElectron"
+  | "cell"
+  | "coordination"
+  | "counting"
+  | "voids"
+  | "comparison"
+  | "metallicBond"
+  | "covalentNetwork";
+export type CrystalSiteType = "corner" | "face-center" | "edge-center" | "body-center";
+export type CrystalVoidStage = "framework" | "voids" | "filled";
 
 export type MoleculeNames = {
   zh: string;
@@ -22,6 +36,40 @@ export type MoleculeMetadata = {
   verified?: boolean;
 };
 
+export type CrystalTeachingViewMode = {
+  id: CrystalViewMode;
+  labelZh: string;
+  titleZh: string;
+  bodyZh: string;
+};
+
+export type CrystalVoidStageTeaching = {
+  id: CrystalVoidStage;
+  labelZh: string;
+  titleZh: string;
+  bodyZh: string;
+};
+
+export type CrystalTeaching = {
+  structureTypeZh: string;
+  modelZh: string;
+  coordinationNumberZh: string;
+  spatialFeatureZh: string;
+  unitCellDescriptionZh: string;
+  particleCountZh: {
+    cl?: string;
+    na?: string;
+    cs?: string;
+    formula?: string;
+    ratio: string;
+    lines?: string[];
+  };
+  coordinationDescriptionZh: string[];
+  commonMistakesZh: string[];
+  viewModes: CrystalTeachingViewMode[];
+  voidStages?: CrystalVoidStageTeaching[];
+};
+
 export type Atom = {
   id: string;
   element: string;
@@ -29,6 +77,7 @@ export type Atom = {
   position: [number, number, number];
   radius?: number;
   color?: string;
+  siteType?: CrystalSiteType;
 };
 
 export type Bond = {
@@ -36,6 +85,28 @@ export type Bond = {
   atomIds: [string, string];
   order?: 1 | 2 | 3;
   kind?: "single" | "double" | "triple" | "ionic-neighbor" | "visual-guide";
+};
+
+export type CoordinationLink = {
+  id: string;
+  atomIds: [string, string];
+  labelZh?: string;
+};
+
+export type InterlayerForce = {
+  id: string;
+  start: [number, number, number];
+  end: [number, number, number];
+  kind?: "vanDerWaals";
+  labelZh?: string;
+};
+
+export type CrystalInfo = {
+  typeZh: string;
+  latticeZh: string;
+  coordination: string;
+  unitCellCount: Record<string, number>;
+  formulaExplanationZh: string;
 };
 
 export type LonePair = {
@@ -74,10 +145,15 @@ export type MoleculeRecord = {
   category: MoleculeCategory;
   summaryZh: string;
   atoms: Atom[];
+  ions?: Atom[];
+  coordinationLinks?: CoordinationLink[];
+  interlayerForces?: InterlayerForce[];
+  crystal?: CrystalInfo;
   bonds: Bond[];
   lonePairs: LonePair[];
   keyAngles: AngleSpec[];
   lessonSteps: LessonStep[];
   rendering?: MoleculeRendering;
   metadata?: MoleculeMetadata;
+  crystalTeaching?: CrystalTeaching;
 };

@@ -3,47 +3,67 @@
 ## v0.1 - Project Harness
 
 - Establish project documentation.
-- Define MVP boundaries, design system, UI spec, molecule schema, QA checklist, and review guide.
-- Do not create frontend code in this phase.
+- Define product positioning, design system, UI spec, molecule schema, QA checklist, and review guide.
+- Keep the project focused on Chinese high-school structural chemistry learning.
 
 ## v0.2 - Frontend Scaffold
 
 - Create Vite + React + TypeScript frontend.
 - Add Tailwind CSS and shadcn/ui foundation.
-- Set up basic routing for Home and 3D Learning.
+- Set up routing for the current frontend page set.
 - Confirm build command works.
 
-## v0.3 - Static UI Shell
+## v0.3 - Current Frontend Baseline
 
-- Build Home page shell.
-- Build 3D Learning page responsive layout.
-- Add placeholder panels for selector, viewer, controls, and lesson steps.
+- Build Home page.
+- Build Modules page and module cards.
+- Build module detail page as the main learning experience.
+- Add Paths, Exam, and About pages as current frontend routes.
 - Keep design aligned with the light education style.
 
 ## v0.4 - Molecule Data and Types
 
 - Add TypeScript molecule data types.
-- Add hand-authored records for CH4, NH3, H2O, CO2, BF3, and simplified NaCl.
+- Add hand-authored records for core structures:
+  - CH4
+  - NH3
+  - H2O
+  - CO2
+  - BF3
+  - simplified NaCl teaching model
 - Protect manual IDs.
 - Mark uncertain facts with `TODO-CHEM-VERIFY`.
 
-## v0.6 - 3D Viewer MVP
+## v0.6 - 3D Viewer
 
 - Integrate React Three Fiber and Drei.
 - Render atoms, bonds, lone pairs, and key angle annotations.
-- Support rotate, zoom, auto rotate, and structure switching.
+- Support rotate, zoom, auto rotate, and viewer toggles.
+- Use placeholder viewers for modules without real 3D data.
 
 ## v0.8 - Teaching Interaction
 
 - Connect lesson steps to viewer focus states.
-- Add toggles for bond angles and lone pairs.
+- Add toggles for bond angles, lone pairs, and atom labels.
 - Improve mobile, tablet, and teacher projection readability.
-- Run QA checklist against the full MVP flow.
+- Keep module-detail learning flow concise and classroom-friendly.
 
-## v1.0 - MVP Release
+## v0.9 - Frontend Polish
 
-- Polish Chinese teaching copy.
-- Review chemical accuracy for MVP structures.
-- Verify responsive layouts.
+- Refine current multi-page navigation and module browsing.
+- Improve motion, responsive layout, and projection readability.
+- Reduce misleading placeholders where real 3D data is absent.
+- Review Chinese teaching copy and visual hierarchy.
+
+## v1.0 - Frontend Release Candidate
+
+- Verify current frontend pages.
+- Review chemical accuracy for core structures.
 - Confirm build, lint, and tests where available.
-- Document known limitations and future scope.
+- Document known limitations and future backend needs.
+
+## Later - Backend Support Layer
+
+- Design backend from the finalized frontend data and page needs.
+- Keep initial backend read-only and minimal.
+- Avoid login, database-backed user state, AI chat, Gemini API, dynamic SMILES, and RDKit runtime unless explicitly approved.

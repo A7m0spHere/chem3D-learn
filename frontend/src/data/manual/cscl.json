@@ -1,0 +1,325 @@
+{
+  "id": "cscl",
+  "kind": "crystal",
+  "formula": "CsCl",
+  "names": {
+    "zh": "氯化铯",
+    "en": "Cesium chloride"
+  },
+  "nameZh": "CsCl 型晶体结构",
+  "category": "crystal",
+  "titleZh": "CsCl 型晶体结构",
+  "descriptionZh": "CsCl 可以看成 Cl- 位于立方体顶点，Cs+ 位于立方体中心。中心 Cs+ 同时接近 8 个顶点 Cl-，因此 Cs+ 的配位数为 8。",
+  "summaryZh": "CsCl 常用画法是 Cl- 位于立方体顶点，Cs+ 位于体心。中心 Cs+ 被 8 个 Cl- 包围，Cl- 周围也对应 8 个 Cs+，属于 8 : 8 配位。",
+  "ions": [
+    {
+      "id": "cl-corner-1",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [-0.5, -0.5, -0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-2",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [0.5, -0.5, -0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-3",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [-0.5, 0.5, -0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-4",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [0.5, 0.5, -0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-5",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [-0.5, -0.5, 0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-6",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [0.5, -0.5, 0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-7",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [-0.5, 0.5, 0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-8",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [0.5, 0.5, 0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cs-body",
+      "element": "Cs+",
+      "label": "Cs+ 体心",
+      "position": [0, 0, 0],
+      "radius": 0.16,
+      "color": "#A16207",
+      "siteType": "body-center"
+    }
+  ],
+  "atoms": [
+    {
+      "id": "cl-corner-1",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [-0.5, -0.5, -0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-2",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [0.5, -0.5, -0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-3",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [-0.5, 0.5, -0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-4",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [0.5, 0.5, -0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-5",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [-0.5, -0.5, 0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-6",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [0.5, -0.5, 0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-7",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [-0.5, 0.5, 0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cl-corner-8",
+      "element": "Cl-",
+      "label": "Cl- 顶点",
+      "position": [0.5, 0.5, 0.5],
+      "radius": 0.12,
+      "color": "#10B981",
+      "siteType": "corner"
+    },
+    {
+      "id": "cs-body",
+      "element": "Cs+",
+      "label": "Cs+ 体心",
+      "position": [0, 0, 0],
+      "radius": 0.16,
+      "color": "#A16207",
+      "siteType": "body-center"
+    }
+  ],
+  "coordinationLinks": [
+    {
+      "id": "cs-body-cl-corner-1",
+      "atomIds": ["cs-body", "cl-corner-1"],
+      "labelZh": "Cs+ 到顶点 Cl-"
+    },
+    {
+      "id": "cs-body-cl-corner-2",
+      "atomIds": ["cs-body", "cl-corner-2"],
+      "labelZh": "Cs+ 到顶点 Cl-"
+    },
+    {
+      "id": "cs-body-cl-corner-3",
+      "atomIds": ["cs-body", "cl-corner-3"],
+      "labelZh": "Cs+ 到顶点 Cl-"
+    },
+    {
+      "id": "cs-body-cl-corner-4",
+      "atomIds": ["cs-body", "cl-corner-4"],
+      "labelZh": "Cs+ 到顶点 Cl-"
+    },
+    {
+      "id": "cs-body-cl-corner-5",
+      "atomIds": ["cs-body", "cl-corner-5"],
+      "labelZh": "Cs+ 到顶点 Cl-"
+    },
+    {
+      "id": "cs-body-cl-corner-6",
+      "atomIds": ["cs-body", "cl-corner-6"],
+      "labelZh": "Cs+ 到顶点 Cl-"
+    },
+    {
+      "id": "cs-body-cl-corner-7",
+      "atomIds": ["cs-body", "cl-corner-7"],
+      "labelZh": "Cs+ 到顶点 Cl-"
+    },
+    {
+      "id": "cs-body-cl-corner-8",
+      "atomIds": ["cs-body", "cl-corner-8"],
+      "labelZh": "Cs+ 到顶点 Cl-"
+    }
+  ],
+  "bonds": [],
+  "lonePairs": [],
+  "keyAngles": [],
+  "lessonSteps": [
+    {
+      "id": "cell",
+      "titleZh": "观察 CsCl 晶胞",
+      "bodyZh": "先看立方体晶胞：Cl- 位于 8 个顶点，Cs+ 位于体心。"
+    },
+    {
+      "id": "coordination",
+      "titleZh": "理解八配位",
+      "bodyZh": "中心 Cs+ 沿立方体体对角线方向与 8 个顶点 Cl- 相邻，因此 Cs+ 的配位数为 8。"
+    },
+    {
+      "id": "counting",
+      "titleZh": "用均摊法计数",
+      "bodyZh": "8 个顶点 Cl- 各贡献 1/8，共 1 个 Cl-；体心 Cs+ 完整属于该晶胞，共 1 个 Cs+。"
+    },
+    {
+      "id": "comparison",
+      "titleZh": "对比 NaCl",
+      "bodyZh": "NaCl 是 6 : 6 配位，CsCl 是 8 : 8 配位；CsCl 不能简单当作普通 BCC 金属晶体。"
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [2.9, 2.35, 3.35],
+    "cameraFov": 42,
+    "atomScale": 1,
+    "bondRadius": 0.01,
+    "showAtomLabels": true
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "hand-authored teaching unit cell model",
+    "notesZh": "CsCl 晶胞教学模型，固定采用 Cl- 顶点、Cs+ 体心的常见高中教学画法；辅助线只表示最近邻配位关系，不表示共价键。",
+    "verified": true
+  },
+  "crystal": {
+    "typeZh": "CsCl 型结构",
+    "latticeZh": "简单立方晶格 + 两种离子基元",
+    "coordination": "8:8",
+    "unitCellCount": {
+      "Cs": 1,
+      "Cl": 1
+    },
+    "formulaExplanationZh": "8 个顶点 Cl- 各贡献 1/8，共 1 个 Cl-；体心 Cs+ 完整属于该晶胞，共 1 个 Cs+，所以化学式为 CsCl。"
+  },
+  "crystalTeaching": {
+    "structureTypeZh": "离子晶体",
+    "modelZh": "CsCl 型",
+    "coordinationNumberZh": "8 : 8",
+    "spatialFeatureZh": "Cl- 位于简单立方顶点，Cs+ 位于体心",
+    "unitCellDescriptionZh": "Cl- 位于晶胞的 8 个顶点；Cs+ 位于 1 个体心。中心和顶点不是同一种粒子，因此不能简单当作普通 BCC 金属晶体。",
+    "particleCountZh": {
+      "cl": "Cl-：8 × 1/8 = 1",
+      "cs": "Cs+：1 × 1 = 1",
+      "formula": "化学式：CsCl",
+      "ratio": "所以晶胞中 Cs+ : Cl- = 1 : 1",
+      "lines": [
+        "Cl-：8 × 1/8 = 1",
+        "Cs+：1 × 1 = 1",
+        "Cs+ : Cl- = 1 : 1",
+        "化学式：CsCl"
+      ]
+    },
+    "coordinationDescriptionZh": [
+      "每个 Cs+ 周围有 8 个 Cl-。",
+      "每个 Cl- 周围也有 8 个 Cs+。",
+      "中心 Cs+ 到 8 个顶点 Cl- 的连线只表示最近邻配位关系，不表示共价键。"
+    ],
+    "commonMistakesZh": [
+      "CsCl 的图形容易被看成体心立方，但它不是由同一种粒子组成的 BCC 金属晶体。",
+      "顶点和体心分别是不同离子，更准确地说，它是简单立方晶格加两种离子基元。",
+      "NaCl 是 6 : 6 配位；CsCl 是 8 : 8 配位，不要把两者的配位数混淆。"
+    ],
+    "viewModes": [
+      {
+        "id": "cell",
+        "labelZh": "晶胞结构",
+        "titleZh": "完整晶胞",
+        "bodyZh": "CsCl 常用画法是 Cl- 位于立方体顶点，Cs+ 位于体心。这个结构不是 NaCl 那种 6 配位结构，而是 8 配位结构。"
+      },
+      {
+        "id": "coordination",
+        "labelZh": "配位关系",
+        "titleZh": "八配位关系",
+        "bodyZh": "中心 Cs+ 沿立方体体对角线方向与 8 个 Cl- 相邻，因此 Cs+ 的配位数为 8。反过来，每个 Cl- 周围也有 8 个 Cs+，所以 CsCl 是 8 : 8 配位。"
+      },
+      {
+        "id": "counting",
+        "labelZh": "晶胞计数",
+        "titleZh": "均摊法计数",
+        "bodyZh": "8 个顶点 Cl- 每个只被 8 个相邻晶胞共享，所以每个顶点 Cl- 对本晶胞贡献 1/8。8 个顶点合计贡献 1 个 Cl-。体心 Cs+ 完整属于本晶胞，贡献 1 个 Cs+。"
+      },
+      {
+        "id": "comparison",
+        "labelZh": "结构对比",
+        "titleZh": "与 NaCl 对比",
+        "bodyZh": "NaCl 中一个 Na+ 周围有 6 个 Cl-，是 6 : 6 配位；CsCl 中一个 Cs+ 周围有 8 个 Cl-，是 8 : 8 配位。不要把 CsCl 简单理解成普通 BCC 金属结构，因为顶点和体心是不同离子。"
+      }
+    ]
+  }
+}

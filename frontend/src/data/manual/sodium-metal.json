@@ -1,0 +1,240 @@
+{
+  "id": "sodium-metal",
+  "kind": "crystal",
+  "formula": "Na",
+  "names": {
+    "zh": "金属钠",
+    "en": "Sodium metal"
+  },
+  "nameZh": "金属钠晶体结构",
+  "category": "crystal",
+  "titleZh": "金属钠晶体结构",
+  "subtitleZh": "体心立方金属晶体",
+  "descriptionZh": "金属钠在常温常压下可用体心立方晶体结构进行教学表示。Na 原子位于晶胞的 8 个顶点和 1 个体心，一个晶胞中实际含有 2 个 Na 原子。",
+  "summaryZh": "金属钠是体心立方 BCC 金属晶体。Na 原子位于立方体的 8 个顶点和 1 个体心，一个晶胞中实际含有 2 个 Na 原子。",
+  "atoms": [
+    {
+      "id": "na-corner-1",
+      "element": "Na",
+      "label": "Na",
+      "position": [-0.5, -0.5, -0.5],
+      "radius": 0.12,
+      "color": "#D6D3C6",
+      "siteType": "corner"
+    },
+    {
+      "id": "na-corner-2",
+      "element": "Na",
+      "label": "Na",
+      "position": [0.5, -0.5, -0.5],
+      "radius": 0.12,
+      "color": "#D6D3C6",
+      "siteType": "corner"
+    },
+    {
+      "id": "na-corner-3",
+      "element": "Na",
+      "label": "Na",
+      "position": [-0.5, 0.5, -0.5],
+      "radius": 0.12,
+      "color": "#D6D3C6",
+      "siteType": "corner"
+    },
+    {
+      "id": "na-corner-4",
+      "element": "Na",
+      "label": "Na",
+      "position": [0.5, 0.5, -0.5],
+      "radius": 0.12,
+      "color": "#D6D3C6",
+      "siteType": "corner"
+    },
+    {
+      "id": "na-corner-5",
+      "element": "Na",
+      "label": "Na",
+      "position": [-0.5, -0.5, 0.5],
+      "radius": 0.12,
+      "color": "#D6D3C6",
+      "siteType": "corner"
+    },
+    {
+      "id": "na-corner-6",
+      "element": "Na",
+      "label": "Na",
+      "position": [0.5, -0.5, 0.5],
+      "radius": 0.12,
+      "color": "#D6D3C6",
+      "siteType": "corner"
+    },
+    {
+      "id": "na-corner-7",
+      "element": "Na",
+      "label": "Na",
+      "position": [-0.5, 0.5, 0.5],
+      "radius": 0.12,
+      "color": "#D6D3C6",
+      "siteType": "corner"
+    },
+    {
+      "id": "na-corner-8",
+      "element": "Na",
+      "label": "Na",
+      "position": [0.5, 0.5, 0.5],
+      "radius": 0.12,
+      "color": "#D6D3C6",
+      "siteType": "corner"
+    },
+    {
+      "id": "na-body",
+      "element": "Na",
+      "label": "Na",
+      "position": [0, 0, 0],
+      "radius": 0.16,
+      "color": "#D6D3C6",
+      "siteType": "body-center"
+    }
+  ],
+  "coordinationLinks": [
+    {
+      "id": "na-body-na-corner-1",
+      "atomIds": ["na-body", "na-corner-1"],
+      "labelZh": "体心 Na 到顶点 Na 的最近邻关系"
+    },
+    {
+      "id": "na-body-na-corner-2",
+      "atomIds": ["na-body", "na-corner-2"],
+      "labelZh": "体心 Na 到顶点 Na 的最近邻关系"
+    },
+    {
+      "id": "na-body-na-corner-3",
+      "atomIds": ["na-body", "na-corner-3"],
+      "labelZh": "体心 Na 到顶点 Na 的最近邻关系"
+    },
+    {
+      "id": "na-body-na-corner-4",
+      "atomIds": ["na-body", "na-corner-4"],
+      "labelZh": "体心 Na 到顶点 Na 的最近邻关系"
+    },
+    {
+      "id": "na-body-na-corner-5",
+      "atomIds": ["na-body", "na-corner-5"],
+      "labelZh": "体心 Na 到顶点 Na 的最近邻关系"
+    },
+    {
+      "id": "na-body-na-corner-6",
+      "atomIds": ["na-body", "na-corner-6"],
+      "labelZh": "体心 Na 到顶点 Na 的最近邻关系"
+    },
+    {
+      "id": "na-body-na-corner-7",
+      "atomIds": ["na-body", "na-corner-7"],
+      "labelZh": "体心 Na 到顶点 Na 的最近邻关系"
+    },
+    {
+      "id": "na-body-na-corner-8",
+      "atomIds": ["na-body", "na-corner-8"],
+      "labelZh": "体心 Na 到顶点 Na 的最近邻关系"
+    }
+  ],
+  "bonds": [],
+  "lonePairs": [],
+  "keyAngles": [],
+  "lessonSteps": [
+    {
+      "id": "cell",
+      "titleZh": "观察 BCC 晶胞",
+      "bodyZh": "金属钠晶体可用体心立方结构表示：Na 原子位于晶胞的 8 个顶点和 1 个体心。"
+    },
+    {
+      "id": "coordination",
+      "titleZh": "理解最近邻关系",
+      "bodyZh": "体心 Na 周围最近的 Na 原子有 8 个，可按最近邻关系理解为 8 配位。"
+    },
+    {
+      "id": "counting",
+      "titleZh": "完成晶胞计数",
+      "bodyZh": "顶点 Na：8 × 1/8 = 1；体心 Na：1，所以一个 BCC 晶胞中实际含有 2 个 Na 原子。"
+    },
+    {
+      "id": "metallicBond",
+      "titleZh": "理解金属键示意",
+      "bodyZh": "金属钠不是由独立 Na2 分子构成，也不是 NaCl 式离子晶体。电子海示意只帮助理解金属键模型。"
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [2.9, 2.35, 3.35],
+    "cameraFov": 42,
+    "atomScale": 1,
+    "bondRadius": 0.01,
+    "showAtomLabels": true
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "hand-authored teaching unit cell model",
+    "notesZh": "金属钠体心立方晶胞教学模型；最近邻示意线只表示空间相邻关系，不表示共价键。",
+    "verified": true
+  },
+  "crystal": {
+    "typeZh": "体心立方结构",
+    "latticeZh": "体心立方晶格",
+    "coordination": "8",
+    "unitCellCount": {
+      "Na": 2
+    },
+    "formulaExplanationZh": "8 个顶点 Na 原子各贡献 1/8，共 1 个 Na 原子；体心 Na 原子完整属于该晶胞，共 1 个 Na 原子，因此一个晶胞中实际含有 2 个 Na 原子。"
+  },
+  "crystalTeaching": {
+    "structureTypeZh": "金属晶体",
+    "modelZh": "BCC 体心立方",
+    "coordinationNumberZh": "8",
+    "spatialFeatureZh": "Na 原子位于立方体 8 个顶点和 1 个体心",
+    "unitCellDescriptionZh": "金属钠是体心立方 BCC 金属晶体。一个晶胞中，8 个顶点 Na 原子各被 8 个晶胞共享，每个贡献 1/8；体心 Na 原子完整属于该晶胞，贡献 1 个 Na 原子。",
+    "particleCountZh": {
+      "na": "Na：8 × 1/8 + 1 = 2",
+      "ratio": "所以一个 BCC 晶胞中实际含有 2 个 Na 原子",
+      "lines": [
+        "顶点 Na：8 × 1/8 = 1",
+        "体心 Na：1",
+        "晶胞内 Na 原子总数：2"
+      ]
+    },
+    "coordinationDescriptionZh": [
+      "体心立方结构中，一个 Na 原子周围最近的 Na 原子有 8 个。",
+      "图中的 8 条细线只表示最近邻关系，帮助观察配位数。",
+      "这些最近邻示意线不是共价键，也不表示 Na2 分子。"
+    ],
+    "commonMistakesZh": [
+      "金属钠不是由阴阳离子交替排列形成的离子晶体，也不是分子晶体。",
+      "不要把最近邻示意线理解为共价键。",
+      "不要把金属钠晶体看成一个个独立 Na2 分子。",
+      "金属钠和 CsCl 都能看到顶点和体心位置有粒子，但金属钠顶点和体心都是 Na 原子；CsCl 顶点和体心是不同离子。"
+    ],
+    "viewModes": [
+      {
+        "id": "cell",
+        "labelZh": "晶胞结构",
+        "titleZh": "完整 BCC 晶胞",
+        "bodyZh": "金属钠是体心立方 BCC 金属晶体。Na 原子位于晶胞的 8 个顶点和 1 个体心。"
+      },
+      {
+        "id": "coordination",
+        "labelZh": "最近邻关系",
+        "titleZh": "8 个最近邻 Na",
+        "bodyZh": "在体心立方结构中，一个 Na 原子周围最近的 Na 原子有 8 个，因此可按最近邻关系理解为 8 配位。"
+      },
+      {
+        "id": "counting",
+        "labelZh": "晶胞计数",
+        "titleZh": "均摊法计数",
+        "bodyZh": "顶点原子被 8 个晶胞共享，体心原子完整属于本晶胞，所以一个 BCC 晶胞中实际含有 2 个 Na 原子。"
+      },
+      {
+        "id": "metallicBond",
+        "labelZh": "金属键示意",
+        "titleZh": "电子海模型示意",
+        "bodyZh": "金属钠中 Na 原子通过金属键结合。高中阶段可粗略理解为金属阳离子实与较自由运动的价电子之间的相互作用。这个示意不是具体电子轨道，只是帮助理解金属键的模型。"
+      }
+    ]
+  }
+}

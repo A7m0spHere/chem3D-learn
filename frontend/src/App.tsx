@@ -1,30 +1,59 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { AppHeader } from "@/components/common/AppHeader";
 import { HomePage } from "@/pages/HomePage";
-import { LearningPage } from "@/pages/LearningPage";
-import { mockMolecules } from "@/data/mockMolecules";
-
-type Page = "home" | "learning";
+import { ModulesPage } from "@/pages/ModulesPage";
+import { ModuleDetailPage } from "@/pages/ModuleDetailPage";
+import { PathsPage } from "@/pages/PathsPage";
+import { ExamPage } from "@/pages/ExamPage";
+import { AboutPage } from "@/pages/AboutPage";
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>("home");
-  const [selectedMoleculeId, setSelectedMoleculeId] = useState(mockMolecules[0].id);
-
-  const handleStartLearning = (moleculeId?: string) => {
-    if (moleculeId) {
-      setSelectedMoleculeId(moleculeId);
-    }
-    setCurrentPage("learning");
-  };
-
   return (
     <>
-      <AppHeader currentPage={currentPage} onNavigate={setCurrentPage} />
-      {currentPage === "home" ? (
-        <HomePage onStartLearning={handleStartLearning} />
-      ) : (
-        <LearningPage selectedMoleculeId={selectedMoleculeId} onSelectMolecule={setSelectedMoleculeId} />
-      )}
+      <RouteScrollHandler />
+      <AppHeader />
+      <div className="pt-[60px] min-h-screen flex flex-col">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/modules" element={<ModulesPage />} />
+          <Route path="/module/:id" element={<ModuleDetailPage />} />
+          <Route path="/paths" element={<PathsPage />} />
+          <Route path="/exam" element={<ExamPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+      </div>
     </>
   );
+}
+
+function RouteScrollHandler() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      return;
+    }
+
+    const targetId = decodeURIComponent(location.hash.slice(1));
+    const frameId = window.requestAnimationFrame(() => {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const headerOffset = 76;
+      const targetTop = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: Math.max(targetTop, 0),
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [location.pathname, location.hash]);
+
+  return null;
 }

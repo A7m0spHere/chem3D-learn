@@ -10,6 +10,19 @@ type BondMeshProps = {
 };
 
 export function BondMesh({ bond, atomsById, isFocused = false, radius = 0.04 }: BondMeshProps) {
+  const bondOrder =
+    bond.order ??
+    (bond.kind === "triple" ? 3 : bond.kind === "double" ? 2 : 1);
+  const cylinderCount = Math.min(Math.max(bondOrder, 1), 3);
+  const cylinderRadius = isFocused ? radius * 1.35 : radius;
+  const offsetDistance = cylinderRadius * 2.5;
+  const offsets =
+    cylinderCount === 1
+      ? [0]
+      : cylinderCount === 2
+        ? [-offsetDistance, offsetDistance]
+        : [-offsetDistance, 0, offsetDistance];
+
   const geometry = useMemo(() => {
     const startAtom = atomsById.get(bond.atomIds[0]);
     const endAtom = atomsById.get(bond.atomIds[1]);
@@ -39,9 +52,13 @@ export function BondMesh({ bond, atomsById, isFocused = false, radius = 0.04 }: 
   }
 
   return (
-    <mesh position={geometry.midpoint} quaternion={geometry.quaternion} castShadow>
-      <cylinderGeometry args={[isFocused ? radius * 1.35 : radius, isFocused ? radius * 1.35 : radius, geometry.length, 24]} />
-      <meshStandardMaterial color={isFocused ? "#F4A261" : "#B7C7C3"} roughness={0.45} />
-    </mesh>
+    <group position={geometry.midpoint} quaternion={geometry.quaternion}>
+      {offsets.map((offset) => (
+        <mesh key={offset} position={[offset, 0, 0]} castShadow>
+          <cylinderGeometry args={[cylinderRadius, cylinderRadius, geometry.length, 24]} />
+          <meshStandardMaterial color={isFocused ? "#F4A261" : "#B7C7C3"} roughness={0.45} />
+        </mesh>
+      ))}
+    </group>
   );
 }

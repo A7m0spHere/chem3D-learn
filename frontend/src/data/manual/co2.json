@@ -8,7 +8,7 @@
   },
   "nameZh": "二氧化碳",
   "category": "vsepr",
-  "summaryZh": "二氧化碳以碳原子为中心，两个氧原子位于相反方向。三个原子在同一直线上，整体结构对称，O-C-O 键角为 180°。",
+  "summaryZh": "二氧化碳的结构式可写作 O=C=O，两个 C=O 双键位于中心碳原子两侧。三个原子在同一直线上，整体结构对称，O-C-O 键角为 180°。",
   "atoms": [
     {
       "id": "c1",
@@ -56,20 +56,20 @@
       "atomIds": ["o1", "c1", "o2"],
       "valueDeg": 180,
       "label": "180°",
-      "descriptionZh": "两个 C=O 键方向相反，使二氧化碳形成对称的直线形结构。高中阶段重点掌握直线形和 180° 键角。"
+      "descriptionZh": "两个 C=O 双键方向相反，使二氧化碳形成对称的直线形结构。高中阶段重点掌握直线形和 180° 键角。"
     }
   ],
   "lessonSteps": [
     {
       "id": "center-atom",
       "titleZh": "识别中心碳原子",
-      "bodyZh": "先找到位于中心的碳原子。二氧化碳中，碳原子两侧各连接一个氧原子。",
+      "bodyZh": "先找到位于中心的碳原子。二氧化碳可写作 O=C=O，碳原子两侧各通过一个 C=O 双键连接氧原子。",
       "focusAtomIds": ["c1"]
     },
     {
       "id": "linear-shape",
       "titleZh": "观察直线形",
-      "bodyZh": "两个 C=O 键方向相反，三个原子排在同一直线上，整体呈对称的直线形结构。",
+      "bodyZh": "两个 C=O 双键方向相反，三个原子排在同一直线上，整体呈对称的直线形结构。",
       "focusAtomIds": ["o1", "c1", "o2"],
       "focusBondIds": ["c1-o1", "c1-o2"]
     },
@@ -92,7 +92,7 @@
   "metadata": {
     "level": "high-school",
     "source": "hand-authored teaching model",
-    "notesZh": "CO2 直线形教学模型，坐标用于课堂可视化，不作为实验键长数据。当前教学视图暂用单柱表示 C=O 方向，后续可优化双键显示。",
+    "notesZh": "CO2 直线形教学模型，坐标用于课堂可视化，不作为实验键长数据。",
     "verified": true
   }
 }

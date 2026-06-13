@@ -1,0 +1,117 @@
+{
+  "id": "octahedral-voids",
+  "kind": "crystal",
+  "formula": "Octahedral void",
+  "names": {
+    "zh": "八面体空隙",
+    "en": "Octahedral void"
+  },
+  "nameZh": "八面体空隙",
+  "category": "crystal",
+  "summaryZh": "八面体空隙由 6 个球围成。若在空隙中心填入小球，它会同时接触 6 个周围球，因此对应六配位空间环境。",
+  "atoms": [
+    { "id": "host-x-pos", "element": "X", "label": "球", "position": [0.9, 0, 0], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "host-x-neg", "element": "X", "label": "球", "position": [-0.9, 0, 0], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "host-y-pos", "element": "X", "label": "球", "position": [0, 0.9, 0], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "host-y-neg", "element": "X", "label": "球", "position": [0, -0.9, 0], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "host-z-pos", "element": "X", "label": "球", "position": [0, 0, 0.9], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "host-z-neg", "element": "X", "label": "球", "position": [0, 0, -0.9], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "void-center", "element": "void", "label": "空隙", "position": [0, 0, 0], "radius": 0.08, "color": "#F4A261" }
+  ],
+  "coordinationLinks": [
+    { "id": "void-x-pos", "atomIds": ["void-center", "host-x-pos"], "labelZh": "六配位方向" },
+    { "id": "void-x-neg", "atomIds": ["void-center", "host-x-neg"], "labelZh": "六配位方向" },
+    { "id": "void-y-pos", "atomIds": ["void-center", "host-y-pos"], "labelZh": "六配位方向" },
+    { "id": "void-y-neg", "atomIds": ["void-center", "host-y-neg"], "labelZh": "六配位方向" },
+    { "id": "void-z-pos", "atomIds": ["void-center", "host-z-pos"], "labelZh": "六配位方向" },
+    { "id": "void-z-neg", "atomIds": ["void-center", "host-z-neg"], "labelZh": "六配位方向" }
+  ],
+  "bonds": [
+    { "id": "edge-1", "atomIds": ["host-x-pos", "host-y-pos"], "kind": "visual-guide" },
+    { "id": "edge-2", "atomIds": ["host-x-pos", "host-y-neg"], "kind": "visual-guide" },
+    { "id": "edge-3", "atomIds": ["host-x-pos", "host-z-pos"], "kind": "visual-guide" },
+    { "id": "edge-4", "atomIds": ["host-x-pos", "host-z-neg"], "kind": "visual-guide" },
+    { "id": "edge-5", "atomIds": ["host-x-neg", "host-y-pos"], "kind": "visual-guide" },
+    { "id": "edge-6", "atomIds": ["host-x-neg", "host-y-neg"], "kind": "visual-guide" },
+    { "id": "edge-7", "atomIds": ["host-x-neg", "host-z-pos"], "kind": "visual-guide" },
+    { "id": "edge-8", "atomIds": ["host-x-neg", "host-z-neg"], "kind": "visual-guide" },
+    { "id": "edge-9", "atomIds": ["host-y-pos", "host-z-pos"], "kind": "visual-guide" },
+    { "id": "edge-10", "atomIds": ["host-y-pos", "host-z-neg"], "kind": "visual-guide" },
+    { "id": "edge-11", "atomIds": ["host-y-neg", "host-z-pos"], "kind": "visual-guide" },
+    { "id": "edge-12", "atomIds": ["host-y-neg", "host-z-neg"], "kind": "visual-guide" }
+  ],
+  "lonePairs": [],
+  "keyAngles": [],
+  "lessonSteps": [],
+  "rendering": {
+    "cameraPosition": [2.8, 2.4, 3.2],
+    "cameraFov": 42,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "Hand-authored teaching model",
+    "notesZh": "用于说明八面体空隙的六配位空间形状，坐标为教学示意。",
+    "verified": true
+  },
+  "crystalTeaching": {
+    "structureTypeZh": "密堆积空隙",
+    "modelZh": "八面体空隙教学模型",
+    "coordinationNumberZh": "6",
+    "spatialFeatureZh": "6 个球围成一个八面体空间",
+    "unitCellDescriptionZh": "在面心立方最密堆积中，体心和棱心位置可理解为八面体空隙。",
+    "particleCountZh": {
+      "lines": ["体心八面体空隙：1 个", "棱心八面体空隙：12 × 1/4 = 3 个", "合计：1 + 3 = 4 个"],
+      "ratio": "面心立方中八面体空隙数与球数相同。"
+    },
+    "coordinationDescriptionZh": [
+      "中心空隙被上下、左右、前后 6 个球包围。",
+      "填入中心小球时，它的配位数为 6。",
+      "辅助线表示八面体轮廓，不表示化学键。"
+    ],
+    "commonMistakesZh": [
+      "不要把八面体空隙理解成 8 个球围成的空隙；八面体有 6 个顶点。",
+      "体心空隙和棱心空隙在晶胞均摊时贡献不同。"
+    ],
+    "viewModes": [
+      {
+        "id": "cell",
+        "labelZh": "骨架",
+        "titleZh": "六球骨架",
+        "bodyZh": "先观察 6 个球分别位于上下、左右、前后方向。"
+      },
+      {
+        "id": "voids",
+        "labelZh": "空隙",
+        "titleZh": "八面体空隙",
+        "bodyZh": "显示中心空隙和八面体轮廓，理解为什么它对应六配位。"
+      },
+      {
+        "id": "counting",
+        "labelZh": "计数",
+        "titleZh": "空隙计数",
+        "bodyZh": "面心立方中体心空隙完整属于本晶胞，棱心空隙被 4 个晶胞共享。"
+      }
+    ],
+    "voidStages": [
+      {
+        "id": "framework",
+        "labelZh": "骨架",
+        "titleZh": "只看 6 个球",
+        "bodyZh": "先隐藏中心小球，只观察 6 个球围出的空间。"
+      },
+      {
+        "id": "voids",
+        "labelZh": "标出空隙",
+        "titleZh": "中心是空隙",
+        "bodyZh": "中心橙色标记表示可填入小球的位置。"
+      },
+      {
+        "id": "filled",
+        "labelZh": "填入小球",
+        "titleZh": "六配位环境",
+        "bodyZh": "填入中心小球后，它同时接触 6 个周围球。"
+      }
+    ]
+  }
+}

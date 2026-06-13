@@ -2,86 +2,111 @@
 
 ## Pages
 
-The MVP contains only:
+The current frontend baseline contains:
 - Home page
-- 3D Learning page
+- Modules page
+- Module detail page
+- Paths page
+- Exam page
+- About page
 
-Do not add login, dashboards, admin pages, question-bank pages, AI chat pages, or database-driven pages.
+The module detail page is also the current 3D learning experience when a module has real structure data.
+
+Do not add login, dashboards, admin pages, payment pages, AI chat pages, database-driven user pages, or dynamic molecule-input pages unless explicitly requested.
 
 ## Home Page
 
 Purpose:
 - Introduce Chem3D Learn as a 3D structural chemistry learning site.
-- Guide students and teachers into the 3D Learning page quickly.
+- Guide students and teachers into module exploration quickly.
+- Provide an entry into the current module system and learning paths.
 
 Required layout:
-- Top navigation with product name and entry link to Learning.
+- Top navigation with product name and primary learning entry.
 - First viewport with the product name, short Chinese value statement, and primary action.
-- Module preview area for the MVP structures:
-  - CH4
-  - NH3
-  - H2O
-  - CO2
-  - BF3
-  - NaCl
+- Module/category preview area aligned with the current frontend.
 - Short explanation of the learning flow:
-  - choose a structure
-  - observe the 3D model
-  - toggle angles/lone pairs
-  - follow lesson steps
+  - choose a module or structure
+  - observe the 3D model when available
+  - toggle angles/lone pairs/labels where supported
+  - follow lesson steps or module guidance
 
 Visual requirements:
 - Light background using the design tokens.
 - Scientific but friendly tone.
-- No dark hero, cyberpunk style, or purple-blue AI SaaS look.
+- Current frontend visual direction is the baseline.
+- Avoid dark hero, cyberpunk style, or purple-blue AI SaaS look.
 
-## 3D Learning Page
+## Modules Page
 
 Purpose:
-- Let students explore one molecule or crystal at a time.
+- Present the current learning module catalog.
+- Let users filter or browse by topic category.
+- Keep extended modules lightweight until their real 3D content exists.
+
+Requirements:
+- Category filters should be clear and touch-friendly.
+- Module cards should show title, subtitle, difficulty, tags, and concise explanation.
+- Modules without real 3D data may use placeholder visual guidance instead of pretending to have a complete model.
+
+## Module Detail / 3D Learning Experience
+
+Purpose:
+- Let students explore one molecule, crystal, or learning module at a time.
 - Help teachers present a clear structure explanation in class.
+- Use real 3D viewer only when hand-authored structure data is available.
 
 Desktop layout:
-- Three-column layout.
-- Left sidebar: molecule/crystal selector and brief category labels.
-- Center: large 3D viewer with rotate, zoom, and auto-rotate controls.
-- Right panel: Chinese lesson explanation, step content, key facts, and step navigation.
+- Viewer and lesson/module panel should dominate the page content.
+- 3D viewer must stay large enough for classroom projection.
+- Explanation, key facts, common mistakes, and related modules should remain readable.
 
-Required controls:
-- Select structure.
+Required 3D controls when real structure data exists:
 - Rotate and zoom via 3D viewer controls.
 - Toggle auto rotate.
 - Toggle key bond angles.
 - Toggle lone pairs where applicable.
+- Toggle atom labels where supported.
 - Switch lesson steps.
 
 3D viewer requirements:
-- Must be visually dominant.
+- Must be visually dominant when the structure is the main learning task.
 - Must not be reduced to a small decorative card.
 - Should show atom labels or legends when useful.
 - Angle labels and lone-pair markers must be readable.
 
-Lesson panel requirements:
-- Show current structure name and formula.
-- Show current lesson step title and explanation.
+Lesson/module panel requirements:
+- Show current structure or module name.
+- Show formula when applicable.
+- Show current lesson step title and explanation when structure data exists.
 - Keep text concise and high-school appropriate.
 - Mark uncertain chemistry facts with `TODO-CHEM-VERIFY`.
+
+## Paths, Exam, and About Pages
+
+Purpose:
+- Paths page can organize recommended learning sequences.
+- Exam page can group exam-oriented spatial thinking topics.
+- About page can explain product positioning and use cases.
+
+Requirements:
+- These pages should follow the same light education visual language.
+- Placeholder states are acceptable while the frontend is being developed.
+- Avoid expanding into a full question bank, account system, or backend SaaS workflow without explicit approval.
 
 ## Responsive Strategy
 
 Desktop:
-- Use a three-column Learning layout.
-- Keep the 3D viewer in the center and largest.
+- Keep the viewer and teaching panel prominent on 3D learning pages.
+- Keep navigation and category browsing clear.
 
 Tablet:
-- Sidebar may collapse into a drawer or compact rail.
-- Viewer remains above or beside the lesson panel depending on available width.
+- Viewer may stack above or beside the lesson panel depending on available width.
 - Controls remain touch-friendly.
 
 Mobile:
-- Viewer appears at the top.
+- Viewer appears near the top when available.
 - Explanation appears below the viewer.
-- Model selection changes to a top selector.
 - Avoid horizontal overflow.
 
 Teacher projection mode:
@@ -91,9 +116,9 @@ Teacher projection mode:
 
 ## Gemini UI Draft Boundary
 
-Gemini may draft only HomePage / LearningPage UI ideas, preferably saved as `docs/gemini-ui-draft.md` when present.
+Gemini drafts are historical/reference material.
 
-Codex must adapt any Gemini draft into the approved stack:
+Codex must adapt any draft into the approved stack:
 - Vite
 - React
 - TypeScript
@@ -102,10 +127,13 @@ Codex must adapt any Gemini draft into the approved stack:
 - React Three Fiber
 - Drei
 
+The current frontend implementation has priority over draft text.
+
 Codex must not adopt Gemini suggestions that introduce:
 - Next.js
 - Firebase
-- backend services
 - login
+- database-backed user workflows
 - Gemini API
+- RDKit runtime
 - AI chat features

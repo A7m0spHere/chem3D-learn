@@ -1,0 +1,146 @@
+/* ============================================
+   Phase 1 Motion System — Tokens + Utilities
+   ============================================ */
+
+/* ============================================
+   Phase 2 additions — page enter + skeleton
+   ============================================ */
+
+/* --- Section 1: CSS Custom Properties (Tokens) --- */
+
+:root {
+  /* Duration tokens */
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-slow: 350ms;
+
+  /* Easing tokens */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Spatial tokens used by utility classes */
+  --motion-slide-distance: 12px;
+  --motion-scale-start: 0.96;
+}
+
+/* --- Section 2: Keyframes --- */
+
+@keyframes motion-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes motion-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-slide-distance));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(var(--motion-scale-start));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes motion-selected-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(42, 157, 143, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(42, 157, 143, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(42, 157, 143, 0);
+  }
+}
+
+@keyframes motion-page-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes motion-skeleton {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+@keyframes motion-float {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50px);
+  }
+}
+
+@keyframes motion-rotate-slow {
+  0% {
+    transform: rotate(-15deg);
+  }
+  100% {
+    transform: rotate(15deg);
+  }
+}
+
+/* --- Section 3: Utility Classes --- */
+
+.motion-fade-in {
+  animation: motion-fade-in var(--motion-base) var(--ease-out-soft) both;
+}
+
+.motion-slide-up {
+  animation: motion-slide-up var(--motion-base) var(--ease-out-soft) both;
+}
+
+.motion-scale-in {
+  animation: motion-scale-in var(--motion-base) var(--ease-out-soft) both;
+}
+
+.motion-selected-pulse {
+  animation: motion-selected-pulse 0.6s var(--ease-out-soft);
+}
+
+.motion-page-enter {
+  animation: motion-page-enter var(--motion-slow) var(--ease-out-soft) both;
+}
+
+.motion-skeleton {
+  animation: motion-skeleton 1.2s ease-in-out infinite;
+}
+
+/* --- Section 4: prefers-reduced-motion (global opt-out) --- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "id": "zinc-metal",
+  "kind": "crystal",
+  "formula": "Zn",
+  "names": {
+    "zh": "金属锌",
+    "en": "Zinc"
+  },
+  "nameZh": "金属锌晶体结构",
+  "category": "crystal",
+  "summaryZh": "金属锌可作为六方最密堆积的高中教学实例。观察中心 Zn 原子时，同层有 6 个最近邻，上下两层各有 3 个最近邻，配位数为 12。",
+  "atoms": [
+    { "id": "zn-center", "element": "Zn", "label": "Zn", "position": [0, 0, 0], "radius": 0.14, "color": "#A3A3A3", "siteType": "body-center" },
+    { "id": "zn-same-1", "element": "Zn", "label": "Zn", "position": [0.86, 0, 0], "radius": 0.12, "color": "#C7C7C7" },
+    { "id": "zn-same-2", "element": "Zn", "label": "Zn", "position": [0.43, 0, 0.745], "radius": 0.12, "color": "#C7C7C7" },
+    { "id": "zn-same-3", "element": "Zn", "label": "Zn", "position": [-0.43, 0, 0.745], "radius": 0.12, "color": "#C7C7C7" },
+    { "id": "zn-same-4", "element": "Zn", "label": "Zn", "position": [-0.86, 0, 0], "radius": 0.12, "color": "#C7C7C7" },
+    { "id": "zn-same-5", "element": "Zn", "label": "Zn", "position": [-0.43, 0, -0.745], "radius": 0.12, "color": "#C7C7C7" },
+    { "id": "zn-same-6", "element": "Zn", "label": "Zn", "position": [0.43, 0, -0.745], "radius": 0.12, "color": "#C7C7C7" },
+    { "id": "zn-upper-1", "element": "Zn", "label": "Zn", "position": [0.43, 0.7, 0.248], "radius": 0.12, "color": "#E5D6A8" },
+    { "id": "zn-upper-2", "element": "Zn", "label": "Zn", "position": [-0.43, 0.7, 0.248], "radius": 0.12, "color": "#E5D6A8" },
+    { "id": "zn-upper-3", "element": "Zn", "label": "Zn", "position": [0, 0.7, -0.496], "radius": 0.12, "color": "#E5D6A8" },
+    { "id": "zn-lower-1", "element": "Zn", "label": "Zn", "position": [0.43, -0.7, -0.248], "radius": 0.12, "color": "#B9D7D2" },
+    { "id": "zn-lower-2", "element": "Zn", "label": "Zn", "position": [-0.43, -0.7, -0.248], "radius": 0.12, "color": "#B9D7D2" },
+    { "id": "zn-lower-3", "element": "Zn", "label": "Zn", "position": [0, -0.7, 0.496], "radius": 0.12, "color": "#B9D7D2" }
+  ],
+  "coordinationLinks": [
+    { "id": "zn-center-same-1", "atomIds": ["zn-center", "zn-same-1"], "labelZh": "同层最近邻" },
+    { "id": "zn-center-same-2", "atomIds": ["zn-center", "zn-same-2"], "labelZh": "同层最近邻" },
+    { "id": "zn-center-same-3", "atomIds": ["zn-center", "zn-same-3"], "labelZh": "同层最近邻" },
+    { "id": "zn-center-same-4", "atomIds": ["zn-center", "zn-same-4"], "labelZh": "同层最近邻" },
+    { "id": "zn-center-same-5", "atomIds": ["zn-center", "zn-same-5"], "labelZh": "同层最近邻" },
+    { "id": "zn-center-same-6", "atomIds": ["zn-center", "zn-same-6"], "labelZh": "同层最近邻" },
+    { "id": "zn-center-upper-1", "atomIds": ["zn-center", "zn-upper-1"], "labelZh": "上层最近邻" },
+    { "id": "zn-center-upper-2", "atomIds": ["zn-center", "zn-upper-2"], "labelZh": "上层最近邻" },
+    { "id": "zn-center-upper-3", "atomIds": ["zn-center", "zn-upper-3"], "labelZh": "上层最近邻" },
+    { "id": "zn-center-lower-1", "atomIds": ["zn-center", "zn-lower-1"], "labelZh": "下层最近邻" },
+    { "id": "zn-center-lower-2", "atomIds": ["zn-center", "zn-lower-2"], "labelZh": "下层最近邻" },
+    { "id": "zn-center-lower-3", "atomIds": ["zn-center", "zn-lower-3"], "labelZh": "下层最近邻" }
+  ],
+  "bonds": [],
+  "lonePairs": [],
+  "keyAngles": [],
+  "lessonSteps": [
+    {
+      "id": "layer",
+      "titleZh": "先看同层六边形",
+      "bodyZh": "中心 Zn 原子周围同一层有 6 个最近邻，形成六边形环绕。",
+      "focusAtomIds": ["zn-center", "zn-same-1", "zn-same-2", "zn-same-3", "zn-same-4", "zn-same-5", "zn-same-6"]
+    },
+    {
+      "id": "coordination",
+      "titleZh": "再数上下两层",
+      "bodyZh": "上层 3 个、下层 3 个 Zn 原子也与中心原子相邻，所以配位数为 6 + 3 + 3 = 12。"
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [3.1, 2.35, 3.6],
+    "cameraFov": 42,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "Hand-authored teaching model",
+    "notesZh": "用于说明六方最密堆积的十二配位关系，坐标为教学示意。",
+    "verified": true
+  },
+  "crystalTeaching": {
+    "structureTypeZh": "金属晶体",
+    "modelZh": "六方最密堆积教学模型",
+    "coordinationNumberZh": "12",
+    "spatialFeatureZh": "同层 6 个最近邻，上下两层各 3 个最近邻",
+    "unitCellDescriptionZh": "本模型突出一个中心 Zn 原子的最近邻环境，不作为完整晶胞计数模型。",
+    "particleCountZh": {
+      "lines": ["同层最近邻：6", "上层最近邻：3", "下层最近邻：3", "总配位数：6 + 3 + 3 = 12"],
+      "ratio": "中心 Zn 原子的配位数为 12。"
+    },
+    "coordinationDescriptionZh": [
+      "先锁定中心 Zn 原子，再按层数最近邻。",
+      "同层六边形给出 6 个最近邻。",
+      "上下两层各补 3 个最近邻，合计 12。"
+    ],
+    "commonMistakesZh": [
+      "不要把屏幕中看到的原子总数直接当作一个晶胞内的原子数。",
+      "配位数数的是最近邻原子个数，不是晶胞中可见原子个数。"
+    ],
+    "viewModes": [
+      {
+        "id": "cell",
+        "labelZh": "堆积",
+        "titleZh": "六方最密堆积",
+        "bodyZh": "三层 Zn 原子错位堆积，中心原子被周围最近邻包围。"
+      },
+      {
+        "id": "coordination",
+        "labelZh": "配位",
+        "titleZh": "十二配位",
+        "bodyZh": "连线显示中心 Zn 到 12 个最近邻的空间关系。"
+      },
+      {
+        "id": "counting",
+        "labelZh": "分层数",
+        "titleZh": "6 + 3 + 3",
+        "bodyZh": "按同层、上层、下层分层计数，避免漏掉上下层最近邻。"
+      },
+      {
+        "id": "metallicBond",
+        "labelZh": "金属键",
+        "titleZh": "金属键示意",
+        "bodyZh": "淡色电子云只用于提示金属键的离域特征，不代表具体电子轨道形状。"
+      }
+    ]
+  }
+}

@@ -4,12 +4,14 @@
 
 Chem3D Learn uses a light, clean, education-focused design. The interface should feel scientific, friendly, calm, and suitable for both self-study and classroom projection.
 
+The current frontend implementation is the visual baseline. Future visual work should refine the existing direction instead of resetting it, unless the user explicitly asks for a redesign.
+
 Avoid:
 - dark dashboard style
 - cyberpunk style
 - purple-blue AI SaaS template style
-- heavy gradients
-- decorative visual noise
+- excessive gradients that overpower learning content
+- decorative visual noise that competes with the 3D viewer or teaching text
 - overcrowded text
 - shrinking the 3D viewer into a small card
 
@@ -30,7 +32,7 @@ Use these tokens consistently in Tailwind theme configuration or CSS variables w
 
 ## Layout Principles
 
-- Make the 3D viewer the dominant area on the Learning page.
+- Make the 3D viewer dominant on module detail pages where real 3D structure data exists.
 - Use panels for navigation, controls, and lesson text, but avoid nesting cards inside cards.
 - Keep whitespace moderate: enough clarity for students, not a sparse marketing page.
 - Keep classroom projection readability in mind: labels, buttons, and step text must remain legible.

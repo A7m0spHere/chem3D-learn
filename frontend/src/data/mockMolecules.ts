@@ -4,6 +4,14 @@ import bf3Data from "@/data/manual/bf3.json";
 import co2Data from "@/data/manual/co2.json";
 import h2oData from "@/data/manual/h2o.json";
 import nh3Data from "@/data/manual/nh3.json";
+import naclData from "@/data/manual/nacl.json";
+import csclData from "@/data/manual/cscl.json";
+import sodiumMetalData from "@/data/manual/sodium-metal.json";
+import diamondData from "@/data/manual/diamond.json";
+import zincMetalData from "@/data/manual/zinc-metal.json";
+import octahedralVoidsData from "@/data/manual/octahedral-voids.json";
+import tetrahedralVoidsData from "@/data/manual/tetrahedral-voids.json";
+import graphiteData from "@/data/manual/graphite.json";
 
 export type MockMoleculeRecord = MoleculeRecord & {
   geometryZh: string;
@@ -34,6 +42,14 @@ const realMoleculesById = new Map<string, MoleculeRecord>([
   ["nh3", nh3Data as unknown as MoleculeRecord],
   ["co2", co2Data as unknown as MoleculeRecord],
   ["bf3", bf3Data as unknown as MoleculeRecord],
+  ["nacl", naclData as unknown as MoleculeRecord],
+  ["cscl", csclData as unknown as MoleculeRecord],
+  ["sodium-metal", sodiumMetalData as unknown as MoleculeRecord],
+  ["diamond", diamondData as unknown as MoleculeRecord],
+  ["zinc-metal", zincMetalData as unknown as MoleculeRecord],
+  ["octahedral-voids", octahedralVoidsData as unknown as MoleculeRecord],
+  ["tetrahedral-voids", tetrahedralVoidsData as unknown as MoleculeRecord],
+  ["graphite", graphiteData as unknown as MoleculeRecord],
 ]);
 
 /** Returns the hand-authored 3D data for a molecule, or undefined. */
@@ -72,11 +88,15 @@ export function mergeMoleculeData(
     summaryZh: real.summaryZh,
     atoms: real.atoms,
     bonds: real.bonds,
+    ions: real.ions,
+    coordinationLinks: real.coordinationLinks,
+    crystal: real.crystal,
     lonePairs: real.lonePairs,
     keyAngles: real.keyAngles,
     lessonSteps: real.lessonSteps,
     rendering: real.rendering,
     metadata: real.metadata,
+    crystalTeaching: real.crystalTeaching,
   };
 }
 
@@ -351,14 +371,14 @@ export const mockMolecules: MockMoleculeRecord[] = [
   {
     id: "nacl",
     formula: "NaCl",
-    nameZh: "NaCl 配位环境（简化）",
+    nameZh: "NaCl 型晶体结构（氯化钠晶胞）",
     category: "crystal",
     categoryLabelZh: "晶体结构",
-    geometryZh: "六配位环境",
-    centralAtomZh: "Na+ / Cl- 相互配位",
-    lonePairsTextZh: "不适用",
-    summaryZh: "这里用简化模型观察 Na+ 周围的六个相邻 Cl-，帮助理解 NaCl 中的配位关系。",
-    commonMistakeZh: "本模型是配位环境示意，不是完整晶胞。后续正式晶胞模型需单独实现。",
+    geometryZh: "面心立方 / 六配位",
+    centralAtomZh: "Cl- 面心立方，Na+ 填入八面体空隙",
+    lonePairsTextZh: "不适用（离子晶体）",
+    summaryZh: "NaCl 是典型离子晶体。Cl- 构成面心立方排列，Na+ 位于棱心和体心，一个晶胞中两类离子数目比为 1 : 1。",
+    commonMistakeZh: "NaCl 晶体不是由独立 NaCl 分子构成；图中辅助线只表示最近邻配位关系，不表示共价键。",
     atoms: [
       { id: "na1", element: "Na+", label: "Na+", position: [0, 0, 0], color: "#2A9D8F" },
       { id: "cl1", element: "Cl-", label: "Cl-", position: [1.2, 0, 0], color: "#64748B" },
@@ -389,20 +409,158 @@ export const mockMolecules: MockMoleculeRecord[] = [
     lessonSteps: [
       {
         id: "center",
-        titleZh: "观察中心离子",
-        bodyZh: "先看中心 Na+，再观察周围相邻的 Cl-。",
+        titleZh: "观察晶胞组成",
+        bodyZh: "先看 Cl- 的顶点和面心位置，再看 Na+ 的棱心和体心位置。",
       },
       {
         id: "coordination",
         titleZh: "理解六配位",
-        bodyZh: "该简化模型展示一个 Na+ 周围有六个相邻 Cl-，用于建立空间直觉。",
+        bodyZh: "体心 Na+ 周围有 6 个最近邻 Cl-；反过来，每个 Cl- 周围也有 6 个 Na+。",
       },
       {
         id: "limit",
-        titleZh: "区分示意与晶胞",
-        bodyZh: "当前只表示局部配位环境，不等同于完整 NaCl 晶胞。",
+        titleZh: "完成粒子计数",
+        bodyZh: "Cl-：8 × 1/8 + 6 × 1/2 = 4；Na+：12 × 1/4 + 1 = 4。",
         showAngles: true,
         focusAngleIds: ["cl-na-cl"],
+      },
+    ],
+  },
+  {
+    id: "cscl",
+    formula: "CsCl",
+    nameZh: "CsCl 型晶体结构",
+    category: "crystal",
+    categoryLabelZh: "晶体结构",
+    geometryZh: "简单立方 / 八配位",
+    centralAtomZh: "Cl- 顶点，Cs+ 体心",
+    lonePairsTextZh: "不适用（离子晶体）",
+    summaryZh: "CsCl 常用画法是 Cl- 位于立方体顶点，Cs+ 位于体心，一个晶胞中两类离子数目比为 1 : 1。",
+    commonMistakeZh: "CsCl 不能简单当作普通 BCC 金属晶体；顶点和体心是不同离子。NaCl 是 6 : 6 配位，CsCl 是 8 : 8 配位。",
+    atoms: [
+      { id: "cs-body", element: "Cs+", label: "Cs+", position: [0, 0, 0], color: "#A16207" },
+      { id: "cl-corner-1", element: "Cl-", label: "Cl-", position: [-0.5, -0.5, -0.5], color: "#10B981" },
+      { id: "cl-corner-2", element: "Cl-", label: "Cl-", position: [0.5, -0.5, -0.5], color: "#10B981" },
+      { id: "cl-corner-3", element: "Cl-", label: "Cl-", position: [-0.5, 0.5, -0.5], color: "#10B981" },
+      { id: "cl-corner-4", element: "Cl-", label: "Cl-", position: [0.5, 0.5, -0.5], color: "#10B981" },
+      { id: "cl-corner-5", element: "Cl-", label: "Cl-", position: [-0.5, -0.5, 0.5], color: "#10B981" },
+      { id: "cl-corner-6", element: "Cl-", label: "Cl-", position: [0.5, -0.5, 0.5], color: "#10B981" },
+      { id: "cl-corner-7", element: "Cl-", label: "Cl-", position: [-0.5, 0.5, 0.5], color: "#10B981" },
+      { id: "cl-corner-8", element: "Cl-", label: "Cl-", position: [0.5, 0.5, 0.5], color: "#10B981" },
+    ],
+    bonds: [],
+    lonePairs: [],
+    keyAngles: [],
+    lessonSteps: [
+      {
+        id: "cell",
+        titleZh: "观察 CsCl 晶胞",
+        bodyZh: "Cl- 位于立方体 8 个顶点，Cs+ 位于体心。",
+      },
+      {
+        id: "coordination",
+        titleZh: "理解八配位",
+        bodyZh: "体心 Cs+ 与 8 个顶点 Cl- 最近邻，形成 8 : 8 配位。",
+      },
+      {
+        id: "counting",
+        titleZh: "完成晶胞计数",
+        bodyZh: "Cl-：8 × 1/8 = 1；Cs+：1，所以化学式为 CsCl。",
+      },
+    ],
+  },
+  {
+    id: "sodium-metal",
+    formula: "Na",
+    nameZh: "金属钠晶体结构",
+    category: "crystal",
+    categoryLabelZh: "晶体结构",
+    geometryZh: "体心立方 / BCC",
+    centralAtomZh: "Na 顶点与 Na 体心",
+    lonePairsTextZh: "不适用（金属晶体）",
+    summaryZh: "金属钠晶体可用体心立方结构表示。Na 原子位于 8 个顶点和 1 个体心，一个晶胞中实际含有 2 个 Na 原子。",
+    commonMistakeZh: "金属钠不是阴阳离子交替排列的离子晶体；最近邻示意线也不是普通化学键。",
+    atoms: [
+      { id: "na-body", element: "Na", label: "Na", position: [0, 0, 0], color: "#D6D3C6" },
+      { id: "na-corner-1", element: "Na", label: "Na", position: [-0.5, -0.5, -0.5], color: "#D6D3C6" },
+      { id: "na-corner-2", element: "Na", label: "Na", position: [0.5, -0.5, -0.5], color: "#D6D3C6" },
+      { id: "na-corner-3", element: "Na", label: "Na", position: [-0.5, 0.5, -0.5], color: "#D6D3C6" },
+      { id: "na-corner-4", element: "Na", label: "Na", position: [0.5, 0.5, -0.5], color: "#D6D3C6" },
+      { id: "na-corner-5", element: "Na", label: "Na", position: [-0.5, -0.5, 0.5], color: "#D6D3C6" },
+      { id: "na-corner-6", element: "Na", label: "Na", position: [0.5, -0.5, 0.5], color: "#D6D3C6" },
+      { id: "na-corner-7", element: "Na", label: "Na", position: [-0.5, 0.5, 0.5], color: "#D6D3C6" },
+      { id: "na-corner-8", element: "Na", label: "Na", position: [0.5, 0.5, 0.5], color: "#D6D3C6" },
+    ],
+    bonds: [],
+    lonePairs: [],
+    keyAngles: [],
+    lessonSteps: [
+      {
+        id: "cell",
+        titleZh: "观察 BCC 晶胞",
+        bodyZh: "金属钠晶体可用体心立方结构表示：Na 原子位于 8 个顶点和 1 个体心。",
+      },
+      {
+        id: "coordination",
+        titleZh: "理解最近邻关系",
+        bodyZh: "体心 Na 周围最近的 Na 原子有 8 个，可按最近邻关系理解为 8 配位。",
+      },
+      {
+        id: "counting",
+        titleZh: "完成晶胞计数",
+        bodyZh: "顶点 Na：8 × 1/8 = 1；体心 Na：1，所以一个 BCC 晶胞中实际含有 2 个 Na 原子。",
+      },
+    ],
+  },
+  {
+    id: "diamond",
+    formula: "C",
+    nameZh: "金刚石晶体结构",
+    category: "crystal",
+    categoryLabelZh: "晶体结构",
+    geometryZh: "金刚石型 / 四配位",
+    centralAtomZh: "C，四个最近邻 C",
+    lonePairsTextZh: "不适用（共价晶体）",
+    summaryZh: "金刚石是典型的共价晶体，也可称为原子晶体。每个 C 原子与周围 4 个 C 原子形成共价键，构成连续的三维空间网状结构。",
+    commonMistakeZh: "金刚石不是分子晶体，也不是离子晶体或金属晶体；晶胞中实际含有 8 个 C 原子，不代表存在独立的 8 原子分子。",
+    atoms: [
+      { id: "c-inner-1", element: "C", label: "C", position: [-0.25, -0.25, -0.25], color: "#374151" },
+      { id: "c-corner-1", element: "C", label: "C", position: [-0.5, -0.5, -0.5], color: "#374151" },
+      { id: "c-face-x-neg", element: "C", label: "C", position: [-0.5, 0, 0], color: "#374151" },
+      { id: "c-face-y-neg", element: "C", label: "C", position: [0, -0.5, 0], color: "#374151" },
+      { id: "c-face-z-neg", element: "C", label: "C", position: [0, 0, -0.5], color: "#374151" },
+    ],
+    bonds: [
+      { id: "c-inner-1-c-corner-1", atomIds: ["c-inner-1", "c-corner-1"], kind: "single", order: 1 },
+      { id: "c-inner-1-c-face-x-neg", atomIds: ["c-inner-1", "c-face-x-neg"], kind: "single", order: 1 },
+      { id: "c-inner-1-c-face-y-neg", atomIds: ["c-inner-1", "c-face-y-neg"], kind: "single", order: 1 },
+      { id: "c-inner-1-c-face-z-neg", atomIds: ["c-inner-1", "c-face-z-neg"], kind: "single", order: 1 },
+    ],
+    lonePairs: [],
+    keyAngles: [
+      {
+        id: "diamond-tetrahedral-angle",
+        atomIds: ["c-corner-1", "c-inner-1", "c-face-x-neg"],
+        valueDeg: 109.5,
+        label: "约 109.5°",
+        descriptionZh: "金刚石中 C-C-C 键角约为 109.5°。",
+      },
+    ],
+    lessonSteps: [
+      {
+        id: "cell",
+        titleZh: "观察金刚石晶胞",
+        bodyZh: "常规晶胞中可以看到顶点 C、面心 C 和晶胞内部 C。",
+      },
+      {
+        id: "coordination",
+        titleZh: "理解四面体配位",
+        bodyZh: "每个 C 原子与周围 4 个 C 原子形成共价键，空间构型接近正四面体。",
+      },
+      {
+        id: "counting",
+        titleZh: "完成晶胞计数",
+        bodyZh: "顶点、面心和内部 C 需要按共享关系计数，一个常规晶胞中实际含有 8 个 C 原子。",
       },
     ],
   },
@@ -410,6 +568,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
 
 export const mockMoleculeById = new Map(mockMolecules.map((molecule) => [molecule.id, molecule]));
 
-export function getMockMolecule(id: string): MockMoleculeRecord {
-  return mockMoleculeById.get(id) ?? mockMolecules[0];
+export function getMockMolecule(id: string): MockMoleculeRecord | undefined {
+  return mockMoleculeById.get(id);
 }

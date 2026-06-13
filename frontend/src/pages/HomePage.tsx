@@ -1,125 +1,147 @@
-import { ArrowRight, Eye, Layers3, MousePointer2, Orbit, Shapes, Sparkles } from "lucide-react";
-import { ModuleCard } from "@/components/home/ModuleCard";
+import { ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Move3D, Layers3, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mockMolecules } from "@/data/mockMolecules";
+import { FloatingChemistryBackground } from "@/components/motion/FloatingChemistryBackground";
+import { ChemistryCursor } from "@/components/motion/ChemistryCursor";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
+import { ModuleCard } from "@/components/home/ModuleCard";
+import { categories, getModulesByCategory, learningPaths } from "@/data/learningModules";
 
-const learningFlow = [
-  {
-    icon: <MousePointer2 className="h-5 w-5" aria-hidden="true" />,
-    title: "选择结构",
-    description: "从 CH4、NH3、H2O、CO2、BF3 和 NaCl 简化示意开始。",
-  },
-  {
-    icon: <Eye className="h-5 w-5" aria-hidden="true" />,
-    title: "观察空间",
-    description: "在大视图区对照原子、键、键角和孤电子对标记。",
-  },
-  {
-    icon: <Layers3 className="h-5 w-5" aria-hidden="true" />,
-    title: "跟随步骤",
-    description: "按步骤理解中心原子、空间构型和关键易错点。",
-  },
-];
-
-const modules = [
-  {
-    icon: <Shapes className="h-5 w-5" aria-hidden="true" />,
-    title: "分子构型",
-    description: "观察直线形、平面三角形、正四面体等基础空间构型。",
-  },
-  {
-    icon: <Sparkles className="h-5 w-5" aria-hidden="true" />,
-    title: "键角与孤电子对",
-    description: "对比 NH3 和 H2O，理解孤电子对对键角的影响。",
-  },
-  {
-    icon: <Orbit className="h-5 w-5" aria-hidden="true" />,
-    title: "简化晶体示意",
-    description: "用 NaCl 配位环境建立晶体空间关系的初步直觉。",
-  },
-];
-
-type HomePageProps = {
-  onStartLearning: (moleculeId?: string) => void;
-};
-
-export function HomePage({ onStartLearning }: HomePageProps) {
+export function HomePage() {
   return (
-    <main className="min-h-[calc(100vh-65px)] bg-background">
-      <section className="border-b border-border bg-gradient-to-b from-white to-background">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_0.95fr] lg:px-8 lg:py-16">
-          <div className="flex flex-col justify-center">
-            <p className="text-sm font-semibold text-primary">高中结构化学 · 3D 学习</p>
-            <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight text-text-primary sm:text-5xl">
-              Chem3D Learn
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-text-secondary">
-              用清晰的空间示意、简短中文讲解和分步观察，帮助学生理解分子构型、键角变化和基础晶体关系。
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button size="lg" onClick={() => onStartLearning()}>
-                进入 3D 结构学习
-                <ArrowRight className="h-5 w-5" aria-hidden="true" />
-              </Button>
-              <Button size="lg" variant="secondary" onClick={() => onStartLearning("ch4")}>
-                查看 CH4 示例
-              </Button>
-            </div>
-          </div>
+    <main className="motion-page-enter relative overflow-hidden bg-background">
+      <ChemistryCursor />
+      <FloatingChemistryBackground />
 
-          <div className="rounded-lg border border-border bg-surface p-5 shadow-panel">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-text-primary">首批核心模型</h2>
-                <p className="mt-1 text-sm text-text-secondary">点击进入对应学习步骤</p>
-              </div>
-              <span className="rounded-md bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary-dark">
-                {mockMolecules.length} 个模型
-              </span>
+      <section className="relative pt-20 pb-24 sm:pt-32 sm:pb-32 z-10 border-b border-border bg-gradient-to-b from-transparent to-white/60 backdrop-blur-[2px]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <ScrollReveal>
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-1.5 text-sm font-semibold text-primary-dark shadow-sm backdrop-blur-md mb-8">
+              <Move3D className="h-4 w-4" />
+              高中结构化学 · 3D 辅助学习
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {mockMolecules.map((molecule) => (
-                <button
-                  key={molecule.id}
-                  className="rounded-md border border-border bg-background p-4 text-left transition-colors hover:border-primary hover:bg-white"
-                  onClick={() => onStartLearning(molecule.id)}
-                  type="button"
-                >
-                  <span className="block text-2xl font-bold text-primary-dark">{molecule.formula}</span>
-                  <span className="mt-1 block text-sm font-medium text-text-primary">{molecule.nameZh}</span>
-                  <span className="mt-2 block text-xs text-text-secondary">{molecule.geometryZh}</span>
-                </button>
+            <h1 className="max-w-4xl mx-auto text-4xl font-bold tracking-tight text-text-primary sm:text-6xl lg:text-7xl mb-8 leading-tight">
+              结构化学 <span className="text-primary relative inline-block">
+                3D 学习站
+                <svg className="absolute -bottom-2 left-0 w-full h-3 text-accent opacity-50" viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <path d="M0,10 Q50,20 100,10" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                </svg>
+              </span>
+            </h1>
+            <p className="max-w-2xl mx-auto text-lg leading-8 text-text-secondary sm:text-xl mb-10">
+              把抽象的分子构型、晶体结构和有机立体问题，变成可旋转、可观察、可理解的三维模型。以知识点为驱动，告别死记硬背。
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button asChild size="lg" className="rounded-full px-8 shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5">
+                <Link to="/modules">
+                  开始学习
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="secondary" className="rounded-full px-8 bg-white hover:bg-slate-50 shadow-sm transition-all hover:-translate-y-0.5 border border-border">
+                <Link to="/#molecular-geometry">查看知识模块</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="rounded-full px-8 bg-transparent border-primary/20 text-primary-dark hover:bg-primary/5 transition-all">
+                <Link to="/paths">查看学习路线</Link>
+              </Button>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Categories Overview */}
+      <section className="relative py-16 bg-white z-10 border-b border-border">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-text-primary">五大核心学习分类</h2>
+              <p className="mt-4 text-text-secondary max-w-2xl mx-auto">涵盖高中结构化学全部空间痛点，从基础构型到能力扩展计算。</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {categories.map((cat) => (
+                <Link to={`/#${cat.id}`} key={cat.id} className="group block rounded-2xl border border-border bg-background p-6 transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-panel hover:bg-white text-center">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary-dark mb-4 transition-transform group-hover:scale-110">
+                    <Layers3 className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-text-primary group-hover:text-primary transition-colors">{cat.title}</h3>
+                  <p className="mt-2 text-xs font-medium text-text-secondary">{cat.subtitle}</p>
+                </Link>
               ))}
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-4 md:grid-cols-3">
-          {learningFlow.map((item) => (
-            <ModuleCard
-              key={item.title}
-              description={item.description}
-              icon={item.icon}
-              title={item.title}
-            />
-          ))}
-        </div>
-      </section>
+      {/* Module Sections */}
+      {categories.map((category, index) => {
+        const modules = getModulesByCategory(category.id);
+        if (modules.length === 0) return null;
 
-      <section className="border-t border-border bg-white">
-        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-12 sm:px-6 md:grid-cols-3 lg:px-8">
-          {modules.map((item) => (
-            <ModuleCard
-              key={item.title}
-              description={item.description}
-              icon={item.icon}
-              title={item.title}
-            />
+        return (
+          <Section
+            key={category.id}
+            id={category.id}
+            title={category.title}
+            description={category.description}
+            altBg={index % 2 !== 0}
+          >
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {modules.map((mod) => (
+                <ModuleCard key={mod.id} module={mod} />
+              ))}
+            </div>
+          </Section>
+        );
+      })}
+
+      {/* Learning Paths */}
+      <Section
+        id="learning-paths"
+        title="推荐学习路线"
+        description="按逻辑串联知识点，建立完整的空间体系。"
+        altBg={categories.length % 2 !== 0}
+      >
+        <div className="grid gap-6 md:grid-cols-3">
+          {learningPaths.map((path) => (
+            <div key={path.id} className="rounded-2xl border border-border bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent mb-4">
+                <Route className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-bold text-text-primary mb-2">{path.title}</h3>
+              <p className="text-sm text-text-secondary mb-6">{path.subtitle}</p>
+              <div className="space-y-3">
+                {path.steps.map((step, i) => (
+                  <Link key={i} to={`/module/${step.moduleId}`} className="group flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-background transition-colors">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500 group-hover:bg-primary-light group-hover:text-primary-dark transition-colors">{i + 1}</span>
+                    <span className="text-sm font-medium text-text-primary group-hover:text-primary transition-colors line-clamp-1">
+                      {/* Would lookup module title here normally, using step.moduleId for brevity in display if needed, but standard is to lookup */}
+                      模块: {step.moduleId.split('-').join(' ')}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
-      </section>
+      </Section>
     </main>
+  );
+}
+
+function Section({ id, title, description, children, altBg }: { id: string; title: string; description: string; children: ReactNode; altBg?: boolean }) {
+  return (
+    <section id={id} className={`relative scroll-mt-20 py-16 sm:py-24 z-10 ${altBg ? 'bg-white' : 'bg-background'}`}>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <ScrollReveal>
+          <div className="mb-12 max-w-3xl">
+            <h2 className="text-3xl font-bold tracking-tight text-text-primary">{title}</h2>
+            <p className="mt-4 text-lg text-text-secondary">{description}</p>
+          </div>
+          {children}
+        </ScrollReveal>
+      </div>
+    </section>
   );
 }

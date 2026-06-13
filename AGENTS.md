@@ -4,7 +4,7 @@
 
 You are working on Chem3D Learn / 结构化学 3D 学习站.
 
-This project is a Chinese high-school structural chemistry 3D learning website for ordinary students and classroom projection. It is not a chemistry database, question bank, backend SaaS product, drug discovery platform, or AI chat product.
+This project is a Chinese high-school structural chemistry 3D learning website for ordinary students and classroom projection. It is a front-end-first educational product. The current frontend implementation is the source of truth for product shape.
 
 Primary users:
 - 中国高中普通学生
@@ -13,44 +13,54 @@ Primary users:
 Primary goal:
 - Help students understand spatial chemical structures through interactive 3D visualization, step-by-step explanation, and concise Chinese teaching content.
 
+This project is not:
+- a full chemistry database
+- a large question bank
+- a backend SaaS product
+- a drug discovery platform
+- an AI chat product
+
 ## Communication Rules
 
 - 默认使用中文回复用户，包括过程说明、计划、总结和最终报告。
 - 只有当用户明确要求英文，或需要保留代码、命令、错误信息、文件名、API 名称等原文时，才使用英文。
 
-## Current MVP Scope
+## Current Product Direction
 
-Only implement:
+当前以已经生成的前端为准。现有前端包含：
 - Home page
-- 3D Learning page
-- Core VSEPR molecules:
-  - CH4
-  - NH3
-  - H2O
-  - CO2
-  - BF3
-- One simplified crystal example:
-  - NaCl unit cell
-- Basic interactions:
-  - rotate
-  - zoom
-  - auto rotate toggle
-  - show/hide bond angles
-  - show/hide lone pairs
-  - lesson step switching
+- Modules page
+- Module detail / 3D learning experience
+- Paths page
+- Exam page
+- About page
 
-Do not implement:
+Core 3D teaching content remains priority:
+- CH4
+- NH3
+- H2O
+- CO2
+- BF3
+- simplified NaCl teaching model
+
+Extended module cards, routes, and placeholder learning sections may exist in the frontend as content structure. They should stay lightweight and classroom-friendly unless explicitly expanded.
+
+Do not add unless explicitly requested:
 - Login
 - User accounts
-- Backend database
+- Database-backed user state
 - Teacher admin panel
-- Complex question bank
 - Payment
 - Dynamic SMILES input
 - RDKit runtime API
-- Large competition-level content
 - Gemini API
 - AI chat features
+
+Backend direction:
+- A minimal backend may be added later based on the completed frontend.
+- Backend work should follow frontend data and page needs.
+- Backend should remain simple and read-only unless the user explicitly asks for more.
+- Do not introduce database, auth, AI chat, Gemini API, or RDKit runtime as part of backend work unless explicitly requested.
 
 ## Tech Stack
 
@@ -69,12 +79,12 @@ Do not use:
 - Angular
 - Unity WebGL
 - Firebase
-- Backend framework unless explicitly requested
 - Database unless explicitly requested
+- Large backend frameworks unless explicitly requested
 
 ## Repository Structure
 
-Expected structure:
+Current expected structure:
 
 ```text
 Chem3D-Learn/
@@ -85,30 +95,33 @@ Chem3D-Learn/
 │  │  ├─ components/
 │  │  │  ├─ ui/
 │  │  │  ├─ common/
+│  │  │  ├─ learning/
+│  │  │  ├─ motion/
 │  │  │  └─ three/
 │  │  ├─ data/
 │  │  │  ├─ manual/
 │  │  │  └─ generated/
+│  │  ├─ hooks/
 │  │  ├─ types/
 │  │  ├─ lib/
 │  │  └─ styles/
+├─ backend/
 ├─ tools/
 └─ README.md
 ```
-
-Do not create `frontend/` unless the task explicitly asks to scaffold the frontend.
 
 ## Gemini UI Collaboration
 
 Gemini may be used only as a UI drafting collaborator.
 
 Rules:
-- Gemini only drafts HomePage / LearningPage UI ideas.
+- Gemini output may inform HomePage, module pages, and learning UI ideas.
 - Gemini output should be stored as `docs/gemini-ui-draft.md` when there is an actual draft to preserve.
+- The current frontend implementation has priority over historical Gemini drafts.
 - Codex is responsible for integrating any Gemini draft into the Vite + React + TypeScript project.
 - Codex must fix types, split components, align with the design system, and run validation after integration.
-- Codex must not introduce Next.js, Firebase, backend services, login, Gemini API, or AI chat features because of a Gemini draft.
-- Gemini output is reference material, not an implementation authority.
+- Codex must not introduce Next.js, Firebase, login, Gemini API, RDKit runtime, database features, or AI chat features because of a Gemini draft.
+- Gemini output is reference material, not implementation authority.
 
 ## Visual Design Rules
 
@@ -116,7 +129,7 @@ Use:
 - Light background
 - Clean education style
 - Scientific but friendly visual tone
-- Large 3D viewer area
+- Large 3D viewer area where 3D learning is the main task
 - Moderate whitespace
 - Clear cards and panels
 - Readable classroom projection typography
@@ -125,9 +138,10 @@ Avoid:
 - Dark dashboard style
 - Cyberpunk style
 - Purple-blue AI SaaS template style
-- Heavy gradients
 - Overcrowded text
-- Shrinking the 3D viewer into a small card
+- Shrinking the 3D viewer into a small decorative card
+
+The current frontend visual direction is accepted as the baseline. Future visual changes should refine it instead of resetting it.
 
 ## Development Rules
 
@@ -146,6 +160,7 @@ During coding:
 - Put 3D components in `frontend/src/components/three`
 - Put hand-authored molecule data in `frontend/src/data/manual`
 - Preserve manually authored core molecule data
+- Treat frontend hand-authored molecule data as the primary source until backend integration is explicitly planned
 
 Chemistry accuracy:
 - If unsure about a chemical fact, add `TODO-CHEM-VERIFY` instead of inventing.
@@ -159,7 +174,7 @@ Chemistry accuracy:
 
 ## Validation Commands
 
-After frontend changes, run:
+After frontend code changes, run:
 
 ```bash
 cd frontend
@@ -178,7 +193,7 @@ If tests exist, also run:
 npm test
 ```
 
-For documentation-only tasks before frontend scaffolding, do not run `npm run build`.
+For documentation-only tasks, do not run `npm run build` unless the user explicitly asks.
 
 ## Done Means
 
@@ -186,7 +201,8 @@ A task is done only when:
 - The requested files are changed.
 - No unrelated large refactor is introduced.
 - The user-facing behavior or documentation matches the task.
-- Frontend changes build successfully when a frontend exists.
+- Frontend changes build successfully when frontend code changes exist.
+- Documentation-only tasks explain why build was not run.
 - Every final response must use this report format:
 
 ```markdown

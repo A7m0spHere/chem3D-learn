@@ -1,0 +1,156 @@
+{
+  "id": "graphite",
+  "kind": "crystal",
+  "formula": "C",
+  "names": {
+    "zh": "石墨",
+    "en": "Graphite"
+  },
+  "nameZh": "石墨结构",
+  "category": "crystal",
+  "summaryZh": "石墨中碳原子采取 sp² 杂化，在同一平面内形成正六边形 C-C 共价键网络。平行碳层之间主要依靠较弱的范德华力结合，层内离域 π 电子可解释石墨的导电性。",
+  "atoms": [
+    { "id": "c-a1-1", "element": "C", "label": "C", "position": [0.72, 0.28, 0], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a1-2", "element": "C", "label": "C", "position": [0.36, 0.28, 0.624], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a1-3", "element": "C", "label": "C", "position": [-0.36, 0.28, 0.624], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a1-4", "element": "C", "label": "C", "position": [-0.72, 0.28, 0], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a1-5", "element": "C", "label": "C", "position": [-0.36, 0.28, -0.624], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a1-6", "element": "C", "label": "C", "position": [0.36, 0.28, -0.624], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a2-1", "element": "C", "label": "C", "position": [1.44, 0.28, 0], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a2-2", "element": "C", "label": "C", "position": [1.08, 0.28, 0.624], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a2-6", "element": "C", "label": "C", "position": [1.08, 0.28, -0.624], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a3-3", "element": "C", "label": "C", "position": [-1.08, 0.28, 0.624], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a3-4", "element": "C", "label": "C", "position": [-1.44, 0.28, 0], "radius": 0.075, "color": "#374151" },
+    { "id": "c-a3-5", "element": "C", "label": "C", "position": [-1.08, 0.28, -0.624], "radius": 0.075, "color": "#374151" },
+
+    { "id": "c-b1-1", "element": "C", "label": "C", "position": [0.96, -0.46, 0.18], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b1-2", "element": "C", "label": "C", "position": [0.6, -0.46, 0.804], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b1-3", "element": "C", "label": "C", "position": [-0.12, -0.46, 0.804], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b1-4", "element": "C", "label": "C", "position": [-0.48, -0.46, 0.18], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b1-5", "element": "C", "label": "C", "position": [-0.12, -0.46, -0.444], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b1-6", "element": "C", "label": "C", "position": [0.6, -0.46, -0.444], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b2-1", "element": "C", "label": "C", "position": [1.68, -0.46, 0.18], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b2-2", "element": "C", "label": "C", "position": [1.32, -0.46, 0.804], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b2-6", "element": "C", "label": "C", "position": [1.32, -0.46, -0.444], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b3-3", "element": "C", "label": "C", "position": [-0.84, -0.46, 0.804], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b3-4", "element": "C", "label": "C", "position": [-1.2, -0.46, 0.18], "radius": 0.075, "color": "#4B5563" },
+    { "id": "c-b3-5", "element": "C", "label": "C", "position": [-0.84, -0.46, -0.444], "radius": 0.075, "color": "#4B5563" }
+  ],
+  "bonds": [
+    { "id": "a1-1-2", "atomIds": ["c-a1-1", "c-a1-2"], "order": 1, "kind": "single" },
+    { "id": "a1-2-3", "atomIds": ["c-a1-2", "c-a1-3"], "order": 1, "kind": "single" },
+    { "id": "a1-3-4", "atomIds": ["c-a1-3", "c-a1-4"], "order": 1, "kind": "single" },
+    { "id": "a1-4-5", "atomIds": ["c-a1-4", "c-a1-5"], "order": 1, "kind": "single" },
+    { "id": "a1-5-6", "atomIds": ["c-a1-5", "c-a1-6"], "order": 1, "kind": "single" },
+    { "id": "a1-6-1", "atomIds": ["c-a1-6", "c-a1-1"], "order": 1, "kind": "single" },
+    { "id": "a-1-a2-1", "atomIds": ["c-a1-1", "c-a2-1"], "order": 1, "kind": "single" },
+    { "id": "a-2-a2-2", "atomIds": ["c-a1-2", "c-a2-2"], "order": 1, "kind": "single" },
+    { "id": "a2-1-2", "atomIds": ["c-a2-1", "c-a2-2"], "order": 1, "kind": "single" },
+    { "id": "a2-6-1", "atomIds": ["c-a2-6", "c-a2-1"], "order": 1, "kind": "single" },
+    { "id": "a-6-a2-6", "atomIds": ["c-a1-6", "c-a2-6"], "order": 1, "kind": "single" },
+    { "id": "a-3-a3-3", "atomIds": ["c-a1-3", "c-a3-3"], "order": 1, "kind": "single" },
+    { "id": "a3-3-4", "atomIds": ["c-a3-3", "c-a3-4"], "order": 1, "kind": "single" },
+    { "id": "a3-4-5", "atomIds": ["c-a3-4", "c-a3-5"], "order": 1, "kind": "single" },
+    { "id": "a-4-a3-4", "atomIds": ["c-a1-4", "c-a3-4"], "order": 1, "kind": "single" },
+    { "id": "a-5-a3-5", "atomIds": ["c-a1-5", "c-a3-5"], "order": 1, "kind": "single" },
+
+    { "id": "b1-1-2", "atomIds": ["c-b1-1", "c-b1-2"], "order": 1, "kind": "single" },
+    { "id": "b1-2-3", "atomIds": ["c-b1-2", "c-b1-3"], "order": 1, "kind": "single" },
+    { "id": "b1-3-4", "atomIds": ["c-b1-3", "c-b1-4"], "order": 1, "kind": "single" },
+    { "id": "b1-4-5", "atomIds": ["c-b1-4", "c-b1-5"], "order": 1, "kind": "single" },
+    { "id": "b1-5-6", "atomIds": ["c-b1-5", "c-b1-6"], "order": 1, "kind": "single" },
+    { "id": "b1-6-1", "atomIds": ["c-b1-6", "c-b1-1"], "order": 1, "kind": "single" },
+    { "id": "b-1-b2-1", "atomIds": ["c-b1-1", "c-b2-1"], "order": 1, "kind": "single" },
+    { "id": "b-2-b2-2", "atomIds": ["c-b1-2", "c-b2-2"], "order": 1, "kind": "single" },
+    { "id": "b2-1-2", "atomIds": ["c-b2-1", "c-b2-2"], "order": 1, "kind": "single" },
+    { "id": "b2-6-1", "atomIds": ["c-b2-6", "c-b2-1"], "order": 1, "kind": "single" },
+    { "id": "b-6-b2-6", "atomIds": ["c-b1-6", "c-b2-6"], "order": 1, "kind": "single" },
+    { "id": "b-3-b3-3", "atomIds": ["c-b1-3", "c-b3-3"], "order": 1, "kind": "single" },
+    { "id": "b3-3-4", "atomIds": ["c-b3-3", "c-b3-4"], "order": 1, "kind": "single" },
+    { "id": "b3-4-5", "atomIds": ["c-b3-4", "c-b3-5"], "order": 1, "kind": "single" },
+    { "id": "b-4-b3-4", "atomIds": ["c-b1-4", "c-b3-4"], "order": 1, "kind": "single" },
+    { "id": "b-5-b3-5", "atomIds": ["c-b1-5", "c-b3-5"], "order": 1, "kind": "single" }
+  ],
+  "interlayerForces": [
+    { "id": "vdw-band-1", "start": [-1.18, 0, -0.48], "end": [1.16, 0, -0.36], "kind": "vanDerWaals", "labelZh": "层间范德华力" },
+    { "id": "vdw-band-2", "start": [-1.0, 0, 0.02], "end": [1.32, 0, 0.14], "kind": "vanDerWaals", "labelZh": "层间范德华力" },
+    { "id": "vdw-band-3", "start": [-0.82, 0, 0.52], "end": [1.0, 0, 0.62], "kind": "vanDerWaals", "labelZh": "层间范德华力" }
+  ],
+  "lonePairs": [],
+  "keyAngles": [
+    {
+      "id": "c-c-c-120",
+      "atomIds": ["c-a1-2", "c-a1-1", "c-a1-6"],
+      "valueDeg": 120,
+      "label": "120°",
+      "descriptionZh": "石墨层内碳原子近似 sp² 杂化，C-C-C 键角约为 120°。"
+    }
+  ],
+  "lessonSteps": [],
+  "rendering": {
+    "cameraPosition": [3.2, 2.35, 3.7],
+    "cameraFov": 39,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "Hand-authored teaching model",
+    "notesZh": "用于说明石墨层状结构、层内共价键、层间范德华力和离域 π 电子，坐标为教学示意。",
+    "verified": true
+  },
+  "crystalTeaching": {
+    "structureTypeZh": "混合晶体",
+    "modelZh": "石墨层状教学模型",
+    "coordinationNumberZh": "层内每个 C 原子与 3 个 C 原子成键",
+    "spatialFeatureZh": "层内平面正六边形，层与层平行并错位堆叠",
+    "unitCellDescriptionZh": "本模型展示上下两层平行石墨片段。每层内 C 原子通过 C-C 共价键连成六边形网络，层间只用范德华力示意，不表示普通化学键。",
+    "particleCountZh": {
+      "lines": ["层内每个 C 连接 3 个 C", "每条 C-C 键被 2 个 C 共享", "C 原子数 : C-C 键数 = 2 : 3"],
+      "ratio": "石墨层内常考比例：C : C-C = 2 : 3。"
+    },
+    "coordinationDescriptionZh": [
+      "石墨层内碳原子采取 sp² 杂化，形成近似 120° 的平面三角环境。",
+      "每个 C 原子与同层 3 个 C 原子形成 C-C 共价键。",
+      "层与层之间距离较大，主要依靠较弱范德华力结合。",
+      "层内离域 π 电子可在平面内移动，帮助解释石墨能导电。"
+    ],
+    "commonMistakesZh": [
+      "层间虚线表示范德华力，不是 C-C 共价键。",
+      "虚线带表示层与层之间的弱相互作用区域，不表示某两个 C 原子之间形成化学键。",
+      "不要把石墨理解成像金刚石一样的三维共价网状晶体。",
+      "π 电子云是离域电子示意，不表示层间形成普通化学键。"
+    ],
+    "viewModes": [
+      {
+        "id": "layer",
+        "labelZh": "层状结构",
+        "titleZh": "平行碳层堆叠",
+        "bodyZh": "石墨由一层层平面碳原子网络堆叠形成。上下层保持平行，下层相对上层略微错位，帮助看出层状晶体的空间特点。"
+      },
+      {
+        "id": "inPlaneBond",
+        "labelZh": "层内共价键",
+        "titleZh": "sp² 与三配位",
+        "bodyZh": "同一层内，每个 C 原子采用 sp² 杂化，与周围 3 个 C 原子形成 C-C 共价键，构成平面六边形网络。"
+      },
+      {
+        "id": "interlayerForce",
+        "labelZh": "层间作用力",
+        "titleZh": "较弱的范德华力",
+        "bodyZh": "层间虚线只表示较弱的范德华力，不是普通 C-C 共价键。层与层之间容易相对滑动，可解释石墨较软、有润滑性。"
+      },
+      {
+        "id": "piElectron",
+        "labelZh": "离域 π 电子",
+        "titleZh": "层内离域 π 电子",
+        "bodyZh": "每个 C 原子还有未参与 sp² 杂化的 p 轨道，形成层内离域 π 电子体系。电子可沿碳层移动，因此石墨能导电。"
+      },
+      {
+        "id": "comparison",
+        "labelZh": "对比金刚石",
+        "titleZh": "同素异形体对比",
+        "bodyZh": "石墨和金刚石都是碳单质，但石墨是 sp² 三配位层状结构，金刚石是 sp³ 四配位三维网状结构，因此性质差异很大。"
+      }
+    ]
+  }
+}

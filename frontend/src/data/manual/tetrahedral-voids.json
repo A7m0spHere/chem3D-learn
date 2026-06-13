@@ -1,0 +1,107 @@
+{
+  "id": "tetrahedral-voids",
+  "kind": "crystal",
+  "formula": "Tetrahedral void",
+  "names": {
+    "zh": "四面体空隙",
+    "en": "Tetrahedral void"
+  },
+  "nameZh": "四面体空隙",
+  "category": "crystal",
+  "summaryZh": "四面体空隙由 4 个球围成。若在空隙中心填入小球，它会被 4 个周围球包围，因此对应四配位空间环境。",
+  "atoms": [
+    { "id": "host-1", "element": "X", "label": "球", "position": [0.78, 0.78, 0.78], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "host-2", "element": "X", "label": "球", "position": [-0.78, -0.78, 0.78], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "host-3", "element": "X", "label": "球", "position": [-0.78, 0.78, -0.78], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "host-4", "element": "X", "label": "球", "position": [0.78, -0.78, -0.78], "radius": 0.16, "color": "#B7D9D3" },
+    { "id": "void-center", "element": "void", "label": "空隙", "position": [0, 0, 0], "radius": 0.075, "color": "#F4A261" }
+  ],
+  "coordinationLinks": [
+    { "id": "void-host-1", "atomIds": ["void-center", "host-1"], "labelZh": "四配位方向" },
+    { "id": "void-host-2", "atomIds": ["void-center", "host-2"], "labelZh": "四配位方向" },
+    { "id": "void-host-3", "atomIds": ["void-center", "host-3"], "labelZh": "四配位方向" },
+    { "id": "void-host-4", "atomIds": ["void-center", "host-4"], "labelZh": "四配位方向" }
+  ],
+  "bonds": [
+    { "id": "tet-edge-1", "atomIds": ["host-1", "host-2"], "kind": "visual-guide" },
+    { "id": "tet-edge-2", "atomIds": ["host-1", "host-3"], "kind": "visual-guide" },
+    { "id": "tet-edge-3", "atomIds": ["host-1", "host-4"], "kind": "visual-guide" },
+    { "id": "tet-edge-4", "atomIds": ["host-2", "host-3"], "kind": "visual-guide" },
+    { "id": "tet-edge-5", "atomIds": ["host-2", "host-4"], "kind": "visual-guide" },
+    { "id": "tet-edge-6", "atomIds": ["host-3", "host-4"], "kind": "visual-guide" }
+  ],
+  "lonePairs": [],
+  "keyAngles": [],
+  "lessonSteps": [],
+  "rendering": {
+    "cameraPosition": [2.7, 2.3, 3.1],
+    "cameraFov": 42,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "Hand-authored teaching model",
+    "notesZh": "用于说明四面体空隙的四配位空间形状，坐标为教学示意。",
+    "verified": true
+  },
+  "crystalTeaching": {
+    "structureTypeZh": "密堆积空隙",
+    "modelZh": "四面体空隙教学模型",
+    "coordinationNumberZh": "4",
+    "spatialFeatureZh": "4 个球围成一个四面体空间",
+    "unitCellDescriptionZh": "在密堆积结构中，四面体空隙数量通常是球数的 2 倍。",
+    "particleCountZh": {
+      "lines": ["若密堆积球数为 N", "四面体空隙数：2N", "填入中心小球时配位数：4"],
+      "ratio": "四面体空隙数 = 2 × 密堆积球数。"
+    },
+    "coordinationDescriptionZh": [
+      "中心空隙被 4 个球包围。",
+      "四个球的位置对应四面体的四个顶点。",
+      "辅助线表示四面体轮廓，不表示化学键。"
+    ],
+    "commonMistakesZh": [
+      "不要把四面体空隙和八面体空隙的配位数混淆。",
+      "四面体空隙数是 2N，八面体空隙数是 N。"
+    ],
+    "viewModes": [
+      {
+        "id": "cell",
+        "labelZh": "骨架",
+        "titleZh": "四球骨架",
+        "bodyZh": "先观察 4 个球形成四面体的四个顶点。"
+      },
+      {
+        "id": "voids",
+        "labelZh": "空隙",
+        "titleZh": "四面体空隙",
+        "bodyZh": "显示中心空隙和四面体轮廓，理解为什么它对应四配位。"
+      },
+      {
+        "id": "counting",
+        "labelZh": "计数",
+        "titleZh": "空隙数量",
+        "bodyZh": "密堆积中 N 个球通常形成 2N 个四面体空隙，这是填隙比例题的基础。"
+      }
+    ],
+    "voidStages": [
+      {
+        "id": "framework",
+        "labelZh": "骨架",
+        "titleZh": "只看 4 个球",
+        "bodyZh": "先隐藏中心小球，只观察四面体骨架。"
+      },
+      {
+        "id": "voids",
+        "labelZh": "标出空隙",
+        "titleZh": "中心是空隙",
+        "bodyZh": "中心橙色标记表示可填入小球的位置。"
+      },
+      {
+        "id": "filled",
+        "labelZh": "填入小球",
+        "titleZh": "四配位环境",
+        "bodyZh": "填入中心小球后，它被 4 个周围球包围。"
+      }
+    ]
+  }
+}

@@ -1,3 +1,5 @@
+@import "./motion.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,8 +9,8 @@
 }
 
 html {
-  background: #f7faf9;
-  color: #1f2933;
+  background: #f9fafb;
+  color: #111827;
 }
 
 body {

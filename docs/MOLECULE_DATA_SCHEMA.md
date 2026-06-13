@@ -2,13 +2,15 @@
 
 ## Purpose
 
-This document defines the hand-authored structure data needed by Chem3D Learn. The schema is for concise high-school teaching content, not a full chemistry database.
+This document defines the hand-authored structure data used by Chem3D Learn. The schema is for concise high-school teaching content, not a full chemistry database.
 
-Hand-authored molecule data should live in:
+Frontend hand-authored molecule data currently lives in:
 - `frontend/src/data/manual`
 
-Shared TypeScript types should live in:
+Shared TypeScript types live in:
 - `frontend/src/types`
+
+Frontend manual data is the current source of truth. A backend may later reuse, mirror, or map this data, but backend integration should not silently replace the frontend data model without an explicit plan.
 
 Protected manual IDs:
 - `ch4`
@@ -22,11 +24,16 @@ Do not overwrite protected records without explicit instruction.
 
 ## MoleculeRecord
 
-Each structure record must include:
+Each structure record should follow the current frontend type shape:
 
 ```ts
 type MoleculeRecord = {
   id: string;
+  kind?: "molecule" | "crystal";
+  names?: {
+    zh: string;
+    en?: string;
+  };
   formula: string;
   nameZh: string;
   category: "vsepr" | "crystal";
@@ -36,11 +43,15 @@ type MoleculeRecord = {
   lonePairs: LonePair[];
   keyAngles: AngleSpec[];
   lessonSteps: LessonStep[];
+  rendering?: MoleculeRendering;
+  metadata?: MoleculeMetadata;
 };
 ```
 
 Field semantics:
-- `id`: stable lowercase ID used by routing and selection.
+- `id`: stable lowercase ID used by routing, registry lookup, and selection.
+- `kind`: optional broad render kind, usually `molecule` or `crystal`.
+- `names`: optional localized names; `names.zh` may duplicate `nameZh` for richer display.
 - `formula`: display formula, such as `CH4`.
 - `nameZh`: Chinese display name.
 - `category`: `vsepr` for molecule structures, `crystal` for simplified crystal structures.
@@ -50,6 +61,8 @@ Field semantics:
 - `lonePairs`: visible lone-pair markers, empty when not applicable.
 - `keyAngles`: teaching-focused angle annotations.
 - `lessonSteps`: ordered explanation steps.
+- `rendering`: optional viewer tuning for camera, atom scale, bond radius, and labels.
+- `metadata`: optional source and verification metadata.
 
 ## Atom
 
@@ -87,7 +100,7 @@ Field semantics:
 - `id`: stable bond ID.
 - `atomIds`: the two connected atom IDs.
 - `order`: simple bond order for molecular display.
-- `kind`: visual interpretation. `ionic-neighbor` or `visual-guide` may be used for simplified NaCl.
+- `kind`: visual interpretation. `ionic-neighbor` or `visual-guide` may be used for simplified NaCl teaching models.
 
 ## LonePair
 
@@ -154,10 +167,49 @@ Field semantics:
 - `showLonePairs`: whether this step should emphasize lone pairs.
 - `showAngles`: whether this step should emphasize key angles.
 
+## MoleculeRendering
+
+```ts
+type MoleculeRendering = {
+  cameraPosition?: [number, number, number];
+  cameraFov?: number;
+  atomScale?: number;
+  bondRadius?: number;
+  angleRadius?: number;
+  showAtomLabels?: boolean;
+};
+```
+
+Field semantics:
+- `cameraPosition`: default camera position for this structure.
+- `cameraFov`: default camera field of view.
+- `atomScale`: visual atom scale multiplier.
+- `bondRadius`: default rendered bond radius.
+- `angleRadius`: angle annotation radius.
+- `showAtomLabels`: preferred default for atom label visibility; runtime UI may override it.
+
+## MoleculeMetadata
+
+```ts
+type MoleculeMetadata = {
+  level?: "high-school";
+  source?: string;
+  notesZh?: string;
+  verified?: boolean;
+};
+```
+
+Field semantics:
+- `level`: intended learning level.
+- `source`: short source or authoring note.
+- `notesZh`: Chinese notes for limitations, simplifications, or teaching intent.
+- `verified`: whether chemistry content has been manually reviewed.
+
 ## Data Rules
 
-- Keep data small and hand-authored for the MVP.
-- Do not add dynamic SMILES parsing or RDKit runtime generation.
+- Keep data small and hand-authored for core structures.
+- Extended frontend modules may exist without real 3D data; use placeholders honestly.
+- Do not add dynamic SMILES parsing or RDKit runtime generation without explicit approval.
 - Do not turn this into a large chemistry database.
 - Use `TODO-CHEM-VERIFY` for uncertain chemistry facts.
-- NaCl is a simplified unit cell teaching model, not a full crystallographic database entry.
+- NaCl is a simplified teaching model, not a full crystallographic database entry.
