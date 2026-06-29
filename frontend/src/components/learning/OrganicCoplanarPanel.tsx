@@ -104,19 +104,6 @@ export function OrganicCoplanarPanel({ activeMode, vinylAligned }: OrganicCoplan
   );
 }
 
-function organicModeIndex(mode: OrganicCoplanarMode): string {
-  const order: OrganicCoplanarMode[] = [
-    "benzenePlane",
-    "sp3Carbon",
-    "sp2Fragment",
-    "spFragment",
-    "amineGroup",
-    "rotation",
-  ];
-  const index = order.indexOf(mode);
-  return index >= 0 ? String(index + 1) : "0";
-}
-
 type FactRowProps = {
   label: string;
   value: string;

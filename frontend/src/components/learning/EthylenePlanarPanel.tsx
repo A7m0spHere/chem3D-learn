@@ -94,12 +94,6 @@ export function EthylenePlanarPanel({ activeMode, planeView }: EthylenePlanarPan
   );
 }
 
-function ethyleneModeIndex(mode: EthylenePlanarMode): string {
-  const order: EthylenePlanarMode[] = ["overview", "plane", "angle", "piBond", "rotationLock"];
-  const index = order.indexOf(mode);
-  return index >= 0 ? String(index + 1) : "1";
-}
-
 type FactRowProps = {
   label: string;
   value: string;

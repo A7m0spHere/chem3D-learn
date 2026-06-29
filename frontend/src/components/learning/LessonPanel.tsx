@@ -1,4 +1,4 @@
-import { AlertTriangle, FlaskConical, Info, ChevronLeft, ChevronRight } from "lucide-react";
+import { Info, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Accordion,
   AccordionContent,

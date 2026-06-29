@@ -1,4 +1,4 @@
-import { AlertTriangle, Box, Calculator, Info, Network } from "lucide-react";
+import { Box, Calculator, Info, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,

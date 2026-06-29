@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import { ModuleCard } from "@/components/home/ModuleCard";
 import { categories, getModulesByCategory, type ModuleCategory } from "@/data/learningModules";
 

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Move3D, Layers3, Route } from "lucide-react";
+import { ArrowRight, Move3D, Layers3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingChemistryBackground } from "@/components/motion/FloatingChemistryBackground";
 import { ChemistryCursor } from "@/components/motion/ChemistryCursor";

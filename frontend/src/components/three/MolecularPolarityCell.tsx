@@ -5,7 +5,6 @@ import { Quaternion, Vector3 } from "three";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import {
   bondDipoleExamples,
-  getMolecularPolarityModeInfo,
   type MolecularPolarityMode,
 } from "@/data/molecularPolarity";
 
@@ -41,7 +40,6 @@ export function MolecularPolarityCell({
   mode,
   loading = false,
 }: MolecularPolarityCellProps) {
-  const modeInfo = getMolecularPolarityModeInfo(mode);
   const overlayInfo = getSceneOverlayInfo(mode);
   const isBondDipoleMode = mode === "bondDipole";
 

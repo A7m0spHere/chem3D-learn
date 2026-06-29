@@ -206,8 +206,6 @@ type CarbonAtomProps = {
 
 function CarbonAtom({ atom, viewMode, voidStage, showLabel, useCompactLabelSet }: CarbonAtomProps) {
   const isInternal = atom.id.startsWith("c-inner");
-  const isCorner = atom.siteType === "corner";
-  const isFaceCenter = atom.siteType === "face-center";
   const isCoordinationMode = viewMode === "coordination";
   const isCountingMode = viewMode === "counting";
   const isNetworkMode = viewMode === "covalentNetwork";
