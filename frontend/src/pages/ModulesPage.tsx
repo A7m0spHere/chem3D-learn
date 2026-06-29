@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 import { ModuleCard } from "@/components/home/ModuleCard";
+import { prefetchViewerChunks } from "@/lib/prefetch";
 import { categories, getModulesByCategory, type ModuleCategory } from "@/data/learningModules";
 
 export function ModulesPage() {
   const [activeCategory, setActiveCategory] = useState<ModuleCategory | "all">("all");
+
+  // 模块列表页是 3D 入口，空闲时预热 three/r3f 共享 chunk，点进模块秒开。
+  useEffect(() => {
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(prefetchViewerChunks);
+    } else {
+      window.setTimeout(prefetchViewerChunks, 2000);
+    }
+  }, []);
 
   return (
     <main className="motion-page-enter bg-background min-h-screen pb-20">

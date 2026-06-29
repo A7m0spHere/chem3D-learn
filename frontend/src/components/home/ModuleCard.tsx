@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { prefetchViewerChunks } from "@/lib/prefetch";
 import type { LearningModule } from "@/data/learningModules";
 
 type ModuleCardProps = {
@@ -11,7 +12,10 @@ export function ModuleCard({ module }: ModuleCardProps) {
   const primaryFact = module.geometryName ?? module.bondAngle ?? module.polarity ?? module.hybridization;
 
   return (
-    <article className="group flex h-full flex-col rounded-2xl border border-border bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-panel">
+    <article
+      onMouseEnter={prefetchViewerChunks}
+      onFocus={prefetchViewerChunks}
+      className="group flex h-full flex-col rounded-2xl border border-border bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-panel">
       <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
         <div className="min-w-0">
           <div className="mb-3 text-4xl font-black leading-none text-primary-dark">
