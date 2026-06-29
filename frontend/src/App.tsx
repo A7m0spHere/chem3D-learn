@@ -4,7 +4,7 @@ import { AppHeader } from "@/components/common/AppHeader";
 import { HomePage } from "@/pages/HomePage";
 import { ModulesPage } from "@/pages/ModulesPage";
 import { ModuleDetailPage } from "@/pages/ModuleDetailPage";
-import { PathsPage } from "@/pages/PathsPage";
+
 import { ExamPage } from "@/pages/ExamPage";
 import { AboutPage } from "@/pages/AboutPage";
 
@@ -18,7 +18,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/modules" element={<ModulesPage />} />
           <Route path="/module/:id" element={<ModuleDetailPage />} />
-          <Route path="/paths" element={<PathsPage />} />
+
           <Route path="/exam" element={<ExamPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<HomePage />} />

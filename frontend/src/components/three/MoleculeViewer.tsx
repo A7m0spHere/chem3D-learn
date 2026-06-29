@@ -5,6 +5,7 @@ import { AngleArc } from "@/components/three/AngleArc";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { LonePairMesh } from "@/components/three/LonePairMesh";
+import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type { MoleculeRecord, LessonStep } from "@/types/molecule";
 
 type MoleculeViewerProps = {
@@ -34,6 +35,19 @@ export function MoleculeViewer({
     () => new Map(molecule.atoms.map((atom) => [atom.id, atom])),
     [molecule.atoms],
   );
+  const sceneOffset = useMemo(() => {
+    const positions = molecule.atoms.map((atom) => atom.position);
+    const min = positions.reduce(
+      (current, position) => current.map((value, index) => Math.min(value, position[index])) as [number, number, number],
+      [Infinity, Infinity, Infinity] as [number, number, number],
+    );
+    const max = positions.reduce(
+      (current, position) => current.map((value, index) => Math.max(value, position[index])) as [number, number, number],
+      [-Infinity, -Infinity, -Infinity] as [number, number, number],
+    );
+
+    return [0, -(min[1] + max[1]) / 2, 0] as [number, number, number];
+  }, [molecule.atoms]);
   const focusedAtomIds = new Set(activeStep.focusAtomIds ?? []);
   const focusedBondIds = new Set(activeStep.focusBondIds ?? []);
   const visibleAngleIds = new Set(activeStep.focusAngleIds ?? molecule.keyAngles.map((angle) => angle.id));
@@ -46,25 +60,19 @@ export function MoleculeViewer({
   // showAtomLabels is now a runtime toggle from the parent; defaults to false
 
   return (
-    <section className="flex min-h-[420px] flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-panel transition-shadow duration-base ease-out-soft hover:shadow-lg lg:min-h-[620px]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
-        <div>
-          <h2 className="text-lg font-semibold text-text-primary">3D Viewer</h2>
-          <p className="text-sm text-text-secondary">拖拽旋转，滚轮或触控板缩放</p>
-        </div>
-        <div className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-primary-dark">
-          {molecule.formula} · {displayName}
-        </div>
-      </div>
-
-      <div className="relative min-h-0 flex-1 bg-[radial-gradient(circle_at_center,#ffffff_0%,#f7faf9_62%,#e8f3f0_100%)]">
-        {loading ? (
-          <div className="motion-skeleton absolute inset-0 z-10 flex items-center justify-center rounded-[inherit] bg-white/60" />
-        ) : null}
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} shadows>
+    <ThreeViewerFrame
+      className="min-h-[420px] transition-shadow duration-base ease-out-soft hover:shadow-lg lg:min-h-[620px]"
+      loading={loading}
+      meta={`${displayName} · 拖拽旋转`}
+      stageTestId="molecule-viewer-canvas"
+      summary={activeStep.bodyZh}
+      title={`${molecule.formula}｜${activeStep.titleZh}`}
+      viewerTestId="molecule-viewer"
+    >
+      <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop={autoRotate ? "always" : "demand"} shadows style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.6} />
           <directionalLight position={[4, 5, 3]} intensity={1.45} castShadow />
-          <group rotation={[0, -0.35, 0]}>
+          <group position={sceneOffset} rotation={[0, -0.35, 0]}>
             {molecule.bonds.map((bond) => (
               <BondMesh
                 key={bond.id}
@@ -91,12 +99,13 @@ export function MoleculeViewer({
                     key={angle.id}
                     angle={angle}
                     atomsById={atomsById}
+                    htmlPointerEvents="none"
                     radius={angleRadius}
                   />
                 ))}
             {showLonePairs &&
               molecule.lonePairs.map((lonePair) => (
-                <LonePairMesh key={lonePair.id} lonePair={lonePair} />
+                <LonePairMesh atomsById={atomsById} key={lonePair.id} lonePair={lonePair} />
               ))}
           </group>
           <OrbitControls
@@ -107,8 +116,7 @@ export function MoleculeViewer({
             maxDistance={8}
             minDistance={2.4}
           />
-        </Canvas>
-      </div>
-    </section>
+      </Canvas>
+    </ThreeViewerFrame>
   );
 }

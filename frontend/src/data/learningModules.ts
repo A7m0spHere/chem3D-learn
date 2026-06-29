@@ -189,15 +189,15 @@ export const learningModules: LearningModule[] = [
   {
     id: "polarity-judgment",
     title: "分子极性判断",
-    subtitle: "空间对称性决定整体极性",
+    subtitle: "从电负性到键偶极抵消",
     category: "molecular-geometry",
     difficulty: "核心",
-    tags: ["分子极性", "对称性", "偶极矩"],
-    representativeModels: ["h2o", "co2", "bf3", "nh3"],
-    description: "分子极性不仅取决于键的极性，更取决于分子的空间构型。如果空间对称，键的偶极矩向量和为零，则整体非极性。",
-    keyPoints: ["键极性与分子极性的区别", "向量合成法判断极性"],
-    examValue: "高考核心：判断给定分子是极性还是非极性。",
-    visualFocus: "在 3D 中展示偶极矩向量的合成抵消过程。",
+    tags: ["分子极性", "键偶极", "BF₃ 反例"],
+    representativeModels: [],
+    description: "键有极性，不代表分子一定有极性；关键要看键偶极在空间中能否抵消。本模块固定比较 HCl、H₂O、HClO 和 BF₃。",
+    keyPoints: ["先看电负性，再判断键偶极方向", "看空间构型，判断键偶极能否抵消", "BF₃ 虽含极性键，但整体为非极性分子"],
+    examValue: "高考核心：用键偶极矢量合成判断分子极性，避免把“有极性键”机械等同于“极性分子”。",
+    visualFocus: "在 3D 中展示 HCl、H₂O、HClO 的合偶极矩不为 0，以及 BF₃ 三个 B–F 键偶极对称抵消。",
     route: "/module/polarity-judgment",
   },
 
@@ -282,12 +282,12 @@ export const learningModules: LearningModule[] = [
     subtitle: "六方最密堆积与十二配位",
     category: "crystal-structure",
     difficulty: "核心",
-    tags: ["金属晶体", "六方最密堆积", "配位数"],
+    tags: ["金属晶体", "六方最密堆积", "A-B-A", "配位数", "晶胞计数"],
     representativeModels: ["zinc-metal"],
-    description: "教材中的金属锌晶体可作为六方最密堆积实例观察：一个 Zn 原子周围同层有 6 个最近邻，上下两层再各有 3 个最近邻。",
-    keyPoints: ["同层 6 个最近邻", "上层 3 个、下层 3 个最近邻", "配位数为 12"],
-    examValue: "用具体晶体练习“找最近邻”，帮助区分配位数与一个晶胞内看到的原子数。",
-    visualFocus: "以一个 Zn 原子为中心，分层数出 6 + 3 + 3 个最近邻，理解六方最密堆积的十二配位。",
+    description: "教材中的金属锌晶体可作为六方最密堆积实例观察：六方晶胞呈 A-B-A 金属原子堆积，局部配位环境中一个 Zn 周围有 12 个最近邻。",
+    keyPoints: ["A-B-A 六方最密堆积", "配位数为 12", "六方晶胞平均含 6 个 Zn 原子"],
+    examValue: "用具体晶体区分“配位数”和“晶胞平均占有数”：配位环境数 6 + 3 + 3，晶胞计数算 12×1/6 + 2×1/2 + 3。",
+    visualFocus: "先看六方晶胞和 A-B-A 分层，再切换到周期延展后的局部配位簇数出 12 配位，最后完成晶胞平均占有计数。",
     route: "/module/zinc-metal-crystal",
     formula: "Zn",
   },
@@ -322,18 +322,18 @@ export const learningModules: LearningModule[] = [
 
   // === 3. 有机立体结构 (organic-stereochemistry) ===
   {
-    id: "coplanar-collinear-analysis",
+    id: "organic-coplanar",
     title: "有机物原子共线共面分析",
     subtitle: "结合单双三键判断原子共面",
     category: "organic-stereochemistry",
     difficulty: "核心",
-    tags: ["共面", "共线", "有机大题"],
+    tags: ["共面", "共线", "有机结构"],
     representativeModels: [],
-    description: "综合考察甲烷（四面体）、乙烯（平面）、乙炔（直线）、苯（平面）母体结构，通过单键旋转判断最多共面原子数。",
-    keyPoints: ["母体结构的刚性", "单键的自由旋转导致的不确定性", "对角线平面的灵活运用"],
-    examValue: "高考必考题型，得分率低，依赖空间想象力。",
-    visualFocus: "动态展示单键旋转过程，以及一个平面如何切过多个碳原子。",
-    route: "/module/coplanar-collinear-analysis",
+    description: "通过一个多取代苯综合模型，同时观察苯环平面、sp3 四面体、sp2 平面、sp 直线和胺基结构，理解有机物中原子共线共面的判断方法。",
+    keyPoints: ["苯环平面是判断起点", "sp3 片段具有四面体空间性", "sp2、sp 片段分别对应平面与直线", "单键旋转会影响能否对齐共面"],
+    examValue: "用于建立共线共面判断的空间直觉，本模块只做 3D 概念示例，不做题目训练。",
+    visualFocus: "在同一个多取代苯模型中切换观察苯环平面、甲基四面体、乙烯基平面、乙炔基直线和胺基空间片段。",
+    route: "/module/organic-coplanar",
   },
   {
     id: "ethylene-planar",
@@ -342,7 +342,7 @@ export const learningModules: LearningModule[] = [
     category: "organic-stereochemistry",
     difficulty: "基础",
     tags: ["乙烯", "sp²", "共面"],
-    representativeModels: [],
+    representativeModels: ["ethylene-planar"],
     description: "由于 C=C 双键中 π 键的限制，乙烯分子不能自由旋转，2 个 C 和 4 个 H 严格共面。",
     keyPoints: ["键角约 120°", "双键刚性"],
     examValue: "基础判断模块，常作为大分子的一部分出现。",
@@ -362,6 +362,10 @@ export const learningModules: LearningModule[] = [
     examValue: "提供一条绝对直线，在大分子中共面判断中起到核心骨架作用。",
     visualFocus: "展示直线结构以及两个互相垂直的 π 键电子云。",
     route: "/module/acetylene-linear",
+    formula: "C₂H₂",
+    geometryName: "直线形",
+    hybridization: "sp",
+    bondAngle: "180°",
   },
   {
     id: "benzene-planar",
@@ -376,6 +380,10 @@ export const learningModules: LearningModule[] = [
     examValue: "围绕苯环旋转单键是高考最爱考察的共面极限题型。",
     visualFocus: "标出苯环上的对角线结构以及整体平面的扩展。",
     route: "/module/benzene-planar",
+    formula: "C₆H₆",
+    geometryName: "平面正六边形",
+    hybridization: "sp²",
+    bondAngle: "≈ 120°",
   },
   {
     id: "single-bond-rotation",
@@ -424,16 +432,17 @@ export const learningModules: LearningModule[] = [
   {
     id: "sigma-pi-bonds",
     title: "σ 键与 π 键",
-    subtitle: "头碰头与肩并肩",
+    subtitle: "从乙烯双键看 1σ + 1π",
     category: "bonding-orbitals",
     difficulty: "核心",
-    tags: ["σ 键", "π 键", "轨道重叠"],
+    tags: ["σ 键", "π 键", "乙烯", "双键刚性"],
     representativeModels: [],
-    description: "σ 键沿键轴方向“头碰头”重叠，电子云集中在两核之间；π 键“肩并肩”重叠，电子云在键轴上下方分布。",
-    keyPoints: ["单键都是 σ 键", "双键为 1σ + 1π", "三键为 1σ + 2π", "σ 键比 π 键牢固"],
-    examValue: "给出分子式，快速清点 σ 键和 π 键的个数。",
-    visualFocus: "用半透明云雾材质展示电子云的重叠形态和方向性。",
+    description: "以乙烯 C=C 双键为例，观察 σ 键沿键轴头碰头重叠，π 键由 p 轨道肩并肩重叠形成，理解双键由 1 个 σ 键和 1 个 π 键组成。",
+    keyPoints: ["C=C 双键 = 1 个 σ 键 + 1 个 π 键", "π 电子云分布在分子平面上下", "π 键让双键具有刚性"],
+    examValue: "高考常用：清点 σ/π 键个数，解释乙烯共面和双键刚性来源。",
+    visualFocus: "在乙烯 3D 模型中切换观察 σ 键、π 键和双键组成。本模块为高中教学示意，不是真实电子云计算图。",
     route: "/module/sigma-pi-bonds",
+    formula: "C₂H₄",
   },
   {
     id: "hybrid-orbitals-sp",
@@ -557,7 +566,13 @@ export function getModulesByCategory(category: ModuleCategory): LearningModule[]
 }
 
 export function getModuleById(id: string): LearningModule | undefined {
-  return learningModules.find((m) => m.id === id);
+  const canonicalId =
+    id === "coplanar-collinear-analysis"
+      ? "organic-coplanar"
+      : id === "molecular-polarity"
+        ? "polarity-judgment"
+        : id;
+  return learningModules.find((m) => m.id === canonicalId);
 }
 
 // Learning Paths
@@ -609,7 +624,7 @@ export const learningPaths: LearningPath[] = [
       { moduleId: "single-bond-rotation" },
       { moduleId: "cis-trans-isomerism" },
       { moduleId: "chirality-carbon" },
-      { moduleId: "coplanar-collinear-analysis" },
+      { moduleId: "organic-coplanar" },
     ],
   },
 ];

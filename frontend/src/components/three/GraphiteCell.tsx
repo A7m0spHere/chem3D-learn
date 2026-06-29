@@ -2,9 +2,11 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { type ReactNode, useMemo, useRef } from "react";
 import { Group, Quaternion, Vector3 } from "three";
+import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
   Bond,
+  CrystalModelStyle,
   CrystalViewMode,
   InterlayerForce,
   MoleculeRecord,
@@ -13,6 +15,7 @@ import type {
 type GraphiteCellProps = {
   molecule: MoleculeRecord;
   viewMode: CrystalViewMode;
+  modelStyle: CrystalModelStyle;
   showLabels: boolean;
   loading?: boolean;
 };
@@ -47,6 +50,7 @@ const defaultGraphiteInterlayerForces: InterlayerForce[] = [
 export function GraphiteCell({
   molecule,
   viewMode,
+  modelStyle: _modelStyle,
   showLabels,
   loading = false,
 }: GraphiteCellProps) {
@@ -83,26 +87,20 @@ export function GraphiteCell({
   const showPiCloud = viewMode === "piElectron";
 
   return (
-    <section className="flex h-full min-h-[500px] flex-1 flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-panel">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-white/80 px-5 py-4">
-        <div>
-          <h2 className="text-lg font-semibold text-text-primary">3D 晶体 Viewer</h2>
-          <p className="text-sm text-text-secondary">拖拽旋转，滚轮或触控板缩放</p>
-        </div>
-        <div className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-primary-dark">
-          {activeMode?.labelZh ?? "层状结构"} · {molecule.formula}
-        </div>
-      </div>
-
-      <div className="relative min-h-0 flex-1 bg-[radial-gradient(circle_at_center,#ffffff_0%,#f7faf9_58%,#e8f3f0_100%)]">
-        {loading ? (
-          <div className="motion-skeleton absolute inset-0 z-10 flex items-center justify-center rounded-[inherit] bg-white/60" />
-        ) : null}
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} shadows>
+    <ThreeViewerFrame
+      footerMeta={<GraphiteLegend />}
+      loading={loading}
+      meta="拖拽旋转 · 标签可按需开启"
+      stageTestId={`${molecule.id}-canvas`}
+      summary={activeMode?.bodyZh ?? molecule.summaryZh}
+      title={`${molecule.formula}｜${activeMode?.titleZh ?? "平行碳层堆叠"}`}
+      viewerTestId={`${molecule.id}-viewer`}
+    >
+        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} shadows style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.74} />
           <directionalLight position={[4, 5, 4]} intensity={1.36} castShadow />
           <directionalLight position={[-3, 2, -4]} intensity={0.42} />
-          <group position={[-0.08, 0.05, 0]} rotation={[0.18, -0.46, 0]} scale={1.42}>
+          <group position={[-0.08, 0.28, 0]} rotation={[0.18, -0.46, 0]} scale={1.15}>
             {showLayerPlanes ? <LayerPlane y={0.28} tone="upper" /> : null}
             {showLayerPlanes ? <LayerPlane y={-0.46} tone="lower" /> : null}
             {showPiCloud ? <PiElectronCloud /> : null}
@@ -142,10 +140,7 @@ export function GraphiteCell({
             target={[0, -0.02, 0]}
           />
         </Canvas>
-
-        <GraphiteLegend />
-      </div>
-    </section>
+    </ThreeViewerFrame>
   );
 }
 
@@ -287,7 +282,7 @@ function CarbonAtom({ atom, layer, viewMode, showLabel }: CarbonAtomProps) {
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={7.2} position={[0, radius + 0.08, 0]}>
+        <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.08, 0]}>
           <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-text-primary shadow-sm sm:text-xs">
             {labelText}
           </span>
@@ -433,9 +428,9 @@ function PiElectronParticle({ offset }: { offset: number }) {
 
 function GraphiteLegend() {
   return (
-    <div className="pointer-events-none absolute bottom-4 left-4 z-10 rounded-2xl border border-border/70 bg-white/88 px-3 py-3 text-xs text-text-secondary shadow-sm backdrop-blur-md">
-      <p className="mb-2 font-semibold text-text-primary">图例</p>
-      <div className="space-y-1.5">
+    <div className="pointer-events-none hidden items-center gap-3 text-[11px] text-text-secondary xl:flex">
+      <span className="font-semibold text-text-primary">图例</span>
+      <div className="flex items-center gap-3">
         <LegendItem marker={<span className="h-3 w-3 rounded-full bg-[#374151]" />} label="C 原子" />
         <LegendItem marker={<span className="h-0.5 w-5 rounded-full bg-[#4B5563]" />} label="层内 C-C 共价键" />
         <LegendItem
@@ -450,7 +445,7 @@ function GraphiteLegend() {
 
 function LegendItem({ marker, label }: { marker: ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5">
       <span className="flex h-4 w-6 items-center justify-center">{marker}</span>
       <span>{label}</span>
     </div>

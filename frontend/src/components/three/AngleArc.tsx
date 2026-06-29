@@ -3,13 +3,29 @@ import { useMemo } from "react";
 import { QuadraticBezierCurve3, Vector3 } from "three";
 import type { AngleSpec, Atom } from "@/types/molecule";
 
-type AngleArcProps = {
+type Vec3 = [number, number, number];
+
+export type AngleArcLabelVariant = "default" | "minimal";
+
+export type AngleArcProps = {
   angle: AngleSpec;
   atomsById: Map<string, Atom>;
   radius?: number;
+  labelOffset?: Vec3;
+  showGuideLine?: boolean;
+  labelVariant?: AngleArcLabelVariant;
+  htmlPointerEvents?: "auto" | "none";
 };
 
-export function AngleArc({ angle, atomsById, radius = 0.82 }: AngleArcProps) {
+export function AngleArc({
+  angle,
+  atomsById,
+  radius = 0.82,
+  labelOffset = [0, 0, 0],
+  showGuideLine = false,
+  labelVariant = "default",
+  htmlPointerEvents = "auto",
+}: AngleArcProps) {
   const arc = useMemo(() => {
     const first = atomsById.get(angle.atomIds[0]);
     const vertex = atomsById.get(angle.atomIds[1]);
@@ -36,10 +52,14 @@ export function AngleArc({ angle, atomsById, radius = 0.82 }: AngleArcProps) {
     const control = vertexPosition.clone().add(centerDirection.multiplyScalar(radius * 0.64));
     const curve = new QuadraticBezierCurve3(start, control, end);
     const points = curve.getPoints(24);
-    const labelPosition = curve.getPoint(0.5).add(centerDirection.multiplyScalar(0.18));
+    const guideStart = curve.getPoint(0.5);
+    const labelPosition = guideStart
+      .clone()
+      .add(centerDirection.multiplyScalar(0.18))
+      .add(new Vector3(...labelOffset));
 
-    return { points, labelPosition };
-  }, [angle.atomIds, atomsById, radius]);
+    return { guideStart, points, labelPosition };
+  }, [angle.atomIds, atomsById, labelOffset, radius]);
 
   if (!arc) {
     return null;
@@ -48,8 +68,28 @@ export function AngleArc({ angle, atomsById, radius = 0.82 }: AngleArcProps) {
   return (
     <group>
       <Line color="#F4A261" lineWidth={2.5} points={arc.points} />
-      <Html center distanceFactor={6} position={arc.labelPosition.toArray()}>
-        <span className="whitespace-nowrap rounded-md border border-accent bg-white px-2 py-1 text-xs font-bold text-primary-dark shadow-sm">
+      {showGuideLine ? (
+        <Line
+          color="#F4A261"
+          lineWidth={1}
+          opacity={0.72}
+          points={[arc.guideStart, arc.labelPosition]}
+          transparent
+        />
+      ) : null}
+      <Html
+        center
+        distanceFactor={6}
+        pointerEvents={htmlPointerEvents}
+        position={arc.labelPosition.toArray()}
+      >
+        <span
+          className={
+            labelVariant === "minimal"
+              ? "whitespace-nowrap text-[11px] font-bold text-[#B96320] drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
+              : "whitespace-nowrap rounded-md border border-accent bg-white px-2 py-1 text-xs font-bold text-primary-dark shadow-sm"
+          }
+        >
           {angle.label}
         </span>
       </Html>

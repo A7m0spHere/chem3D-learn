@@ -1,18 +1,65 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronRight, Home, LayoutList, AlertTriangle } from "lucide-react";
+import { ChevronRight, Home, LayoutList } from "lucide-react";
 
-import { MoleculeViewer } from "@/components/three/MoleculeViewer";
-import { NaClCell } from "@/components/three/NaClCell";
-import { CsClCell } from "@/components/three/CsClCell";
-import { SodiumMetalCell } from "@/components/three/SodiumMetalCell";
-import { DiamondCell } from "@/components/three/DiamondCell";
-import { ZincMetalCell } from "@/components/three/ZincMetalCell";
-import { VoidStructureCell } from "@/components/three/VoidStructureCell";
-import { GraphiteCell } from "@/components/three/GraphiteCell";
+// 3D viewers 按需懒加载：使 three.js / R3F 不进入首页、考试页等非 3D 页面的初始包。
+const MoleculeViewer = lazy(() =>
+  import("@/components/three/MoleculeViewer").then((m) => ({ default: m.MoleculeViewer })),
+);
+const NaClCell = lazy(() =>
+  import("@/components/three/NaClCell").then((m) => ({ default: m.NaClCell })),
+);
+const CsClCell = lazy(() =>
+  import("@/components/three/CsClCell").then((m) => ({ default: m.CsClCell })),
+);
+const SodiumMetalCell = lazy(() =>
+  import("@/components/three/SodiumMetalCell").then((m) => ({ default: m.SodiumMetalCell })),
+);
+const DiamondCell = lazy(() =>
+  import("@/components/three/DiamondCell").then((m) => ({ default: m.DiamondCell })),
+);
+const ZincMetalCell = lazy(() =>
+  import("@/components/three/ZincMetalCell").then((m) => ({ default: m.ZincMetalCell })),
+);
+const VoidStructureCell = lazy(() =>
+  import("@/components/three/VoidStructureCell").then((m) => ({ default: m.VoidStructureCell })),
+);
+const GraphiteCell = lazy(() =>
+  import("@/components/three/GraphiteCell").then((m) => ({ default: m.GraphiteCell })),
+);
+const OrganicCoplanarViewer = lazy(() =>
+  import("@/components/three/OrganicCoplanarViewer").then((m) => ({ default: m.OrganicCoplanarViewer })),
+);
+const EthylenePlanarCell = lazy(() =>
+  import("@/components/three/EthylenePlanarCell").then((m) => ({ default: m.EthylenePlanarCell })),
+);
+const BenzenePlanarCell = lazy(() =>
+  import("@/components/three/BenzenePlanarCell").then((m) => ({ default: m.BenzenePlanarCell })),
+);
+const AcetyleneLinearCell = lazy(() =>
+  import("@/components/three/AcetyleneLinearCell").then((m) => ({ default: m.AcetyleneLinearCell })),
+);
+const SigmaPiBondCell = lazy(() =>
+  import("@/components/three/SigmaPiBondCell").then((m) => ({ default: m.SigmaPiBondCell })),
+);
+const MolecularPolarityCell = lazy(() =>
+  import("@/components/three/MolecularPolarityCell").then((m) => ({ default: m.MolecularPolarityCell })),
+);
 import { ModulePlaceholderViewer } from "@/components/three/ModulePlaceholderViewer";
 import { CrystalKnowledgePanel } from "@/components/learning/CrystalKnowledgePanel";
 import { CrystalModeToolbar } from "@/components/learning/CrystalModeToolbar";
+import { OrganicCoplanarPanel } from "@/components/learning/OrganicCoplanarPanel";
+import { OrganicCoplanarToolbar } from "@/components/learning/OrganicCoplanarToolbar";
+import { EthylenePlanarPanel } from "@/components/learning/EthylenePlanarPanel";
+import { EthylenePlanarToolbar } from "@/components/learning/EthylenePlanarToolbar";
+import { BenzenePlanarPanel } from "@/components/learning/BenzenePlanarPanel";
+import { BenzenePlanarToolbar } from "@/components/learning/BenzenePlanarToolbar";
+import { AcetyleneLinearPanel } from "@/components/learning/AcetyleneLinearPanel";
+import { AcetyleneLinearToolbar } from "@/components/learning/AcetyleneLinearToolbar";
+import { SigmaPiBondPanel } from "@/components/learning/SigmaPiBondPanel";
+import { SigmaPiBondToolbar } from "@/components/learning/SigmaPiBondToolbar";
+import { MolecularPolarityPanel } from "@/components/learning/MolecularPolarityPanel";
+import { MolecularPolarityToolbar } from "@/components/learning/MolecularPolarityToolbar";
 import { LessonPanel } from "@/components/learning/LessonPanel";
 import { FloatingToolbar } from "@/components/learning/FloatingToolbar";
 
@@ -25,7 +72,96 @@ import {
 } from "@/data/mockMolecules";
 import { ModuleCard } from "@/components/home/ModuleCard";
 import { learningModules } from "@/data/learningModules";
-import type { CrystalViewMode, CrystalVoidStage } from "@/types/molecule";
+import type { MolecularPolarityMode } from "@/data/molecularPolarity";
+import type {
+  CrystalModelStyle,
+  CrystalViewMode,
+  CrystalVoidStage,
+  AcetyleneLinearMode,
+  BenzenePlanarMode,
+  EthylenePlanarMode,
+  OrganicCoplanarMode,
+  SigmaPiBondMode,
+} from "@/types/molecule";
+import type { EthylenePlaneView } from "@/data/ethylenePlanar";
+import type { BenzenePlaneView } from "@/data/benzenePlanar";
+import type { AcetyleneLineView } from "@/data/acetyleneLinear";
+
+// ---------------------------------------------------------------------------
+// Viewer 注册表：用单一 viewerKind 判别取代原先散落在 viewer/toolbar/panel
+// 三处 ternary 里的十多个 uses*Viewer 布尔。新增一个 3D 模块只需在这里加一行。
+// ---------------------------------------------------------------------------
+
+type ViewerKind =
+  | "polarity"
+  | "sigma-pi"
+  | "ethylene"
+  | "benzene"
+  | "acetylene"
+  | "organic-coplanar"
+  | "crystal-nacl"
+  | "crystal-cscl"
+  | "crystal-sodium"
+  | "crystal-diamond"
+  | "crystal-zinc"
+  | "crystal-void"
+  | "crystal-graphite"
+  | "molecule"
+  | "placeholder";
+
+type ViewerSpec = {
+  viewer: () => ReactNode;
+  toolbar: () => ReactNode;
+  panel: () => ReactNode;
+};
+
+// 单一来源判别当前模块用哪种 3D viewer。保持与原三段 ternary 完全一致的优先级：
+// 专题模式（按 moduleData.id）→ 晶体（按 molecule.id + kind）→ 普通分子 → 占位。
+function deriveViewerKind(
+  moduleData: { id: string },
+  molecule: { id: string; kind?: string } | null | undefined,
+  usesRealViewer: boolean,
+): ViewerKind {
+  switch (moduleData.id) {
+    case "polarity-judgment":
+      return "polarity";
+    case "sigma-pi-bonds":
+      return "sigma-pi";
+    case "ethylene-planar":
+      return "ethylene";
+    case "benzene-planar":
+      return "benzene";
+    case "acetylene-linear":
+      return "acetylene";
+    case "organic-coplanar":
+      return "organic-coplanar";
+    default:
+      break;
+  }
+  if (usesRealViewer && molecule != null && molecule.kind === "crystal") {
+    switch (molecule.id) {
+      case "nacl":
+        return "crystal-nacl";
+      case "cscl":
+        return "crystal-cscl";
+      case "sodium-metal":
+        return "crystal-sodium";
+      case "diamond":
+        return "crystal-diamond";
+      case "zinc-metal":
+        return "crystal-zinc";
+      case "octahedral-voids":
+      case "tetrahedral-voids":
+        return "crystal-void";
+      case "graphite":
+        return "crystal-graphite";
+      default:
+        break;
+    }
+  }
+  if (usesRealViewer && molecule) return "molecule";
+  return "placeholder";
+}
 
 export function ModuleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -65,8 +201,22 @@ export function ModuleDetailPage() {
   const [showLonePairs, setShowLonePairs] = useState(false);
   const [showAtomLabels, setShowAtomLabels] = useState(false);
   const [crystalViewMode, setCrystalViewMode] = useState<CrystalViewMode>("cell");
+  const [crystalModelStyle, setCrystalModelStyle] = useState<CrystalModelStyle>("ballStick");
   const [voidStage, setVoidStage] = useState<CrystalVoidStage>("framework");
   const [showCrystalLabels, setShowCrystalLabels] = useState(false);
+  const [organicCoplanarMode, setOrganicCoplanarMode] = useState<OrganicCoplanarMode>("overview");
+  const [organicVinylAligned, setOrganicVinylAligned] = useState(false);
+  const [showOrganicLabels, setShowOrganicLabels] = useState(false);
+  const [ethyleneMode, setEthyleneMode] = useState<EthylenePlanarMode>("overview");
+  const [ethylenePlaneView, setEthylenePlaneView] = useState<EthylenePlaneView>("top");
+  const [benzeneMode, setBenzeneMode] = useState<BenzenePlanarMode>("overview");
+  const [benzenePlaneView, setBenzenePlaneView] = useState<BenzenePlaneView>("top");
+  const [acetyleneMode, setAcetyleneMode] = useState<AcetyleneLinearMode>("overview");
+  const [acetyleneLineView, setAcetyleneLineView] = useState<AcetyleneLineView>("front");
+  const [sigmaPiBondMode, setSigmaPiBondMode] = useState<SigmaPiBondMode>("overview");
+  const [showSigmaPiBondLabels, setShowSigmaPiBondLabels] = useState(false);
+  const [molecularPolarityMode, setMolecularPolarityMode] =
+    useState<MolecularPolarityMode>("electronegativity");
   const [viewerLoading, setViewerLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
@@ -76,8 +226,21 @@ export function ModuleDetailPage() {
     setShowLonePairs(false);
     setShowAtomLabels(false);
     setCrystalViewMode("cell");
+    setCrystalModelStyle("ballStick");
     setVoidStage("framework");
     setShowCrystalLabels(false);
+    setOrganicCoplanarMode("overview");
+    setOrganicVinylAligned(false);
+    setShowOrganicLabels(false);
+    setEthyleneMode("overview");
+    setEthylenePlaneView("top");
+    setBenzeneMode("overview");
+    setBenzenePlaneView("top");
+    setAcetyleneMode("overview");
+    setAcetyleneLineView("front");
+    setSigmaPiBondMode("overview");
+    setShowSigmaPiBondLabels(false);
+    setMolecularPolarityMode("electronegativity");
     setViewerLoading(true);
     setCompletedSteps(new Set());
     const timer = setTimeout(() => setViewerLoading(false), 300);
@@ -94,30 +257,8 @@ export function ModuleDetailPage() {
   }
 
   const activeStep = molecule?.lessonSteps[activeStepIndex] ?? molecule?.lessonSteps[0];
-  const usesNaClCrystalViewer =
-    usesRealViewer && molecule?.id === "nacl" && molecule.kind === "crystal";
-  const usesCsClCrystalViewer =
-    usesRealViewer && molecule?.id === "cscl" && molecule.kind === "crystal";
-  const usesSodiumMetalCrystalViewer =
-    usesRealViewer && molecule?.id === "sodium-metal" && molecule.kind === "crystal";
-  const usesDiamondCrystalViewer =
-    usesRealViewer && molecule?.id === "diamond" && molecule.kind === "crystal";
-  const usesZincMetalCrystalViewer =
-    usesRealViewer && molecule?.id === "zinc-metal" && molecule.kind === "crystal";
-  const usesVoidStructureViewer =
-    usesRealViewer &&
-    (molecule?.id === "octahedral-voids" || molecule?.id === "tetrahedral-voids") &&
-    molecule.kind === "crystal";
-  const usesGraphiteCrystalViewer =
-    usesRealViewer && molecule?.id === "graphite" && molecule.kind === "crystal";
-  const usesCrystalTeachingViewer =
-    usesNaClCrystalViewer ||
-    usesCsClCrystalViewer ||
-    usesSodiumMetalCrystalViewer ||
-    usesDiamondCrystalViewer ||
-    usesZincMetalCrystalViewer ||
-    usesVoidStructureViewer ||
-    usesGraphiteCrystalViewer;
+  const viewerKind = deriveViewerKind(moduleData, molecule, usesRealViewer);
+  const supportsPackingModel = molecule?.id === "zinc-metal";
   const crystalModes = molecule?.crystalTeaching?.viewModes ?? [];
   const defaultCrystalViewMode = crystalModes[0]?.id ?? "cell";
   const activeCrystalViewMode = crystalModes.some((mode) => mode.id === crystalViewMode)
@@ -165,12 +306,355 @@ export function ModuleDetailPage() {
     )
     .slice(0, 3);
 
+  // 晶体系列共用同一套 toolbar / panel，预计算后在各 crystal-* 条目复用。
+  const crystalToolbar = crystalModes.length > 0 ? (
+    <CrystalModeToolbar
+      activeMode={activeCrystalViewMode}
+      modelStyle={crystalModelStyle}
+      modes={crystalModes}
+      onModelStyleChange={setCrystalModelStyle}
+      onModeChange={handleCrystalModeChange}
+      onToggleLabels={() => setShowCrystalLabels((value) => !value)}
+      showLabels={showCrystalLabels}
+      supportsModelStyle={supportsPackingModel}
+    />
+  ) : null;
+  const crystalPanel = molecule ? (
+    <div className="flex-1 min-h-[400px]">
+      <CrystalKnowledgePanel
+        activeMode={activeCrystalViewMode}
+        molecule={molecule}
+        onVoidStageChange={setVoidStage}
+        voidStage={voidStage}
+      />
+    </div>
+  ) : null;
+
+  // 注册表：每个 kind 对应 viewer / toolbar / panel 三个渲染函数。函数体与重构前
+  // 三段 ternary 中的 JSX 逐字一致，仅收敛分发逻辑。
+  const viewerRegistry: Record<ViewerKind, ViewerSpec> = {
+    polarity: {
+      viewer: () => <MolecularPolarityCell loading={viewerLoading} mode={molecularPolarityMode} />,
+      toolbar: () => (
+        <MolecularPolarityToolbar
+          activeMode={molecularPolarityMode}
+          onModeChange={setMolecularPolarityMode}
+        />
+      ),
+      panel: () => (
+        <div className="flex-1 min-h-[400px]">
+          <MolecularPolarityPanel activeMode={molecularPolarityMode} />
+        </div>
+      ),
+    },
+    "sigma-pi": {
+      viewer: () => (
+        <SigmaPiBondCell
+          loading={viewerLoading}
+          mode={sigmaPiBondMode}
+          showLabels={showSigmaPiBondLabels}
+        />
+      ),
+      toolbar: () => (
+        <SigmaPiBondToolbar
+          activeMode={sigmaPiBondMode}
+          onModeChange={setSigmaPiBondMode}
+          onToggleLabels={() => setShowSigmaPiBondLabels((value) => !value)}
+          showLabels={showSigmaPiBondLabels}
+        />
+      ),
+      panel: () => (
+        <div className="flex-1 min-h-[400px]">
+          <SigmaPiBondPanel activeMode={sigmaPiBondMode} />
+        </div>
+      ),
+    },
+    ethylene: {
+      viewer: () => (
+        <EthylenePlanarCell
+          loading={viewerLoading}
+          mode={ethyleneMode}
+          planeView={ethylenePlaneView}
+        />
+      ),
+      toolbar: () => (
+        <EthylenePlanarToolbar
+          activeMode={ethyleneMode}
+          onModeChange={setEthyleneMode}
+          onPlaneViewChange={setEthylenePlaneView}
+          planeView={ethylenePlaneView}
+        />
+      ),
+      panel: () => (
+        <div className="flex-1 min-h-[400px]">
+          <EthylenePlanarPanel activeMode={ethyleneMode} planeView={ethylenePlaneView} />
+        </div>
+      ),
+    },
+    benzene: {
+      viewer: () => (
+        <BenzenePlanarCell
+          loading={viewerLoading}
+          mode={benzeneMode}
+          planeView={benzenePlaneView}
+        />
+      ),
+      toolbar: () => (
+        <BenzenePlanarToolbar
+          activeMode={benzeneMode}
+          onModeChange={setBenzeneMode}
+          onPlaneViewChange={setBenzenePlaneView}
+          planeView={benzenePlaneView}
+        />
+      ),
+      panel: () => (
+        <div className="flex-1 min-h-[400px]">
+          <BenzenePlanarPanel activeMode={benzeneMode} planeView={benzenePlaneView} />
+        </div>
+      ),
+    },
+    acetylene: {
+      viewer: () => (
+        <AcetyleneLinearCell
+          lineView={acetyleneLineView}
+          loading={viewerLoading}
+          mode={acetyleneMode}
+        />
+      ),
+      toolbar: () => (
+        <AcetyleneLinearToolbar
+          activeMode={acetyleneMode}
+          lineView={acetyleneLineView}
+          onLineViewChange={setAcetyleneLineView}
+          onModeChange={setAcetyleneMode}
+        />
+      ),
+      panel: () => (
+        <div className="flex-1 min-h-[400px]">
+          <AcetyleneLinearPanel activeMode={acetyleneMode} lineView={acetyleneLineView} />
+        </div>
+      ),
+    },
+    "organic-coplanar": {
+      viewer: () => (
+        <OrganicCoplanarViewer
+          activeMode={organicCoplanarMode}
+          loading={viewerLoading}
+          showLabels={showOrganicLabels}
+          vinylAligned={organicVinylAligned}
+        />
+      ),
+      toolbar: () => (
+        <OrganicCoplanarToolbar
+          activeMode={organicCoplanarMode}
+          onModeChange={setOrganicCoplanarMode}
+          onToggleLabels={() => setShowOrganicLabels((value) => !value)}
+          onToggleVinylAligned={() => setOrganicVinylAligned((value) => !value)}
+          showLabels={showOrganicLabels}
+          vinylAligned={organicVinylAligned}
+        />
+      ),
+      panel: () => (
+        <div className="flex-1 min-h-[400px]">
+          <OrganicCoplanarPanel
+            activeMode={organicCoplanarMode}
+            vinylAligned={organicVinylAligned}
+          />
+        </div>
+      ),
+    },
+    "crystal-nacl": {
+      viewer: () =>
+        molecule ? (
+          <NaClCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            voidStage={voidStage}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-cscl": {
+      viewer: () =>
+        molecule ? (
+          <CsClCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-sodium": {
+      viewer: () =>
+        molecule ? (
+          <SodiumMetalCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-diamond": {
+      viewer: () =>
+        molecule ? (
+          <DiamondCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            voidStage={voidStage}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-zinc": {
+      viewer: () =>
+        molecule ? (
+          <ZincMetalCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-void": {
+      viewer: () =>
+        molecule ? (
+          <VoidStructureCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            voidStage={voidStage}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-graphite": {
+      viewer: () =>
+        molecule ? (
+          <GraphiteCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    molecule: {
+      viewer: () =>
+        activeStep && molecule ? (
+          <MoleculeViewer
+            activeStep={activeStep}
+            autoRotate={autoRotate}
+            loading={viewerLoading}
+            molecule={molecule}
+            onToggleAngles={() => setShowAngles((value) => !value)}
+            onToggleAtomLabels={() => setShowAtomLabels((value) => !value)}
+            onToggleAutoRotate={() => setAutoRotate((value) => !value)}
+            onToggleLonePairs={() => setShowLonePairs((value) => !value)}
+            showAngles={showAngles}
+            showAtomLabels={showAtomLabels}
+            showLonePairs={showLonePairs}
+          />
+        ) : (
+          <ModulePlaceholderViewer
+            category={moduleData.category}
+            visualFocus={moduleData.visualFocus}
+          />
+        ),
+      toolbar: () =>
+        activeStep && molecule ? (
+          <FloatingToolbar
+            autoRotate={autoRotate}
+            showAngles={showAngles}
+            showLonePairs={showLonePairs}
+            showAtomLabels={showAtomLabels}
+            onToggleAutoRotate={() => setAutoRotate((value) => !value)}
+            onToggleAngles={() => setShowAngles((value) => !value)}
+            onToggleLonePairs={() => setShowLonePairs((value) => !value)}
+            onToggleAtomLabels={() => setShowAtomLabels((value) => !value)}
+          />
+        ) : null,
+      panel: () =>
+        molecule ? (
+          <div className="flex-1 min-h-[400px]">
+            <LessonPanel
+              activeStep={activeStep!}
+              molecule={molecule}
+              lessonSteps={molecule.lessonSteps}
+              activeStepIndex={activeStepIndex}
+              completedStepIndices={completedSteps}
+              onPrevious={() => goToStep(activeStepIndex - 1)}
+              onNext={() => goToStep(activeStepIndex + 1)}
+            />
+          </div>
+        ) : null,
+    },
+    placeholder: {
+      viewer: () => (
+        <ModulePlaceholderViewer
+          category={moduleData.category}
+          visualFocus={moduleData.visualFocus}
+        />
+      ),
+      toolbar: () => null,
+      panel: () => (
+        <div className="rounded-3xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-sm flex-1">
+          <h3 className="text-lg font-bold text-text-primary mb-4">模块详情</h3>
+          <p className="text-text-secondary leading-relaxed mb-6">
+            {moduleData.description}
+          </p>
+          <h4 className="text-sm font-bold text-primary-dark mb-2">核心要点</h4>
+          <ul className="list-disc pl-5 space-y-2 text-sm text-text-primary mb-6">
+            {moduleData.keyPoints.map((point, i) => (
+              <li key={i}>{point}</li>
+            ))}
+          </ul>
+
+          {/* Properties Grid */}
+          <div className="grid grid-cols-2 gap-3 mt-auto">
+            {moduleData.geometryName && <FactBox label="空间构型" value={moduleData.geometryName} />}
+            {moduleData.hybridization && <FactBox label="杂化方式" value={moduleData.hybridization} />}
+            {moduleData.bondAngle && <FactBox label="键角" value={moduleData.bondAngle} />}
+            {moduleData.polarity && <FactBox label="极性" value={moduleData.polarity} />}
+          </div>
+        </div>
+      ),
+    },
+  };
+
+  const spec = viewerRegistry[viewerKind];
+
   return (
     <main className="motion-page-enter bg-background min-h-screen pb-20">
       {/* 1. 顶部信息区 */}
-      <div className="border-b border-border bg-white">
+      <div className="border-b border-white/40 bg-gradient-to-b from-primary/5 to-transparent backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <nav className="flex items-center text-sm font-medium text-text-secondary mb-4">
+          <nav className="flex items-center text-sm font-medium text-text-secondary/80 mb-4">
             <Link to="/" className="hover:text-primary transition-colors"><Home className="h-4 w-4" /></Link>
             <ChevronRight className="h-4 w-4 mx-2" />
             <Link to="/modules" className="hover:text-primary transition-colors flex items-center">
@@ -180,7 +664,7 @@ export function ModuleDetailPage() {
             <ChevronRight className="h-4 w-4 mx-2" />
             <span className="text-text-primary">{moduleData.title}</span>
           </nav>
-          
+
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -209,188 +693,34 @@ export function ModuleDetailPage() {
 
       {/* 2. 主体学习区 */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-[1fr_400px]">
-          
+        <div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-[1fr_450px]">
+
           {/* 左侧：3D Viewer */}
           <div className="lg:col-span-2 xl:col-span-1 flex flex-col gap-4">
             <div
-              className={`relative flex h-[500px] min-h-0 overflow-hidden rounded-3xl ${
-                usesCrystalTeachingViewer ? "lg:h-[600px]" : "lg:h-[620px]"
+              className={`relative flex min-h-[430px] overflow-hidden rounded-2xl border border-border bg-white/70 shadow-panel backdrop-blur-xl sm:min-h-[500px] ${
+                viewerKind === "sigma-pi"
+                  ? "lg:h-[calc(100vh-280px)] lg:min-h-[500px]"
+                  : "lg:h-[calc(100vh-220px)] lg:min-h-[600px]"
               }`}
             >
-              {usesCrystalTeachingViewer && molecule ? (
-                usesNaClCrystalViewer ? (
-                  <NaClCell
-                    loading={viewerLoading}
-                    molecule={molecule}
-                    showLabels={showCrystalLabels}
-                    voidStage={voidStage}
-                    viewMode={activeCrystalViewMode}
-                  />
-                ) : usesCsClCrystalViewer ? (
-                  <CsClCell
-                    loading={viewerLoading}
-                    molecule={molecule}
-                    showLabels={showCrystalLabels}
-                    viewMode={activeCrystalViewMode}
-                  />
-                ) : usesSodiumMetalCrystalViewer ? (
-                  <SodiumMetalCell
-                    loading={viewerLoading}
-                    molecule={molecule}
-                    showLabels={showCrystalLabels}
-                    viewMode={activeCrystalViewMode}
-                  />
-                ) : usesDiamondCrystalViewer ? (
-                  <DiamondCell
-                    loading={viewerLoading}
-                    molecule={molecule}
-                    showLabels={showCrystalLabels}
-                    voidStage={voidStage}
-                    viewMode={activeCrystalViewMode}
-                  />
-                ) : usesZincMetalCrystalViewer ? (
-                  <ZincMetalCell
-                    loading={viewerLoading}
-                    molecule={molecule}
-                    showLabels={showCrystalLabels}
-                    viewMode={activeCrystalViewMode}
-                  />
-                ) : usesVoidStructureViewer ? (
-                  <VoidStructureCell
-                    loading={viewerLoading}
-                    molecule={molecule}
-                    showLabels={showCrystalLabels}
-                    voidStage={voidStage}
-                    viewMode={activeCrystalViewMode}
-                  />
-                ) : (
-                  <GraphiteCell
-                    loading={viewerLoading}
-                    molecule={molecule}
-                    showLabels={showCrystalLabels}
-                    viewMode={activeCrystalViewMode}
-                  />
-                )
-              ) : usesRealViewer && molecule && activeStep ? (
-                <MoleculeViewer
-                  activeStep={activeStep}
-                  autoRotate={autoRotate}
-                  loading={viewerLoading}
-                  molecule={molecule}
-                  onToggleAngles={() => setShowAngles((value) => !value)}
-                  onToggleAtomLabels={() => setShowAtomLabels((value) => !value)}
-                  onToggleAutoRotate={() => setAutoRotate((value) => !value)}
-                  onToggleLonePairs={() => setShowLonePairs((value) => !value)}
-                  showAngles={showAngles}
-                  showAtomLabels={showAtomLabels}
-                  showLonePairs={showLonePairs}
-                />
-              ) : (
-                <ModulePlaceholderViewer category={moduleData.category} visualFocus={moduleData.visualFocus} />
-              )}
+              <Suspense fallback={<ViewerChunkFallback />}>{spec.viewer()}</Suspense>
             </div>
 
-            {usesCrystalTeachingViewer && molecule && crystalModes.length > 0 ? (
-              <CrystalModeToolbar
-                activeMode={activeCrystalViewMode}
-                modes={crystalModes}
-                onModeChange={handleCrystalModeChange}
-                onToggleLabels={() => setShowCrystalLabels((value) => !value)}
-                showLabels={showCrystalLabels}
-              />
-            ) : null}
-
-            {!usesCrystalTeachingViewer && usesRealViewer && molecule && activeStep ? (
-              <FloatingToolbar
-                autoRotate={autoRotate}
-                showAngles={showAngles}
-                showLonePairs={showLonePairs}
-                showAtomLabels={showAtomLabels}
-                onToggleAutoRotate={() => setAutoRotate((value) => !value)}
-                onToggleAngles={() => setShowAngles((value) => !value)}
-                onToggleLonePairs={() => setShowLonePairs((value) => !value)}
-                onToggleAtomLabels={() => setShowAtomLabels((value) => !value)}
-              />
-            ) : null}
+            {/* 独立操作台 (Control Console) */}
+            <div className="w-full flex justify-center">
+              <div className="max-w-full overflow-x-auto no-scrollbar pb-2">{spec.toolbar()}</div>
+            </div>
           </div>
 
           {/* 右侧：知识点与步骤 */}
           <div className="flex flex-col gap-6">
             {/* 如果有互动步骤，展示 LessonPanel，否则展示静态说明 */}
-            {usesCrystalTeachingViewer && molecule ? (
-              <div className="flex-1 min-h-[400px]">
-                <CrystalKnowledgePanel
-                  activeMode={activeCrystalViewMode}
-                  molecule={molecule}
-                  onVoidStageChange={setVoidStage}
-                  voidStage={voidStage}
-                />
-              </div>
-            ) : usesRealViewer && molecule ? (
-              <div className="flex-1 min-h-[400px]">
-                <LessonPanel
-                  activeStep={activeStep!}
-                  molecule={molecule}
-                  lessonSteps={molecule.lessonSteps}
-                  activeStepIndex={activeStepIndex}
-                  completedStepIndices={completedSteps}
-                  onPrevious={() => goToStep(activeStepIndex - 1)}
-                  onNext={() => goToStep(activeStepIndex + 1)}
-                />
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-border bg-white p-6 shadow-sm flex-1">
-                <h3 className="text-lg font-bold text-text-primary mb-4">模块详情</h3>
-                <p className="text-text-secondary leading-relaxed mb-6">
-                  {moduleData.description}
-                </p>
-                <h4 className="text-sm font-bold text-primary-dark mb-2">核心要点</h4>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-text-primary mb-6">
-                  {moduleData.keyPoints.map((point, i) => (
-                    <li key={i}>{point}</li>
-                  ))}
-                </ul>
-
-                {/* Properties Grid */}
-                <div className="grid grid-cols-2 gap-3 mt-auto">
-                  {moduleData.geometryName && <FactBox label="空间构型" value={moduleData.geometryName} />}
-                  {moduleData.hybridization && <FactBox label="杂化方式" value={moduleData.hybridization} />}
-                  {moduleData.bondAngle && <FactBox label="键角" value={moduleData.bondAngle} />}
-                  {moduleData.polarity && <FactBox label="极性" value={moduleData.polarity} />}
-                </div>
-              </div>
-            )}
+            {spec.panel()}
           </div>
         </div>
 
-        {/* 3 & 4. 常见误区 & 考试价值 */}
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          {mockMolecule?.commonMistakeZh && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-              <div className="flex items-center gap-2 text-amber-600 mb-3 font-bold">
-                <AlertTriangle className="h-5 w-5" />
-                常见误区
-              </div>
-              <p className="text-sm text-amber-900 leading-relaxed">
-                {mockMolecule.commonMistakeZh}
-              </p>
-            </div>
-          )}
-          {moduleData.examValue && (
-            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6">
-              <div className="flex items-center gap-2 text-blue-600 mb-3 font-bold">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                高考价值
-              </div>
-              <p className="text-sm text-blue-900 leading-relaxed">
-                {moduleData.examValue}
-              </p>
-            </div>
-          )}
-        </div>
+
 
         {/* 5. 相关推荐区 */}
         {relatedModules.length > 0 && (
@@ -414,5 +744,12 @@ function FactBox({ label, value }: { label: string; value: string }) {
       <div className="text-xs text-text-secondary mb-1">{label}</div>
       <div className="font-semibold text-text-primary">{value}</div>
     </div>
+  );
+}
+
+function ViewerChunkFallback() {
+  // 3D viewer chunk 首次下载时的占位骨架，复用 ThreeViewerFrame 的 skeleton 样式。
+  return (
+    <div className="motion-skeleton absolute inset-0 z-10 flex items-center justify-center bg-white/60" />
   );
 }

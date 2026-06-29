@@ -2,9 +2,11 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
 import { Quaternion, Vector3 } from "three";
+import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
   Bond,
+  CrystalModelStyle,
   CrystalSiteType,
   CrystalViewMode,
   CrystalVoidStage,
@@ -14,6 +16,7 @@ import type {
 type DiamondCellProps = {
   molecule: MoleculeRecord;
   viewMode: CrystalViewMode;
+  modelStyle: CrystalModelStyle;
   voidStage: CrystalVoidStage;
   showLabels: boolean;
   loading?: boolean;
@@ -83,6 +86,7 @@ const tetrahedralVoidSites: DiamondVoidSite[] = [
 export function DiamondCell({
   molecule,
   viewMode,
+  modelStyle: _modelStyle,
   voidStage,
   showLabels,
   loading = false,
@@ -94,6 +98,7 @@ export function DiamondCell({
   const cameraPosition = molecule.rendering?.cameraPosition ?? [2.95, 2.35, 3.45];
   const cameraFov = molecule.rendering?.cameraFov ?? 42;
   const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeStage = molecule.crystalTeaching?.voidStages?.find((stage) => stage.id === voidStage);
   const useCompactLabels = useCompactCrystalLabels();
   const isVoidMode = viewMode === "voids";
   const visibleBonds = isVoidMode && voidStage !== "filled"
@@ -102,27 +107,25 @@ export function DiamondCell({
       ? molecule.bonds.filter((bond) => coordinationFocusBondIds.has(bond.id))
       : molecule.bonds;
 
-  return (
-    <section className="flex h-full min-h-[500px] flex-1 flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-panel">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-white/80 px-5 py-4">
-        <div>
-          <h2 className="text-lg font-semibold text-text-primary">3D 晶胞 Viewer</h2>
-          <p className="text-sm text-text-secondary">拖拽旋转，滚轮或触控板缩放</p>
-        </div>
-        <div className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-primary-dark">
-          {activeMode?.labelZh ?? "晶胞结构"} · {molecule.formula}
-        </div>
-      </div>
+  const displayTitle = isVoidMode && activeStage ? activeStage.titleZh : activeMode?.titleZh ?? "完整金刚石晶胞";
+  const displaySummary = isVoidMode && activeStage
+    ? activeStage.bodyZh
+    : activeMode?.bodyZh ?? molecule.summaryZh;
 
-      <div className="relative min-h-0 flex-1 bg-[radial-gradient(circle_at_center,#ffffff_0%,#f7faf9_58%,#e8f3f0_100%)]">
-        {loading ? (
-          <div className="motion-skeleton absolute inset-0 z-10 flex items-center justify-center rounded-[inherit] bg-white/60" />
-        ) : null}
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} shadows>
+  return (
+    <ThreeViewerFrame
+      loading={loading}
+      meta="拖拽旋转 · 标签可按需开启"
+      stageTestId={`${molecule.id}-canvas`}
+      summary={displaySummary}
+      title={`${molecule.formula}｜${displayTitle}`}
+      viewerTestId={`${molecule.id}-viewer`}
+    >
+        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" shadows style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.72} />
           <directionalLight position={[4, 5, 4]} intensity={1.35} castShadow />
           <directionalLight position={[-3, 2, -4]} intensity={0.42} />
-          <group position={[0, -0.04, 0]} rotation={[0.2, -0.5, 0]} scale={2.08}>
+          <group position={[0, -0.04, 0]} rotation={[0.2, -0.5, 0]} scale={1.78}>
             <CellFrame isMuted={viewMode === "counting" || viewMode === "comparison" || isVoidMode} />
             {visibleBonds.map((bond) => (
               <CovalentLink
@@ -162,8 +165,7 @@ export function DiamondCell({
             target={[0, 0, 0]}
           />
         </Canvas>
-      </div>
-    </section>
+    </ThreeViewerFrame>
   );
 }
 
@@ -297,7 +299,7 @@ function CarbonAtom({ atom, viewMode, voidStage, showLabel, useCompactLabelSet }
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={useCompactLabelSet ? 7.4 : 6.8} position={[0, radius + 0.08, 0]}>
+        <Html center distanceFactor={useCompactLabelSet ? 7.4 : 6.8} pointerEvents="none" position={[0, radius + 0.08, 0]}>
           <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-text-primary shadow-sm sm:text-xs">
             {labelText}
           </span>
@@ -466,7 +468,7 @@ function TetrahedralVoidMarker({ site, stage, showLabel }: TetrahedralVoidMarker
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={7.2} position={[0, radius + 0.08, 0]}>
+        <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.08, 0]}>
           <span className="whitespace-nowrap rounded-md border border-amber-200 bg-amber-50/95 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900 shadow-sm sm:text-xs">
             {site.label}
           </span>

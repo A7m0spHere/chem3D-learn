@@ -1,5 +1,11 @@
 import { AlertTriangle, Box, Calculator, Info, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import type {
   CrystalTeaching,
   CrystalViewMode,
@@ -35,12 +41,12 @@ export function CrystalKnowledgePanel({
   }
 
   return (
-    <aside className="flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-white shadow-sm">
-      <div className="border-b border-border bg-background/50 px-6 py-5">
+    <aside className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/60 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="border-b border-white/40 bg-white/40 px-6 py-5 backdrop-blur-sm">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-semibold tracking-wider text-primary">当前晶体模型</p>
           <span className="rounded bg-primary-light/50 px-2 py-0.5 text-xs text-primary-dark">
-            {teaching.modelZh}
+            {teaching.currentModelZh ?? teaching.modelZh}
           </span>
         </div>
         <h1 className="mt-2 text-2xl font-bold leading-tight text-text-primary">
@@ -72,52 +78,64 @@ export function CrystalKnowledgePanel({
           </section>
         ) : null}
 
-        <section className="rounded-2xl border border-border bg-background p-5">
-          <h3 className="flex items-center gap-2 font-semibold text-text-primary">
-            <Info className="h-4 w-4 text-primary" aria-hidden="true" />
-            基础信息
-          </h3>
-          <div className="mt-4 grid gap-2 text-sm">
-            <FactRow label="晶体类型" value={teaching.structureTypeZh} strong />
-            <FactRow label="结构模型" value={teaching.modelZh} />
-            <FactRow label="配位数" value={teaching.coordinationNumberZh} />
-            <FactRow label="空间特征" value={teaching.spatialFeatureZh} />
-          </div>
-        </section>
+        {teaching.teachingTipZh ? (
+          <section className="rounded-2xl border border-primary/20 bg-primary-light/30 p-5">
+            <h3 className="flex items-center gap-2 font-semibold text-primary-dark">
+              <Info className="h-4 w-4" aria-hidden="true" />
+              教学提示
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-text-primary">{teaching.teachingTipZh}</p>
+          </section>
+        ) : null}
 
-        <section className="rounded-2xl border border-border bg-background p-5">
-          <h3 className="flex items-center gap-2 font-semibold text-text-primary">
-            <Box className="h-4 w-4 text-primary" aria-hidden="true" />
-            晶胞组成
-          </h3>
-          <p className="mt-3 text-sm leading-6 text-text-secondary">{teaching.unitCellDescriptionZh}</p>
-        </section>
+        <Accordion type="multiple" defaultValue={["info"]} className="w-full space-y-5">
+          <AccordionItem value="info" className="rounded-2xl border border-white/60 bg-white/60 px-5 shadow-sm border-b-0 data-[state=open]:pb-2">
+            <AccordionTrigger className="hover:no-underline py-5">
+              <h3 className="flex items-center gap-2 font-semibold text-text-primary">
+                <Info className="h-4 w-4 text-primary" aria-hidden="true" />
+                基础信息
+              </h3>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid gap-2 text-sm">
+                <FactRow label="晶体类型" value={teaching.structureTypeZh} strong />
+                <FactRow label="结构模型" value={teaching.modelZh} />
+                <FactRow label="配位数" value={teaching.coordinationNumberZh} />
+                <FactRow label={teaching.spatialFeatureLabelZh ?? "空间特征"} value={teaching.spatialFeatureZh} />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-        <ParticleCountCard teaching={teaching} />
+          <AccordionItem value="composition" className="rounded-2xl border border-white/60 bg-white/60 px-5 shadow-sm border-b-0 data-[state=open]:pb-2">
+            <AccordionTrigger className="hover:no-underline py-5">
+              <h3 className="flex items-center gap-2 font-semibold text-text-primary">
+                <Box className="h-4 w-4 text-primary" aria-hidden="true" />
+                晶胞组成
+              </h3>
+            </AccordionTrigger>
+            <AccordionContent>
+              <p className="text-sm leading-6 text-text-secondary">{teaching.unitCellDescriptionZh}</p>
+            </AccordionContent>
+          </AccordionItem>
 
-        <section className="rounded-2xl border border-border bg-background p-5">
-          <h3 className="flex items-center gap-2 font-semibold text-text-primary">
-            <Network className="h-4 w-4 text-primary" aria-hidden="true" />
-            配位关系
-          </h3>
-          <ul className="mt-3 space-y-2 text-sm leading-6 text-text-secondary">
-            {teaching.coordinationDescriptionZh.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </section>
+          <ParticleCountCard teaching={teaching} />
 
-        <section className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5">
-          <h3 className="flex items-center gap-2 font-semibold text-amber-900">
-            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-            易错提醒
-          </h3>
-          <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-900">
-            {teaching.commonMistakesZh.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </section>
+          <AccordionItem value="coordination" className="rounded-2xl border border-white/60 bg-white/60 px-5 shadow-sm border-b-0 data-[state=open]:pb-2">
+            <AccordionTrigger className="hover:no-underline py-5">
+              <h3 className="flex items-center gap-2 font-semibold text-text-primary">
+                <Network className="h-4 w-4 text-primary" aria-hidden="true" />
+                配位关系
+              </h3>
+            </AccordionTrigger>
+            <AccordionContent>
+              <ul className="space-y-2 text-sm leading-6 text-text-secondary">
+                {teaching.coordinationDescriptionZh.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </aside>
   );
@@ -191,18 +209,22 @@ function ParticleCountCard({ teaching }: { teaching: CrystalTeaching }) {
     ].filter((line): line is string => Boolean(line));
 
   return (
-    <section className="rounded-2xl border border-border bg-background p-5">
-      <h3 className="flex items-center gap-2 font-semibold text-text-primary">
-        <Calculator className="h-4 w-4 text-primary" aria-hidden="true" />
-        粒子个数计算
-      </h3>
-      <div className="mt-3 space-y-2 rounded-xl bg-white p-4 font-mono text-sm text-text-primary">
-        {countLines.map((line) => (
-          <p key={line}>{line}</p>
-        ))}
-      </div>
-      <p className="mt-3 text-sm font-semibold text-primary-dark">{teaching.particleCountZh.ratio}</p>
-    </section>
+    <AccordionItem value="count" className="rounded-2xl border border-white/60 bg-white/60 px-5 shadow-sm border-b-0 data-[state=open]:pb-2">
+      <AccordionTrigger className="hover:no-underline py-5">
+        <h3 className="flex items-center gap-2 font-semibold text-text-primary">
+          <Calculator className="h-4 w-4 text-primary" aria-hidden="true" />
+          粒子个数计算
+        </h3>
+      </AccordionTrigger>
+      <AccordionContent>
+        <div className="space-y-2 rounded-xl bg-white p-4 font-mono text-sm text-text-primary">
+          {countLines.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
+        <p className="mt-3 text-sm font-semibold text-primary-dark">{teaching.particleCountZh.ratio}</p>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
 

@@ -1,0 +1,154 @@
+{
+  "id": "ethylene-planar",
+  "kind": "molecule",
+  "names": {
+    "zh": "乙烯",
+    "en": "Ethylene"
+  },
+  "formula": "C2H4",
+  "nameZh": "乙烯平面结构",
+  "category": "vsepr",
+  "summaryZh": "乙烯 C2H4 中 2 个 C 和 4 个 H 位于同一平面。每个碳原子为 sp2 杂化，C=C 双键由 1 个 σ 键和 1 个 π 键组成。",
+  "atoms": [
+    {
+      "id": "c1",
+      "element": "C",
+      "label": "C1",
+      "position": [-0.67, 0, 0],
+      "color": "#1F2933"
+    },
+    {
+      "id": "c2",
+      "element": "C",
+      "label": "C2",
+      "position": [0.67, 0, 0],
+      "color": "#1F2933"
+    },
+    {
+      "id": "h1",
+      "element": "H",
+      "label": "H",
+      "position": [-1.215, 0.944, 0],
+      "color": "#FFFFFF"
+    },
+    {
+      "id": "h2",
+      "element": "H",
+      "label": "H",
+      "position": [-1.215, -0.944, 0],
+      "color": "#FFFFFF"
+    },
+    {
+      "id": "h3",
+      "element": "H",
+      "label": "H",
+      "position": [1.215, 0.944, 0],
+      "color": "#FFFFFF"
+    },
+    {
+      "id": "h4",
+      "element": "H",
+      "label": "H",
+      "position": [1.215, -0.944, 0],
+      "color": "#FFFFFF"
+    }
+  ],
+  "bonds": [
+    {
+      "id": "c1-c2",
+      "atomIds": ["c1", "c2"],
+      "kind": "double",
+      "order": 2
+    },
+    {
+      "id": "c1-h1",
+      "atomIds": ["c1", "h1"],
+      "kind": "single",
+      "order": 1
+    },
+    {
+      "id": "c1-h2",
+      "atomIds": ["c1", "h2"],
+      "kind": "single",
+      "order": 1
+    },
+    {
+      "id": "c2-h3",
+      "atomIds": ["c2", "h3"],
+      "kind": "single",
+      "order": 1
+    },
+    {
+      "id": "c2-h4",
+      "atomIds": ["c2", "h4"],
+      "kind": "single",
+      "order": 1
+    }
+  ],
+  "lonePairs": [],
+  "keyAngles": [
+    {
+      "id": "h1-c1-c2",
+      "atomIds": ["h1", "c1", "c2"],
+      "valueDeg": 120,
+      "label": "≈120°",
+      "descriptionZh": "sp2 杂化使每个碳原子周围三个 σ 键方向接近平面三角形。"
+    },
+    {
+      "id": "h2-c1-c2",
+      "atomIds": ["h2", "c1", "c2"],
+      "valueDeg": 120,
+      "label": "≈120°",
+      "descriptionZh": "乙烯中的键角只需按高中教学记为约 120°。"
+    },
+    {
+      "id": "c1-c2-h3",
+      "atomIds": ["c1", "c2", "h3"],
+      "valueDeg": 120,
+      "label": "≈120°",
+      "descriptionZh": "另一个碳原子周围同样呈近似平面三角形。"
+    },
+    {
+      "id": "c1-c2-h4",
+      "atomIds": ["c1", "c2", "h4"],
+      "valueDeg": 120,
+      "label": "≈120°",
+      "descriptionZh": "两个碳原子的局部结构都体现 sp2 杂化特点。"
+    }
+  ],
+  "lessonSteps": [
+    {
+      "id": "plane",
+      "titleZh": "确认 6 个原子共面",
+      "bodyZh": "乙烯 C2H4 中 2 个 C 和 4 个 H 都落在同一个分子平面内。",
+      "focusAtomIds": ["c1", "c2", "h1", "h2", "h3", "h4"]
+    },
+    {
+      "id": "angle",
+      "titleZh": "观察约 120° 键角",
+      "bodyZh": "每个碳为 sp2 杂化，三个 σ 键方向形成近似平面三角形，键角约 120°。",
+      "focusAngleIds": ["h1-c1-c2", "h2-c1-c2", "c1-c2-h3", "c1-c2-h4"],
+      "showAngles": true
+    },
+    {
+      "id": "pi-bond",
+      "titleZh": "理解 π 键限制旋转",
+      "bodyZh": "C=C 双键由 1 个 σ 键和 1 个 π 键组成，π 键需要两个 p 轨道保持平行侧向重叠。",
+      "focusBondIds": ["c1-c2"]
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [0.2, -4.8, 3.2],
+    "cameraFov": 42,
+    "atomScale": 0.9,
+    "bondRadius": 0.035,
+    "angleRadius": 0.55,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "手写高中教学示意坐标",
+    "notesZh": "坐标用于教学显示，重点表达乙烯 6 原子共面、sp2 构型和 π 键限制旋转。",
+    "verified": true
+  }
+}

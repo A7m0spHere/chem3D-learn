@@ -12,8 +12,40 @@ export type CrystalViewMode =
   | "comparison"
   | "metallicBond"
   | "covalentNetwork";
+export type CrystalModelStyle = "ballStick" | "packing";
 export type CrystalSiteType = "corner" | "face-center" | "edge-center" | "body-center";
 export type CrystalVoidStage = "framework" | "voids" | "filled";
+export type OrganicCoplanarMode =
+  | "overview"
+  | "benzenePlane"
+  | "sp3Carbon"
+  | "sp2Fragment"
+  | "spFragment"
+  | "amineGroup"
+  | "rotation";
+export type EthylenePlanarMode =
+  | "overview"
+  | "plane"
+  | "angle"
+  | "piBond"
+  | "rotationLock";
+export type BenzenePlanarMode =
+  | "overview"
+  | "plane"
+  | "angle"
+  | "diagonal"
+  | "piBond";
+export type AcetyleneLinearMode =
+  | "overview"
+  | "line"
+  | "angle"
+  | "piBond"
+  | "tripleBond";
+export type SigmaPiBondMode =
+  | "overview"
+  | "sigma"
+  | "pi"
+  | "doubleBond";
 
 export type MoleculeNames = {
   zh: string;
@@ -51,10 +83,13 @@ export type CrystalVoidStageTeaching = {
 };
 
 export type CrystalTeaching = {
+  currentModelZh?: string;
   structureTypeZh: string;
   modelZh: string;
   coordinationNumberZh: string;
+  spatialFeatureLabelZh?: string;
   spatialFeatureZh: string;
+  teachingTipZh?: string;
   unitCellDescriptionZh: string;
   particleCountZh: {
     cl?: string;

@@ -8,18 +8,23 @@ type ModuleCardProps = {
 };
 
 export function ModuleCard({ module }: ModuleCardProps) {
+  const primaryFact = module.geometryName ?? module.bondAngle ?? module.polarity ?? module.hybridization;
+
   return (
-    <article className="group flex h-full flex-col rounded-2xl border border-border bg-white/70 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md hover:bg-white">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-xl font-bold text-text-primary group-hover:text-primary transition-colors">
+    <article className="group flex h-full flex-col rounded-2xl border border-border bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-panel">
+      <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
+        <div className="min-w-0">
+          <div className="mb-3 text-4xl font-black leading-none text-primary-dark">
+            {module.formula ?? module.title.split("：")[0]}
+          </div>
+          <h3 className="text-lg font-bold leading-snug text-text-primary transition-colors group-hover:text-primary">
             {module.title}
           </h3>
           <p className="mt-1 text-sm font-medium text-primary-dark">
             {module.subtitle}
           </p>
         </div>
-        <span className="inline-flex shrink-0 items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-text-secondary">
+        <span className="inline-flex shrink-0 items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary-dark">
           {module.difficulty}
         </span>
       </div>
@@ -28,14 +33,16 @@ export function ModuleCard({ module }: ModuleCardProps) {
         {module.description}
       </p>
 
-      {/* Optional details grid */}
-      {(module.bondAngle || module.hybridization || module.polarity) && (
-        <dl className="mt-5 grid grid-cols-2 gap-2 text-sm">
-          {module.bondAngle && <Fact label="键角" value={module.bondAngle} />}
-          {module.hybridization && <Fact label="杂化" value={module.hybridization} />}
-          {module.lonePairs && <Fact label="孤对电子" value={module.lonePairs} />}
-          {module.polarity && <Fact label="极性" value={module.polarity} />}
-        </dl>
+      {primaryFact ? (
+        <div className="mt-5 rounded-xl border border-border bg-background px-4 py-3">
+          <div className="text-xs font-semibold text-text-secondary">观察重点</div>
+          <div className="mt-1 text-base font-bold text-text-primary">{primaryFact}</div>
+        </div>
+      ) : (
+        <div className="mt-5 rounded-xl border border-dashed border-border bg-background/70 px-4 py-3">
+          <div className="text-xs font-semibold text-text-secondary">学习状态</div>
+          <div className="mt-1 text-sm font-semibold text-text-primary">轻量教学模块</div>
+        </div>
       )}
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -56,14 +63,5 @@ export function ModuleCard({ module }: ModuleCardProps) {
         </Link>
       </Button>
     </article>
-  );
-}
-
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg bg-background px-3 py-1.5 transition-colors group-hover:bg-primary-light/30">
-      <dt className="text-xs text-text-secondary mb-0.5">{label}</dt>
-      <dd className="font-semibold text-text-primary text-xs">{value}</dd>
-    </div>
   );
 }

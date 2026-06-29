@@ -24,15 +24,15 @@ export function FloatingToolbar({
 }: FloatingToolbarProps) {
   return (
     <div
-      className="w-full rounded-2xl border border-border/70 bg-white/80 px-4 py-3 shadow-sm backdrop-blur"
+      className="chem-control-console"
       data-floating-toolbar
     >
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      <div className="chem-control-grid">
         <Button
           variant={autoRotate ? "default" : "ghost"}
           size="sm"
           onClick={onToggleAutoRotate}
-          className="min-w-[112px] rounded-full px-3 whitespace-nowrap"
+          className="chem-touch-button"
           title="自动旋转"
         >
           <RotateCcw className={`mr-1.5 h-4 w-4 ${autoRotate ? "animate-spin-slow" : ""}`} />
@@ -42,7 +42,7 @@ export function FloatingToolbar({
           variant={showAngles ? "default" : "ghost"}
           size="sm"
           onClick={onToggleAngles}
-          className="min-w-[112px] rounded-full px-3 whitespace-nowrap"
+          className="chem-touch-button"
           title="显示/隐藏键角"
         >
           <Move3d className="mr-1.5 h-4 w-4" />
@@ -52,7 +52,7 @@ export function FloatingToolbar({
           variant={showLonePairs ? "default" : "ghost"}
           size="sm"
           onClick={onToggleLonePairs}
-          className="min-w-[112px] rounded-full px-3 whitespace-nowrap"
+          className="chem-touch-button"
           title="显示/隐藏孤电子对"
         >
           <Orbit className="mr-1.5 h-4 w-4" />
@@ -62,7 +62,7 @@ export function FloatingToolbar({
           variant={showAtomLabels ? "default" : "ghost"}
           size="sm"
           onClick={onToggleAtomLabels}
-          className="min-w-[112px] rounded-full px-3 whitespace-nowrap"
+          className="chem-touch-button"
           title="显示/隐藏原子标记"
         >
           <CircleDot className="mr-1.5 h-4 w-4" />

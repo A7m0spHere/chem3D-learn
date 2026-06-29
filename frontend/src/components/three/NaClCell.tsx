@@ -2,9 +2,11 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
   Bond,
+  CrystalModelStyle,
   CrystalSiteType,
   CrystalViewMode,
   CrystalVoidStage,
@@ -14,6 +16,7 @@ import type {
 type NaClCellProps = {
   molecule: MoleculeRecord;
   viewMode: CrystalViewMode;
+  modelStyle: CrystalModelStyle;
   voidStage: CrystalVoidStage;
   showLabels: boolean;
   loading?: boolean;
@@ -59,6 +62,7 @@ const bodyOctahedronEdges: Array<[[number, number, number], [number, number, num
 export function NaClCell({
   molecule,
   viewMode,
+  modelStyle: _modelStyle,
   voidStage,
   showLabels,
   loading = false,
@@ -74,27 +78,26 @@ export function NaClCell({
   const cameraPosition = molecule.rendering?.cameraPosition ?? [3.2, 2.8, 4.2];
   const cameraFov = molecule.rendering?.cameraFov ?? 42;
   const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeStage = molecule.crystalTeaching?.voidStages?.find((stage) => stage.id === voidStage);
   const isVoidMode = viewMode === "voids";
-  const groupScale = isVoidMode ? 0.66 : 0.72;
+  const groupScale = isVoidMode ? 0.7 : 0.8;
   const groupPosition: [number, number, number] = isVoidMode ? [0, -0.12, 0] : [0, -0.08, 0];
 
-  return (
-    <section className="flex h-full min-h-[500px] flex-1 flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-panel">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-white/80 px-5 py-4">
-        <div>
-          <h2 className="text-lg font-semibold text-text-primary">3D 晶胞 Viewer</h2>
-          <p className="text-sm text-text-secondary">拖拽旋转，滚轮或触控板缩放</p>
-        </div>
-        <div className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-primary-dark">
-          {activeMode?.labelZh ?? "晶胞结构"} · {molecule.formula}
-        </div>
-      </div>
+  const displayTitle = isVoidMode && activeStage ? activeStage.titleZh : activeMode?.titleZh ?? "完整晶胞";
+  const displaySummary = isVoidMode && activeStage
+    ? activeStage.bodyZh
+    : activeMode?.bodyZh ?? molecule.summaryZh;
 
-      <div className="relative min-h-0 flex-1 bg-[radial-gradient(circle_at_center,#ffffff_0%,#f7faf9_58%,#e8f3f0_100%)]">
-        {loading ? (
-          <div className="motion-skeleton absolute inset-0 z-10 flex items-center justify-center rounded-[inherit] bg-white/60" />
-        ) : null}
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} shadows>
+  return (
+    <ThreeViewerFrame
+      loading={loading}
+      meta="拖拽旋转 · 标签可按需开启"
+      stageTestId={`${molecule.id}-canvas`}
+      summary={displaySummary}
+      title={`${molecule.formula}｜${displayTitle}`}
+      viewerTestId={`${molecule.id}-viewer`}
+    >
+        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" shadows style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.68} />
           <directionalLight position={[4, 5, 4]} intensity={1.35} castShadow />
           <directionalLight position={[-3, 2, -4]} intensity={0.35} />
@@ -143,8 +146,7 @@ export function NaClCell({
             target={[0, 0, 0]}
           />
         </Canvas>
-      </div>
-    </section>
+    </ThreeViewerFrame>
   );
 }
 
@@ -269,7 +271,7 @@ function IonMesh({ atom, viewMode, voidStage, showLabel }: IonMeshProps) {
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={7} position={[0, radius + 0.12, 0]}>
+        <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.12, 0]}>
           <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-text-primary shadow-sm">
             {labelText}
           </span>
@@ -322,7 +324,7 @@ function VoidMarker({ atom, stage, showLabel }: VoidMarkerProps) {
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={7} position={[0, radius + 0.12, 0]}>
+        <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.12, 0]}>
           <span className="whitespace-nowrap rounded-md border border-amber-200 bg-amber-50/95 px-1.5 py-0.5 text-xs font-semibold text-amber-900 shadow-sm">
             {label}
           </span>

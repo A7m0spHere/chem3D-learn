@@ -16,6 +16,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  color: #1f2933;
   font-family:
     Inter,
     ui-sans-serif,
@@ -29,4 +30,28 @@ body {
 button,
 select {
   font: inherit;
+}
+
+@layer components {
+  .chem-viewer-stage {
+    background:
+      radial-gradient(circle at 50% 42%, #f4f8fb 0%, #eaf1f4 46%, #dce8e8 100%);
+  }
+
+  .chem-viewer-stage canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .chem-control-console {
+    @apply mx-auto w-fit max-w-full rounded-2xl border border-border bg-white/90 p-2 shadow-panel backdrop-blur-md;
+  }
+
+  .chem-control-grid {
+    @apply grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center;
+  }
+
+  .chem-touch-button {
+    @apply h-12 min-w-[112px] rounded-xl px-4 text-sm font-semibold whitespace-nowrap sm:h-11;
+  }
 }

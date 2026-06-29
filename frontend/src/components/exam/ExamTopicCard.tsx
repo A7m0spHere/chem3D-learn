@@ -7,7 +7,7 @@ export function ExamTopicCard({ topic }: { topic: ExamTopic }) {
   const isChallenge = topic.difficulty === "竞赛挑战";
 
   return (
-    <article className={`group flex h-full flex-col rounded-2xl border bg-white/70 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:bg-white ${isChallenge ? "border-amber-200 hover:border-amber-400" : "border-border hover:border-primary/30"}`}>
+    <article className={`group flex h-full flex-col rounded-2xl border bg-white/40 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(42,157,143,0.15)] hover:bg-white/80 ${isChallenge ? "border-amber-200/50 hover:border-amber-400" : "border-white/50 hover:border-primary/40"}`}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-xl font-bold text-text-primary group-hover:text-primary transition-colors">

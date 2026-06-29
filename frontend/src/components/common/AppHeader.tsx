@@ -10,7 +10,6 @@ export function AppHeader() {
     { name: "晶体结构", href: "/#crystal-structure" },
     { name: "有机立体", href: "/#organic-stereochemistry" },
     { name: "化学键与轨道", href: "/#bonding-orbitals" },
-    { name: "学习路线", href: "/paths" },
     { name: "能力扩展", href: "/exam" },
   ];
 

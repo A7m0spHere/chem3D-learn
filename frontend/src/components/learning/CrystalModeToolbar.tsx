@@ -1,6 +1,10 @@
 import { Box, Calculator, GitCompare, Layers3, Network, Orbit, Share2, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { CrystalTeachingViewMode, CrystalViewMode } from "@/types/molecule";
+import type {
+  CrystalModelStyle,
+  CrystalTeachingViewMode,
+  CrystalViewMode,
+} from "@/types/molecule";
 
 type CrystalModeToolbarProps = {
   modes: CrystalTeachingViewMode[];
@@ -8,6 +12,9 @@ type CrystalModeToolbarProps = {
   showLabels: boolean;
   onModeChange: (mode: CrystalViewMode) => void;
   onToggleLabels: () => void;
+  modelStyle?: CrystalModelStyle;
+  onModelStyleChange?: (style: CrystalModelStyle) => void;
+  supportsModelStyle?: boolean;
 };
 
 const modeIcons: Record<CrystalViewMode, typeof Box> = {
@@ -30,17 +37,20 @@ export function CrystalModeToolbar({
   showLabels,
   onModeChange,
   onToggleLabels,
+  modelStyle = "ballStick",
+  onModelStyleChange,
+  supportsModelStyle = false,
 }: CrystalModeToolbarProps) {
   return (
-    <div className="w-full rounded-2xl border border-border/70 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
-      <div className="flex flex-wrap items-center justify-center gap-2">
+    <div className="chem-control-console">
+      <div className="chem-control-grid">
         {modes.map((mode) => {
           const Icon = modeIcons[mode.id];
           const isActive = mode.id === activeMode;
 
           return (
             <Button
-              className="min-w-[112px] rounded-full px-3 whitespace-nowrap"
+              className="chem-touch-button"
               key={mode.id}
               onClick={() => onModeChange(mode.id)}
               size="sm"
@@ -53,8 +63,34 @@ export function CrystalModeToolbar({
             </Button>
           );
         })}
+        {supportsModelStyle && onModelStyleChange ? (
+          <>
+            <Button
+              className="chem-touch-button"
+              onClick={() => onModelStyleChange("ballStick")}
+              size="sm"
+              title="切换为球棍模型"
+              type="button"
+              variant={modelStyle === "ballStick" ? "default" : "ghost"}
+            >
+              <Network className="h-4 w-4" aria-hidden="true" />
+              球棍模型
+            </Button>
+            <Button
+              className="chem-touch-button"
+              onClick={() => onModelStyleChange("packing")}
+              size="sm"
+              title="切换为堆积模型"
+              type="button"
+              variant={modelStyle === "packing" ? "default" : "ghost"}
+            >
+              <Layers3 className="h-4 w-4" aria-hidden="true" />
+              堆积模型
+            </Button>
+          </>
+        ) : null}
         <Button
-          className="min-w-[112px] rounded-full px-3 whitespace-nowrap"
+          className="chem-touch-button"
           onClick={onToggleLabels}
           size="sm"
           title="显示/隐藏晶胞位点标签"

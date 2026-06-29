@@ -107,7 +107,7 @@
     }
   ],
   "rendering": {
-    "cameraPosition": [3.3, 2.8, 4.3],
+    "cameraPosition": [2.7, 2.3, 3.5],
     "cameraFov": 42,
     "atomScale": 1,
     "bondRadius": 0.045,

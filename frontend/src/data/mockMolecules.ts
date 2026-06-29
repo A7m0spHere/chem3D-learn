@@ -12,6 +12,7 @@ import zincMetalData from "@/data/manual/zinc-metal.json";
 import octahedralVoidsData from "@/data/manual/octahedral-voids.json";
 import tetrahedralVoidsData from "@/data/manual/tetrahedral-voids.json";
 import graphiteData from "@/data/manual/graphite.json";
+import ethylenePlanarData from "@/data/manual/ethylene-planar.json";
 
 export type MockMoleculeRecord = MoleculeRecord & {
   geometryZh: string;
@@ -50,6 +51,7 @@ const realMoleculesById = new Map<string, MoleculeRecord>([
   ["octahedral-voids", octahedralVoidsData as unknown as MoleculeRecord],
   ["tetrahedral-voids", tetrahedralVoidsData as unknown as MoleculeRecord],
   ["graphite", graphiteData as unknown as MoleculeRecord],
+  ["ethylene-planar", ethylenePlanarData as unknown as MoleculeRecord],
 ]);
 
 /** Returns the hand-authored 3D data for a molecule, or undefined. */

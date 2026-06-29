@@ -8,106 +8,127 @@
   },
   "nameZh": "金属锌晶体结构",
   "category": "crystal",
-  "summaryZh": "金属锌可作为六方最密堆积的高中教学实例。观察中心 Zn 原子时，同层有 6 个最近邻，上下两层各有 3 个最近邻，配位数为 12。",
+  "summaryZh": "金属锌可作为六方最密堆积的高中教学模型。六方晶胞呈 A-B-A 金属原子堆积，平均每个晶胞含 6 个 Zn 原子；观察周期延展后的局部环境时，一个 Zn 的配位数为 12。",
   "atoms": [
-    { "id": "zn-center", "element": "Zn", "label": "Zn", "position": [0, 0, 0], "radius": 0.14, "color": "#A3A3A3", "siteType": "body-center" },
-    { "id": "zn-same-1", "element": "Zn", "label": "Zn", "position": [0.86, 0, 0], "radius": 0.12, "color": "#C7C7C7" },
-    { "id": "zn-same-2", "element": "Zn", "label": "Zn", "position": [0.43, 0, 0.745], "radius": 0.12, "color": "#C7C7C7" },
-    { "id": "zn-same-3", "element": "Zn", "label": "Zn", "position": [-0.43, 0, 0.745], "radius": 0.12, "color": "#C7C7C7" },
-    { "id": "zn-same-4", "element": "Zn", "label": "Zn", "position": [-0.86, 0, 0], "radius": 0.12, "color": "#C7C7C7" },
-    { "id": "zn-same-5", "element": "Zn", "label": "Zn", "position": [-0.43, 0, -0.745], "radius": 0.12, "color": "#C7C7C7" },
-    { "id": "zn-same-6", "element": "Zn", "label": "Zn", "position": [0.43, 0, -0.745], "radius": 0.12, "color": "#C7C7C7" },
-    { "id": "zn-upper-1", "element": "Zn", "label": "Zn", "position": [0.43, 0.7, 0.248], "radius": 0.12, "color": "#E5D6A8" },
-    { "id": "zn-upper-2", "element": "Zn", "label": "Zn", "position": [-0.43, 0.7, 0.248], "radius": 0.12, "color": "#E5D6A8" },
-    { "id": "zn-upper-3", "element": "Zn", "label": "Zn", "position": [0, 0.7, -0.496], "radius": 0.12, "color": "#E5D6A8" },
-    { "id": "zn-lower-1", "element": "Zn", "label": "Zn", "position": [0.43, -0.7, -0.248], "radius": 0.12, "color": "#B9D7D2" },
-    { "id": "zn-lower-2", "element": "Zn", "label": "Zn", "position": [-0.43, -0.7, -0.248], "radius": 0.12, "color": "#B9D7D2" },
-    { "id": "zn-lower-3", "element": "Zn", "label": "Zn", "position": [0, -0.7, 0.496], "radius": 0.12, "color": "#B9D7D2" }
+    { "id": "zn-bottom-corner-1", "element": "Zn", "label": "Zn", "position": [0.95, -0.75, 0], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-bottom-corner-2", "element": "Zn", "label": "Zn", "position": [0.475, -0.75, 0.823], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-bottom-corner-3", "element": "Zn", "label": "Zn", "position": [-0.475, -0.75, 0.823], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-bottom-corner-4", "element": "Zn", "label": "Zn", "position": [-0.95, -0.75, 0], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-bottom-corner-5", "element": "Zn", "label": "Zn", "position": [-0.475, -0.75, -0.823], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-bottom-corner-6", "element": "Zn", "label": "Zn", "position": [0.475, -0.75, -0.823], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-top-corner-1", "element": "Zn", "label": "Zn", "position": [0.95, 0.75, 0], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-top-corner-2", "element": "Zn", "label": "Zn", "position": [0.475, 0.75, 0.823], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-top-corner-3", "element": "Zn", "label": "Zn", "position": [-0.475, 0.75, 0.823], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-top-corner-4", "element": "Zn", "label": "Zn", "position": [-0.95, 0.75, 0], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-top-corner-5", "element": "Zn", "label": "Zn", "position": [-0.475, 0.75, -0.823], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-top-corner-6", "element": "Zn", "label": "Zn", "position": [0.475, 0.75, -0.823], "radius": 0.105, "color": "#94A3B8", "siteType": "corner" },
+    { "id": "zn-bottom-face", "element": "Zn", "label": "Zn", "position": [0, -0.75, 0], "radius": 0.12, "color": "#94A3B8", "siteType": "face-center" },
+    { "id": "zn-top-face", "element": "Zn", "label": "Zn", "position": [0, 0.75, 0], "radius": 0.12, "color": "#94A3B8", "siteType": "face-center" },
+    { "id": "zn-inner-1", "element": "Zn", "label": "Zn", "position": [0.475, 0, 0.274], "radius": 0.12, "color": "#94A3B8" },
+    { "id": "zn-inner-2", "element": "Zn", "label": "Zn", "position": [-0.475, 0, 0.274], "radius": 0.12, "color": "#94A3B8" },
+    { "id": "zn-inner-3", "element": "Zn", "label": "Zn", "position": [0, 0, -0.548], "radius": 0.12, "color": "#94A3B8" }
   ],
-  "coordinationLinks": [
-    { "id": "zn-center-same-1", "atomIds": ["zn-center", "zn-same-1"], "labelZh": "同层最近邻" },
-    { "id": "zn-center-same-2", "atomIds": ["zn-center", "zn-same-2"], "labelZh": "同层最近邻" },
-    { "id": "zn-center-same-3", "atomIds": ["zn-center", "zn-same-3"], "labelZh": "同层最近邻" },
-    { "id": "zn-center-same-4", "atomIds": ["zn-center", "zn-same-4"], "labelZh": "同层最近邻" },
-    { "id": "zn-center-same-5", "atomIds": ["zn-center", "zn-same-5"], "labelZh": "同层最近邻" },
-    { "id": "zn-center-same-6", "atomIds": ["zn-center", "zn-same-6"], "labelZh": "同层最近邻" },
-    { "id": "zn-center-upper-1", "atomIds": ["zn-center", "zn-upper-1"], "labelZh": "上层最近邻" },
-    { "id": "zn-center-upper-2", "atomIds": ["zn-center", "zn-upper-2"], "labelZh": "上层最近邻" },
-    { "id": "zn-center-upper-3", "atomIds": ["zn-center", "zn-upper-3"], "labelZh": "上层最近邻" },
-    { "id": "zn-center-lower-1", "atomIds": ["zn-center", "zn-lower-1"], "labelZh": "下层最近邻" },
-    { "id": "zn-center-lower-2", "atomIds": ["zn-center", "zn-lower-2"], "labelZh": "下层最近邻" },
-    { "id": "zn-center-lower-3", "atomIds": ["zn-center", "zn-lower-3"], "labelZh": "下层最近邻" }
-  ],
+  "coordinationLinks": [],
   "bonds": [],
   "lonePairs": [],
   "keyAngles": [],
   "lessonSteps": [
     {
+      "id": "cell",
+      "titleZh": "观察六方晶胞",
+      "bodyZh": "先观察六方柱晶胞：上下两层为 A 层，晶胞中部有 3 个内部 Zn 构成 B 层。"
+    },
+    {
       "id": "layer",
-      "titleZh": "先看同层六边形",
-      "bodyZh": "中心 Zn 原子周围同一层有 6 个最近邻，形成六边形环绕。",
-      "focusAtomIds": ["zn-center", "zn-same-1", "zn-same-2", "zn-same-3", "zn-same-4", "zn-same-5", "zn-same-6"]
+      "titleZh": "理解 A-B-A 堆积",
+      "bodyZh": "上下两层 A 层位置对应，中间 B 层落在 A 层三角形空隙上方，形成六方最密堆积。"
     },
     {
       "id": "coordination",
-      "titleZh": "再数上下两层",
-      "bodyZh": "上层 3 个、下层 3 个 Zn 原子也与中心原子相邻，所以配位数为 6 + 3 + 3 = 12。"
+      "titleZh": "数出十二配位",
+      "bodyZh": "切换到周期延展后的局部配位簇：中心 Zn 同层有 6 个最近邻，上层 3 个、下层 3 个最近邻，配位数为 12。"
+    },
+    {
+      "id": "counting",
+      "titleZh": "完成晶胞计数",
+      "bodyZh": "只按平均占有计数：顶角 12 × 1/6 = 2，面心 2 × 1/2 = 1，内部 3 × 1 = 3，合计 6。"
+    },
+    {
+      "id": "metallicBond",
+      "titleZh": "认识金属键",
+      "bodyZh": "金属键可用电子海模型理解：金属阳离子或原子实与离域电子之间存在整体作用，不是定向共价键。"
     }
   ],
   "rendering": {
-    "cameraPosition": [3.1, 2.35, 3.6],
+    "cameraPosition": [3.1, 2.45, 3.7],
     "cameraFov": 42,
     "showAtomLabels": false
   },
   "metadata": {
     "level": "high-school",
     "source": "Hand-authored teaching model",
-    "notesZh": "用于说明六方最密堆积的十二配位关系，坐标为教学示意。",
+    "notesZh": "用于说明人教版高中选择性必修 2 中六方最密堆积、十二配位和六方晶胞平均占有计数关系；坐标为教学示意。",
     "verified": true
   },
   "crystalTeaching": {
+    "currentModelZh": "金属锌晶体结构",
     "structureTypeZh": "金属晶体",
     "modelZh": "六方最密堆积教学模型",
     "coordinationNumberZh": "12",
-    "spatialFeatureZh": "同层 6 个最近邻，上下两层各 3 个最近邻",
-    "unitCellDescriptionZh": "本模型突出一个中心 Zn 原子的最近邻环境，不作为完整晶胞计数模型。",
+    "spatialFeatureLabelZh": "层状特征",
+    "spatialFeatureZh": "A-B-A 层状密堆积",
+    "teachingTipZh": "本模型突出高中教材中的晶胞、配位和计数关系，不展示真实晶体全部周期延展。堆积模型表示 Zn 金属原子堆积，不是分子堆积；颜色仅表示教学高亮，不代表不同元素。",
+    "unitCellDescriptionZh": "六方柱晶胞中可见 12 个顶角 Zn、上下两个面心 Zn 和 3 个内部 Zn。顶角和面心原子会被相邻晶胞共享，内部 Zn 完整属于本晶胞。",
     "particleCountZh": {
-      "lines": ["同层最近邻：6", "上层最近邻：3", "下层最近邻：3", "总配位数：6 + 3 + 3 = 12"],
-      "ratio": "中心 Zn 原子的配位数为 12。"
+      "lines": [
+        "顶角 Zn：12 × 1/6 = 2",
+        "面心 Zn：2 × 1/2 = 1",
+        "内部 Zn：3 × 1 = 3",
+        "合计：2 + 1 + 3 = 6"
+      ],
+      "ratio": "平均每个六方晶胞含 6 个 Zn 原子。"
     },
     "coordinationDescriptionZh": [
-      "先锁定中心 Zn 原子，再按层数最近邻。",
-      "同层六边形给出 6 个最近邻。",
-      "上下两层各补 3 个最近邻，合计 12。"
+      "配位环境模式使用周期延展后的局部 12 配位簇，不只依赖单个六方晶胞内的可见原子。",
+      "中心 Zn 同层有 6 个最近邻，上层 3 个最近邻，下层 3 个最近邻，合计配位数为 12。",
+      "配位模式中的虚线只表示最近邻关系，不表示共价键。",
+      "金属键是金属阳离子或原子实与离域电子之间的整体作用；金属键不是固定方向的共价键。"
     ],
     "commonMistakesZh": [
-      "不要把屏幕中看到的原子总数直接当作一个晶胞内的原子数。",
-      "配位数数的是最近邻原子个数，不是晶胞中可见原子个数。"
+      "不要把计数模式和配位数混在一起：晶胞计数求平均占有数，配位数数最近邻个数。",
+      "不要把教学高亮颜色理解成不同元素，所有球都表示 Zn。",
+      "不要把最近邻虚线当作 Zn-Zn 共价键。"
     ],
     "viewModes": [
       {
         "id": "cell",
-        "labelZh": "堆积",
-        "titleZh": "六方最密堆积",
-        "bodyZh": "三层 Zn 原子错位堆积，中心原子被周围最近邻包围。"
+        "labelZh": "晶胞",
+        "titleZh": "六方晶胞",
+        "bodyZh": "显示完整六方柱晶胞和全部 Zn 原子：12 个顶角、上下 2 个面心和 3 个内部 Zn。默认颜色统一表示同一种 Zn 元素；堆积模型表示金属原子堆积。"
+      },
+      {
+        "id": "layer",
+        "labelZh": "分层堆积",
+        "titleZh": "A-B-A 层状堆积",
+        "bodyZh": "上下两层为 A 层，中间为 B 层。淡色水平面和 A/B/A 标签只帮助观察层状堆积关系。"
       },
       {
         "id": "coordination",
-        "labelZh": "配位",
-        "titleZh": "十二配位",
-        "bodyZh": "连线显示中心 Zn 到 12 个最近邻的空间关系。"
+        "labelZh": "配位环境",
+        "titleZh": "局部十二配位",
+        "bodyZh": "切换到周期延展后的局部配位簇：中心 Zn 周围同层 6 个、上层 3 个、下层 3 个最近邻，配位数为 12。虚线只表示最近邻关系，不表示共价键。"
       },
       {
         "id": "counting",
-        "labelZh": "分层数",
-        "titleZh": "6 + 3 + 3",
-        "bodyZh": "按同层、上层、下层分层计数，避免漏掉上下层最近邻。"
+        "labelZh": "晶胞计数",
+        "titleZh": "六方晶胞平均占有",
+        "bodyZh": "本模式只讲平均占有：顶角、面心、内部原子按共享关系分别贡献 1/6、1/2、1，合计每个晶胞 6 个 Zn。"
       },
       {
         "id": "metallicBond",
         "labelZh": "金属键",
-        "titleZh": "金属键示意",
-        "bodyZh": "淡色电子云只用于提示金属键的离域特征，不代表具体电子轨道形状。"
+        "titleZh": "电子海模型",
+        "bodyZh": "半透明电子海和漂浮电子点表示离域电子的整体作用。金属键不是固定方向的共价键，因此不画 Zn-Zn 方向性实线键。"
       }
     ]
   }
