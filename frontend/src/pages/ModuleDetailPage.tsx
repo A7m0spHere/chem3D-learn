@@ -42,6 +42,9 @@ const AcetyleneLinearCell = lazy(() =>
 const SigmaPiBondCell = lazy(() =>
   import("@/components/three/SigmaPiBondCell").then((m) => ({ default: m.SigmaPiBondCell })),
 );
+const BondingBasicsCell = lazy(() =>
+  import("@/components/three/BondingBasicsCell").then((m) => ({ default: m.BondingBasicsCell })),
+);
 const MolecularPolarityCell = lazy(() =>
   import("@/components/three/MolecularPolarityCell").then((m) => ({ default: m.MolecularPolarityCell })),
 );
@@ -58,6 +61,8 @@ import { AcetyleneLinearPanel } from "@/components/learning/AcetyleneLinearPanel
 import { AcetyleneLinearToolbar } from "@/components/learning/AcetyleneLinearToolbar";
 import { SigmaPiBondPanel } from "@/components/learning/SigmaPiBondPanel";
 import { SigmaPiBondToolbar } from "@/components/learning/SigmaPiBondToolbar";
+import { BondingBasicsPanel } from "@/components/learning/BondingBasicsPanel";
+import { BondingBasicsToolbar } from "@/components/learning/BondingBasicsToolbar";
 import { MolecularPolarityPanel } from "@/components/learning/MolecularPolarityPanel";
 import { MolecularPolarityToolbar } from "@/components/learning/MolecularPolarityToolbar";
 import { LessonPanel } from "@/components/learning/LessonPanel";
@@ -81,11 +86,16 @@ import type {
   BenzenePlanarMode,
   EthylenePlanarMode,
   OrganicCoplanarMode,
-  SigmaPiBondMode,
 } from "@/types/molecule";
 import type { EthylenePlaneView } from "@/data/ethylenePlanar";
 import type { BenzenePlaneView } from "@/data/benzenePlanar";
 import type { AcetyleneLineView } from "@/data/acetyleneLinear";
+import type { PiBondMode, SigmaBondMode } from "@/data/sigmaPiBonds";
+import {
+  getDefaultBondingBasicsMode,
+  isBondingBasicsModuleId,
+  type BondingBasicsMode,
+} from "@/data/bondingBasics";
 
 // ---------------------------------------------------------------------------
 // Viewer 注册表：用单一 viewerKind 判别取代原先散落在 viewer/toolbar/panel
@@ -94,7 +104,9 @@ import type { AcetyleneLineView } from "@/data/acetyleneLinear";
 
 type ViewerKind =
   | "polarity"
-  | "sigma-pi"
+  | "sigma-bond"
+  | "pi-bond"
+  | "bonding-basics"
   | "ethylene"
   | "benzene"
   | "acetylene"
@@ -125,8 +137,14 @@ function deriveViewerKind(
   switch (moduleData.id) {
     case "polarity-judgment":
       return "polarity";
-    case "sigma-pi-bonds":
-      return "sigma-pi";
+    case "sigma-bond-orbitals":
+      return "sigma-bond";
+    case "pi-bond-orbitals":
+      return "pi-bond";
+    case "hybrid-orbitals-sp":
+    case "ionic-bond-formation":
+    case "coordinate-bond-formation":
+      return "bonding-basics";
     case "ethylene-planar":
       return "ethylene";
     case "benzene-planar":
@@ -213,8 +231,11 @@ export function ModuleDetailPage() {
   const [benzenePlaneView, setBenzenePlaneView] = useState<BenzenePlaneView>("top");
   const [acetyleneMode, setAcetyleneMode] = useState<AcetyleneLinearMode>("overview");
   const [acetyleneLineView, setAcetyleneLineView] = useState<AcetyleneLineView>("front");
-  const [sigmaPiBondMode, setSigmaPiBondMode] = useState<SigmaPiBondMode>("overview");
+  const [sigmaBondMode, setSigmaBondMode] = useState<SigmaBondMode>("ss");
+  const [piBondMode, setPiBondMode] = useState<PiBondMode>("before");
+  const [piBondPlaying, setPiBondPlaying] = useState(false);
   const [showSigmaPiBondLabels, setShowSigmaPiBondLabels] = useState(false);
+  const [bondingBasicsMode, setBondingBasicsMode] = useState<BondingBasicsMode>("sp");
   const [molecularPolarityMode, setMolecularPolarityMode] =
     useState<MolecularPolarityMode>("electronegativity");
   const [viewerLoading, setViewerLoading] = useState(false);
@@ -238,8 +259,15 @@ export function ModuleDetailPage() {
     setBenzenePlaneView("top");
     setAcetyleneMode("overview");
     setAcetyleneLineView("front");
-    setSigmaPiBondMode("overview");
+    setSigmaBondMode("ss");
+    setPiBondMode("before");
+    setPiBondPlaying(false);
     setShowSigmaPiBondLabels(false);
+    if (id && isBondingBasicsModuleId(id)) {
+      setBondingBasicsMode(getDefaultBondingBasicsMode(id));
+    } else {
+      setBondingBasicsMode("sp");
+    }
     setMolecularPolarityMode("electronegativity");
     setViewerLoading(true);
     setCompletedSteps(new Set());
@@ -258,6 +286,9 @@ export function ModuleDetailPage() {
 
   const activeStep = molecule?.lessonSteps[activeStepIndex] ?? molecule?.lessonSteps[0];
   const viewerKind = deriveViewerKind(moduleData, molecule, usesRealViewer);
+  const bondingBasicsModuleId = isBondingBasicsModuleId(moduleData.id)
+    ? moduleData.id
+    : "hybrid-orbitals-sp";
   const supportsPackingModel = molecule?.id === "zinc-metal";
   const crystalModes = molecule?.crystalTeaching?.viewModes ?? [];
   const defaultCrystalViewMode = crystalModes[0]?.id ?? "cell";
@@ -347,25 +378,75 @@ export function ModuleDetailPage() {
         </div>
       ),
     },
-    "sigma-pi": {
+    "sigma-bond": {
       viewer: () => (
         <SigmaPiBondCell
+          lessonType="sigma"
           loading={viewerLoading}
-          mode={sigmaPiBondMode}
+          mode={sigmaBondMode}
           showLabels={showSigmaPiBondLabels}
         />
       ),
       toolbar: () => (
         <SigmaPiBondToolbar
-          activeMode={sigmaPiBondMode}
-          onModeChange={setSigmaPiBondMode}
+          activeMode={sigmaBondMode}
+          lessonType="sigma"
+          onModeChange={setSigmaBondMode}
           onToggleLabels={() => setShowSigmaPiBondLabels((value) => !value)}
           showLabels={showSigmaPiBondLabels}
         />
       ),
       panel: () => (
         <div className="flex-1 min-h-[400px]">
-          <SigmaPiBondPanel activeMode={sigmaPiBondMode} />
+          <SigmaPiBondPanel activeMode={sigmaBondMode} lessonType="sigma" />
+        </div>
+      ),
+    },
+    "pi-bond": {
+      viewer: () => (
+        <SigmaPiBondCell
+          lessonType="pi"
+          loading={viewerLoading}
+          mode={piBondMode}
+          playing={piBondPlaying}
+          showLabels={showSigmaPiBondLabels}
+        />
+      ),
+      toolbar: () => (
+        <SigmaPiBondToolbar
+          activeMode={piBondMode}
+          isPlaying={piBondPlaying}
+          lessonType="pi"
+          onModeChange={setPiBondMode}
+          onToggleLabels={() => setShowSigmaPiBondLabels((value) => !value)}
+          onTogglePlaying={() => setPiBondPlaying((value) => !value)}
+          showLabels={showSigmaPiBondLabels}
+        />
+      ),
+      panel: () => (
+        <div className="flex-1 min-h-[400px]">
+          <SigmaPiBondPanel activeMode={piBondMode} lessonType="pi" />
+        </div>
+      ),
+    },
+    "bonding-basics": {
+      viewer: () => (
+        <BondingBasicsCell
+          loading={viewerLoading}
+          mode={bondingBasicsMode}
+          moduleId={bondingBasicsModuleId}
+        />
+      ),
+      toolbar: () => (
+        <BondingBasicsToolbar
+          activeMode={bondingBasicsMode}
+          moduleId={bondingBasicsModuleId}
+          onModeChange={setBondingBasicsMode}
+        />
+      ),
+      panel: () => (
+        <div className="flex-1 min-h-[400px]">
+          <BondingBasicsPanel activeMode={bondingBasicsMode} moduleId={bondingBasicsModuleId} />
         </div>
       ),
     },
@@ -699,7 +780,9 @@ export function ModuleDetailPage() {
           <div className="lg:col-span-2 xl:col-span-1 flex flex-col gap-4">
             <div
               className={`relative flex min-h-[430px] overflow-hidden rounded-2xl border border-border bg-white/70 shadow-panel backdrop-blur-xl sm:min-h-[500px] ${
-                viewerKind === "sigma-pi"
+                viewerKind === "sigma-bond" ||
+                viewerKind === "pi-bond" ||
+                viewerKind === "bonding-basics"
                   ? "lg:h-[calc(100vh-280px)] lg:min-h-[500px]"
                   : "lg:h-[calc(100vh-220px)] lg:min-h-[600px]"
               }`}

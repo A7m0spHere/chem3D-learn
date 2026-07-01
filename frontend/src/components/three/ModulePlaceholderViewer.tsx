@@ -1,4 +1,4 @@
-import { Box, Orbit, Hexagon, Layers, Scan } from "lucide-react";
+import { Box, Orbit, Hexagon, Layers } from "lucide-react";
 import type { ModuleCategory } from "@/data/learningModules";
 
 type ModulePlaceholderViewerProps = {
@@ -17,9 +17,8 @@ export function ModulePlaceholderViewer({ category, visualFocus }: ModulePlaceho
         return { icon: Hexagon, label: "碳骨架立体构象", color: "text-amber-500", bg: "bg-amber-50" };
       case "bonding-orbitals":
         return { icon: Layers, label: "轨道重叠与电子云", color: "text-purple-500", bg: "bg-purple-50" };
-      case "exam-spatial-thinking":
       default:
-        return { icon: Scan, label: "空间结构解题辅助", color: "text-slate-500", bg: "bg-slate-50" };
+        return { icon: Layers, label: "空间结构辅助", color: "text-slate-500", bg: "bg-slate-50" };
     }
   };
 

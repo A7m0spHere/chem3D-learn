@@ -8,7 +8,7 @@
   "formula": "C2H4",
   "nameZh": "乙烯平面结构",
   "category": "vsepr",
-  "summaryZh": "乙烯 C2H4 中 2 个 C 和 4 个 H 位于同一平面。每个碳原子为 sp2 杂化，C=C 双键由 1 个 σ 键和 1 个 π 键组成。",
+  "summaryZh": "乙烯 C2H4 中 2 个 C 和 4 个 H 位于同一平面。每个碳原子为 sp² 杂化，C=C 双键由 1 个 σ 键和 1 个 π 键组成。",
   "atoms": [
     {
       "id": "c1",
@@ -92,7 +92,7 @@
       "atomIds": ["h1", "c1", "c2"],
       "valueDeg": 120,
       "label": "≈120°",
-      "descriptionZh": "sp2 杂化使每个碳原子周围三个 σ 键方向接近平面三角形。"
+      "descriptionZh": "sp² 杂化使每个碳原子周围三个 σ 键方向接近平面三角形。"
     },
     {
       "id": "h2-c1-c2",
@@ -113,7 +113,7 @@
       "atomIds": ["c1", "c2", "h4"],
       "valueDeg": 120,
       "label": "≈120°",
-      "descriptionZh": "两个碳原子的局部结构都体现 sp2 杂化特点。"
+      "descriptionZh": "两个碳原子的局部结构都体现 sp² 杂化特点。"
     }
   ],
   "lessonSteps": [
@@ -126,7 +126,7 @@
     {
       "id": "angle",
       "titleZh": "观察约 120° 键角",
-      "bodyZh": "每个碳为 sp2 杂化，三个 σ 键方向形成近似平面三角形，键角约 120°。",
+      "bodyZh": "每个碳为 sp² 杂化，三个 σ 键方向形成近似平面三角形，键角约 120°。",
       "focusAngleIds": ["h1-c1-c2", "h2-c1-c2", "c1-c2-h3", "c1-c2-h4"],
       "showAngles": true
     },
@@ -148,7 +148,7 @@
   "metadata": {
     "level": "high-school",
     "source": "手写高中教学示意坐标",
-    "notesZh": "坐标用于教学显示，重点表达乙烯 6 原子共面、sp2 构型和 π 键限制旋转。",
+    "notesZh": "坐标用于教学显示，重点表达乙烯 6 原子共面、sp² 构型和 π 键限制旋转。",
     "verified": true
   }
 }

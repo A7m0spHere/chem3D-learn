@@ -2,6 +2,10 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
 import { Quaternion, Vector3 } from "three";
+import {
+  htmlOverlayAmberCompactLabelClass,
+  htmlOverlayCompactLabelClass,
+} from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
@@ -298,7 +302,7 @@ function CarbonAtom({ atom, viewMode, voidStage, showLabel, useCompactLabelSet }
       ) : null}
       {shouldShowLabel ? (
         <Html center distanceFactor={useCompactLabelSet ? 7.4 : 6.8} pointerEvents="none" position={[0, radius + 0.08, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-text-primary shadow-sm sm:text-xs">
+          <span className={htmlOverlayCompactLabelClass}>
             {labelText}
           </span>
         </Html>
@@ -467,7 +471,7 @@ function TetrahedralVoidMarker({ site, stage, showLabel }: TetrahedralVoidMarker
       ) : null}
       {shouldShowLabel ? (
         <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.08, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-amber-200 bg-amber-50/95 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900 shadow-sm sm:text-xs">
+          <span className={htmlOverlayAmberCompactLabelClass}>
             {site.label}
           </span>
         </Html>

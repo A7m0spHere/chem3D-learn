@@ -65,10 +65,10 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-text-primary">五大核心学习分类</h2>
-              <p className="mt-4 text-text-secondary max-w-2xl mx-auto">涵盖高中结构化学全部空间痛点，从基础构型到能力扩展计算。</p>
+              <h2 className="text-3xl font-bold text-text-primary">四大核心学习分类</h2>
+              <p className="mt-4 text-text-secondary max-w-2xl mx-auto">围绕分子构型、晶体结构、有机空间结构和化学键轨道，建立高中结构化学的 3D 空间直觉。</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {categories.map((cat) => (
                 <Link to={`/#${cat.id}`} key={cat.id} className="group block rounded-2xl border border-border bg-background p-6 transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-panel hover:bg-white text-center">
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary-dark mb-4 transition-transform group-hover:scale-110">

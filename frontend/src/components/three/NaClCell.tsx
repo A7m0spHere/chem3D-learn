@@ -2,6 +2,10 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import {
+  htmlOverlayAmberLabelClass,
+  htmlOverlayLabelClass,
+} from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
@@ -272,7 +276,7 @@ function IonMesh({ atom, viewMode, voidStage, showLabel }: IonMeshProps) {
       ) : null}
       {shouldShowLabel ? (
         <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.12, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-text-primary shadow-sm">
+          <span className={htmlOverlayLabelClass}>
             {labelText}
           </span>
         </Html>
@@ -325,7 +329,7 @@ function VoidMarker({ atom, stage, showLabel }: VoidMarkerProps) {
       ) : null}
       {shouldShowLabel ? (
         <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.12, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-amber-200 bg-amber-50/95 px-1.5 py-0.5 text-xs font-semibold text-amber-900 shadow-sm">
+          <span className={htmlOverlayAmberLabelClass}>
             {label}
           </span>
         </Html>

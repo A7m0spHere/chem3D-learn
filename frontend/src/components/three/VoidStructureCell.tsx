@@ -2,6 +2,10 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import {
+  htmlOverlayAmberStrongLabelClass,
+  htmlOverlayLabelClass,
+} from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
@@ -152,7 +156,7 @@ function HostSphere({ atom, viewMode, showLabel }: HostSphereProps) {
       </mesh>
       {showLabel ? (
         <Html center distanceFactor={6.8} pointerEvents="none" position={[0, radius + 0.1, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-text-primary shadow-sm">
+          <span className={htmlOverlayLabelClass}>
             {atom.label}
           </span>
         </Html>
@@ -189,7 +193,7 @@ function VoidMarker({ atom, filled, showLabel }: VoidMarkerProps) {
       </mesh>
       {showLabel ? (
         <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.16, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-xs font-bold text-amber-900 shadow-sm">
+          <span className={htmlOverlayAmberStrongLabelClass}>
             {filled ? "填入小球" : "空隙中心"}
           </span>
         </Html>

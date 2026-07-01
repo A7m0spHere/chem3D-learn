@@ -1,6 +1,7 @@
 import { Html, Line } from "@react-three/drei";
 import { useMemo } from "react";
 import { QuadraticBezierCurve3, Vector3 } from "three";
+import { htmlOverlayAngleLabelClass } from "@/components/three/htmlOverlayStyles";
 import type { AngleSpec, Atom } from "@/types/molecule";
 
 type Vec3 = [number, number, number];
@@ -87,7 +88,7 @@ export function AngleArc({
           className={
             labelVariant === "minimal"
               ? "whitespace-nowrap text-[11px] font-bold text-[#B96320] drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
-              : "whitespace-nowrap rounded-md border border-accent bg-white px-2 py-1 text-xs font-bold text-primary-dark shadow-sm"
+              : htmlOverlayAngleLabelClass
           }
         >
           {angle.label}

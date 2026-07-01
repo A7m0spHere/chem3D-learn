@@ -41,12 +41,6 @@ export type AcetyleneLinearMode =
   | "angle"
   | "piBond"
   | "tripleBond";
-export type SigmaPiBondMode =
-  | "overview"
-  | "sigma"
-  | "pi"
-  | "doubleBond";
-
 export type MoleculeNames = {
   zh: string;
   en?: string;

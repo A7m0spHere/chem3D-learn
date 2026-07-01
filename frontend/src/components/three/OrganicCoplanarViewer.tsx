@@ -2,6 +2,10 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import {
+  htmlOverlaySubtleLabelClass,
+  htmlOverlaySubtleWideLabelClass,
+} from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getOrganicCoplanarModeInfo } from "@/data/organicCoplanar";
 import type { OrganicCoplanarMode } from "@/types/molecule";
@@ -286,8 +290,16 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
     lonePairDirection: normalize(sub(lonePairPosition, amineN)),
     fragmentLabels: [
       { label: "苯环平面", position: [0, 0, 0.18], fragment: "ring" },
-      { label: "sp3 · CH3", position: add(methylC, [0.18, -0.18, 0.62]), fragment: "sp3" },
-      { label: vinylAligned ? "sp2 · 已对齐" : "sp2 · 约 45°", position: add(vinylC1, [0.12, 0.18, 0.58]), fragment: "sp2" },
+      {
+        label: "sp³ · CH3",
+        position: add(methylC, [0.18, -0.18, 0.62]),
+        fragment: "sp3",
+      },
+      {
+        label: vinylAligned ? "sp² · 已对齐" : "sp² · 约 45°",
+        position: add(vinylC1, [0.12, 0.18, 0.58]),
+        fragment: "sp2",
+      },
       { label: "sp · 直线", position: add(ethynylC1, [0, -0.34, 0.36]), fragment: "sp" },
       { label: "NH2 · 空间示意", position: add(amineN, [-0.52, 0.36, 0.42]), fragment: "amine" },
     ],
@@ -388,7 +400,7 @@ function OrganicAtomMesh({
       </mesh>
       {labelShouldShow ? (
         <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.14, 0]}>
-          <span className="rounded border border-primary/10 bg-white/65 px-1 py-0.5 text-[11px] font-semibold text-text-primary/75 shadow-[0_1px_3px_rgba(31,41,51,0.06)]">
+          <span className={htmlOverlaySubtleLabelClass}>
             {atom.label}
           </span>
         </Html>
@@ -608,7 +620,7 @@ function ModeLabels({
             pointerEvents="none"
             position={label.position}
           >
-            <span className="whitespace-nowrap rounded border border-primary/10 bg-white/65 px-1.5 py-0.5 text-[11px] font-semibold text-text-primary/75 shadow-[0_1px_3px_rgba(31,41,51,0.06)]">
+            <span className={htmlOverlaySubtleWideLabelClass}>
               {label.label}
             </span>
           </Html>

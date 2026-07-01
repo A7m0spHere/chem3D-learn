@@ -1,30 +1,21 @@
-import { FlaskConical, Info, Orbit, Sigma } from "lucide-react";
+import { FlaskConical, Info, Lightbulb } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { getOrbitalBondLesson, getOrbitalBondModeInfo } from "@/data/sigmaPiBonds";
-import type { PiBondMode, SigmaBondMode } from "@/data/sigmaPiBonds";
+import { getBondingBasicsLesson, getBondingBasicsModeInfo } from "@/data/bondingBasics";
+import type { BondingBasicsMode, BondingBasicsModuleId } from "@/data/bondingBasics";
 
-type SigmaPiBondPanelProps =
-  | {
-      lessonType: "sigma";
-      activeMode: SigmaBondMode;
-    }
-  | {
-      lessonType: "pi";
-      activeMode: PiBondMode;
-    };
+type BondingBasicsPanelProps = {
+  moduleId: BondingBasicsModuleId;
+  activeMode: BondingBasicsMode;
+};
 
-export function SigmaPiBondPanel(props: SigmaPiBondPanelProps) {
-  const lesson = getOrbitalBondLesson(props.lessonType);
-  const modeInfo =
-    props.lessonType === "sigma"
-      ? getOrbitalBondModeInfo("sigma", props.activeMode)
-      : getOrbitalBondModeInfo("pi", props.activeMode);
-  const LessonIcon = props.lessonType === "sigma" ? Sigma : Orbit;
+export function BondingBasicsPanel({ moduleId, activeMode }: BondingBasicsPanelProps) {
+  const lesson = getBondingBasicsLesson(moduleId);
+  const modeInfo = getBondingBasicsModeInfo(moduleId, activeMode);
 
   return (
     <aside className="flex h-full min-h-[400px] flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md">
@@ -40,7 +31,7 @@ export function SigmaPiBondPanel(props: SigmaPiBondPanelProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
-        <div key={`${props.lessonType}-${props.activeMode}`} className="motion-fade-in space-y-6">
+        <div key={`${moduleId}-${activeMode}`} className="motion-fade-in space-y-6">
           <Accordion type="multiple" defaultValue={["info", "points"]} className="w-full space-y-5">
             <AccordionItem value="info" className="rounded-2xl border border-white/60 bg-white/60 px-5 shadow-sm border-b-0 data-[state=open]:pb-2">
               <AccordionTrigger className="hover:no-underline py-5">
@@ -84,28 +75,15 @@ export function SigmaPiBondPanel(props: SigmaPiBondPanelProps) {
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="exam" className="rounded-2xl border border-primary/15 bg-primary/5 px-5 shadow-sm border-b-0 data-[state=open]:pb-2">
+            <AccordionItem value="limit" className="rounded-2xl border border-accent/30 bg-accent/10 px-5 shadow-sm border-b-0 data-[state=open]:pb-2">
               <AccordionTrigger className="hover:no-underline py-5">
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-primary-dark">
-                  <LessonIcon className="h-4 w-4" aria-hidden="true" />
-                  考试迁移
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
+                  <Lightbulb className="h-4 w-4 text-accent" aria-hidden="true" />
+                  模型说明
                 </h3>
               </AccordionTrigger>
               <AccordionContent>
-                <p className="text-sm leading-6 text-text-secondary">
-                  {modeInfo.examNote}
-                </p>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="limit" className="rounded-2xl border border-accent/30 bg-accent/10 px-5 shadow-sm border-b-0 data-[state=open]:pb-2">
-              <AccordionTrigger className="hover:no-underline py-5">
-                <h3 className="text-sm font-semibold text-text-primary">模型说明</h3>
-              </AccordionTrigger>
-              <AccordionContent>
-                <p className="text-sm leading-6 text-text-secondary">
-                  {lesson.limitation}
-                </p>
+                <p className="text-sm leading-6 text-text-secondary">{lesson.limitation}</p>
               </AccordionContent>
             </AccordionItem>
           </Accordion>

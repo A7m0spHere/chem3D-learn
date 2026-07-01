@@ -1,68 +1,126 @@
-import type { SigmaPiBondMode } from "@/types/molecule";
+export type OrbitalBondLessonType = "sigma" | "pi";
+export type SigmaBondMode = "ss" | "sp";
+export type PiBondMode = "before" | "forming" | "after";
 
-export type SigmaPiBondModeInfo = {
-  id: SigmaPiBondMode;
+export type OrbitalBondModeInfo = {
+  id: SigmaBondMode | PiBondMode;
   label: string;
   title: string;
   description: string;
   points: string[];
-  viewerLabel: string;
   viewerTitle: string;
   viewerSummary: string;
   examNote: string;
 };
 
-export const sigmaPiBondModes: SigmaPiBondModeInfo[] = [
+export type OrbitalBondLessonInfo = {
+  type: OrbitalBondLessonType;
+  title: string;
+  eyebrow: string;
+  subtitle: string;
+  modelObject: string;
+  badge: string;
+  modes: OrbitalBondModeInfo[];
+  limitation: string;
+};
+
+export const sigmaBondModes: OrbitalBondModeInfo[] = [
   {
-    id: "overview",
-    label: "总览",
-    title: "乙烯双键的成键图像",
+    id: "ss",
+    label: "s-s σ 键",
+    title: "s-s σ 键：两个球形轨道头碰头重叠",
     description:
-      "乙烯 C₂H₄ 中，两个碳原子之间的 C=C 双键不是两根完全相同的单键，而是由 1 个 σ 键和 1 个 π 键共同组成。",
-    points: ["C=C 双键包含 1 个 σ 键和 1 个 π 键", "σ 键在两核连线上", "π 电子云分布在分子平面上下"],
-    viewerLabel: "乙烯双键 · 1σ + 1π",
-    viewerTitle: "乙烯 C₂H₄｜C=C 双键由 1σ + 1π 组成",
-    viewerSummary: "σ 键沿两核连线连接两个碳，π 键分布在分子平面上下。",
-    examNote: "看到双键时，不要按“两根普通单键”理解；计数时记作 1 个 σ 键、1 个 π 键。",
+      "两个 s 轨道沿两核连线方向靠近，电子云在两核之间集中。因为重叠区围绕键轴近似对称，所以形成 σ 键。",
+    points: ["X 轴表示两核连线，也是键轴", "两个 s 轨道都是球形电子云", "重叠区集中在两个原子核之间"],
+    viewerTitle: "s-s σ 键｜球形轨道沿 X 轴正面重叠",
+    viewerSummary: "两个 s 轨道沿键轴头碰头重叠，电子云主要集中在两核之间。",
+    examNote: "判断 σ 键时，抓住“沿键轴正面重叠、绕键轴近似对称”这两个关键词。",
   },
   {
-    id: "sigma",
-    label: "σ 键",
-    title: "σ 键：沿键轴头碰头重叠",
+    id: "sp",
+    label: "s-p σ 键",
+    title: "s-p σ 键：球形轨道与 p 轨道正面重叠",
     description:
-      "σ 键来自轨道沿两核连线方向的正面重叠。电子云主要集中在两个原子核之间，围绕键轴近似对称。",
-    points: ["沿 C-C 键轴方向重叠", "电子云集中在两核之间", "单键都可以看作 σ 键"],
-    viewerLabel: "σ 键 · 头碰头重叠",
-    viewerTitle: "σ 键｜沿键轴正面重叠",
-    viewerSummary: "轨道沿两核连线头碰头重叠，电子云主要集中在两个原子核之间。",
-    examNote: "单键只有 σ 键；双键和三键中也各有 1 个 σ 键。",
-  },
-  {
-    id: "pi",
-    label: "π 键",
-    title: "π 键：p 轨道肩并肩重叠",
-    description:
-      "乙烯中每个碳原子保留 1 个未杂化 p 轨道。两个 p 轨道互相平行，进行侧向重叠，形成位于分子平面上下方的 π 电子云。",
-    points: ["p 轨道垂直于乙烯分子平面", "两个 p 轨道必须保持平行", "π 键电子云在键轴上下两侧"],
-    viewerLabel: "π 键 · 肩并肩重叠",
-    viewerTitle: "π 键｜两个 p 轨道侧向重叠",
-    viewerSummary: "两个未杂化 p 轨道保持平行，在键轴上下两侧形成 π 电子云。",
-    examNote: "π 键通常出现在双键和三键中，是判断双键刚性与共面的关键。",
-  },
-  {
-    id: "doubleBond",
-    label: "双键组成",
-    title: "C=C 双键 = 1σ + 1π",
-    description:
-      "双键的第一部分是连接两个碳原子的 σ 键，第二部分是上下分布的 π 键。两者共同让 C=C 键更短、更强，并限制自由旋转。",
-    points: ["σ 键提供沿键轴的连接", "π 键提供侧向重叠", "双键计数为 1σ + 1π"],
-    viewerLabel: "C=C = 1σ + 1π",
-    viewerTitle: "C=C 双键｜1 个 σ 键 + 1 个 π 键",
-    viewerSummary: "σ 键提供沿键轴的连接，π 键提供侧向重叠并限制双键自由旋转。",
-    examNote: "三键可类比为 1 个 σ 键 + 2 个互相垂直的 π 键。",
+      "s 轨道可以和沿键轴取向的 p 轨道头碰头重叠。只要重叠发生在两核连线方向上，也属于 σ 键。",
+    points: ["左侧是球形 s 轨道", "右侧 p 轨道沿 X 轴取向", "靠近键轴的一端与 s 轨道正面重叠"],
+    viewerTitle: "s-p σ 键｜s 轨道与 p 轨道头碰头重叠",
+    viewerSummary: "s 轨道与沿键轴取向的 p 轨道正面重叠，同样形成 σ 键。",
+    examNote: "σ 键不只来自 s-s；s-p、p-p 只要沿键轴正面重叠，也按 σ 键理解。",
   },
 ];
 
-export function getSigmaPiBondModeInfo(mode: SigmaPiBondMode): SigmaPiBondModeInfo {
-  return sigmaPiBondModes.find((item) => item.id === mode) ?? sigmaPiBondModes[0];
+export const piBondModes: OrbitalBondModeInfo[] = [
+  {
+    id: "before",
+    label: "成键前",
+    title: "成键前：两个 p 轨道平行但尚未有效重叠",
+    description:
+      "两个 p 轨道都垂直于键轴，并保持互相平行。此时原子核距离较远，侧向重叠还不明显。",
+    points: ["X 轴表示两核连线", "p 轨道沿 Z 方向伸展", "两个 p 轨道必须保持平行"],
+    viewerTitle: "p-p π 键｜成键前的平行 p 轨道",
+    viewerSummary: "两个 p 轨道已经平行取向，但侧向重叠还很弱。",
+    examNote: "π 键的前提是 p 轨道平行；如果旋转破坏平行关系，π 重叠会减弱或消失。",
+  },
+  {
+    id: "forming",
+    label: "成键中",
+    title: "成键中：p 轨道开始肩并肩重叠",
+    description:
+      "两个平行 p 轨道从侧面靠近，键轴上方和下方分别出现连续的电子云重叠区域。",
+    points: ["重叠不是沿键轴正面发生", "上方一组电子云开始连通", "下方一组电子云也同步连通"],
+    viewerTitle: "p-p π 键｜肩并肩重叠正在形成",
+    viewerSummary: "平行 p 轨道侧向靠近，在键轴上下两侧形成 π 重叠区。",
+    examNote: "π 键的电子云不在键轴正中央，而在键轴上下或左右两侧。",
+  },
+  {
+    id: "after",
+    label: "成键后",
+    title: "成键后：键轴两侧形成 π 电子云",
+    description:
+      "成键后，两个 p 轨道的侧向重叠稳定下来，电子云主要分布在键轴上下两侧，而不是集中在键轴上。",
+    points: ["p-p 侧向重叠形成 π 键", "π 电子云位于键轴上下两侧", "轨道平行性决定 π 键是否能保持"],
+    viewerTitle: "p-p π 键｜键轴上下两侧的 π 电子云",
+    viewerSummary: "两个平行 p 轨道侧向重叠，π 电子云分布在键轴上下两侧。",
+    examNote: "双键和三键中的 π 键会限制自由旋转，本质上是为了保持 p 轨道平行重叠。",
+  },
+];
+
+export const orbitalBondLessons: Record<OrbitalBondLessonType, OrbitalBondLessonInfo> = {
+  sigma: {
+    type: "sigma",
+    title: "σ 键",
+    eyebrow: "轨道重叠专题",
+    subtitle: "沿键轴头碰头重叠",
+    modelObject: "s-s 与 s-p 轨道重叠",
+    badge: "正面重叠",
+    modes: sigmaBondModes,
+    limitation: "这里的轨道和电子云是高中课堂教学示意，不是真实量子化学电子密度计算图。",
+  },
+  pi: {
+    type: "pi",
+    title: "π 键",
+    eyebrow: "轨道重叠专题",
+    subtitle: "p-p 轨道肩并肩重叠",
+    modelObject: "p-p 侧向重叠过程",
+    badge: "侧向重叠",
+    modes: piBondModes,
+    limitation: "这里的轨道和电子云是高中课堂教学示意，不是真实量子化学电子密度计算图。",
+  },
+};
+
+export function getOrbitalBondLesson(type: OrbitalBondLessonType): OrbitalBondLessonInfo {
+  return orbitalBondLessons[type];
+}
+
+export function getOrbitalBondModeInfo(
+  type: "sigma",
+  mode: SigmaBondMode,
+): OrbitalBondModeInfo;
+export function getOrbitalBondModeInfo(type: "pi", mode: PiBondMode): OrbitalBondModeInfo;
+export function getOrbitalBondModeInfo(
+  type: OrbitalBondLessonType,
+  mode: SigmaBondMode | PiBondMode,
+): OrbitalBondModeInfo {
+  const lesson = getOrbitalBondLesson(type);
+  return lesson.modes.find((item) => item.id === mode) ?? lesson.modes[0];
 }

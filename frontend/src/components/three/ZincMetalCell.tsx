@@ -2,6 +2,10 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import { Group, Quaternion, Vector3 } from "three";
+import {
+  crystalOverlayBadgeToneClasses,
+  htmlOverlayLabelClass,
+} from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type { CrystalModelStyle, CrystalViewMode, MoleculeRecord } from "@/types/molecule";
 
@@ -558,7 +562,7 @@ function ZincAtom({ atom, viewMode, modelStyle, showLabel }: ZincAtomProps) {
       ) : null}
       {shouldShowLabel ? (
         <Html center distanceFactor={6.8} pointerEvents="none" position={[0, atom.radius + 0.1, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-text-primary shadow-sm">
+          <span className={htmlOverlayLabelClass}>
             {getAtomLabel(atom, viewMode)}
           </span>
         </Html>
@@ -605,20 +609,9 @@ function LayerBadge({
   position: [number, number, number];
   tone: "same" | "upper" | "lower" | "center" | "note";
 }) {
-  const toneClass =
-    tone === "center"
-      ? "border-primary/40 bg-primary/90 text-white"
-      : tone === "upper"
-        ? "border-amber-200 bg-amber-50 text-amber-900"
-      : tone === "lower"
-          ? "border-teal-200 bg-teal-50 text-teal-900"
-      : tone === "note"
-            ? "border-slate-200 bg-white/90 text-slate-700"
-            : "border-orange-200 bg-orange-50 text-orange-900";
-
   return (
     <Html center distanceFactor={7.2} pointerEvents="none" position={position}>
-      <span className={`whitespace-nowrap rounded-full border px-2 py-1 text-xs font-bold shadow-sm ${toneClass}`}>
+      <span className={`whitespace-nowrap rounded-full border px-2 py-1 text-xs font-bold ${crystalOverlayBadgeToneClasses[tone]}`}>
         {label}
       </span>
     </Html>

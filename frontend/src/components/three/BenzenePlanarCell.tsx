@@ -70,7 +70,7 @@ const angleSpecs: AngleSpec[] = [
     atomIds: ["h1", "c1", "c2"],
     valueDeg: 120,
     label: "≈120°",
-    descriptionZh: "苯环中每个碳近似 sp2 杂化，键角约为 120°。",
+    descriptionZh: "苯环中每个碳近似 sp² 杂化，键角约为 120°。",
   },
   {
     id: "c3-c2-h2",

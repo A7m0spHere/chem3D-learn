@@ -1,4 +1,5 @@
 import { Html } from "@react-three/drei";
+import { htmlOverlayLabelClass } from "@/components/three/htmlOverlayStyles";
 import type { Atom } from "@/types/molecule";
 
 const elementColors: Record<string, string> = {
@@ -31,7 +32,7 @@ export function AtomMesh({ atom, isFocused = false, atomScale = 1, showLabel = t
       </mesh>
       {showLabel ? (
         <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.16, 0]}>
-          <span className="rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-text-primary shadow-sm">
+          <span className={htmlOverlayLabelClass}>
             {atom.label}
           </span>
         </Html>

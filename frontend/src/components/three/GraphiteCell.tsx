@@ -2,6 +2,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { type ReactNode, useMemo, useRef } from "react";
 import { Group, Quaternion, Vector3 } from "three";
+import { htmlOverlayCompactLabelClass } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
@@ -283,7 +284,7 @@ function CarbonAtom({ atom, layer, viewMode, showLabel }: CarbonAtomProps) {
       ) : null}
       {shouldShowLabel ? (
         <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.08, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-text-primary shadow-sm sm:text-xs">
+          <span className={htmlOverlayCompactLabelClass}>
             {labelText}
           </span>
         </Html>

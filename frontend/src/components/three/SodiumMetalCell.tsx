@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import { htmlOverlayLabelClass } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
@@ -213,7 +214,7 @@ function SodiumAtom({ atom, viewMode, showLabel }: SodiumAtomProps) {
       ) : null}
       {shouldShowLabel ? (
         <Html center distanceFactor={6.8} pointerEvents="none" position={[0, radius + 0.08, 0]}>
-          <span className="whitespace-nowrap rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-semibold text-text-primary shadow-sm">
+          <span className={htmlOverlayLabelClass}>
             {labelText}
           </span>
         </Html>

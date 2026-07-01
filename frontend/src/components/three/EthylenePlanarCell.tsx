@@ -5,6 +5,7 @@ import { Quaternion, Vector3 } from "three";
 import { AngleArc } from "@/components/three/AngleArc";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
+import { htmlOverlaySp2LabelClass } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getEthylenePlanarModeInfo, type EthylenePlaneView } from "@/data/ethylenePlanar";
 import type { AngleSpec, Atom, Bond, EthylenePlanarMode } from "@/types/molecule";
@@ -40,14 +41,14 @@ const angleSpecs: AngleSpec[] = [
     atomIds: ["h1", "c1", "c2"],
     valueDeg: 120,
     label: "≈120°",
-    descriptionZh: "sp2 杂化使乙烯中每个碳周围的键角约为 120°。",
+    descriptionZh: "sp² 杂化使乙烯中每个碳周围的键角约为 120°。",
   },
   {
     id: "c1-c2-h3",
     atomIds: ["c1", "c2", "h3"],
     valueDeg: 120,
     label: "≈120°",
-    descriptionZh: "乙烯两端都是 sp2 碳。",
+    descriptionZh: "乙烯两端都是 sp² 碳。",
   },
 ];
 
@@ -194,7 +195,7 @@ function Sp2Labels() {
           position={label.position}
         >
           <span
-            className="whitespace-nowrap rounded border border-primary/15 bg-white/60 px-1 py-0.5 text-[11px] font-semibold text-primary-dark/70 shadow-[0_1px_3px_rgba(31,41,51,0.06)]"
+            className={htmlOverlaySp2LabelClass}
             data-testid="ethylene-sp2-label"
           >
             sp²

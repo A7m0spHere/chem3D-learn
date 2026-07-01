@@ -40,30 +40,30 @@ export const organicCoplanarModes: OrganicCoplanarModeInfo[] = [
     ],
     notes: [
       "不要表达成所有取代基都与苯环共面。",
-      "取代基后续原子是否共面，还要继续结合 sp3、sp2、sp 和单键旋转判断。",
+      "取代基后续原子是否共面，还要继续结合 sp³、sp²、sp 和单键旋转判断。",
     ],
     viewerTitle: "苯环平面｜共面判断的参考面",
     viewerSummary: "苯环原子位于同一平面，但不能据此断定所有取代基后续原子都共面。",
   },
   {
     id: "sp3Carbon",
-    labelZh: "sp3 片段",
+    labelZh: "sp³ 片段",
     titleZh: "甲基碳显示四面体空间性",
     bodyZh: "连接苯环的甲基 C 可以位于苯环平面附近，但甲基上的 3 个 H 呈四面体排布，不能强行全部放入苯环平面。",
     facts: [
       { label: "片段", value: "ringC1 - CH3" },
-      { label: "杂化特点", value: "sp3，近似四面体" },
+      { label: "杂化特点", value: "sp³，近似四面体" },
     ],
     notes: [
       "至少一个甲基 H 明显偏离苯环平面。",
-      "sp3 碳周围的原子一般体现三维空间分布。",
+      "sp³ 碳周围的原子一般体现三维空间分布。",
     ],
     viewerTitle: "sp³ 片段｜甲基呈四面体空间分布",
     viewerSummary: "连接苯环的甲基碳附近具有三维空间性，三个 H 不会全部落在苯环平面内。",
   },
   {
     id: "sp2Fragment",
-    labelZh: "sp2 片段",
+    labelZh: "sp² 片段",
     titleZh: "乙烯基自身是平面片段",
     bodyZh: "乙烯基中的 C=C 双键使该片段自身保持平面；默认示例中，乙烯基平面与苯环平面约成 45° 夹角。",
     facts: [
