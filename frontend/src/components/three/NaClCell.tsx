@@ -252,8 +252,8 @@ function IonMesh({ atom, viewMode, voidStage, showLabel }: IonMeshProps) {
 
   return (
     <group position={atom.position}>
-      <mesh>
-        <sphereGeometry args={[radius * scale, 32, 32]} />
+      <mesh scale={scale}>
+        <sphereGeometry args={[radius, 32, 32]} />
         <meshStandardMaterial
           color={atom.color}
           emissive={emissive}

@@ -378,7 +378,8 @@ function OrganicAtomMesh({
   showLabel: boolean;
 }) {
   const color = elementColors[atom.element];
-  const radius = isFocused ? atom.radius * 1.14 : atom.radius;
+  const focusScale = isFocused ? 1.14 : 1;
+  const radius = atom.radius * focusScale;
   const opacity = isDimmed ? 0.34 : 1;
   const labelShouldShow =
     showLabel ||
@@ -387,8 +388,8 @@ function OrganicAtomMesh({
 
   return (
     <group position={atom.position}>
-      <mesh>
-        <sphereGeometry args={[radius, 32, 32]} />
+      <mesh scale={focusScale}>
+        <sphereGeometry args={[atom.radius, 32, 32]} />
         <meshStandardMaterial
           color={color}
           emissive={isFocused ? fragmentColors[atom.fragment] : "#000000"}
@@ -420,7 +421,7 @@ function OrganicBondMesh({
   isDimmed: boolean;
 }) {
   const order = bond.order;
-  const radius = isFocused ? 0.024 : 0.018;
+  const focusScale = isFocused ? 0.024 / 0.018 : 1;
   const offsetDistance = order === 1 ? 0 : order === 2 ? 0.048 : 0.06;
   const offsets = order === 1 ? [0] : order === 2 ? [-offsetDistance, offsetDistance] : [-offsetDistance, 0, offsetDistance];
   const start = new Vector3(...bond.start);
@@ -438,8 +439,9 @@ function OrganicBondMesh({
           key={`${bond.id}-${offset}`}
           position={add(vectorToTuple(midpoint), scale(offsetVector, offset))}
           quaternion={quaternion}
+          scale={[focusScale, 1, focusScale]}
         >
-          <cylinderGeometry args={[radius, radius, direction.length(), 24]} />
+          <cylinderGeometry args={[0.018, 0.018, direction.length(), 24]} />
           <meshStandardMaterial
             color={color}
             opacity={isDimmed ? 0.22 : 0.88}

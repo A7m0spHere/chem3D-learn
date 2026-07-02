@@ -546,8 +546,8 @@ function ZincAtom({ atom, viewMode, modelStyle, showLabel }: ZincAtomProps) {
 
   return (
     <group position={atom.position}>
-      <mesh>
-        <sphereGeometry args={[atom.radius * scale, 32, 32]} />
+      <mesh scale={scale}>
+        <sphereGeometry args={[atom.radius, 32, 32]} />
         <meshStandardMaterial
           color={zincBaseColor}
           emissive={emissive}

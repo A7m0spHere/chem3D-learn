@@ -192,8 +192,8 @@ function SodiumAtom({ atom, viewMode, showLabel }: SodiumAtomProps) {
 
   return (
     <group position={atom.position}>
-      <mesh>
-        <sphereGeometry args={[radius * scale, 32, 32]} />
+      <mesh scale={scale}>
+        <sphereGeometry args={[radius, 32, 32]} />
         <meshStandardMaterial
           color={atom.color}
           emissive={emissive}
