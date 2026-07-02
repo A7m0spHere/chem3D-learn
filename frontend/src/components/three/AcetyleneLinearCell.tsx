@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
+import { CameraRig } from "@/components/three/CameraRig";
 import { POrbitalPair, PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getAcetyleneLinearModeInfo, type AcetyleneLineView } from "@/data/acetyleneLinear";
@@ -40,7 +41,6 @@ export function AcetyleneLinearCell({
     () => new Map(acetyleneAtoms.map((atom) => [atom.id, atom])),
     [],
   );
-  const canvasKey = `${mode}-${lineView}`;
 
   return (
     <ThreeViewerFrame
@@ -53,10 +53,14 @@ export function AcetyleneLinearCell({
     >
       <Canvas
         camera={{ position: getCameraPosition(mode, lineView), fov: mode === "line" ? 38 : 42 }}
-        key={canvasKey}
         frameloop="demand"
         style={{ height: "100%", width: "100%" }}
       >
+        <CameraRig
+          fov={mode === "line" ? 38 : 42}
+          position={getCameraPosition(mode, lineView)}
+          resetKey={`${mode}-${lineView}`}
+        />
         <ambientLight intensity={0.68} />
         <directionalLight position={[3.6, 4.4, 4.8]} intensity={1.3} />
         <directionalLight position={[-3.2, -2.4, 2.4]} intensity={0.34} />
@@ -70,6 +74,7 @@ export function AcetyleneLinearCell({
         <OrbitControls
           enableDamping
           enablePan={false}
+          makeDefault
           maxDistance={8}
           minDistance={2.2}
           target={[0, 0, 0]}

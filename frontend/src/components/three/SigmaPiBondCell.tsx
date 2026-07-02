@@ -2,6 +2,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useRef } from "react";
 import { type Group } from "three";
+import { CameraRig } from "@/components/three/CameraRig";
 import {
   AxisTriad,
   GuideCylinder,
@@ -48,10 +49,14 @@ export function SigmaPiBondCell(props: SigmaPiBondCellProps) {
     >
       <Canvas
         camera={{ position: getCameraPosition(props.lessonType), fov: 42 }}
-        key={`${props.lessonType}-${props.mode}`}
         frameloop={isPiPlaying ? "always" : "demand"}
         style={{ height: "100%", width: "100%" }}
       >
+        <CameraRig
+          fov={42}
+          position={getCameraPosition(props.lessonType)}
+          resetKey={`${props.lessonType}-${props.mode}`}
+        />
         <ambientLight intensity={0.74} />
         <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.28} />
         <directionalLight position={[-3.2, -2.4, 2.6]} intensity={0.34} />
@@ -70,6 +75,7 @@ export function SigmaPiBondCell(props: SigmaPiBondCellProps) {
         <OrbitControls
           enableDamping
           enablePan={false}
+          makeDefault
           maxDistance={8}
           minDistance={2.2}
           target={[0, 0, 0]}

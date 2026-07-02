@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { Quaternion, Vector3 } from "three";
+import { CameraRig } from "@/components/three/CameraRig";
 import {
   LonePairOrbital as SharedLonePairOrbital,
   OrbitalSurface,
@@ -63,10 +64,10 @@ export function BondingBasicsCell({
     >
       <Canvas
         camera={{ position: [3.15, -3.8, 2.8], fov: 37 }}
-        key={`${moduleId}-${mode}`}
         frameloop="demand"
         style={{ height: "100%", width: "100%" }}
       >
+        <CameraRig fov={37} position={[3.15, -3.8, 2.8]} resetKey={`${moduleId}-${mode}`} />
         <ambientLight intensity={0.74} />
         <directionalLight position={[3.5, 4.6, 4.2]} intensity={1.3} />
         <directionalLight position={[-3.2, -2.4, 2.6]} intensity={0.34} />
@@ -79,7 +80,7 @@ export function BondingBasicsCell({
           {moduleId === "ionic-bond-formation" ? <IonicScene mode={mode} /> : null}
           {moduleId === "coordinate-bond-formation" ? <CoordinateScene mode={mode} /> : null}
         </group>
-        <OrbitControls enableDamping enablePan={false} maxDistance={8} minDistance={1.85} target={[0, 0.04, 0]} />
+        <OrbitControls enableDamping enablePan={false} makeDefault maxDistance={8} minDistance={1.85} target={[0, 0.04, 0]} />
       </Canvas>
     </ThreeViewerFrame>
   );

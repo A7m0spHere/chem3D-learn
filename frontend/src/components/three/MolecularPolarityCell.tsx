@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import { CameraRig } from "@/components/three/CameraRig";
 import { PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import {
@@ -62,10 +63,10 @@ export function MolecularPolarityCell({
         ) : (
           <Canvas
             camera={{ position: getCameraPosition(mode), fov: 42 }}
-            key={mode}
             frameloop="demand"
             style={{ height: "100%", width: "100%" }}
           >
+            <CameraRig fov={42} position={getCameraPosition(mode)} resetKey={mode} />
             <ambientLight intensity={0.72} />
             <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.36} />
             <directionalLight position={[-3, -2.5, 2.6]} intensity={0.34} />
@@ -79,6 +80,7 @@ export function MolecularPolarityCell({
             <OrbitControls
               enableDamping
               enablePan={false}
+              makeDefault
               maxDistance={8}
               minDistance={2.25}
               target={[0, 0, 0]}

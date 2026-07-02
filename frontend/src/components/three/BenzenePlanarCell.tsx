@@ -3,6 +3,7 @@ import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
 import { AngleArc } from "@/components/three/AngleArc";
+import { CameraRig } from "@/components/three/CameraRig";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { POrbitalPair, PiCloudBand } from "@/components/three/OrbitalPrimitives";
@@ -92,7 +93,6 @@ export function BenzenePlanarCell({
     () => new Map(benzeneAtoms.map((atom) => [atom.id, atom])),
     [],
   );
-  const canvasKey = `${mode}-${planeView}`;
 
   return (
     <ThreeViewerFrame
@@ -105,10 +105,14 @@ export function BenzenePlanarCell({
     >
       <Canvas
         camera={{ position: getCameraPosition(mode, planeView), fov: mode === "plane" ? 38 : 42 }}
-        key={canvasKey}
         frameloop="demand"
         style={{ height: "100%", width: "100%" }}
       >
+        <CameraRig
+          fov={mode === "plane" ? 38 : 42}
+          position={getCameraPosition(mode, planeView)}
+          resetKey={`${mode}-${planeView}`}
+        />
         <ambientLight intensity={0.68} />
         <directionalLight position={[3.6, 4.4, 4.8]} intensity={1.28} />
         <directionalLight position={[-3.4, -2.8, 2.6]} intensity={0.36} />
@@ -122,6 +126,7 @@ export function BenzenePlanarCell({
         <OrbitControls
           enableDamping
           enablePan={false}
+          makeDefault
           maxDistance={8}
           minDistance={2.4}
           target={[0, 0, 0]}

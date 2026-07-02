@@ -3,6 +3,7 @@ import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
 import { AngleArc } from "@/components/three/AngleArc";
+import { CameraRig } from "@/components/three/CameraRig";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { htmlOverlaySp2LabelClass } from "@/components/three/htmlOverlayStyles";
@@ -64,7 +65,6 @@ export function EthylenePlanarCell({
     [],
   );
   const cameraPosition = getCameraPosition(mode, planeView);
-  const canvasKey = `${mode}-${planeView}`;
 
   return (
     <ThreeViewerFrame
@@ -77,10 +77,14 @@ export function EthylenePlanarCell({
     >
         <Canvas
           camera={{ position: cameraPosition, fov: mode === "plane" && planeView === "side" ? 36 : 42 }}
-          key={canvasKey}
-          frameloop="demand"
+            frameloop="demand"
           style={{ height: "100%", width: "100%" }}
         >
+          <CameraRig
+            fov={mode === "plane" && planeView === "side" ? 36 : 42}
+            position={cameraPosition}
+            resetKey={`${mode}-${planeView}`}
+          />
           <ambientLight intensity={0.68} />
           <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.35} />
           <directionalLight position={[-3.2, -2.4, 2.6]} intensity={0.32} />
@@ -95,6 +99,7 @@ export function EthylenePlanarCell({
           <OrbitControls
             enableDamping
             enablePan={false}
+            makeDefault
             maxDistance={8}
             minDistance={2.25}
             target={[0, 0, 0]}
