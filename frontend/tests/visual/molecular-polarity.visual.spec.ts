@@ -6,6 +6,27 @@ test.describe("分子极性判断模块视觉回归", () => {
     await page.addStyleTag({ content: "header { display: none !important; }" });
   });
 
+  test("电负性示意显示偏移电子云", async ({ page }) => {
+    test.setTimeout(45_000);
+
+    await page.getByRole("button", { exact: true, name: "电负性" }).click();
+
+    const viewer = page.getByTestId("molecular-polarity-viewer");
+    const canvasArea = page.getByTestId("molecular-polarity-canvas");
+    await expect(viewer).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(
+      viewer.getByText("电负性：F > O > Cl > B > H｜先判断电子偏移方向", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("电子云偏向 F", { exact: true })).toBeVisible();
+
+    await page.waitForTimeout(800);
+
+    await expect(canvasArea).toHaveScreenshot("molecular-polarity-electronegativity-viewer.png");
+  });
+
   test("HClO 弯曲结构与轻量标签布局稳定", async ({ page }) => {
     test.setTimeout(45_000);
 

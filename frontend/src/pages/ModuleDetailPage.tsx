@@ -95,6 +95,8 @@ import {
   getDefaultBondingBasicsMode,
   isBondingBasicsModuleId,
   type BondingBasicsMode,
+  type HybridOrbitalControls,
+  type HybridRenderMode,
 } from "@/data/bondingBasics";
 
 // ---------------------------------------------------------------------------
@@ -236,6 +238,10 @@ export function ModuleDetailPage() {
   const [piBondPlaying, setPiBondPlaying] = useState(false);
   const [showSigmaPiBondLabels, setShowSigmaPiBondLabels] = useState(false);
   const [bondingBasicsMode, setBondingBasicsMode] = useState<BondingBasicsMode>("sp");
+  const [hybridProgress, setHybridProgress] = useState(100);
+  const [hybridRenderMode, setHybridRenderMode] = useState<HybridRenderMode>("solid");
+  const [showHybridUnhybridizedP, setShowHybridUnhybridizedP] = useState(true);
+  const [showHybridAxes, setShowHybridAxes] = useState(true);
   const [molecularPolarityMode, setMolecularPolarityMode] =
     useState<MolecularPolarityMode>("electronegativity");
   const [viewerLoading, setViewerLoading] = useState(false);
@@ -268,6 +274,10 @@ export function ModuleDetailPage() {
     } else {
       setBondingBasicsMode("sp");
     }
+    setHybridProgress(100);
+    setHybridRenderMode("solid");
+    setShowHybridUnhybridizedP(true);
+    setShowHybridAxes(true);
     setMolecularPolarityMode("electronegativity");
     setViewerLoading(true);
     setCompletedSteps(new Set());
@@ -289,6 +299,12 @@ export function ModuleDetailPage() {
   const bondingBasicsModuleId = isBondingBasicsModuleId(moduleData.id)
     ? moduleData.id
     : "hybrid-orbitals-sp";
+  const hybridControls = {
+    progress: hybridProgress,
+    renderMode: hybridRenderMode,
+    showUnhybridizedP: showHybridUnhybridizedP,
+    showAxes: showHybridAxes,
+  } satisfies HybridOrbitalControls;
   const supportsPackingModel = molecule?.id === "zinc-metal";
   const crystalModes = molecule?.crystalTeaching?.viewModes ?? [];
   const defaultCrystalViewMode = crystalModes[0]?.id ?? "cell";
@@ -432,6 +448,7 @@ export function ModuleDetailPage() {
     "bonding-basics": {
       viewer: () => (
         <BondingBasicsCell
+          hybridControls={hybridControls}
           loading={viewerLoading}
           mode={bondingBasicsMode}
           moduleId={bondingBasicsModuleId}
@@ -440,8 +457,13 @@ export function ModuleDetailPage() {
       toolbar: () => (
         <BondingBasicsToolbar
           activeMode={bondingBasicsMode}
+          hybridControls={hybridControls}
           moduleId={bondingBasicsModuleId}
+          onHybridProgressChange={setHybridProgress}
+          onHybridRenderModeChange={setHybridRenderMode}
           onModeChange={setBondingBasicsMode}
+          onToggleHybridAxes={() => setShowHybridAxes((value) => !value)}
+          onToggleHybridUnhybridizedP={() => setShowHybridUnhybridizedP((value) => !value)}
         />
       ),
       panel: () => (

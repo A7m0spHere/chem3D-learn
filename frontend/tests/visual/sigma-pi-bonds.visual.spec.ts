@@ -20,6 +20,9 @@ test.describe("σ 键 / π 键轨道模块", () => {
     await page.getByRole("button", { exact: true, name: "s-p σ 键" }).click();
     await expect(viewer.getByText("s-p σ 键｜s 轨道与 p 轨道头碰头重叠", { exact: true })).toBeVisible();
     await expect(canvasArea.getByText("s-p 头碰头重叠", { exact: true })).toBeVisible();
+
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("sigma-bond-sp-overlap-viewer.png");
   });
 
   test("π 键模块展示 p-p 成键阶段和播放状态", async ({ page }) => {
@@ -37,6 +40,9 @@ test.describe("σ 键 / π 键轨道模块", () => {
     await expect(viewer.getByText("p-p π 键｜键轴上下两侧的 π 电子云", { exact: true })).toBeVisible();
     await expect(canvasArea.getByText("π 电子云", { exact: true })).toHaveCount(1);
     await expect(canvasArea.getByText("p-p 肩并肩重叠", { exact: true })).toBeVisible();
+
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("pi-bond-electron-cloud-viewer.png");
 
     await page.getByRole("button", { exact: true, name: "播放" }).click();
     await expect(page.getByRole("button", { exact: true, name: "暂停" })).toBeVisible();

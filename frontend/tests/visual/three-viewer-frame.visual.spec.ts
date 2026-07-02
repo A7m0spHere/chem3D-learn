@@ -1,4 +1,5 @@
 import { expect, test, type Locator } from "@playwright/test";
+import { inflateSync } from "node:zlib";
 
 const viewers = [
   { route: "/module/tetrahedral-ch4", viewer: "molecule-viewer", stage: "molecule-viewer-canvas" },
@@ -32,9 +33,9 @@ const bondingBasicsMobileViewers = [
     viewer: "hybrid-orbitals-sp-viewer",
     stage: "hybrid-orbitals-sp-canvas",
     modes: [
-      { testId: "bonding-basics-mode-sp", labels: ["中心原子", "sp 杂化轨道方向"] },
-      { testId: "bonding-basics-mode-sp2", labels: ["中心原子", "sp2 杂化轨道方向"] },
-      { testId: "bonding-basics-mode-sp3", labels: ["中心原子", "sp3 杂化轨道方向"] },
+      { testId: "bonding-basics-mode-sp", labels: ["sp 杂化模拟", "180°", "未杂化 p 轨道 ×2"] },
+      { testId: "bonding-basics-mode-sp2", labels: ["sp² 杂化模拟", "120°", "未杂化 p 轨道 ×1"] },
+      { testId: "bonding-basics-mode-sp3", labels: ["sp³ 杂化模拟", "109.5°", "无未杂化 p 轨道"] },
     ],
   },
   {
@@ -62,6 +63,114 @@ const bondingBasicsMobileViewers = [
 async function expectVisibleStageLabel(stage: Locator, label: string) {
   const labelLocator = stage.getByText(label, { exact: true });
   await expect(labelLocator.first()).toBeVisible();
+}
+
+async function expectStageScreenshotHasDetail(stage: Locator) {
+  const screenshot = await stage.screenshot();
+  const image = decodePng(screenshot);
+  const [baseR, baseG, baseB] = image.pixels;
+  let detailedPixels = 0;
+
+  for (let i = 0; i < image.pixels.length; i += 4) {
+    const diff =
+      Math.abs(image.pixels[i] - baseR) +
+      Math.abs(image.pixels[i + 1] - baseG) +
+      Math.abs(image.pixels[i + 2] - baseB);
+    if (diff > 35) {
+      detailedPixels += 1;
+    }
+  }
+
+  expect(detailedPixels).toBeGreaterThan(image.width * image.height * 0.01);
+}
+
+function decodePng(buffer: Buffer) {
+  const signature = buffer.subarray(0, 8);
+  expect(signature.equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))).toBe(true);
+
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  const idatChunks: Buffer[] = [];
+
+  while (offset < buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.subarray(offset + 4, offset + 8).toString("ascii");
+    const data = buffer.subarray(offset + 8, offset + 8 + length);
+
+    if (type === "IHDR") {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      bitDepth = data[8];
+      colorType = data[9];
+    } else if (type === "IDAT") {
+      idatChunks.push(data);
+    } else if (type === "IEND") {
+      break;
+    }
+
+    offset += length + 12;
+  }
+
+  expect(bitDepth).toBe(8);
+  const bytesPerPixel = colorType === 6 ? 4 : colorType === 2 ? 3 : 0;
+  expect(bytesPerPixel).toBeGreaterThan(0);
+
+  const inflated = inflateSync(Buffer.concat(idatChunks));
+  const stride = width * bytesPerPixel;
+  const raw = new Uint8Array(height * stride);
+  let readOffset = 0;
+
+  for (let y = 0; y < height; y += 1) {
+    const filter = inflated[readOffset];
+    readOffset += 1;
+
+    const rowStart = y * stride;
+    const previousRowStart = rowStart - stride;
+    for (let x = 0; x < stride; x += 1) {
+      const rawValue = inflated[readOffset + x];
+      const left = x >= bytesPerPixel ? raw[rowStart + x - bytesPerPixel] : 0;
+      const up = y > 0 ? raw[previousRowStart + x] : 0;
+      const upperLeft = y > 0 && x >= bytesPerPixel ? raw[previousRowStart + x - bytesPerPixel] : 0;
+
+      let value = rawValue;
+      if (filter === 1) {
+        value += left;
+      } else if (filter === 2) {
+        value += up;
+      } else if (filter === 3) {
+        value += Math.floor((left + up) / 2);
+      } else if (filter === 4) {
+        value += paethPredictor(left, up, upperLeft);
+      }
+      raw[rowStart + x] = value & 0xff;
+    }
+
+    readOffset += stride;
+  }
+
+  const pixels = new Uint8Array(width * height * 4);
+  for (let source = 0, target = 0; source < raw.length; source += bytesPerPixel, target += 4) {
+    pixels[target] = raw[source];
+    pixels[target + 1] = raw[source + 1];
+    pixels[target + 2] = raw[source + 2];
+    pixels[target + 3] = bytesPerPixel === 4 ? raw[source + 3] : 255;
+  }
+
+  return { height, pixels, width };
+}
+
+function paethPredictor(left: number, up: number, upperLeft: number) {
+  const estimate = left + up - upperLeft;
+  const leftDistance = Math.abs(estimate - left);
+  const upDistance = Math.abs(estimate - up);
+  const upperLeftDistance = Math.abs(estimate - upperLeft);
+
+  if (leftDistance <= upDistance && leftDistance <= upperLeftDistance) return left;
+  if (upDistance <= upperLeftDistance) return up;
+  return upperLeft;
 }
 
 test.describe("真实 3D Viewer 三段式布局", () => {
@@ -125,6 +234,55 @@ test.describe("真实 3D Viewer 三段式布局", () => {
     }
   });
 
+  test("杂化轨道 Viewer 在桌面和手机下渲染非空 Canvas", async ({ page }) => {
+    test.setTimeout(60_000);
+
+    for (const viewport of [
+      { width: 1280, height: 720 },
+      { width: 390, height: 844 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/module/hybrid-orbitals-sp");
+      const stage = page.getByTestId("hybrid-orbitals-sp-canvas");
+
+      await expect(stage.locator("canvas")).toBeVisible();
+      await expect(page.getByTestId("hybrid-progress-slider")).toBeVisible();
+      await expect(page.getByTestId("hybrid-render-solid")).toBeVisible();
+      await expect(page.getByTestId("hybrid-render-cloud")).toBeVisible();
+      await page.waitForTimeout(300);
+      await expectStageScreenshotHasDetail(stage);
+    }
+  });
+
+  test("杂化轨道专题可切换进度和实体/电子云视图", async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto("/module/hybrid-orbitals-sp");
+
+    const stage = page.getByTestId("hybrid-orbitals-sp-canvas");
+    const progressSlider = page.getByTestId("hybrid-progress-slider");
+    await expect(progressSlider).toBeVisible();
+
+    await progressSlider.evaluate((element) => {
+      const input = element as HTMLInputElement;
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value",
+      )?.set;
+      nativeSetter?.call(input, "45");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await expect(page.getByTestId("hybrid-progress-value")).toHaveText("45%");
+    await expectVisibleStageLabel(stage, "45% 杂化");
+
+    await page.getByTestId("hybrid-render-cloud").click();
+    await expect(page.getByTestId("hybrid-footer-meta")).toContainText("电子云");
+    await expectStageScreenshotHasDetail(stage);
+
+    await page.getByTestId("hybrid-render-solid").click();
+    await expect(page.getByTestId("hybrid-footer-meta")).toContainText("实体轨道");
+  });
+
   test.describe("新增成键基础模块 390px 手机宽度", () => {
     for (const item of bondingBasicsMobileViewers) {
       test(`${item.route} viewer 与 3D 标注保持可读`, async ({ page }) => {
@@ -142,6 +300,13 @@ test.describe("真实 3D Viewer 三段式布局", () => {
         await expect(stage).toBeVisible();
         await expect(stage.locator("canvas")).toBeVisible();
         await expect(summary).toBeVisible();
+
+        if (item.route === "/module/hybrid-orbitals-sp") {
+          await expect(page.getByTestId("hybrid-progress-slider")).toBeVisible();
+          await expect(page.getByTestId("hybrid-render-solid")).toBeVisible();
+          await expect(page.getByTestId("hybrid-render-cloud")).toBeVisible();
+          await expect(page.getByTestId("hybrid-toggle-unhybridized-p")).toBeVisible();
+        }
 
         const [topbarBox, stageBox, summaryBox] = await Promise.all([
           topbar.boundingBox(),

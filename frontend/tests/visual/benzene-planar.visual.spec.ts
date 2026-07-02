@@ -63,6 +63,11 @@ test.describe("苯环平面结构模块视觉回归", () => {
     ).toBeVisible();
     await expect(canvasArea.getByTestId("benzene-pi-label")).toHaveCount(1);
     await expect(page.getByText("这里使用高中课堂示意图表达，不代表精确轨道计算。", { exact: true })).toHaveCount(0);
+
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("benzene-planar-pi-cloud-viewer.png", {
+      timeout: 20_000,
+    });
   });
 
   test("移动端三段式布局不覆盖 Canvas", async ({ page }) => {

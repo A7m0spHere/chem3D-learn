@@ -1,5 +1,6 @@
 export type DomainType = "晶体化学" | "有机立体" | "化学键与轨道" | "分子结构";
 export type DifficultyType = "高考核心" | "高考提高" | "竞赛入门" | "竞赛拓展" | "竞赛挑战";
+export type ExamTopicStatus = "ready" | "planned";
 
 export interface ExamTopic {
   id: string;
@@ -8,7 +9,26 @@ export interface ExamTopic {
   domain: DomainType;
   difficulty: DifficultyType;
   partition: "高频能力" | "高考真题结构" | "竞赛视野";
+  status: ExamTopicStatus;
   route?: string;
+}
+
+export interface ExamTopicStep {
+  title: string;
+  body: string;
+  formula?: string;
+}
+
+export interface ExamTopicDetail {
+  id: string;
+  title: string;
+  subtitle: string;
+  summary: string;
+  coreSteps: ExamTopicStep[];
+  commonMistakes: string[];
+  relatedModuleIds: string[];
+  classroomPrompt: string;
+  examTip: string;
 }
 
 export const examTopics: ExamTopic[] = [
@@ -20,7 +40,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考核心",
     partition: "高频能力",
-    route: "/module/exam-crystal-formula",
+    status: "ready",
+    route: "/exam/exam-crystal-formula",
   },
   {
     id: "exam-coordination-number",
@@ -29,16 +50,18 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考核心",
     partition: "高频能力",
-    route: "/module/exam-coordination-number",
+    status: "ready",
+    route: "/exam/exam-coordination-number",
   },
   {
     id: "exam-fractional-coordinates",
     title: "晶胞内的分数坐标",
-    description: "从三维坐标系理解原子位置，掌握分数坐标的投影与写法规。",
+    description: "从三维坐标系理解原子位置，掌握分数坐标的投影与写法。",
     domain: "晶体化学",
     difficulty: "高考提高",
     partition: "高频能力",
-    route: "/module/exam-fractional-coordinates",
+    status: "ready",
+    route: "/exam/exam-fractional-coordinates",
   },
   {
     id: "exam-crystal-density",
@@ -47,7 +70,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考核心",
     partition: "高频能力",
-    route: "/module/exam-crystal-density",
+    status: "ready",
+    route: "/exam/exam-crystal-density",
   },
   {
     id: "exam-interstitial-sites",
@@ -56,7 +80,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考提高",
     partition: "高频能力",
-    route: "/module/exam-interstitial-sites",
+    status: "ready",
+    route: "/exam/exam-interstitial-sites",
   },
 
   // === 晶体化学 · 高考真题结构 ===
@@ -67,7 +92,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考核心",
     partition: "高考真题结构",
-    route: "/module/nacl", // 可以复用已有的
+    status: "ready",
+    route: "/module/nacl-crystal",
   },
   {
     id: "exam-diamond-si",
@@ -76,7 +102,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考核心",
     partition: "高考真题结构",
-    route: "/module/exam-diamond-si",
+    status: "planned",
   },
   {
     id: "exam-perovskite",
@@ -85,7 +111,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考提高",
     partition: "高考真题结构",
-    route: "/module/exam-perovskite",
+    status: "planned",
   },
   {
     id: "exam-fcc-hcp",
@@ -94,7 +120,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考提高",
     partition: "高考真题结构",
-    route: "/module/exam-fcc-hcp",
+    status: "planned",
   },
 
   // === 晶体化学 · 竞赛视野 ===
@@ -105,6 +131,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛入门",
     partition: "竞赛视野",
+    status: "planned",
   },
   {
     id: "exam-zns",
@@ -113,6 +140,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛入门",
     partition: "竞赛视野",
+    status: "planned",
   },
   {
     id: "exam-caf2",
@@ -121,6 +149,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛入门",
     partition: "竞赛视野",
+    status: "planned",
   },
   {
     id: "exam-hbn",
@@ -129,6 +158,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛入门",
     partition: "竞赛视野",
+    status: "planned",
   },
   {
     id: "exam-mof",
@@ -137,6 +167,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛拓展",
     partition: "竞赛视野",
+    status: "planned",
   },
   {
     id: "exam-mxene",
@@ -145,6 +176,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛拓展",
     partition: "竞赛视野",
+    status: "planned",
   },
   {
     id: "exam-ren3",
@@ -153,6 +185,7 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛拓展",
     partition: "竞赛视野",
+    status: "planned",
   },
   {
     id: "exam-xeo",
@@ -161,5 +194,167 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛挑战",
     partition: "竞赛视野",
+    status: "planned",
   },
 ];
+
+export const examTopicDetails: ExamTopicDetail[] = [
+  {
+    id: "exam-crystal-formula",
+    title: "晶胞均摊与化学式推导",
+    subtitle: "先数位置，再算归属，最后化简比例",
+    summary:
+      "晶胞化学式不是数图中画了几个球，而是计算每类粒子平均属于一个晶胞的数量，再化成最简整数比。",
+    coreSteps: [
+      {
+        title: "识别粒子所在位置",
+        body: "先把每一类粒子按顶点、棱心、面心、体心、晶胞内部分组，不同元素或离子分开统计。",
+        formula: "顶点 1/8 · 棱心 1/4 · 面心 1/2 · 体心 1",
+      },
+      {
+        title: "分别计算平均占有数",
+        body: "同一类粒子的贡献相加，得到每个晶胞中这种粒子的平均个数。晶胞内部粒子通常完整属于本晶胞。",
+      },
+      {
+        title: "化成最简整数比",
+        body: "把各类粒子平均数写成比例，约成最简整数比，得到化学式或晶胞中式量单位数。",
+      },
+    ],
+    commonMistakes: [
+      "把图里画出的球数直接当作晶胞粒子数。",
+      "只统计一种粒子，忘记阴阳离子或不同原子要分别均摊。",
+      "把面心 1/2、棱心 1/4 和体心 1 混淆。",
+    ],
+    relatedModuleIds: ["sodium-metal-crystal", "nacl-crystal", "cscl-crystal"],
+    classroomPrompt: "投影时先让学生只数顶点，再打开完整晶胞，强调“画出来”不等于“完全属于”。",
+    examTip: "遇到陌生晶胞，先写位置贡献表，再代入比例；不要先猜化学式。",
+  },
+  {
+    id: "exam-coordination-number",
+    title: "配位数与最近邻粒子",
+    subtitle: "配位数看距离，不看晶胞里画了几个",
+    summary:
+      "配位数表示一个粒子周围最近邻异号离子或相邻粒子的个数，关键是锁定目标粒子并寻找所有等距离的最近邻。",
+    coreSteps: [
+      {
+        title: "锁定一个目标粒子",
+        body: "选定一个原子或离子作为中心，最好选高对称位置，例如体心、面心或晶胞中心附近的粒子。",
+      },
+      {
+        title: "寻找第一近邻",
+        body: "只统计距离最近且等距离的一圈粒子。离子晶体中通常先看异号离子，金属晶体中看最近的同种原子。",
+      },
+      {
+        title: "用周期延展补全",
+        body: "晶胞边界外还有相邻晶胞。边界附近的最近邻不能只看当前晶胞内画出的部分。",
+      },
+    ],
+    commonMistakes: [
+      "把一个晶胞中的粒子数当作配位数。",
+      "从二维投影图数邻居，漏掉前后方向的粒子。",
+      "把第二近邻也算进第一配位层。",
+    ],
+    relatedModuleIds: ["nacl-crystal", "cscl-crystal", "zinc-metal-crystal"],
+    classroomPrompt: "先在 NaCl 中数 6 个最近邻，再切换 CsCl 对比 8 个最近邻，让学生看到配位数来自空间包围。",
+    examTip: "题目问配位数时，优先画出目标粒子的局部包围结构，而不是完整晶胞。",
+  },
+  {
+    id: "exam-fractional-coordinates",
+    title: "晶胞内的分数坐标",
+    subtitle: "把晶胞边长当作 1，描述点在三条轴上的比例",
+    summary:
+      "分数坐标用晶胞三条边作为单位，记录粒子从原点出发在 a、b、c 方向上分别走了多少比例。",
+    coreSteps: [
+      {
+        title: "先确定原点和三条轴",
+        body: "看题目给出的晶胞方向，确认原点、a 轴、b 轴和 c 轴。换原点会改变同一个点的坐标写法。",
+      },
+      {
+        title: "分别读出三个方向比例",
+        body: "把点投影到 a、b、c 三个方向，写成 x/a、y/b、z/c 的形式，常见值有 0、1/2、1/4、3/4、1。",
+        formula: "(x/a, y/b, z/c)",
+      },
+      {
+        title: "检查是否在晶胞范围内",
+        body: "高中题中常用 0 到 1 之间的分数表示晶胞内位置；边界点可由相邻晶胞共享。",
+      },
+    ],
+    commonMistakes: [
+      "只读平面投影，忘记 z 方向。",
+      "把实际距离单位直接写进坐标，而不是写比例。",
+      "没有看清题目原点，导致三个分量整体偏移。",
+    ],
+    relatedModuleIds: ["nacl-crystal", "diamond-crystal", "zinc-metal-crystal"],
+    classroomPrompt: "用立方体前下左角作原点，让学生先说体心坐标，再说面心和棱心坐标。",
+    examTip: "分数坐标题先画三轴小坐标系，按 x、y、z 顺序逐个读数。",
+  },
+  {
+    id: "exam-crystal-density",
+    title: "晶胞密度与 NA 计算",
+    subtitle: "质量来自 Z 和摩尔质量，体积来自晶胞参数",
+    summary:
+      "晶体密度计算的核心是单个晶胞的质量除以单个晶胞的体积。最常见陷阱是单位换算和 Z 的含义。",
+    coreSteps: [
+      {
+        title: "求每个晶胞的式量单位数 Z",
+        body: "先通过均摊法确定一个晶胞中含有几个化学式单位。NaCl 型常规晶胞中 Z = 4，CsCl 型常规晶胞中 Z = 1。",
+      },
+      {
+        title: "写出晶胞质量",
+        body: "晶胞质量等于 Z 乘以摩尔质量，再除以阿伏伽德罗常数。",
+        formula: "m_cell = ZM / NA",
+      },
+      {
+        title: "用晶胞体积计算密度",
+        body: "立方晶胞体积为 a³。若 a 用 pm 或 nm 给出，必须先换算成 cm，再代入密度单位 g·cm⁻³。",
+        formula: "ρ = ZM / (NA · V_cell)",
+      },
+    ],
+    commonMistakes: [
+      "把 pm、nm 直接代入 cm³ 体系。",
+      "把晶胞中原子总数误当成化学式单位数 Z。",
+      "只用边长 a 做分母，忘记体积是 a³。",
+    ],
+    relatedModuleIds: ["nacl-crystal", "cscl-crystal", "diamond-crystal"],
+    classroomPrompt: "先让学生口算 Z，再单独列出单位换算，避免所有错误混在同一步。",
+    examTip: "密度题固定三行：Z、V_cell、ρ 公式；每行都带单位检查。",
+  },
+  {
+    id: "exam-interstitial-sites",
+    title: "四面体与八面体空隙",
+    subtitle: "先看几个球围成空隙，再记数量比例",
+    summary:
+      "密堆积空隙不是额外画出来的粒子，而是由周围球围出的空间位置。八面体空隙对应 6 配位，四面体空隙对应 4 配位。",
+    coreSteps: [
+      {
+        title: "识别空隙类型",
+        body: "由 6 个球围成、中心到 6 个球近似等距的是八面体空隙；由 4 个球围成的是四面体空隙。",
+      },
+      {
+        title: "记住数量比例",
+        body: "若密堆积骨架中有 N 个球，通常形成 N 个八面体空隙和 2N 个四面体空隙。",
+        formula: "八面体空隙 : 四面体空隙 = N : 2N",
+      },
+      {
+        title: "结合填隙比例推导化学式",
+        body: "题目给出填入多少空隙时，用已填空隙数与骨架粒子数做比例，而不是把所有空隙默认填满。",
+      },
+    ],
+    commonMistakes: [
+      "把空隙当成已经存在的原子或离子。",
+      "混淆 N 个八面体空隙和 2N 个四面体空隙。",
+      "看到 NaCl 就只背结论，没有理解 Na+ 填入八面体空隙。",
+    ],
+    relatedModuleIds: ["octahedral-voids", "tetrahedral-voids", "nacl-crystal"],
+    classroomPrompt: "先隔离一个空隙局部模型，再回到完整晶胞，帮助学生把局部配位和整体计数分开。",
+    examTip: "填隙题先写骨架粒子数 N，再写空隙总数和实际填入比例。",
+  },
+];
+
+export function getExamTopicById(id: string): ExamTopic | undefined {
+  return examTopics.find((topic) => topic.id === id);
+}
+
+export function getExamTopicDetailById(id: string): ExamTopicDetail | undefined {
+  return examTopicDetails.find((topic) => topic.id === id);
+}

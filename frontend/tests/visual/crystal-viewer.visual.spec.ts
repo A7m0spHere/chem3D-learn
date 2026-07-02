@@ -32,6 +32,24 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     ).toHaveCount(0);
   });
 
+  test("石墨离域 π 电子云有独立视觉快照", async ({ page }) => {
+    await page.goto("/module/graphite-structure");
+    await page.getByRole("button", { exact: true, name: "离域 π 电子" }).click();
+
+    const viewer = page.getByTestId("graphite-viewer");
+    const canvasArea = page.getByTestId("graphite-canvas");
+    await expect(viewer.getByText("C｜层内离域 π 电子", { exact: true })).toBeVisible();
+    await expect(
+      viewer.getByText(
+        "每个 C 原子还有未参与 sp² 杂化的 p 轨道，形成层内离域 π 电子体系。电子可沿碳层移动，因此石墨能导电。",
+        { exact: true },
+      ),
+    ).toBeVisible();
+
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("graphite-pi-electron-cloud-viewer.png");
+  });
+
   test("Zn 分层模式和四面体空隙计数使用底部信息区", async ({ page }) => {
     await page.goto("/module/zinc-metal-crystal");
     await page.getByRole("button", { exact: true, name: "分层堆积" }).click();

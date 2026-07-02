@@ -5,6 +5,7 @@ import { Quaternion, Vector3 } from "three";
 import { AngleArc } from "@/components/three/AngleArc";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
+import { POrbitalPair, PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getBenzenePlanarModeInfo, type BenzenePlaneView } from "@/data/benzenePlanar";
 import type { AngleSpec, Atom, BenzenePlanarMode, Bond } from "@/types/molecule";
@@ -284,22 +285,29 @@ function PiBondOverlay() {
         .filter((atom) => atom.element === "C")
         .map((atom) => (
           <group key={atom.id}>
-            <POrbital center={[atom.position[0], atom.position[1], 0.38]} sign="top" />
-            <POrbital center={[atom.position[0], atom.position[1], -0.38]} sign="bottom" />
+            <POrbitalPair
+              center={[atom.position[0], atom.position[1], 0]}
+              direction={[0, 0, 1]}
+              length={0.46}
+              opacity={0.2}
+              seed={400 + Number(atom.id.replace("c", "")) * 17}
+              showAxis={false}
+              width={0.085}
+            />
             <StaticCylinder
               color="#5BAEA5"
               end={[atom.position[0], atom.position[1], 0.68]}
-              opacity={0.42}
-              radius={0.008}
+              opacity={0.22}
+              radius={0.006}
               start={[atom.position[0], atom.position[1], -0.68]}
             />
           </group>
         ))}
-      <PiCloud center={[0, 0, 0.52]} />
-      <PiCloud center={[0, 0, -0.52]} />
-      <Html center distanceFactor={6.6} pointerEvents="none" position={[0, 0, 0.86]}>
+      <PiCloud center={[0, 0, 0.52]} tone="primary" />
+      <PiCloud center={[0, 0, -0.52]} tone="warm" />
+      <Html center distanceFactor={7.8} pointerEvents="none" position={[0.92, 0.72, 0.78]}>
         <span
-          className="whitespace-nowrap text-[11px] font-semibold text-primary-dark/70 drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
+          className="whitespace-nowrap rounded-full bg-white/75 px-2 py-0.5 text-[10px] font-semibold text-primary-dark/70 shadow-sm"
           data-testid="benzene-pi-label"
         >
           大 π 电子云
@@ -309,37 +317,20 @@ function PiBondOverlay() {
   );
 }
 
-function POrbital({ center, sign }: { center: Vec3; sign: "top" | "bottom" }) {
+function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
   return (
-    <mesh position={center} scale={[0.14, 0.14, 0.3]}>
-      <sphereGeometry args={[1, 28, 24]} />
-      <meshStandardMaterial
-        color={sign === "top" ? "#BDEBE5" : "#F7D6A7"}
-        depthWrite={false}
-        emissive={sign === "top" ? "#DFF8F4" : "#FFF0D8"}
-        emissiveIntensity={0.05}
-        opacity={0.38}
-        roughness={0.28}
-        transparent
-      />
-    </mesh>
-  );
-}
-
-function PiCloud({ center }: { center: Vec3 }) {
-  return (
-    <mesh position={center} scale={[1.36, 1.36, 0.13]}>
-      <sphereGeometry args={[1, 64, 32]} />
-      <meshStandardMaterial
-        color="#2A9D8F"
-        depthWrite={false}
-        emissive="#DFF8F4"
-        emissiveIntensity={0.08}
-        opacity={0.15}
-        roughness={0.3}
-        transparent
-      />
-    </mesh>
+    <PiCloudBand
+      cloudStyle="delocalized-ring"
+      center={center}
+      length={1.18}
+      opacity={0.24}
+      orientation="xy"
+      seed={center[2] > 0 ? 509 : 523}
+      thickness={0.09}
+      tone={tone}
+      waist={0.04}
+      width={0.94}
+    />
   );
 }
 

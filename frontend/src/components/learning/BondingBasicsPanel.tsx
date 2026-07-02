@@ -51,6 +51,34 @@ export function BondingBasicsPanel({ moduleId, activeMode }: BondingBasicsPanelP
                   <div className="grid gap-2 text-sm">
                     <FactRow label="模型对象" value={lesson.modelObject} strong />
                     <FactRow label="当前重点" value={modeInfo.label} />
+                    {modeInfo.angleLabel ? (
+                      <FactRow label="代表夹角" value={modeInfo.angleLabel} />
+                    ) : null}
+                    {modeInfo.geometryNote ? (
+                      <FactRow label="空间方向" value={modeInfo.geometryNote} />
+                    ) : null}
+                    {modeInfo.unhybridizedNote ? (
+                      <FactRow label="未杂化轨道" value={modeInfo.unhybridizedNote} />
+                    ) : null}
+                    {modeInfo.inputOrbitals ? (
+                      <FactRow label="杂化前" value={modeInfo.inputOrbitals} />
+                    ) : null}
+                    {modeInfo.outputOrbitals ? (
+                      <FactRow label="杂化后" value={modeInfo.outputOrbitals} strong />
+                    ) : null}
+                    {typeof modeInfo.leftoverPCount === "number" ? (
+                      <FactRow
+                        label="剩余 p 轨道"
+                        value={
+                          modeInfo.leftoverPCount > 0
+                            ? `${modeInfo.leftoverPCount} 组`
+                            : "无"
+                        }
+                      />
+                    ) : null}
+                    {modeInfo.typicalExample ? (
+                      <FactRow label="典型联想" value={modeInfo.typicalExample} />
+                    ) : null}
                   </div>
                 </div>
               </AccordionContent>
@@ -100,6 +128,19 @@ type FactRowProps = {
 };
 
 function FactRow({ label, value, strong = false }: FactRowProps) {
+  const isLong = value.length > 18;
+
+  if (isLong) {
+    return (
+      <div className="space-y-1 rounded-lg bg-white/60 px-3 py-2">
+        <span className="text-text-secondary">{label}</span>
+        <div className={`${strong ? "font-semibold text-primary-dark" : "text-text-primary"} leading-6`}>
+          {value}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-start justify-between gap-3">
       <span className="shrink-0 text-text-secondary">{label}</span>

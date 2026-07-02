@@ -13,7 +13,12 @@ test.describe("普通分子 Viewer 三段式教学信息", () => {
       ),
     ).toBeVisible();
     await page.getByRole("button", { exact: true, name: "孤电子对" }).click();
-    await expect(page.getByTestId("molecule-viewer-canvas").locator("canvas")).toBeVisible();
+    const canvasArea = page.getByTestId("molecule-viewer-canvas");
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(canvasArea.getByText("孤电子对", { exact: true })).toBeVisible();
+
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("molecule-viewer-nh3-lone-pair.png");
   });
 
   test("H2O 键角步骤保留角弧但解释不进入 Canvas", async ({ page }) => {
@@ -27,6 +32,7 @@ test.describe("普通分子 Viewer 三段式教学信息", () => {
     const canvasArea = page.getByTestId("molecule-viewer-canvas");
     await expect(viewer.getByText("H2O｜观察键角进一步减小", { exact: true })).toBeVisible();
     await expect(canvasArea.getByText("约 104.5°", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("孤电子对", { exact: true })).toHaveCount(2);
     await expect(
       canvasArea.getByText(
         "显示 H-O-H 键角后，可以看到水分子的典型键角约为 104.5°，比 NH3 的键角更小。",

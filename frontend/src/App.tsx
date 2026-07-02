@@ -4,8 +4,10 @@ import { AppHeader } from "@/components/common/AppHeader";
 import { HomePage } from "@/pages/HomePage";
 import { ModulesPage } from "@/pages/ModulesPage";
 import { ModuleDetailPage } from "@/pages/ModuleDetailPage";
+import { PathsPage } from "@/pages/PathsPage";
 
 import { ExamPage } from "@/pages/ExamPage";
+import { ExamTopicDetailPage } from "@/pages/ExamTopicDetailPage";
 import { AboutPage } from "@/pages/AboutPage";
 
 export default function App() {
@@ -17,9 +19,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/modules" element={<ModulesPage />} />
+          <Route path="/paths" element={<PathsPage />} />
           <Route path="/module/:id" element={<ModuleDetailPage />} />
 
           <Route path="/exam" element={<ExamPage />} />
+          <Route path="/exam/:id" element={<ExamTopicDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>

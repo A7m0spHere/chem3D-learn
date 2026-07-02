@@ -6,6 +6,7 @@ import {
   htmlOverlaySubtleLabelClass,
   htmlOverlaySubtleWideLabelClass,
 } from "@/components/three/htmlOverlayStyles";
+import { LonePairOrbital as SharedLonePairOrbital } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getOrganicCoplanarModeInfo } from "@/data/organicCoplanar";
 import type { OrganicCoplanarMode } from "@/types/molecule";
@@ -545,40 +546,15 @@ function LonePairOrbital({
   nPosition: Vec3;
   direction: Vec3;
 }) {
-  const orbitalDirection = normalize(direction);
-  const center = add(nPosition, scale(orbitalDirection, 0.38));
-  const quaternion = new Quaternion().setFromUnitVectors(
-    new Vector3(0, 1, 0),
-    new Vector3(...orbitalDirection).normalize(),
-  );
-
   return (
-    <group position={center} quaternion={quaternion}>
-      <mesh scale={[0.23, 0.48, 0.18]}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial
-          color="#EEF7FF"
-          depthWrite={false}
-          emissive="#DBEAFE"
-          emissiveIntensity={0.08}
-          opacity={0.34}
-          roughness={0.28}
-          transparent
-        />
-      </mesh>
-      <mesh scale={[0.235, 0.485, 0.185]}>
-        <sphereGeometry args={[1, 16, 16]} />
-        <meshBasicMaterial color="#AFC7E8" opacity={0.42} transparent wireframe />
-      </mesh>
-      <mesh position={[-0.065, 0.1, 0.026]}>
-        <sphereGeometry args={[0.048, 24, 24]} />
-        <meshStandardMaterial color="#94A3B8" emissive="#CBD5E1" emissiveIntensity={0.12} roughness={0.34} />
-      </mesh>
-      <mesh position={[0.065, 0.1, -0.026]}>
-        <sphereGeometry args={[0.048, 24, 24]} />
-        <meshStandardMaterial color="#B6A26A" emissive="#F4D98B" emissiveIntensity={0.1} roughness={0.34} />
-      </mesh>
-    </group>
+    <SharedLonePairOrbital
+      direction={direction}
+      distance={0.34}
+      length={0.5}
+      opacity={0.38}
+      origin={nPosition}
+      width={0.2}
+    />
   );
 }
 

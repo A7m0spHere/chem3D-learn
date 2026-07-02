@@ -10,6 +10,7 @@ export function AppHeader() {
     { name: "晶体结构", href: "/#crystal-structure" },
     { name: "有机立体", href: "/#organic-stereochemistry" },
     { name: "化学键与轨道", href: "/#bonding-orbitals" },
+    { name: "学习路径", href: "/paths" },
     { name: "能力扩展", href: "/exam" },
   ];
 
@@ -26,12 +27,14 @@ export function AppHeader() {
           <span className="font-semibold text-text-primary">Chem3D Learn</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6" aria-label="主导航">
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6" aria-label="主导航">
           {navLinks.map((link) => {
             const isHash = link.href.startsWith("/#");
             const isActive = isHash
               ? location.pathname === "/" && location.hash === link.href.slice(1)
-              : location.pathname === link.href;
+              : link.href === "/exam"
+                ? location.pathname.startsWith("/exam")
+                : location.pathname === link.href;
 
             return (
               <Link

@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import { PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import {
   bondDipoleExamples,
@@ -288,18 +289,12 @@ function ElectronCloud({
   scale: Vec3;
 }) {
   return (
-    <mesh position={center} scale={meshScale}>
-      <sphereGeometry args={[1, 48, 32]} />
-      <meshStandardMaterial
-        color="#2A9D8F"
-        depthWrite={false}
-        emissive="#DFF8F4"
-        emissiveIntensity={0.08}
-        opacity={0.18}
-        roughness={0.28}
-        transparent
-      />
-    </mesh>
+    <group>
+      <PiCloudBand center={center} opacity={0.18} scale={meshScale} seed={701} tone="primary" />
+      <TinyDipoleLabel position={[center[0] + 0.08, center[1] + 0.34, center[2]]}>
+        电子云偏向 F
+      </TinyDipoleLabel>
+    </group>
   );
 }
 

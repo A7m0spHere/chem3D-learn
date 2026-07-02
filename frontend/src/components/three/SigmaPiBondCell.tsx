@@ -1,7 +1,14 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useRef } from "react";
-import { Quaternion, Vector3, type Group } from "three";
+import { type Group } from "three";
+import {
+  AxisTriad,
+  GuideCylinder,
+  POrbitalPair,
+  PiCloudBand,
+  SOrbitalCloud,
+} from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getOrbitalBondModeInfo } from "@/data/sigmaPiBonds";
 import type { OrbitalBondLessonType, PiBondMode, SigmaBondMode } from "@/data/sigmaPiBonds";
@@ -22,12 +29,6 @@ type SigmaPiBondCellProps =
       playing?: boolean;
       showLabels?: boolean;
     };
-
-const axisColors = {
-  x: "#F4A261",
-  y: "#2A9D8F",
-  z: "#1F6F68",
-};
 
 export function SigmaPiBondCell(props: SigmaPiBondCellProps) {
   const modeInfo =
@@ -185,26 +186,11 @@ function PiBondScene({
 function CoordinateAxes({ showLabels }: { showLabels: boolean }) {
   return (
     <group>
-      <StaticCylinder color={axisColors.x} end={[2.2, -1.05, -1.05]} opacity={0.8} radius={0.01} start={[-2.2, -1.05, -1.05]} />
-      <StaticCylinder color={axisColors.y} end={[-2.2, 1.15, -1.05]} opacity={0.65} radius={0.01} start={[-2.2, -1.05, -1.05]} />
-      <StaticCylinder color={axisColors.z} end={[-2.2, -1.05, 1.15]} opacity={0.65} radius={0.01} start={[-2.2, -1.05, -1.05]} />
-      <AxisTick position={[2.25, -1.05, -1.05]} text="X" color={axisColors.x} />
-      <AxisTick position={[-2.2, 1.2, -1.05]} text="Y" color={axisColors.y} />
-      <AxisTick position={[-2.2, -1.05, 1.2]} text="Z" color={axisColors.z} />
+      <AxisTriad length={2.2} opacity={0.52} origin={[-2.2, -1.05, -1.05]} />
       {showLabels ? (
         <SceneLabel color="#B96320" position={[0, -1.28, -1.05]} text="X 轴：键轴 / 两核连线" />
       ) : null}
     </group>
-  );
-}
-
-function AxisTick({ position, text, color }: { position: Vec3; text: string; color: string }) {
-  return (
-    <Html center distanceFactor={6.7} pointerEvents="none" position={position}>
-      <span className="rounded-full bg-white/85 px-2 py-0.5 text-[11px] font-bold shadow-sm" style={{ color }}>
-        {text}
-      </span>
-    </Html>
   );
 }
 
@@ -223,78 +209,29 @@ function Nucleus({ position, label, showLabel }: { position: Vec3; label: string
 }
 
 function SOrbital({ center }: { center: Vec3 }) {
-  return (
-    <mesh position={center} scale={[0.46, 0.46, 0.46]}>
-      <sphereGeometry args={[1, 48, 32]} />
-      <meshStandardMaterial
-        color="#BDEBE5"
-        depthWrite={false}
-        emissive="#DFF8F4"
-        emissiveIntensity={0.08}
-        opacity={0.32}
-        roughness={0.3}
-        transparent
-      />
-    </mesh>
-  );
+  return <SOrbitalCloud center={center} opacity={0.28} radius={0.46} seed={43} tone="primary" />;
 }
 
 function POrbitalX({ center }: { center: Vec3 }) {
-  return (
-    <group position={center}>
-      <POrbitalLobe center={[-0.36, 0, 0]} scale={[0.4, 0.2, 0.2]} tone="warm" />
-      <POrbitalLobe center={[0.36, 0, 0]} scale={[0.4, 0.2, 0.2]} tone="cool" />
-      <StaticCylinder color="#1F6F68" end={[0.72, 0, 0]} opacity={0.28} radius={0.008} start={[-0.72, 0, 0]} />
-    </group>
-  );
+  return <POrbitalPair center={center} direction={[1, 0, 0]} length={0.64} opacity={0.42} seed={89} width={0.19} />;
 }
 
 function POrbitalZ({ center }: { center: Vec3 }) {
-  return (
-    <group position={center}>
-      <POrbitalLobe center={[0, 0, 0.42]} scale={[0.22, 0.22, 0.48]} tone="cool" />
-      <POrbitalLobe center={[0, 0, -0.42]} scale={[0.22, 0.22, 0.48]} tone="warm" />
-      <StaticCylinder color="#1F6F68" end={[0, 0, 0.86]} opacity={0.28} radius={0.008} start={[0, 0, -0.86]} />
-    </group>
-  );
-}
-
-function POrbitalLobe({
-  center,
-  scale,
-  tone,
-}: {
-  center: Vec3;
-  scale: Vec3;
-  tone: "cool" | "warm";
-}) {
-  return (
-    <mesh position={center} scale={scale}>
-      <sphereGeometry args={[1, 32, 32]} />
-      <meshStandardMaterial
-        color={tone === "cool" ? "#2A9D8F" : "#F4A261"}
-        depthWrite={false}
-        emissive={tone === "cool" ? "#DFF8F4" : "#FFF0D8"}
-        emissiveIntensity={0.08}
-        opacity={0.34}
-        roughness={0.32}
-        transparent
-      />
-    </mesh>
-  );
+  return <POrbitalPair center={center} direction={[0, 0, 1]} length={0.76} opacity={0.42} seed={121} width={0.2} />;
 }
 
 function SigmaOverlap({ center, scale }: { center: Vec3; scale: Vec3 }) {
   return (
     <mesh position={center} scale={scale}>
       <sphereGeometry args={[1, 48, 32]} />
-      <meshStandardMaterial
+      <meshPhysicalMaterial
+        clearcoat={0.24}
         color="#F4A261"
         depthWrite={false}
         emissive="#FFF0D8"
         emissiveIntensity={0.08}
-        opacity={0.26}
-        roughness={0.28}
+        opacity={0.22}
+        roughness={0.32}
         transparent
       />
     </mesh>
@@ -303,25 +240,24 @@ function SigmaOverlap({ center, scale }: { center: Vec3; scale: Vec3 }) {
 
 function PiOverlapCloud({ tone }: { tone: "top" | "bottom" }) {
   return (
-    <mesh scale={[1, 0.22, 0.2]}>
-      <sphereGeometry args={[1, 48, 32]} />
-      <meshStandardMaterial
-        color={tone === "top" ? "#2A9D8F" : "#F4A261"}
-        depthWrite={false}
-        emissive={tone === "top" ? "#DFF8F4" : "#FFF0D8"}
-        emissiveIntensity={0.08}
-        opacity={0.2}
-        roughness={0.3}
-        transparent
-      />
-    </mesh>
+    <PiCloudBand
+      cloudStyle="overlap-lobes"
+      length={1}
+      opacity={0.34}
+      orientation="xy"
+      seed={tone === "top" ? 173 : 211}
+      thickness={0.13}
+      tone={tone === "top" ? "primary" : "warm"}
+      waist={0.24}
+      width={0.28}
+    />
   );
 }
 
 function BondAxis({ showLabel }: { showLabel: boolean }) {
   return (
     <>
-      <StaticCylinder color="#F4A261" end={[1.35, 0, 0]} opacity={0.78} radius={0.012} start={[-1.35, 0, 0]} />
+      <GuideCylinder color="#F4A261" end={[1.35, 0, 0]} opacity={0.78} radius={0.012} start={[-1.35, 0, 0]} />
       {showLabel ? (
         <SceneLabel color="#B96320" position={[0, -0.28, 0.24]} text="键轴" />
       ) : null}
@@ -339,33 +275,6 @@ function SceneLabel({ position, text, color }: { position: Vec3; text: string; c
         {text}
       </span>
     </Html>
-  );
-}
-
-function StaticCylinder({
-  start,
-  end,
-  color,
-  opacity = 1,
-  radius = 0.018,
-}: {
-  start: Vec3;
-  end: Vec3;
-  color: string;
-  opacity?: number;
-  radius?: number;
-}) {
-  const startVector = new Vector3(...start);
-  const endVector = new Vector3(...end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-  const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
-
-  return (
-    <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, direction.length(), 16]} />
-      <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
-    </mesh>
   );
 }
 

@@ -14,6 +14,15 @@ export type BondingBasicsMode =
   | "overlap"
   | "formed";
 
+export type HybridRenderMode = "solid" | "cloud";
+
+export type HybridOrbitalControls = {
+  progress: number;
+  renderMode: HybridRenderMode;
+  showUnhybridizedP: boolean;
+  showAxes: boolean;
+};
+
 export type BondingBasicsModeInfo = {
   id: BondingBasicsMode;
   label: string;
@@ -22,6 +31,13 @@ export type BondingBasicsModeInfo = {
   points: string[];
   viewerTitle: string;
   viewerSummary: string;
+  angleLabel?: string;
+  geometryNote?: string;
+  unhybridizedNote?: string;
+  inputOrbitals?: string;
+  outputOrbitals?: string;
+  leftoverPCount?: number;
+  typicalExample?: string;
 };
 
 export type BondingBasicsLesson = {
@@ -49,27 +65,48 @@ export const bondingBasicsLessons: Record<BondingBasicsModuleId, BondingBasicsLe
         label: "sp",
         title: "sp 杂化：两个方向相反的杂化轨道",
         description: "1 个 s 轨道和 1 个 p 轨道组合，形成 2 个方向相反的杂化轨道，夹角为 180°。",
-        points: ["参与轨道数为 2", "空间排布为直线形", "常用于解释 CO₂、乙炔等直线结构"],
+        points: ["参与轨道数为 2", "空间排布为直线形", "保留 2 组未杂化 p 轨道，可继续形成 π 键"],
         viewerTitle: "sp 杂化｜两个杂化轨道沿 X 轴反向排布",
-        viewerSummary: "sp 杂化形成 2 个方向相反的轨道，代表性夹角为 180°。",
+        viewerSummary: "sp 杂化形成 2 个方向相反的大头杂化轨道，夹角 180°；另保留 2 组未杂化 p 轨道。",
+        angleLabel: "180°",
+        geometryNote: "直线形，两个杂化轨道沿同一直线反向伸展。",
+        unhybridizedNote: "保留 2 组互相垂直的未杂化 p 轨道，常用于解释乙炔中的两组 π 键。",
+        inputOrbitals: "1 个 s 轨道 + 1 个 p 轨道",
+        outputOrbitals: "2 个等价 sp 杂化轨道",
+        leftoverPCount: 2,
+        typicalExample: "乙炔中碳原子的直线形 σ 骨架",
       },
       {
         id: "sp2",
         label: "sp²",
         title: "sp² 杂化：三个轨道在同一平面内",
         description: "1 个 s 轨道和 2 个 p 轨道组合，形成 3 个共面的杂化轨道，彼此约 120°。",
-        points: ["参与轨道数为 3", "三个方向位于同一平面", "常用于解释 BF₃、乙烯、苯环等平面结构"],
+        points: ["参与轨道数为 3", "三个方向位于同一平面", "保留 1 组垂直于平面的未杂化 p 轨道"],
         viewerTitle: "sp² 杂化｜三个轨道平面三角分布",
-        viewerSummary: "sp² 杂化形成 3 个共面方向，代表性夹角约 120°。",
+        viewerSummary: "sp² 杂化形成 3 个共面大头杂化轨道，夹角约 120°；另保留 1 组垂直平面的未杂化 p 轨道。",
+        angleLabel: "120°",
+        geometryNote: "平面三角形，三个杂化轨道都在同一平面内。",
+        unhybridizedNote: "保留 1 组未杂化 p 轨道，方向垂直于 sp² 平面，可用于形成 π 键。",
+        inputOrbitals: "1 个 s 轨道 + 2 个 p 轨道",
+        outputOrbitals: "3 个等价 sp² 杂化轨道",
+        leftoverPCount: 1,
+        typicalExample: "乙烯中碳原子的平面 σ 骨架",
       },
       {
         id: "sp3",
         label: "sp³",
         title: "sp³ 杂化：四个轨道指向四面体",
         description: "1 个 s 轨道和 3 个 p 轨道组合，形成 4 个指向四面体顶点的杂化轨道。",
-        points: ["参与轨道数为 4", "空间排布为四面体", "常用于解释 CH₄、NH₃、H₂O 的电子域排布"],
+        points: ["参与轨道数为 4", "空间排布为四面体", "参与杂化后不再保留未杂化 p 轨道"],
         viewerTitle: "sp³ 杂化｜四个轨道指向四面体",
-        viewerSummary: "sp³ 杂化形成 4 个四面体方向，代表性夹角约 109.5°。",
+        viewerSummary: "sp³ 杂化形成 4 个指向四面体顶点的大头杂化轨道，代表性夹角约 109.5°。",
+        angleLabel: "109.5°",
+        geometryNote: "四面体方向，四个杂化轨道尽量远离。",
+        unhybridizedNote: "s 和 3 个 p 轨道全部参与杂化，高中阶段按无未杂化 p 轨道理解。",
+        inputOrbitals: "1 个 s 轨道 + 3 个 p 轨道",
+        outputOrbitals: "4 个等价 sp³ 杂化轨道",
+        leftoverPCount: 0,
+        typicalExample: "甲烷中碳原子的四面体 σ 骨架",
       },
     ],
     limitation: "这里用方向和形状帮助建立高中空间直觉，不代表真实轨道计算结果。",

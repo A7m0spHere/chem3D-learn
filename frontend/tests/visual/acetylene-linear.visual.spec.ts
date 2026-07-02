@@ -55,6 +55,11 @@ test.describe("乙炔直线结构模块视觉回归", () => {
       page.getByText("这里只做高中课堂示意。", { exact: true }),
     ).toHaveCount(0);
 
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("acetylene-linear-pi-bond-viewer.png", {
+      timeout: 20_000,
+    });
+
     await page.getByRole("button", { exact: true, name: "三键组成" }).click();
     await expect(viewer.getByText("C≡C 三键｜1 个 σ 键 + 2 个 π 键", { exact: true })).toBeVisible();
     await expect(canvasArea.getByTestId("acetylene-triple-label")).toHaveCount(1);

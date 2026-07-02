@@ -1,15 +1,25 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { Quaternion, Vector3 } from "three";
+import {
+  LonePairOrbital as SharedLonePairOrbital,
+  OrbitalSurface,
+} from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import { HybridOrbitalScene } from "@/components/three/HybridOrbitalScene";
 import { getBondingBasicsModeInfo } from "@/data/bondingBasics";
-import type { BondingBasicsMode, BondingBasicsModuleId } from "@/data/bondingBasics";
+import type {
+  BondingBasicsMode,
+  BondingBasicsModuleId,
+  HybridOrbitalControls,
+} from "@/data/bondingBasics";
 
 type Vec3 = [number, number, number];
 
 type BondingBasicsCellProps = {
   moduleId: BondingBasicsModuleId;
   mode: BondingBasicsMode;
+  hybridControls?: HybridOrbitalControls;
   loading?: boolean;
 };
 
@@ -18,12 +28,32 @@ const primaryDark = "#1F6F68";
 const accent = "#F4A261";
 const textPrimary = "#1F2933";
 
-export function BondingBasicsCell({ moduleId, mode, loading = false }: BondingBasicsCellProps) {
+export function BondingBasicsCell({
+  moduleId,
+  mode,
+  hybridControls,
+  loading = false,
+}: BondingBasicsCellProps) {
   const modeInfo = getBondingBasicsModeInfo(moduleId, mode);
-  const sceneScale = moduleId === "hybrid-orbitals-sp" ? 1.14 : 1.2;
+  const sceneScale = moduleId === "hybrid-orbitals-sp" ? 1.08 : 1.2;
+  const resolvedHybridControls = hybridControls ?? {
+    progress: 100,
+    renderMode: "solid",
+    showUnhybridizedP: true,
+    showAxes: true,
+  } satisfies HybridOrbitalControls;
+  const hybridFooterMeta =
+    moduleId === "hybrid-orbitals-sp" ? (
+      <span className="hidden font-semibold text-primary-dark sm:inline" data-testid="hybrid-footer-meta">
+        {resolvedHybridControls.progress}% ·{" "}
+        {resolvedHybridControls.renderMode === "solid" ? "实体轨道" : "电子云"} ·{" "}
+        {resolvedHybridControls.showUnhybridizedP ? "显示未杂化 p" : "隐藏未杂化 p"}
+      </span>
+    ) : undefined;
 
   return (
     <ThreeViewerFrame
+      footerMeta={hybridFooterMeta}
       loading={loading}
       meta="拖拽旋转 · 滚轮或触控板缩放"
       stageTestId={`${moduleId}-canvas`}
@@ -32,7 +62,7 @@ export function BondingBasicsCell({ moduleId, mode, loading = false }: BondingBa
       viewerTestId={`${moduleId}-viewer`}
     >
       <Canvas
-        camera={{ position: [2.8, -3.7, 2.65], fov: 38 }}
+        camera={{ position: [3.15, -3.8, 2.8], fov: 37 }}
         key={`${moduleId}-${mode}`}
         shadows
         frameloop="demand"
@@ -42,28 +72,17 @@ export function BondingBasicsCell({ moduleId, mode, loading = false }: BondingBa
         <directionalLight position={[3.5, 4.6, 4.2]} intensity={1.3} castShadow />
         <directionalLight position={[-3.2, -2.4, 2.6]} intensity={0.34} />
         <group position={[0, 0.08, 0]} rotation={[-0.16, 0.12, 0]} scale={sceneScale}>
-          <ReferencePlane />
-          {moduleId === "hybrid-orbitals-sp" ? <HybridScene mode={mode} /> : null}
+          {moduleId === "hybrid-orbitals-sp" ? (
+            <HybridOrbitalScene controls={resolvedHybridControls} mode={mode} />
+          ) : (
+            <ReferencePlane />
+          )}
           {moduleId === "ionic-bond-formation" ? <IonicScene mode={mode} /> : null}
           {moduleId === "coordinate-bond-formation" ? <CoordinateScene mode={mode} /> : null}
         </group>
         <OrbitControls enableDamping enablePan={false} maxDistance={8} minDistance={1.85} target={[0, 0.04, 0]} />
       </Canvas>
     </ThreeViewerFrame>
-  );
-}
-
-function HybridScene({ mode }: { mode: BondingBasicsMode }) {
-  const directions = getHybridDirections(mode);
-
-  return (
-    <>
-      <AtomCore label="中心原子" position={[0, 0, 0]} />
-      {directions.map((direction, index) => (
-        <HybridLobe direction={direction} index={index} key={`${direction.join("-")}-${index}`} />
-      ))}
-      <SceneLabel color={primaryDark} position={[0, -1.04, 0.2]} text={`${mode} 杂化轨道方向`} />
-    </>
   );
 }
 
@@ -128,30 +147,6 @@ function CoordinateScene({ mode }: { mode: BondingBasicsMode }) {
   );
 }
 
-function HybridLobe({ direction, index }: { direction: Vec3; index: number }) {
-  const end: Vec3 = [direction[0] * 1.12, direction[1] * 1.12, direction[2] * 1.12];
-  const center: Vec3 = [direction[0] * 0.58, direction[1] * 0.58, direction[2] * 0.58];
-  const warm = index % 2 === 0;
-
-  return (
-    <>
-      <StaticCylinder color={warm ? accent : primary} opacity={0.34} radius={0.012} start={[0, 0, 0]} end={end} />
-      <mesh position={center} quaternion={getQuaternionForDirection(direction)} scale={[0.18, 0.18, 0.56]}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial
-          color={warm ? accent : primary}
-          depthWrite={false}
-          emissive={warm ? "#FFF0D8" : "#DFF8F4"}
-          emissiveIntensity={0.08}
-          opacity={0.34}
-          roughness={0.3}
-          transparent
-        />
-      </mesh>
-    </>
-  );
-}
-
 function AtomCore({
   position,
   label,
@@ -199,8 +194,14 @@ function Electron({ position }: { position: Vec3 }) {
 function LonePair({ position }: { position: Vec3 }) {
   return (
     <group position={position}>
-      <Electron position={[-0.08, 0, 0]} />
-      <Electron position={[0.08, 0, 0]} />
+      <SharedLonePairOrbital
+        direction={[1, 0.2, 0]}
+        distance={0}
+        length={0.42}
+        opacity={0.38}
+        origin={[0, 0, 0]}
+        width={0.18}
+      />
       <SceneLabel color={primaryDark} position={[0, 0.24, 0]} text="孤对电子" />
     </group>
   );
@@ -208,10 +209,9 @@ function LonePair({ position }: { position: Vec3 }) {
 
 function EmptyOrbital({ position }: { position: Vec3 }) {
   return (
-    <mesh position={position} scale={[0.34, 0.22, 0.22]}>
-      <sphereGeometry args={[1, 32, 32]} />
-      <meshStandardMaterial color="#E2E8F0" depthWrite={false} opacity={0.38} roughness={0.28} transparent />
-    </mesh>
+    <group position={position}>
+      <OrbitalSurface direction={[1, 0, 0]} length={0.46} opacity={0.22} tone="neutral" width={0.2} />
+    </group>
   );
 }
 
@@ -284,21 +284,4 @@ function getQuaternionForDirection(direction: Vec3) {
     new Vector3(0, 1, 0),
     new Vector3(...direction).normalize(),
   );
-}
-
-function getHybridDirections(mode: BondingBasicsMode): Vec3[] {
-  if (mode === "sp") return [[-1, 0, 0], [1, 0, 0]];
-  if (mode === "sp2") {
-    return [
-      [1, 0, 0],
-      [-0.5, 0, 0.866],
-      [-0.5, 0, -0.866],
-    ];
-  }
-  return [
-    [0.94, 0, -0.33],
-    [-0.47, 0.82, -0.33],
-    [-0.47, -0.82, -0.33],
-    [0, 0, 1],
-  ];
 }

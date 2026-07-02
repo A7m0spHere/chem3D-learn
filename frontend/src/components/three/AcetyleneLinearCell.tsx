@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
+import { POrbitalPair, PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getAcetyleneLinearModeInfo, type AcetyleneLineView } from "@/data/acetyleneLinear";
 import type { AcetyleneLinearMode, Atom, Bond } from "@/types/molecule";
@@ -176,22 +177,38 @@ function PiBondOverlay() {
     <>
       {[-0.62, 0.62].map((x) => (
         <group key={x}>
-          <POrbital center={[x, 0, 0.42]} axis="z" sign="top" />
-          <POrbital center={[x, 0, -0.42]} axis="z" sign="bottom" />
-          <POrbital center={[x, 0.42, 0]} axis="y" sign="top" />
-          <POrbital center={[x, -0.42, 0]} axis="y" sign="bottom" />
+          <POrbitalPair
+            center={[x, 0, 0]}
+            direction={[0, 0, 1]}
+            length={0.5}
+            opacity={0.22}
+            seed={x < 0 ? 311 : 321}
+            showAxis={false}
+            width={0.1}
+          />
+          <POrbitalPair
+            center={[x, 0, 0]}
+            direction={[0, 1, 0]}
+            length={0.5}
+            opacity={0.2}
+            positiveTone="warm"
+            negativeTone="primary"
+            seed={x < 0 ? 331 : 341}
+            showAxis={false}
+            width={0.1}
+          />
           <StaticCylinder
             color="#5BAEA5"
             end={[x, 0, 0.72]}
-            opacity={0.38}
-            radius={0.008}
+            opacity={0.22}
+            radius={0.006}
             start={[x, 0, -0.72]}
           />
           <StaticCylinder
             color="#F4A261"
             end={[x, 0.72, 0]}
-            opacity={0.32}
-            radius={0.008}
+            opacity={0.2}
+            radius={0.006}
             start={[x, -0.72, 0]}
           />
         </group>
@@ -227,33 +244,6 @@ function TripleBondOverlay() {
   );
 }
 
-function POrbital({
-  center,
-  axis,
-  sign,
-}: {
-  center: Vec3;
-  axis: "y" | "z";
-  sign: "top" | "bottom";
-}) {
-  const scale: Vec3 = axis === "z" ? [0.16, 0.16, 0.34] : [0.16, 0.34, 0.16];
-
-  return (
-    <mesh position={center} scale={scale}>
-      <sphereGeometry args={[1, 28, 24]} />
-      <meshStandardMaterial
-        color={axis === "z" ? "#BDEBE5" : "#F7D6A7"}
-        depthWrite={false}
-        emissive={axis === "z" ? "#DFF8F4" : "#FFF0D8"}
-        emissiveIntensity={0.05}
-        opacity={sign === "top" ? 0.38 : 0.32}
-        roughness={0.28}
-        transparent
-      />
-    </mesh>
-  );
-}
-
 function PiCloud({
   center,
   axis,
@@ -264,20 +254,29 @@ function PiCloud({
   color: string;
 }) {
   const scale: Vec3 = axis === "z" ? [0.72, 0.18, 0.14] : [0.72, 0.14, 0.18];
+  const seed =
+    axis === "z"
+      ? center[2] > 0
+        ? 361
+        : 367
+      : center[1] > 0
+        ? 381
+        : 389;
 
   return (
-    <mesh position={center} scale={scale}>
-      <sphereGeometry args={[1, 48, 32]} />
-      <meshStandardMaterial
-        color={color}
-        depthWrite={false}
-        emissive={color}
-        emissiveIntensity={0.04}
-        opacity={0.13}
-        roughness={0.3}
-        transparent
-      />
-    </mesh>
+    <PiCloudBand
+      cloudStyle="overlap-lobes"
+      center={center}
+      length={0.82}
+      opacity={axis === "z" ? 0.32 : 0.22}
+      orientation={axis === "z" ? "xy" : "xz"}
+      scale={scale}
+      seed={seed}
+      thickness={axis === "z" ? 0.12 : 0.1}
+      tone={color === "#F4A261" ? "warm" : "primary"}
+      waist={0.28}
+      width={axis === "z" ? 0.24 : 0.21}
+    />
   );
 }
 

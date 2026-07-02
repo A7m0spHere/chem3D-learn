@@ -6,6 +6,7 @@ import { AngleArc } from "@/components/three/AngleArc";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { htmlOverlaySp2LabelClass } from "@/components/three/htmlOverlayStyles";
+import { POrbitalPair, PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getEthylenePlanarModeInfo, type EthylenePlaneView } from "@/data/ethylenePlanar";
 import type { AngleSpec, Atom, Bond, EthylenePlanarMode } from "@/types/molecule";
@@ -235,54 +236,47 @@ function PiBondOverlay() {
     <>
       {[-0.67, 0.67].map((x) => (
         <group key={x}>
-          <POrbital center={[x, 0, 0.46]} sign="top" />
-          <POrbital center={[x, 0, -0.46]} sign="bottom" />
+          <POrbitalPair
+            center={[x, 0, 0]}
+            direction={[0, 0, 1]}
+            length={0.46}
+            opacity={0.16}
+            seed={x < 0 ? 241 : 251}
+            showAxis={false}
+            width={0.09}
+          />
           <StaticCylinder
             color="#5BAEA5"
-            end={[x, 0, 0.82]}
-            opacity={0.44}
-            radius={0.01}
-            start={[x, 0, -0.82]}
+            end={[x, 0, 0.68]}
+            opacity={0.18}
+            radius={0.006}
+            start={[x, 0, -0.68]}
           />
         </group>
       ))}
-      <PiCloud center={[0, 0, 0.58]} />
-      <PiCloud center={[0, 0, -0.58]} />
+      <PiCloud center={[0, 0, 0.58]} tone="primary" />
+      <PiCloud center={[0, 0, -0.58]} tone="warm" />
     </>
   );
 }
 
-function POrbital({ center, sign }: { center: Vec3; sign: "top" | "bottom" }) {
+function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
   return (
-    <mesh position={center} scale={[0.18, 0.18, 0.38]}>
-      <sphereGeometry args={[1, 32, 32]} />
-      <meshStandardMaterial
-        color={sign === "top" ? "#BDEBE5" : "#F7D6A7"}
-        depthWrite={false}
-        emissive={sign === "top" ? "#DFF8F4" : "#FFF0D8"}
-        emissiveIntensity={0.05}
-        opacity={0.42}
-        roughness={0.28}
-        transparent
+    <group>
+      <PiCloudBand
+        cloudStyle="overlap-lobes"
+        center={center}
+        length={0.84}
+        opacity={0.38}
+        orientation="xy"
+        phaseTone="same"
+        seed={center[2] > 0 ? 307 : 317}
+        thickness={0.15}
+        tone={tone}
+        waist={0.34}
+        width={0.26}
       />
-    </mesh>
-  );
-}
-
-function PiCloud({ center }: { center: Vec3 }) {
-  return (
-    <mesh position={center} scale={[1.08, 0.24, 0.18]}>
-      <sphereGeometry args={[1, 48, 32]} />
-      <meshStandardMaterial
-        color="#2A9D8F"
-        depthWrite={false}
-        emissive="#DFF8F4"
-        emissiveIntensity={0.08}
-        opacity={0.16}
-        roughness={0.3}
-        transparent
-      />
-    </mesh>
+    </group>
   );
 }
 
@@ -418,7 +412,7 @@ function getTwistedGhostAtoms(): Atom[] {
 function getCameraPosition(mode: EthylenePlanarMode, planeView: EthylenePlaneView): Vec3 {
   if (mode === "plane" && planeView === "top") return [0, 0, 5.2];
   if (mode === "plane" && planeView === "side") return [0, -5.6, 0.16];
-  if (mode === "piBond" || mode === "rotationLock") return [0.2, -4.9, 3.1];
+  if (mode === "piBond" || mode === "rotationLock") return [2.2, -4.5, 3.1];
   return [0.15, -4.6, 2.9];
 }
 

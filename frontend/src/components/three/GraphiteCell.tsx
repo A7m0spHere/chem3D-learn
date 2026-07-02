@@ -3,6 +3,7 @@ import { Html, OrbitControls } from "@react-three/drei";
 import { type ReactNode, useMemo, useRef } from "react";
 import { Group, Quaternion, Vector3 } from "three";
 import { htmlOverlayCompactLabelClass } from "@/components/three/htmlOverlayStyles";
+import { PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
   Atom,
@@ -385,14 +386,30 @@ function InterlayerForceBand({
 function PiElectronCloud() {
   return (
     <>
-      <mesh position={[0.12, 0.39, 0.04]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[3.35, 1.72]} />
-        <meshBasicMaterial color="#2A9D8F" depthWrite={false} opacity={0.11} transparent />
-      </mesh>
-      <mesh position={[0.12, 0.18, 0.04]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[3.15, 1.54]} />
-        <meshBasicMaterial color="#F4A261" depthWrite={false} opacity={0.045} transparent />
-      </mesh>
+      <PiCloudBand
+        cloudStyle="layer"
+        center={[0.12, 0.39, 0.04]}
+        length={1.66}
+        opacity={0.18}
+        orientation="xz"
+        seed={601}
+        thickness={0.08}
+        tone="primary"
+        waist={0.04}
+        width={0.86}
+      />
+      <PiCloudBand
+        cloudStyle="layer"
+        center={[0.12, 0.2, 0.04]}
+        length={1.48}
+        opacity={0.09}
+        orientation="xz"
+        seed={607}
+        thickness={0.06}
+        tone="warm"
+        waist={0.02}
+        width={0.76}
+      />
       <PiElectronParticle offset={0} />
       <PiElectronParticle offset={1.7} />
       <PiElectronParticle offset={3.4} />
