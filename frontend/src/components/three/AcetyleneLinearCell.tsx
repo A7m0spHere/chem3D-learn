@@ -54,12 +54,11 @@ export function AcetyleneLinearCell({
       <Canvas
         camera={{ position: getCameraPosition(mode, lineView), fov: mode === "line" ? 38 : 42 }}
         key={canvasKey}
-        shadows
         frameloop="demand"
         style={{ height: "100%", width: "100%" }}
       >
         <ambientLight intensity={0.68} />
-        <directionalLight position={[3.6, 4.4, 4.8]} intensity={1.3} castShadow />
+        <directionalLight position={[3.6, 4.4, 4.8]} intensity={1.3} />
         <directionalLight position={[-3.2, -2.4, 2.4]} intensity={0.34} />
         <group rotation={getSceneRotation(mode, lineView)} scale={1.03}>
           <AcetyleneCore atomsById={atomsById} mode={mode} />

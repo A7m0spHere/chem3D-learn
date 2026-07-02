@@ -101,9 +101,9 @@ export function NaClCell({
       title={`${molecule.formula}｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" shadows style={{ height: "100%", width: "100%" }}>
+        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.68} />
-          <directionalLight position={[4, 5, 4]} intensity={1.35} castShadow />
+          <directionalLight position={[4, 5, 4]} intensity={1.35} />
           <directionalLight position={[-3, 2, -4]} intensity={0.35} />
           <group position={groupPosition} rotation={[0.18, -0.45, 0]} scale={groupScale}>
             <CellFrame isMuted={isVoidMode} />
@@ -252,7 +252,7 @@ function IonMesh({ atom, viewMode, voidStage, showLabel }: IonMeshProps) {
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[radius * scale, 32, 32]} />
         <meshStandardMaterial
           color={atom.color}

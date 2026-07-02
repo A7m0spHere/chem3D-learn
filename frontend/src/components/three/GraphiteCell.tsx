@@ -98,9 +98,13 @@ export function GraphiteCell({
       title={`${molecule.formula}｜${activeMode?.titleZh ?? "平行碳层堆叠"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} shadows style={{ height: "100%", width: "100%" }}>
+        <Canvas
+          camera={{ position: cameraPosition, fov: cameraFov }}
+          frameloop={showInterlayer || showPiCloud ? "always" : "demand"}
+          style={{ height: "100%", width: "100%" }}
+        >
           <ambientLight intensity={0.74} />
-          <directionalLight position={[4, 5, 4]} intensity={1.36} castShadow />
+          <directionalLight position={[4, 5, 4]} intensity={1.36} />
           <directionalLight position={[-3, 2, -4]} intensity={0.42} />
           <group position={[-0.08, 0.28, 0]} rotation={[0.18, -0.46, 0]} scale={1.15}>
             {showLayerPlanes ? <LayerPlane y={0.28} tone="upper" /> : null}
@@ -265,7 +269,7 @@ function CarbonAtom({ atom, layer, viewMode, showLabel }: CarbonAtomProps) {
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[radius * scale, 32, 32]} />
         <meshStandardMaterial
           color={atom.color}

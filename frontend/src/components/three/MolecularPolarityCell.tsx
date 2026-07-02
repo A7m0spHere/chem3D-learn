@@ -63,12 +63,11 @@ export function MolecularPolarityCell({
           <Canvas
             camera={{ position: getCameraPosition(mode), fov: 42 }}
             key={mode}
-            shadows
             frameloop="demand"
             style={{ height: "100%", width: "100%" }}
           >
             <ambientLight intensity={0.72} />
-            <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.36} castShadow />
+            <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.36} />
             <directionalLight position={[-3, -2.5, 2.6]} intensity={0.34} />
             <group
               position={getScenePosition(mode)}
@@ -216,7 +215,7 @@ function AtomSphere({ atom }: { atom: TeachingAtom }) {
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[atom.radius, 32, 32]} />
         <meshStandardMaterial color={atom.color} metalness={0.04} roughness={0.36} />
       </mesh>
@@ -233,7 +232,7 @@ function BondCylinder({ start, end, radius = 0.035 }: { start: Vec3; end: Vec3; 
 
   return (
     <group position={geometry.midpoint} quaternion={geometry.quaternion}>
-      <mesh castShadow>
+      <mesh>
         <cylinderGeometry args={[radius, radius, geometry.length, 24]} />
         <meshStandardMaterial color="#B7C7C3" roughness={0.44} />
       </mesh>

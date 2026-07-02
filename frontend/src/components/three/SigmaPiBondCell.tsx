@@ -49,12 +49,11 @@ export function SigmaPiBondCell(props: SigmaPiBondCellProps) {
       <Canvas
         camera={{ position: getCameraPosition(props.lessonType), fov: 42 }}
         key={`${props.lessonType}-${props.mode}`}
-        shadows
         frameloop={isPiPlaying ? "always" : "demand"}
         style={{ height: "100%", width: "100%" }}
       >
         <ambientLight intensity={0.74} />
-        <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.28} castShadow />
+        <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.28} />
         <directionalLight position={[-3.2, -2.4, 2.6]} intensity={0.34} />
         <group rotation={[-0.18, 0.1, 0]} scale={1.12}>
           <CoordinateAxes showLabels={props.showLabels ?? false} />
@@ -197,7 +196,7 @@ function CoordinateAxes({ showLabels }: { showLabels: boolean }) {
 function Nucleus({ position, label, showLabel }: { position: Vec3; label: string; showLabel: boolean }) {
   return (
     <group position={position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[0.11, 32, 32]} />
         <meshStandardMaterial color="#1F2933" roughness={0.34} />
       </mesh>

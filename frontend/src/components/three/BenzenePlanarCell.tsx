@@ -106,12 +106,11 @@ export function BenzenePlanarCell({
       <Canvas
         camera={{ position: getCameraPosition(mode, planeView), fov: mode === "plane" ? 38 : 42 }}
         key={canvasKey}
-        shadows
         frameloop="demand"
         style={{ height: "100%", width: "100%" }}
       >
         <ambientLight intensity={0.68} />
-        <directionalLight position={[3.6, 4.4, 4.8]} intensity={1.28} castShadow />
+        <directionalLight position={[3.6, 4.4, 4.8]} intensity={1.28} />
         <directionalLight position={[-3.4, -2.8, 2.6]} intensity={0.36} />
         <group rotation={getSceneRotation(mode, planeView)} scale={1.03}>
           <ReferencePlane mode={mode} planeView={planeView} />

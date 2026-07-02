@@ -54,7 +54,7 @@ export function BondMesh({ bond, atomsById, isFocused = false, radius = 0.04 }: 
   return (
     <group position={geometry.midpoint} quaternion={geometry.quaternion}>
       {offsets.map((offset) => (
-        <mesh key={offset} position={[offset, 0, 0]} castShadow>
+        <mesh key={offset} position={[offset, 0, 0]}>
           <cylinderGeometry args={[cylinderRadius, cylinderRadius, geometry.length, 24]} />
           <meshStandardMaterial color={isFocused ? "#F4A261" : "#B7C7C3"} roughness={0.45} />
         </mesh>

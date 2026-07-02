@@ -279,9 +279,13 @@ export function ZincMetalCell({
       title={`${molecule.formula}｜${activeMode?.titleZh ?? "六方晶胞"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: viewerCameraPosition, fov: cameraFov }} shadows style={{ height: "100%", width: "100%" }}>
+        <Canvas
+          camera={{ position: viewerCameraPosition, fov: cameraFov }}
+          frameloop={isMetallicBondMode ? "always" : "demand"}
+          style={{ height: "100%", width: "100%" }}
+        >
           <ambientLight intensity={0.72} />
-          <directionalLight position={[4, 5, 4]} intensity={1.35} castShadow />
+          <directionalLight position={[4, 5, 4]} intensity={1.35} />
           <directionalLight position={[-3, 2, -4]} intensity={0.42} />
           <group position={[0, -0.05, 0]} rotation={[0.16, -0.48, 0]} scale={groupScale}>
             {isCoordinationMode ? (
@@ -430,7 +434,7 @@ function PackingLayerPlanes() {
 function PackingAtom({ atom }: { atom: HcpPackingAtom }) {
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[packingRadius, 32, 32]} />
         <meshStandardMaterial
           color={zincBaseColor}
@@ -542,7 +546,7 @@ function ZincAtom({ atom, viewMode, modelStyle, showLabel }: ZincAtomProps) {
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[atom.radius * scale, 32, 32]} />
         <meshStandardMaterial
           color={zincBaseColor}

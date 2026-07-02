@@ -394,7 +394,7 @@ function PointCloud({
 function AtomCore() {
   return (
     <group>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[0.15, 40, 32]} />
         <meshStandardMaterial
           color={textPrimary}

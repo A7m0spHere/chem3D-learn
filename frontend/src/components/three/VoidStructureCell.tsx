@@ -70,9 +70,9 @@ export function VoidStructureCell({
       title={`${molecule.nameZh}｜${activeMode?.titleZh ?? "空间骨架"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" shadows style={{ height: "100%", width: "100%" }}>
+        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.72} />
-          <directionalLight position={[4, 5, 4]} intensity={1.35} castShadow />
+          <directionalLight position={[4, 5, 4]} intensity={1.35} />
           <directionalLight position={[-3, 2, -4]} intensity={0.42} />
           <group position={[0, -0.03, 0]} rotation={[0.24, -0.48, 0]} scale={groupScale}>
             {molecule.bonds.map((bond) => (
@@ -142,7 +142,7 @@ function HostSphere({ atom, viewMode, showLabel }: HostSphereProps) {
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[radius * scale, 32, 32]} />
         <meshStandardMaterial
           color={atom.color}

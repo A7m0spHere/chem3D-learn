@@ -95,9 +95,9 @@ export function OrganicCoplanarViewer({
       title={modeInfo.viewerTitle}
       viewerTestId="organic-coplanar-viewer"
     >
-        <Canvas camera={{ position: [0.2, 0.2, 5.8], fov: 42 }} frameloop="demand" shadows style={{ height: "100%", width: "100%" }}>
+        <Canvas camera={{ position: [0.2, 0.2, 5.8], fov: 42 }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.68} />
-          <directionalLight position={[3.4, 4.5, 4.2]} intensity={1.32} castShadow />
+          <directionalLight position={[3.4, 4.5, 4.2]} intensity={1.32} />
           <directionalLight position={[-3, -2, 3]} intensity={0.36} />
           <group rotation={[-0.62, 0.06, -0.24]} scale={0.67}>
             <ReferenceGeometry
@@ -387,7 +387,7 @@ function OrganicAtomMesh({
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[radius, 32, 32]} />
         <meshStandardMaterial
           color={color}
@@ -435,7 +435,6 @@ function OrganicBondMesh({
     <group>
       {offsets.map((offset) => (
         <mesh
-          castShadow
           key={`${bond.id}-${offset}`}
           position={add(vectorToTuple(midpoint), scale(offsetVector, offset))}
           quaternion={quaternion}

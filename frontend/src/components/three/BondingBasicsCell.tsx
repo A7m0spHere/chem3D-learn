@@ -64,12 +64,11 @@ export function BondingBasicsCell({
       <Canvas
         camera={{ position: [3.15, -3.8, 2.8], fov: 37 }}
         key={`${moduleId}-${mode}`}
-        shadows
         frameloop="demand"
         style={{ height: "100%", width: "100%" }}
       >
         <ambientLight intensity={0.74} />
-        <directionalLight position={[3.5, 4.6, 4.2]} intensity={1.3} castShadow />
+        <directionalLight position={[3.5, 4.6, 4.2]} intensity={1.3} />
         <directionalLight position={[-3.2, -2.4, 2.6]} intensity={0.34} />
         <group position={[0, 0.08, 0]} rotation={[-0.16, 0.12, 0]} scale={sceneScale}>
           {moduleId === "hybrid-orbitals-sp" ? (
@@ -160,7 +159,7 @@ function AtomCore({
 }) {
   return (
     <group position={position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[0.15, 32, 32]} />
         <meshStandardMaterial color={color} roughness={0.34} />
       </mesh>
@@ -172,7 +171,7 @@ function AtomCore({
 function Ion({ position, color, label, charge }: { position: Vec3; color: string; label: string; charge: string }) {
   return (
     <group position={position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[0.32, 48, 32]} />
         <meshStandardMaterial color={color} roughness={0.32} />
       </mesh>

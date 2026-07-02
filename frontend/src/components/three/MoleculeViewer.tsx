@@ -69,9 +69,9 @@ export function MoleculeViewer({
       title={`${molecule.formula}｜${activeStep.titleZh}`}
       viewerTestId="molecule-viewer"
     >
-      <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop={autoRotate ? "always" : "demand"} shadows style={{ height: "100%", width: "100%" }}>
+      <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop={autoRotate ? "always" : "demand"} style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.6} />
-          <directionalLight position={[4, 5, 3]} intensity={1.45} castShadow />
+          <directionalLight position={[4, 5, 3]} intensity={1.45} />
           <group position={sceneOffset} rotation={[0, -0.35, 0]}>
             {molecule.bonds.map((bond) => (
               <BondMesh

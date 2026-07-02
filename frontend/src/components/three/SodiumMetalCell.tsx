@@ -83,9 +83,9 @@ export function SodiumMetalCell({
       title={`${molecule.formula}｜${activeMode?.titleZh ?? "完整 BCC 晶胞"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" shadows style={{ height: "100%", width: "100%" }}>
+        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.7} />
-          <directionalLight position={[4, 5, 4]} intensity={1.35} castShadow />
+          <directionalLight position={[4, 5, 4]} intensity={1.35} />
           <directionalLight position={[-3, 2, -4]} intensity={0.38} />
           <group position={[0, -0.05, 0]} rotation={[0.18, -0.48, 0]} scale={1.75}>
             <CellFrame isMuted={viewMode === "counting" || showMetallicBondHint} />
@@ -192,7 +192,7 @@ function SodiumAtom({ atom, viewMode, showLabel }: SodiumAtomProps) {
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[radius * scale, 32, 32]} />
         <meshStandardMaterial
           color={atom.color}

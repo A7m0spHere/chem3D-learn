@@ -20,7 +20,7 @@ export function AtomMesh({ atom, isFocused = false, atomScale = 1, showLabel = t
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[isFocused ? radius * 1.12 : radius, 32, 32]} />
         <meshStandardMaterial
           color={color}

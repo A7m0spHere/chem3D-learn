@@ -125,9 +125,9 @@ export function DiamondCell({
       title={`${molecule.formula}｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" shadows style={{ height: "100%", width: "100%" }}>
+        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
           <ambientLight intensity={0.72} />
-          <directionalLight position={[4, 5, 4]} intensity={1.35} castShadow />
+          <directionalLight position={[4, 5, 4]} intensity={1.35} />
           <directionalLight position={[-3, 2, -4]} intensity={0.42} />
           <group position={[0, -0.04, 0]} rotation={[0.2, -0.5, 0]} scale={1.78}>
             <CellFrame isMuted={viewMode === "counting" || viewMode === "comparison" || isVoidMode} />
@@ -282,7 +282,7 @@ function CarbonAtom({ atom, viewMode, voidStage, showLabel, useCompactLabelSet }
 
   return (
     <group position={atom.position}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[radius * scale, 32, 32]} />
         <meshStandardMaterial
           color={atom.color}

@@ -78,12 +78,11 @@ export function EthylenePlanarCell({
         <Canvas
           camera={{ position: cameraPosition, fov: mode === "plane" && planeView === "side" ? 36 : 42 }}
           key={canvasKey}
-          shadows
           frameloop="demand"
           style={{ height: "100%", width: "100%" }}
         >
           <ambientLight intensity={0.68} />
-          <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.35} castShadow />
+          <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.35} />
           <directionalLight position={[-3.2, -2.4, 2.6]} intensity={0.32} />
           <group rotation={getSceneRotation(mode, planeView)} scale={1.02}>
             <ReferenceGeometry mode={mode} planeView={planeView} />
