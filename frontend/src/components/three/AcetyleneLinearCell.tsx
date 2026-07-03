@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
-import { Quaternion, Vector3 } from "three";
+import { StickCylinder } from "@/components/three/StickCylinder";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { CameraRig } from "@/components/three/CameraRig";
@@ -120,7 +120,7 @@ function AcetyleneCore({
 function LineOverlay({ lineView }: { lineView: AcetyleneLineView }) {
   return (
     <>
-      <StaticCylinder
+      <StickCylinder
         color="#2A9D8F"
         end={[2.05, 0, 0]}
         opacity={0.78}
@@ -157,7 +157,7 @@ function AngleOverlay() {
           [0.08, 0.28, 0],
         ]}
       />
-      <StaticCylinder
+      <StickCylinder
         color="#F4A261"
         end={[0.08, 0, 0]}
         opacity={0.5}
@@ -201,14 +201,14 @@ function PiBondOverlay() {
             showAxis={false}
             width={0.1}
           />
-          <StaticCylinder
+          <StickCylinder
             color="#5BAEA5"
             end={[x, 0, 0.72]}
             opacity={0.22}
             radius={0.006}
             start={[x, 0, -0.72]}
           />
-          <StaticCylinder
+          <StickCylinder
             color="#F4A261"
             end={[x, 0.72, 0]}
             opacity={0.2}
@@ -229,7 +229,7 @@ function TripleBondOverlay() {
   return (
     <>
       <PiBondOverlay />
-      <StaticCylinder
+      <StickCylinder
         color="#1F6F68"
         end={[0.72, 0, 0]}
         opacity={0.72}
@@ -281,33 +281,6 @@ function PiCloud({
       waist={0.28}
       width={axis === "z" ? 0.24 : 0.21}
     />
-  );
-}
-
-function StaticCylinder({
-  start,
-  end,
-  color,
-  opacity = 1,
-  radius = 0.018,
-}: {
-  start: Vec3;
-  end: Vec3;
-  color: string;
-  opacity?: number;
-  radius?: number;
-}) {
-  const startVector = new Vector3(...start);
-  const endVector = new Vector3(...end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-  const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
-
-  return (
-    <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, direction.length(), 16]} />
-      <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
-    </mesh>
   );
 }
 

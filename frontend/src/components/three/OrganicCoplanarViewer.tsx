@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import { StickCylinder } from "@/components/three/StickCylinder";
 import {
   htmlOverlaySubtleLabelClass,
   htmlOverlaySubtleWideLabelClass,
@@ -499,7 +500,7 @@ function DashedReferenceLine({ start, end, color }: { start: Vec3; end: Vec3; co
         const segmentEnd = startVector.clone().add(unit.clone().multiplyScalar(length * Math.min(t1, 1)));
 
         return (
-          <StaticCylinder
+          <StickCylinder
             color={color}
             end={vectorToTuple(segmentEnd)}
             key={`${color}-${index}`}
@@ -510,33 +511,6 @@ function DashedReferenceLine({ start, end, color }: { start: Vec3; end: Vec3; co
         );
       })}
     </>
-  );
-}
-
-function StaticCylinder({
-  start,
-  end,
-  color,
-  opacity = 1,
-  radius = 0.018,
-}: {
-  start: Vec3;
-  end: Vec3;
-  color: string;
-  opacity?: number;
-  radius?: number;
-}) {
-  const startVector = new Vector3(...start);
-  const endVector = new Vector3(...end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-  const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
-
-  return (
-    <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, direction.length(), 16]} />
-      <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
-    </mesh>
   );
 }
 

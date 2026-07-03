@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { Quaternion, Vector3 } from "three";
+import { StickCylinder } from "@/components/three/StickCylinder";
 import { CameraRig } from "@/components/three/CameraRig";
 import {
   LonePairOrbital as SharedLonePairOrbital,
@@ -117,7 +118,7 @@ function IonicScene({ mode }: { mode: BondingBasicsMode }) {
       <Arrow start={[-0.54, 0.34, 0]} end={[0.54, 0.34, 0]} color={mode === "transfer" ? accent : primaryDark} />
       {mode === "attraction" ? (
         <>
-          <StaticCylinder color={primaryDark} opacity={0.55} radius={0.014} start={[-0.58, 0, 0]} end={[0.58, 0, 0]} />
+          <StickCylinder color={primaryDark} opacity={0.55} radius={0.014} start={[-0.58, 0, 0]} end={[0.58, 0, 0]} />
           <SceneLabel color={primaryDark} position={[0.42, -1.06, 0.18]} text="异号电荷静电吸引" />
         </>
       ) : (
@@ -137,7 +138,7 @@ function CoordinateScene({ mode }: { mode: BondingBasicsMode }) {
       <LonePair position={mode === "donor" ? [-0.48, 0.34, 0] : [-0.18, 0.28, 0]} />
       <EmptyOrbital position={[0.58, 0.03, 0]} />
       <Arrow start={[-0.36, 0.28, 0]} end={[0.5, 0.08, 0]} color={primaryDark} />
-      <StaticCylinder color={primaryDark} opacity={bondOpacity} radius={0.026} start={[-0.64, 0, 0]} end={[0.64, 0, 0]} />
+      <StickCylinder color={primaryDark} opacity={bondOpacity} radius={0.026} start={[-0.64, 0, 0]} end={[0.64, 0, 0]} />
       <SceneLabel
         color={primaryDark}
         position={[0.52, -1.12, 0.2]}
@@ -221,7 +222,7 @@ function Arrow({ start, end, color }: { start: Vec3; end: Vec3; color: string })
 
   return (
     <>
-      <StaticCylinder color={color} opacity={0.72} radius={0.012} start={start} end={end} />
+      <StickCylinder color={color} opacity={0.72} radius={0.012} start={start} end={end} />
       <mesh position={conePosition} quaternion={getQuaternionForDirection([direction.x, direction.y, direction.z])}>
         <coneGeometry args={[0.055, 0.16, 18]} />
         <meshBasicMaterial color={color} />
@@ -249,33 +250,6 @@ function SceneLabel({ position, text, color }: { position: Vec3; text: string; c
         {text}
       </span>
     </Html>
-  );
-}
-
-function StaticCylinder({
-  start,
-  end,
-  color,
-  opacity = 1,
-  radius = 0.018,
-}: {
-  start: Vec3;
-  end: Vec3;
-  color: string;
-  opacity?: number;
-  radius?: number;
-}) {
-  const startVector = new Vector3(...start);
-  const endVector = new Vector3(...end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-  const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
-
-  return (
-    <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, direction.length(), 16]} />
-      <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
-    </mesh>
   );
 }
 

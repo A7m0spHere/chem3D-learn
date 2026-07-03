@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
-import { Quaternion, Vector3 } from "three";
+import { StickCylinder } from "@/components/three/StickCylinder";
 import { AngleArc } from "@/components/three/AngleArc";
 import { CameraRig } from "@/components/three/CameraRig";
 import { AtomMesh } from "@/components/three/AtomMesh";
@@ -224,7 +224,7 @@ function ReferencePlane({
         ]}
       />
       {planeView === "side" ? (
-        <StaticCylinder
+        <StickCylinder
           color="#2A9D8F"
           end={[2.16, 0, 0]}
           opacity={0.72}
@@ -263,7 +263,7 @@ function AngleOverlay({ atomsById }: { atomsById: Map<string, Atom> }) {
 function DiagonalOverlay() {
   return (
     <>
-      <StaticCylinder
+      <StickCylinder
         color="#F4A261"
         end={benzeneAtoms.find((atom) => atom.id === "h1")!.position}
         opacity={0.86}
@@ -298,7 +298,7 @@ function PiBondOverlay() {
               showAxis={false}
               width={0.085}
             />
-            <StaticCylinder
+            <StickCylinder
               color="#5BAEA5"
               end={[atom.position[0], atom.position[1], 0.68]}
               opacity={0.22}
@@ -335,33 +335,6 @@ function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
       waist={0.04}
       width={0.94}
     />
-  );
-}
-
-function StaticCylinder({
-  start,
-  end,
-  color,
-  opacity = 1,
-  radius = 0.018,
-}: {
-  start: Vec3;
-  end: Vec3;
-  color: string;
-  opacity?: number;
-  radius?: number;
-}) {
-  const startVector = new Vector3(...start);
-  const endVector = new Vector3(...end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-  const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
-
-  return (
-    <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, direction.length(), 16]} />
-      <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
-    </mesh>
   );
 }
 

@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
-import { Quaternion, Vector3 } from "three";
+import { StickCylinder } from "@/components/three/StickCylinder";
 import { AngleArc } from "@/components/three/AngleArc";
 import { CameraRig } from "@/components/three/CameraRig";
 import { AtomMesh } from "@/components/three/AtomMesh";
@@ -169,7 +169,7 @@ function ReferenceGeometry({
             ]}
           />
           {planeView === "side" ? (
-            <StaticCylinder
+            <StickCylinder
               color="#2A9D8F"
               end={[1.72, 0, 0]}
               opacity={0.7}
@@ -249,7 +249,7 @@ function PiBondOverlay() {
             showAxis={false}
             width={0.09}
           />
-          <StaticCylinder
+          <StickCylinder
             color="#5BAEA5"
             end={[x, 0, 0.68]}
             opacity={0.18}
@@ -313,7 +313,7 @@ function RotationArrow() {
         <torusGeometry args={[0.2, 0.013, 12, 64]} />
         <meshBasicMaterial color="#E76F51" opacity={0.72} transparent />
       </mesh>
-      <StaticCylinder color="#E76F51" end={[0, 0.14, 0.74]} opacity={0.82} radius={0.014} start={[0, -0.14, 0.5]} />
+      <StickCylinder color="#E76F51" end={[0, 0.14, 0.74]} opacity={0.82} radius={0.014} start={[0, -0.14, 0.5]} />
     </>
   );
 }
@@ -338,7 +338,7 @@ function TwistedGhost({ atoms }: { atoms: Atom[] }) {
             <meshStandardMaterial color="#F4A261" opacity={0.22} roughness={0.36} transparent />
           </mesh>
         ))}
-      <StaticCylinder
+      <StickCylinder
         color="#E76F51"
         end={[0.67, 0, 0.74]}
         opacity={0.36}
@@ -355,40 +355,13 @@ function GhostBond({ bond, atomsById }: { bond: Bond; atomsById: Map<string, Ato
   if (!startAtom || !endAtom) return null;
 
   return (
-    <StaticCylinder
+    <StickCylinder
       color="#F4A261"
       end={endAtom.position}
       opacity={0.24}
       radius={0.016}
       start={startAtom.position}
     />
-  );
-}
-
-function StaticCylinder({
-  start,
-  end,
-  color,
-  opacity = 1,
-  radius = 0.018,
-}: {
-  start: Vec3;
-  end: Vec3;
-  color: string;
-  opacity?: number;
-  radius?: number;
-}) {
-  const startVector = new Vector3(...start);
-  const endVector = new Vector3(...end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-  const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
-
-  return (
-    <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, direction.length(), 16]} />
-      <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
-    </mesh>
   );
 }
 
