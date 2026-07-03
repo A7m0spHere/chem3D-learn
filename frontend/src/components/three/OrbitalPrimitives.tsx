@@ -5,8 +5,10 @@ import {
   DoubleSide,
   Float32BufferAttribute,
   Quaternion,
+  SphereGeometry,
   Vector3,
 } from "three";
+import { useDisposable } from "@/components/three/useDisposable";
 
 export type OrbitalTone = "primary" | "warm" | "neutral" | "blue";
 export type OrbitalRenderStyle = "surface" | "cloud" | "mixed";
@@ -47,11 +49,13 @@ export function OrbitalSurface({
   position = [0, 0, 0],
   tone = "primary",
 }: OrbitalSurfaceProps) {
-  const geometry = useMemo(() => createPearLobeGeometry(length, width), [length, width]);
+  const geometry = useDisposable(() => createPearLobeGeometry(length, width), [length, width]);
+  const [dx, dy, dz] = direction;
+  const quaternion = useMemo(() => getQuaternionForDirection([dx, dy, dz]), [dx, dy, dz]);
   const colors = toneColors[tone];
 
   return (
-    <mesh geometry={geometry} position={position} quaternion={getQuaternionForDirection(direction)}>
+    <mesh geometry={geometry} position={position} quaternion={quaternion}>
       <meshPhysicalMaterial
         clearcoat={0.5}
         clearcoatRoughness={0.18}
@@ -120,7 +124,7 @@ export function SOrbitalCloud({
   renderStyle = "mixed",
   seed = 17,
 }: SOrbitalCloudProps) {
-  const cloudGeometry = useMemo(() => createSphereCloudGeometry(radius * 1.02, 180, seed), [radius, seed]);
+  const cloudGeometry = useDisposable(() => createSphereCloudGeometry(radius * 1.02, 180, seed), [radius, seed]);
   const colors = toneColors[tone];
 
   return (
@@ -177,13 +181,14 @@ export function POrbitalPair({
   showAxis = true,
   seed = 31,
 }: POrbitalPairProps) {
-  const normalized = normalize(direction);
-  const positiveGeometry = useMemo(
+  const [dx, dy, dz] = direction;
+  const normalized = useMemo(() => normalize([dx, dy, dz]), [dx, dy, dz]);
+  const negativeDirection = useMemo(() => scale(normalized, -1), [normalized]);
+  const positiveGeometry = useDisposable(
     () => createLobeCloudGeometry(normalized, length, width, 120, seed),
     [length, normalized, seed, width],
   );
-  const negativeDirection = scale(normalized, -1);
-  const negativeGeometry = useMemo(
+  const negativeGeometry = useDisposable(
     () => createLobeCloudGeometry(negativeDirection, length, width, 120, seed + 73),
     [length, negativeDirection, seed, width],
   );
@@ -283,7 +288,7 @@ export function PiCloudBand({
     thickness,
     width,
   });
-  const surfaceGeometry = useMemo(
+  const surfaceGeometry = useDisposable(
     () =>
       createPiCloudSurfaceGeometry({
         cloudStyle,
@@ -327,6 +332,10 @@ export function PiCloudBand({
   );
   const colors = toneColors[tone];
   const floatsAboveAtoms = cloudStyle === "overlap-lobes";
+  const particleGeometry = useDisposable(
+    () => new SphereGeometry(particleSize, 8, 8),
+    [particleSize],
+  );
 
   return (
     <group position={center}>
@@ -350,8 +359,7 @@ export function PiCloudBand({
       {showParticles && renderStyle !== "surface" ? (
         <group>
           {particlePositions.map((position, index) => (
-            <mesh key={`pi-particle-${index}`} position={position} renderOrder={12}>
-              <sphereGeometry args={[particleSize, 8, 8]} />
+            <mesh geometry={particleGeometry} key={`pi-particle-${index}`} position={position} renderOrder={12}>
               <meshBasicMaterial
                 color={colors.dark}
                 depthTest={false}
@@ -719,11 +727,20 @@ export function LonePairOrbital({
   tone = "blue",
   electronTones = ["neutral", "warm"],
 }: LonePairOrbitalProps) {
-  const normalized = normalize(direction);
+  const [dx, dy, dz] = direction;
+  const normalized = useMemo(() => normalize([dx, dy, dz]), [dx, dy, dz]);
+  const cloudGeometry = useDisposable(
+    () => createLobeCloudGeometry(normalized, length, width, 120, 317),
+    [length, normalized, width],
+  );
+  const { electronOne, electronTwo } = useMemo(() => {
+    const [basisA, basisB] = makeBasis(vectorFromVec(normalized));
+    return {
+      electronOne: add(scale(normalized, 0.18), toVec3(basisA.clone().multiplyScalar(-0.075).add(basisB.clone().multiplyScalar(0.03)))),
+      electronTwo: add(scale(normalized, 0.18), toVec3(basisA.clone().multiplyScalar(0.075).add(basisB.clone().multiplyScalar(-0.03)))),
+    };
+  }, [normalized]);
   const center = add(origin, scale(normalized, distance));
-  const [basisA, basisB] = makeBasis(vectorFromVec(normalized));
-  const electronOne = add(scale(normalized, 0.18), toVec3(basisA.clone().multiplyScalar(-0.075).add(basisB.clone().multiplyScalar(0.03))));
-  const electronTwo = add(scale(normalized, 0.18), toVec3(basisA.clone().multiplyScalar(0.075).add(basisB.clone().multiplyScalar(-0.03))));
 
   return (
     <group position={center}>
@@ -735,7 +752,7 @@ export function LonePairOrbital({
         width={width}
       />
       <DeterministicPointCloud
-        geometry={createLobeCloudGeometry(normalized, length, width, 120, 317)}
+        geometry={cloudGeometry}
         opacity={opacity * 0.86}
         size={0.023}
         tone={tone}
@@ -783,11 +800,14 @@ export function AxisTriad({
   showLabels = true,
   opacity = 0.52,
 }: AxisTriadProps) {
-  const axes: Array<{ key: "x" | "y" | "z"; label: string; end: Vec3 }> = [
-    { key: "x", label: "X", end: [length, 0, 0] },
-    { key: "y", label: "Y", end: [0, length, 0] },
-    { key: "z", label: "Z", end: [0, 0, length] },
-  ];
+  const axes = useMemo(
+    (): Array<{ key: "x" | "y" | "z"; label: string; end: Vec3; points: [Vector3, Vector3] }> => [
+      { key: "x", label: "X", end: [length, 0, 0], points: [new Vector3(0, 0, 0), new Vector3(length, 0, 0)] },
+      { key: "y", label: "Y", end: [0, length, 0], points: [new Vector3(0, 0, 0), new Vector3(0, length, 0)] },
+      { key: "z", label: "Z", end: [0, 0, length], points: [new Vector3(0, 0, 0), new Vector3(0, 0, length)] },
+    ],
+    [length],
+  );
 
   return (
     <group position={origin}>
@@ -797,7 +817,7 @@ export function AxisTriad({
             color={axisColors[axis.key]}
             lineWidth={1.8}
             opacity={opacity}
-            points={[new Vector3(0, 0, 0), vectorFromVec(axis.end)]}
+            points={axis.points}
             transparent
           />
           {showLabels ? (
@@ -829,15 +849,21 @@ export function GuideCylinder({
   opacity?: number;
   radius?: number;
 }) {
-  const startVector = vectorFromVec(start);
-  const endVector = vectorFromVec(end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-  const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
+  const { length, midpoint, quaternion } = useMemo(() => {
+    const startVector = vectorFromVec(start);
+    const endVector = vectorFromVec(end);
+    const direction = new Vector3().subVectors(endVector, startVector);
+    return {
+      length: direction.length(),
+      midpoint: new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5),
+      quaternion: new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize()),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start[0], start[1], start[2], end[0], end[1], end[2]]);
 
   return (
     <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, direction.length(), 14]} />
+      <cylinderGeometry args={[radius, radius, length, 14]} />
       <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
     </mesh>
   );

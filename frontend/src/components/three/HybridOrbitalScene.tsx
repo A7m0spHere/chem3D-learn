@@ -12,6 +12,7 @@ import {
   POrbitalPair,
   SOrbitalCloud,
 } from "@/components/three/OrbitalPrimitives";
+import { useDisposable } from "@/components/three/useDisposable";
 import type {
   BondingBasicsMode,
   HybridOrbitalControls,
@@ -220,7 +221,9 @@ function HybridOrbital({
   progress: number;
   renderMode: HybridRenderMode;
 }) {
-  const normalized = normalize(direction);
+  const [dx, dy, dz] = direction;
+  const normalized = useMemo(() => normalize([dx, dy, dz]), [dx, dy, dz]);
+  const negativeDirection = useMemo(() => scale(normalized, -1), [normalized]);
   const mainLength = 0.74 + progress * 0.66;
   const mainWidth = 0.18 + progress * 0.18;
   const tailLength = 0.24 + progress * 0.26;
@@ -243,7 +246,7 @@ function HybridOrbital({
           />
           <LobeCloud
             color={accent}
-            direction={scale(normalized, -1)}
+            direction={negativeDirection}
             length={tailLength}
             opacity={opacity * 0.78}
             seed={200 + index * 17}
@@ -262,7 +265,7 @@ function HybridOrbital({
           />
           <LobeSurface
             color={accent}
-            direction={scale(normalized, -1)}
+            direction={negativeDirection}
             length={tailLength}
             opacity={opacity * 0.72}
             width={tailWidth}
@@ -329,10 +332,12 @@ function LobeSurface({
   color: string;
   opacity: number;
 }) {
-  const geometry = useMemo(() => createPearLobeGeometry(length, width), [length, width]);
+  const geometry = useDisposable(() => createPearLobeGeometry(1, 1), []);
+  const [dx, dy, dz] = direction;
+  const quaternion = useMemo(() => getQuaternionForDirection([dx, dy, dz]), [dx, dy, dz]);
 
   return (
-    <mesh geometry={geometry} quaternion={getQuaternionForDirection(direction)}>
+    <mesh geometry={geometry} quaternion={quaternion} scale={[width, length, width]}>
       <meshPhysicalMaterial
         clearcoat={0.52}
         clearcoatRoughness={0.18}
@@ -365,9 +370,10 @@ function LobeCloud({
   size: number;
   seed: number;
 }) {
-  const geometry = useMemo(
-    () => createLobeCloudGeometry(direction, length, width, 220, seed),
-    [direction, length, seed, width],
+  const [dx, dy, dz] = direction;
+  const geometry = useDisposable(
+    () => createLobeCloudGeometry([dx, dy, dz], length, width, 220, seed),
+    [dx, dy, dz, length, seed, width],
   );
 
   return <PointCloud color={color} geometry={geometry} opacity={opacity} size={size} />;
@@ -587,75 +593,81 @@ function StaticCylinder({
   opacity?: number;
   radius?: number;
 }) {
-  const startVector = vectorFromVec(start);
-  const endVector = vectorFromVec(end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-  const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
+  const { length, midpoint, quaternion } = useMemo(() => {
+    const startVector = vectorFromVec(start);
+    const endVector = vectorFromVec(end);
+    const dir = new Vector3().subVectors(endVector, startVector);
+    return {
+      length: dir.length(),
+      midpoint: new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5),
+      quaternion: new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), dir.clone().normalize()),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start[0], start[1], start[2], end[0], end[1], end[2]]);
 
   return (
     <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, direction.length(), 14]} />
+      <cylinderGeometry args={[radius, radius, length, 14]} />
       <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
     </mesh>
   );
 }
 
+const SP_SCENE_CONFIG: HybridSceneConfig = {
+  mode: "sp",
+  displayLabel: "sp",
+  inputLabel: "1s + 1p",
+  outputLabel: "2 个 sp 轨道",
+  directions: [[-1, 0, 0], [1, 0, 0]],
+  inputPAxes: [[1, 0, 0]],
+  unhybridizedAxes: [[0, 1, 0], [0, 0, 1]],
+  angleLabel: "180°",
+  geometryLabel: "直线形",
+  unhybridizedLabel: "未杂化 p 轨道 ×2",
+  atomHint: "乙炔碳原子",
+};
+
+const SP2_SCENE_CONFIG: HybridSceneConfig = {
+  mode: "sp2",
+  displayLabel: "sp²",
+  inputLabel: "1s + 2p",
+  outputLabel: "3 个 sp² 轨道",
+  directions: [
+    [1, 0, 0],
+    [-0.5, 0, 0.866],
+    [-0.5, 0, -0.866],
+  ],
+  inputPAxes: [[1, 0, 0], [0, 0, 1]],
+  unhybridizedAxes: [[0, 1, 0]],
+  angleLabel: "120°",
+  geometryLabel: "平面三角形",
+  unhybridizedLabel: "未杂化 p 轨道 ×1",
+  atomHint: "乙烯碳原子",
+};
+
+const SP3_SCENE_CONFIG: HybridSceneConfig = {
+  mode: "sp3",
+  displayLabel: "sp³",
+  inputLabel: "1s + 3p",
+  outputLabel: "4 个 sp³ 轨道",
+  directions: [
+    [0.94, 0, -0.33],
+    [-0.47, 0.82, -0.33],
+    [-0.47, -0.82, -0.33],
+    [0, 0, 1],
+  ],
+  inputPAxes: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+  unhybridizedAxes: [],
+  angleLabel: "109.5°",
+  geometryLabel: "四面体方向",
+  unhybridizedLabel: "无未杂化 p 轨道",
+  atomHint: "甲烷碳原子",
+};
+
 function getHybridSceneConfig(mode: BondingBasicsMode): HybridSceneConfig {
-  if (mode === "sp") {
-    return {
-      mode,
-      displayLabel: "sp",
-      inputLabel: "1s + 1p",
-      outputLabel: "2 个 sp 轨道",
-      directions: [[-1, 0, 0], [1, 0, 0]],
-      inputPAxes: [[1, 0, 0]],
-      unhybridizedAxes: [[0, 1, 0], [0, 0, 1]],
-      angleLabel: "180°",
-      geometryLabel: "直线形",
-      unhybridizedLabel: "未杂化 p 轨道 ×2",
-      atomHint: "乙炔碳原子",
-    };
-  }
-
-  if (mode === "sp2") {
-    return {
-      mode,
-      displayLabel: "sp²",
-      inputLabel: "1s + 2p",
-      outputLabel: "3 个 sp² 轨道",
-      directions: [
-        [1, 0, 0],
-        [-0.5, 0, 0.866],
-        [-0.5, 0, -0.866],
-      ],
-      inputPAxes: [[1, 0, 0], [0, 0, 1]],
-      unhybridizedAxes: [[0, 1, 0]],
-      angleLabel: "120°",
-      geometryLabel: "平面三角形",
-      unhybridizedLabel: "未杂化 p 轨道 ×1",
-      atomHint: "乙烯碳原子",
-    };
-  }
-
-  return {
-    mode: "sp3",
-    displayLabel: "sp³",
-    inputLabel: "1s + 3p",
-    outputLabel: "4 个 sp³ 轨道",
-    directions: [
-      [0.94, 0, -0.33],
-      [-0.47, 0.82, -0.33],
-      [-0.47, -0.82, -0.33],
-      [0, 0, 1],
-    ],
-    inputPAxes: [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-    unhybridizedAxes: [],
-    angleLabel: "109.5°",
-    geometryLabel: "四面体方向",
-    unhybridizedLabel: "无未杂化 p 轨道",
-    atomHint: "甲烷碳原子",
-  };
+  if (mode === "sp") return SP_SCENE_CONFIG;
+  if (mode === "sp2") return SP2_SCENE_CONFIG;
+  return SP3_SCENE_CONFIG;
 }
 
 function createPearLobeGeometry(length: number, width: number) {
