@@ -1,7 +1,8 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { type ReactNode, useMemo, useRef } from "react";
-import { Group, Quaternion, Vector3 } from "three";
+import { Group, Vector3 } from "three";
+import { StickCylinder } from "@/components/three/StickCylinder";
 import { htmlOverlayCompactLabelClass } from "@/components/three/htmlOverlayStyles";
 import { PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
@@ -539,27 +540,7 @@ function StaticCylinder({
   opacity,
   radius,
 }: StaticCylinderProps) {
-  const geometry = useMemo(() => {
-    const startVector = new Vector3(...start);
-    const endVector = new Vector3(...end);
-    const direction = new Vector3().subVectors(endVector, startVector);
-    const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-    const quaternion = new Quaternion().setFromUnitVectors(
-      new Vector3(0, 1, 0),
-      direction.clone().normalize(),
-    );
-
-    return {
-      length: direction.length(),
-      midpoint,
-      quaternion,
-    };
-  }, [end, start]);
-
   return (
-    <mesh position={geometry.midpoint} quaternion={geometry.quaternion}>
-      <cylinderGeometry args={[radius, radius, geometry.length, 16]} />
-      <meshBasicMaterial color={color} depthWrite={depthWrite} opacity={opacity} transparent />
-    </mesh>
+    <StickCylinder color={color} depthWrite={depthWrite} end={end} opacity={opacity} radius={radius} start={start} />
   );
 }

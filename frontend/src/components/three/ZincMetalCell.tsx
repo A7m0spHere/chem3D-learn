@@ -1,7 +1,8 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
-import { Group, Quaternion, Vector3 } from "three";
+import { Group, Vector3 } from "three";
+import { StickCylinder } from "@/components/three/StickCylinder";
 import {
   crystalOverlayBadgeToneClasses,
   htmlOverlayLabelClass,
@@ -713,27 +714,7 @@ type StaticCylinderProps = {
 };
 
 function StaticCylinder({ start, end, color, opacity, radius }: StaticCylinderProps) {
-  const geometry = useMemo(() => {
-    const startVector = new Vector3(...start);
-    const endVector = new Vector3(...end);
-    const direction = new Vector3().subVectors(endVector, startVector);
-    const midpoint = new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5);
-    const quaternion = new Quaternion().setFromUnitVectors(
-      new Vector3(0, 1, 0),
-      direction.clone().normalize(),
-    );
-
-    return {
-      length: direction.length(),
-      midpoint,
-      quaternion,
-    };
-  }, [end, start]);
-
   return (
-    <mesh position={geometry.midpoint} quaternion={geometry.quaternion}>
-      <cylinderGeometry args={[radius, radius, geometry.length, 12]} />
-      <meshBasicMaterial color={color} opacity={opacity} transparent />
-    </mesh>
+    <StickCylinder color={color} end={end} opacity={opacity} radius={radius} segments={12} start={start} />
   );
 }
