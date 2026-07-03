@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { StickCylinder } from "@/components/three/StickCylinder";
+import { SceneLighting } from "@/components/three/SceneLighting";
 import { htmlOverlayLabelClass } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import type {
@@ -68,9 +69,7 @@ export function CsClCell({
       viewerTestId={`${molecule.id}-viewer`}
     >
         <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
-          <ambientLight intensity={0.68} />
-          <directionalLight position={[4, 5, 4]} intensity={1.35} />
-          <directionalLight position={[-3, 2, -4]} intensity={0.38} />
+          <SceneLighting ambient={0.68} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.38} secondaryPosition={[-3, 2, -4]} />
           <group position={[0, -0.05, 0]} rotation={[0.18, -0.48, 0]} scale={1.75}>
             <CellFrame isMuted={viewMode === "counting"} />
             {(showStrongCoordination || showMutedCoordination)

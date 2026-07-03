@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { StickCylinder } from "@/components/three/StickCylinder";
+import { SceneLighting } from "@/components/three/SceneLighting";
 import { AngleArc } from "@/components/three/AngleArc";
 import { CameraRig } from "@/components/three/CameraRig";
 import { AtomMesh } from "@/components/three/AtomMesh";
@@ -113,9 +114,7 @@ export function BenzenePlanarCell({
           position={getCameraPosition(mode, planeView)}
           resetKey={`${mode}-${planeView}`}
         />
-        <ambientLight intensity={0.68} />
-        <directionalLight position={[3.6, 4.4, 4.8]} intensity={1.28} />
-        <directionalLight position={[-3.4, -2.8, 2.6]} intensity={0.36} />
+        <SceneLighting ambient={0.68} mainIntensity={1.28} mainPosition={[3.6, 4.4, 4.8]} secondaryIntensity={0.36} secondaryPosition={[-3.4, -2.8, 2.6]} />
         <group rotation={getSceneRotation(mode, planeView)} scale={1.03}>
           <ReferencePlane mode={mode} planeView={planeView} />
           <BenzeneCore atomsById={atomsById} mode={mode} />

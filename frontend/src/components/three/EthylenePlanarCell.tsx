@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { StickCylinder } from "@/components/three/StickCylinder";
+import { SceneLighting } from "@/components/three/SceneLighting";
 import { AngleArc } from "@/components/three/AngleArc";
 import { CameraRig } from "@/components/three/CameraRig";
 import { AtomMesh } from "@/components/three/AtomMesh";
@@ -85,9 +86,7 @@ export function EthylenePlanarCell({
             position={cameraPosition}
             resetKey={`${mode}-${planeView}`}
           />
-          <ambientLight intensity={0.68} />
-          <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.35} />
-          <directionalLight position={[-3.2, -2.4, 2.6]} intensity={0.32} />
+          <SceneLighting ambient={0.68} mainIntensity={1.35} mainPosition={[3.4, 4.6, 4.2]} secondaryIntensity={0.32} secondaryPosition={[-3.2, -2.4, 2.6]} />
           <group rotation={getSceneRotation(mode, planeView)} scale={1.02}>
             <ReferenceGeometry mode={mode} planeView={planeView} />
             <MoleculeCore atomsById={atomsById} mode={mode} />

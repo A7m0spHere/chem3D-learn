@@ -3,6 +3,7 @@ import { Html, OrbitControls } from "@react-three/drei";
 import { type ReactNode, useMemo, useRef } from "react";
 import { Group, Vector3 } from "three";
 import { StickCylinder } from "@/components/three/StickCylinder";
+import { SceneLighting } from "@/components/three/SceneLighting";
 import { htmlOverlayCompactLabelClass } from "@/components/three/htmlOverlayStyles";
 import { PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
@@ -104,9 +105,7 @@ export function GraphiteCell({
           frameloop={showInterlayer || showPiCloud ? "always" : "demand"}
           style={{ height: "100%", width: "100%" }}
         >
-          <ambientLight intensity={0.74} />
-          <directionalLight position={[4, 5, 4]} intensity={1.36} />
-          <directionalLight position={[-3, 2, -4]} intensity={0.42} />
+          <SceneLighting ambient={0.74} mainIntensity={1.36} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
           <group position={[-0.08, 0.28, 0]} rotation={[0.18, -0.46, 0]} scale={1.15}>
             {showLayerPlanes ? <LayerPlane y={0.28} tone="upper" /> : null}
             {showLayerPlanes ? <LayerPlane y={-0.46} tone="lower" /> : null}

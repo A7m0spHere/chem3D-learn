@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
 import { StickCylinder } from "@/components/three/StickCylinder";
+import { SceneLighting } from "@/components/three/SceneLighting";
 import {
   htmlOverlayAmberCompactLabelClass,
   htmlOverlayCompactLabelClass,
@@ -126,9 +127,7 @@ export function DiamondCell({
       viewerTestId={`${molecule.id}-viewer`}
     >
         <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
-          <ambientLight intensity={0.72} />
-          <directionalLight position={[4, 5, 4]} intensity={1.35} />
-          <directionalLight position={[-3, 2, -4]} intensity={0.42} />
+          <SceneLighting ambient={0.72} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
           <group position={[0, -0.04, 0]} rotation={[0.2, -0.5, 0]} scale={1.78}>
             <CellFrame isMuted={viewMode === "counting" || viewMode === "comparison" || isVoidMode} />
             {visibleBonds.map((bond) => (

@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
 import { CameraRig } from "@/components/three/CameraRig";
 import { PiCloudBand } from "@/components/three/OrbitalPrimitives";
+import { SceneLighting } from "@/components/three/SceneLighting";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import {
   bondDipoleExamples,
@@ -67,9 +68,7 @@ export function MolecularPolarityCell({
             style={{ height: "100%", width: "100%" }}
           >
             <CameraRig fov={42} position={getCameraPosition(mode)} resetKey={mode} />
-            <ambientLight intensity={0.72} />
-            <directionalLight position={[3.4, 4.6, 4.2]} intensity={1.36} />
-            <directionalLight position={[-3, -2.5, 2.6]} intensity={0.34} />
+            <SceneLighting ambient={0.72} mainIntensity={1.36} mainPosition={[3.4, 4.6, 4.2]} secondaryIntensity={0.34} secondaryPosition={[-3, -2.5, 2.6]} />
             <group
               position={getScenePosition(mode)}
               rotation={getSceneRotation(mode)}

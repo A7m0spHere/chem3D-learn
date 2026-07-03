@@ -3,6 +3,7 @@ import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import { Group, Vector3 } from "three";
 import { StickCylinder } from "@/components/three/StickCylinder";
+import { SceneLighting } from "@/components/three/SceneLighting";
 import {
   crystalOverlayBadgeToneClasses,
   htmlOverlayLabelClass,
@@ -285,9 +286,7 @@ export function ZincMetalCell({
           frameloop={isMetallicBondMode ? "always" : "demand"}
           style={{ height: "100%", width: "100%" }}
         >
-          <ambientLight intensity={0.72} />
-          <directionalLight position={[4, 5, 4]} intensity={1.35} />
-          <directionalLight position={[-3, 2, -4]} intensity={0.42} />
+          <SceneLighting ambient={0.72} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
           <group position={[0, -0.05, 0]} rotation={[0.16, -0.48, 0]} scale={groupScale}>
             {isCoordinationMode ? (
               <CoordinationCluster modelStyle={modelStyle} showLabels={showLabels} />

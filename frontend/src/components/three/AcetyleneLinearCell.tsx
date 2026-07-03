@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { StickCylinder } from "@/components/three/StickCylinder";
+import { SceneLighting } from "@/components/three/SceneLighting";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { CameraRig } from "@/components/three/CameraRig";
@@ -61,9 +62,7 @@ export function AcetyleneLinearCell({
           position={getCameraPosition(mode, lineView)}
           resetKey={`${mode}-${lineView}`}
         />
-        <ambientLight intensity={0.68} />
-        <directionalLight position={[3.6, 4.4, 4.8]} intensity={1.3} />
-        <directionalLight position={[-3.2, -2.4, 2.4]} intensity={0.34} />
+        <SceneLighting ambient={0.68} mainIntensity={1.3} mainPosition={[3.6, 4.4, 4.8]} secondaryIntensity={0.34} secondaryPosition={[-3.2, -2.4, 2.4]} />
         <group rotation={getSceneRotation(mode, lineView)} scale={1.03}>
           <AcetyleneCore atomsById={atomsById} mode={mode} />
           {mode === "line" ? <LineOverlay lineView={lineView} /> : null}
