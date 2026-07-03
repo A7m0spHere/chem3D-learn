@@ -2,15 +2,22 @@ import { useMemo } from "react";
 import { Html, Line } from "@react-three/drei";
 import {
   BufferGeometry,
-  Float32BufferAttribute,
   QuadraticBezierCurve3,
-  Quaternion,
   Vector3,
 } from "three";
 import {
   AxisTriad as SharedAxisTriad,
+  GuideCylinder,
   POrbitalPair,
   SOrbitalCloud,
+  clamp,
+  createLobeCloudGeometry,
+  createPearLobeGeometry,
+  getQuaternionForDirection,
+  normalize,
+  scale,
+  toVec3,
+  vectorFromVec,
 } from "@/components/three/OrbitalPrimitives";
 import { useDisposable } from "@/components/three/useDisposable";
 import type {
@@ -232,7 +239,7 @@ function HybridOrbital({
 
   return (
     <group>
-      <StaticCylinder color={primaryDark} opacity={0.16 + progress * 0.18} radius={0.008} start={[0, 0, 0]} end={guideEnd} />
+      <GuideCylinder color={primaryDark} opacity={0.16 + progress * 0.18} radius={0.008} start={[0, 0, 0]} end={guideEnd} />
       {renderMode === "cloud" ? (
         <>
           <LobeCloud
@@ -291,7 +298,7 @@ function UnhybridizedPOrbital({
 
   return (
     <group>
-      <StaticCylinder
+      <GuideCylinder
         color={getAxisColor(axis)}
         opacity={0.24}
         radius={0.006}
@@ -553,7 +560,7 @@ function DashedGuideLine({ start, end, opacity }: { start: Vec3; end: Vec3; opac
         const segmentStart = startVector.clone().lerp(endVector, index / segments);
         const segmentEnd = startVector.clone().lerp(endVector, (index + 0.58) / segments);
         return (
-          <StaticCylinder
+          <GuideCylinder
             color={guide}
             end={toVec3(segmentEnd)}
             key={`dash-${index}`}
@@ -577,39 +584,6 @@ function SceneBadge({ position, text, color }: { position: Vec3; text: string; c
         {text}
       </span>
     </Html>
-  );
-}
-
-function StaticCylinder({
-  start,
-  end,
-  color,
-  opacity = 1,
-  radius = 0.018,
-}: {
-  start: Vec3;
-  end: Vec3;
-  color: string;
-  opacity?: number;
-  radius?: number;
-}) {
-  const { length, midpoint, quaternion } = useMemo(() => {
-    const startVector = vectorFromVec(start);
-    const endVector = vectorFromVec(end);
-    const dir = new Vector3().subVectors(endVector, startVector);
-    return {
-      length: dir.length(),
-      midpoint: new Vector3().addVectors(startVector, endVector).multiplyScalar(0.5),
-      quaternion: new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), dir.clone().normalize()),
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start[0], start[1], start[2], end[0], end[1], end[2]]);
-
-  return (
-    <mesh position={midpoint} quaternion={quaternion}>
-      <cylinderGeometry args={[radius, radius, length, 14]} />
-      <meshBasicMaterial color={color} opacity={opacity} transparent={opacity < 1} />
-    </mesh>
   );
 }
 
@@ -668,115 +642,6 @@ function getHybridSceneConfig(mode: BondingBasicsMode): HybridSceneConfig {
   if (mode === "sp") return SP_SCENE_CONFIG;
   if (mode === "sp2") return SP2_SCENE_CONFIG;
   return SP3_SCENE_CONFIG;
-}
-
-function createPearLobeGeometry(length: number, width: number) {
-  const rings = 28;
-  const segments = 48;
-  const positions: number[] = [];
-  const indices: number[] = [];
-
-  for (let ring = 0; ring <= rings; ring += 1) {
-    const t = ring / rings;
-    const y = length * t;
-    const profile = Math.pow(Math.sin(Math.PI * t), 0.58) * (0.36 + 0.82 * t);
-    const radius = width * profile;
-
-    for (let segment = 0; segment <= segments; segment += 1) {
-      const phi = (Math.PI * 2 * segment) / segments;
-      positions.push(Math.cos(phi) * radius, y, Math.sin(phi) * radius);
-    }
-  }
-
-  for (let ring = 0; ring < rings; ring += 1) {
-    for (let segment = 0; segment < segments; segment += 1) {
-      const a = ring * (segments + 1) + segment;
-      const b = a + segments + 1;
-      indices.push(a, b, a + 1);
-      indices.push(b, b + 1, a + 1);
-    }
-  }
-
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-  return geometry;
-}
-
-function createLobeCloudGeometry(
-  direction: Vec3,
-  length: number,
-  width: number,
-  count: number,
-  seed: number,
-) {
-  const forward = vectorFromVec(direction).normalize();
-  const [basisA, basisB] = makeBasis(forward);
-  const random = makeRandom(seed);
-  const positions: number[] = [];
-
-  for (let index = 0; index < count; index += 1) {
-    const t = Math.pow(random(), 0.82);
-    const profile = Math.pow(Math.sin(Math.PI * t), 0.58) * (0.36 + 0.82 * t);
-    const radius = width * profile * Math.sqrt(random()) * 0.96;
-    const phi = Math.PI * 2 * random();
-    const axial = forward.clone().multiplyScalar(length * t);
-    const radial = basisA
-      .clone()
-      .multiplyScalar(Math.cos(phi) * radius)
-      .add(basisB.clone().multiplyScalar(Math.sin(phi) * radius));
-    const point = axial.add(radial);
-    positions.push(point.x, point.y, point.z);
-  }
-
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
-  return geometry;
-}
-
-function makeBasis(forward: Vector3): [Vector3, Vector3] {
-  const helper = Math.abs(forward.y) > 0.88 ? new Vector3(1, 0, 0) : new Vector3(0, 1, 0);
-  const basisA = new Vector3().crossVectors(forward, helper).normalize();
-  const basisB = new Vector3().crossVectors(forward, basisA).normalize();
-  return [basisA, basisB];
-}
-
-function makeRandom(seed: number) {
-  let state = seed % 2147483647;
-  if (state <= 0) state += 2147483646;
-
-  return () => {
-    state = (state * 16807) % 2147483647;
-    return (state - 1) / 2147483646;
-  };
-}
-
-function getQuaternionForDirection(direction: Vec3) {
-  return new Quaternion().setFromUnitVectors(
-    new Vector3(0, 1, 0),
-    vectorFromVec(direction).normalize(),
-  );
-}
-
-function normalize(vector: Vec3): Vec3 {
-  return toVec3(vectorFromVec(vector).normalize());
-}
-
-function scale(vector: Vec3, scalar: number): Vec3 {
-  return [vector[0] * scalar, vector[1] * scalar, vector[2] * scalar];
-}
-
-function vectorFromVec(vector: Vec3) {
-  return new Vector3(vector[0], vector[1], vector[2]);
-}
-
-function toVec3(vector: Vector3): Vec3 {
-  return [vector.x, vector.y, vector.z];
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
 }
 
 function getAxisColor(axis: Vec3) {

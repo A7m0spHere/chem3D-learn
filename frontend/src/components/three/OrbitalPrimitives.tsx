@@ -869,7 +869,7 @@ export function GuideCylinder({
   );
 }
 
-function createPearLobeGeometry(length: number, width: number) {
+export function createPearLobeGeometry(length: number, width: number) {
   const rings = 28;
   const segments = 48;
   const positions: number[] = [];
@@ -903,7 +903,7 @@ function createPearLobeGeometry(length: number, width: number) {
   return geometry;
 }
 
-function createLobeCloudGeometry(
+export function createLobeCloudGeometry(
   direction: Vec3,
   length: number,
   width: number,
@@ -972,7 +972,7 @@ function makeRandom(seed: number) {
   };
 }
 
-function getQuaternionForDirection(direction: Vec3) {
+export function getQuaternionForDirection(direction: Vec3) {
   return new Quaternion().setFromUnitVectors(
     new Vector3(0, 1, 0),
     vectorFromVec(direction).normalize(),
@@ -999,6 +999,6 @@ export function toVec3(vector: Vector3): Vec3 {
   return [vector.x, vector.y, vector.z];
 }
 
-function clamp(value: number, min: number, max: number) {
+export function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
