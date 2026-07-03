@@ -1,8 +1,7 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { Html, Instance, Instances, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
-import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
   htmlOverlaySubtleLabelClass,
@@ -483,33 +482,41 @@ function PlanePatch({
 }
 
 function DashedReferenceLine({ start, end, color }: { start: Vec3; end: Vec3; color: string }) {
-  const startVector = new Vector3(...start);
-  const endVector = new Vector3(...end);
-  const direction = new Vector3().subVectors(endVector, startVector);
-  const length = direction.length();
-  const unit = direction.clone().normalize();
-  const segments = 9;
+  const segments = useMemo(() => {
+    const startVector = new Vector3(...start);
+    const endVector = new Vector3(...end);
+    const direction = new Vector3().subVectors(endVector, startVector);
+    const length = direction.length();
+    const unit = direction.clone().normalize();
+    const up = new Vector3(0, 1, 0);
+    const quaternion = new Quaternion().setFromUnitVectors(up, unit);
+    const segmentCount = 9;
+
+    return Array.from({ length: segmentCount }, (_, index) => {
+      const t0 = index / segmentCount;
+      const t1 = t0 + 0.055;
+      const segmentStart = startVector.clone().add(unit.clone().multiplyScalar(length * t0));
+      const segmentEnd = startVector.clone().add(unit.clone().multiplyScalar(length * Math.min(t1, 1)));
+      const segLength = segmentEnd.clone().sub(segmentStart).length();
+      const midpoint = segmentStart.clone().add(segmentEnd).multiplyScalar(0.5);
+      return { midpoint, quaternion, length: segLength };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start[0], start[1], start[2], end[0], end[1], end[2]]);
 
   return (
-    <>
-      {Array.from({ length: segments }).map((_, index) => {
-        const t0 = index / segments;
-        const t1 = t0 + 0.055;
-        const segmentStart = startVector.clone().add(unit.clone().multiplyScalar(length * t0));
-        const segmentEnd = startVector.clone().add(unit.clone().multiplyScalar(length * Math.min(t1, 1)));
-
-        return (
-          <StickCylinder
-            color={color}
-            end={vectorToTuple(segmentEnd)}
-            key={`${color}-${index}`}
-            opacity={0.66}
-            radius={0.01}
-            start={vectorToTuple(segmentStart)}
-          />
-        );
-      })}
-    </>
+    <Instances limit={9}>
+      <cylinderGeometry args={[1, 1, 1, 16]} />
+      <meshBasicMaterial color={color} opacity={0.66} transparent />
+      {segments.map((segment, index) => (
+        <Instance
+          key={index}
+          position={segment.midpoint}
+          quaternion={segment.quaternion}
+          scale={[0.01, segment.length, 0.01]}
+        />
+      ))}
+    </Instances>
   );
 }
 

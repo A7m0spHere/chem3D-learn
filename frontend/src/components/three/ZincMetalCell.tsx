@@ -1,7 +1,7 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { Html, Instance, Instances, OrbitControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
-import { Group, Vector3 } from "three";
+import { Group, Quaternion, Vector3 } from "three";
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
@@ -676,31 +676,35 @@ function DashedGuide({
     const endVector = new Vector3(...end);
     const segmentCount = 9;
     const segmentLengthRatio = 0.52;
+    const up = new Vector3(0, 1, 0);
 
     return Array.from({ length: segmentCount }, (_, index) => {
       const segmentStartRatio = index / segmentCount;
       const segmentEndRatio = segmentStartRatio + segmentLengthRatio / segmentCount;
-
-      return {
-        start: startVector.clone().lerp(endVector, segmentStartRatio).toArray() as [number, number, number],
-        end: startVector.clone().lerp(endVector, Math.min(segmentEndRatio, 1)).toArray() as [number, number, number],
-      };
+      const segmentStart = startVector.clone().lerp(endVector, segmentStartRatio);
+      const segmentEnd = startVector.clone().lerp(endVector, Math.min(segmentEndRatio, 1));
+      const direction = segmentEnd.clone().sub(segmentStart);
+      const length = direction.length();
+      const midpoint = segmentStart.clone().add(segmentEnd).multiplyScalar(0.5);
+      const quaternion = new Quaternion().setFromUnitVectors(up, direction.clone().normalize());
+      return { midpoint, quaternion, length };
     });
-  }, [end, start]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start[0], start[1], start[2], end[0], end[1], end[2]]);
 
   return (
-    <>
+    <Instances limit={9}>
+      <cylinderGeometry args={[1, 1, 1, 12]} />
+      <meshBasicMaterial color={color} opacity={0.5} transparent />
       {segments.map((segment, index) => (
-        <StaticCylinder
-          color={color}
-          end={segment.end}
-          key={`${end.join(",")}-${index}`}
-          opacity={0.5}
-          radius={0.004}
-          start={segment.start}
+        <Instance
+          key={index}
+          position={segment.midpoint}
+          quaternion={segment.quaternion}
+          scale={[0.004, segment.length, 0.004]}
         />
       ))}
-    </>
+    </Instances>
   );
 }
 
