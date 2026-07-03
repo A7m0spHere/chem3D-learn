@@ -462,7 +462,8 @@ function useCylinderGeometry(start: Vec3, end: Vec3) {
       midpoint,
       quaternion,
     };
-  }, [start, end]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start[0], start[1], start[2], end[0], end[1], end[2]]);
 }
 
 function scale(vector: Vec3, scalar: number): Vec3 {

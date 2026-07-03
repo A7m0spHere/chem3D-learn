@@ -18,11 +18,13 @@ export type AngleArcProps = {
   htmlPointerEvents?: "auto" | "none";
 };
 
+const DEFAULT_LABEL_OFFSET: Vec3 = [0, 0, 0];
+
 export function AngleArc({
   angle,
   atomsById,
   radius = 0.82,
-  labelOffset = [0, 0, 0],
+  labelOffset = DEFAULT_LABEL_OFFSET,
   showGuideLine = false,
   labelVariant = "default",
   htmlPointerEvents = "auto",
@@ -60,7 +62,8 @@ export function AngleArc({
       .add(new Vector3(...labelOffset));
 
     return { guideStart, points, labelPosition };
-  }, [angle.atomIds, atomsById, labelOffset, radius]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [angle.atomIds, atomsById, labelOffset[0], labelOffset[1], labelOffset[2], radius]);
 
   if (!arc) {
     return null;
