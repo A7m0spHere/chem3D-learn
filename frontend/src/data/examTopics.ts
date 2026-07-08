@@ -102,7 +102,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考核心",
     partition: "高考真题结构",
-    status: "planned",
+    status: "ready",
+    route: "/exam/exam-diamond-si",
   },
   {
     id: "exam-perovskite",
@@ -131,7 +132,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛入门",
     partition: "竞赛视野",
-    status: "planned",
+    status: "ready",
+    route: "/module/pba-prussian-blue-analogues",
   },
   {
     id: "exam-zns",
@@ -158,7 +160,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛入门",
     partition: "竞赛视野",
-    status: "planned",
+    status: "ready",
+    route: "/module/hbn-structure",
   },
   {
     id: "exam-mof",
@@ -348,6 +351,43 @@ export const examTopicDetails: ExamTopicDetail[] = [
     relatedModuleIds: ["octahedral-voids", "tetrahedral-voids", "nacl-crystal"],
     classroomPrompt: "先隔离一个空隙局部模型，再回到完整晶胞，帮助学生把局部配位和整体计数分开。",
     examTip: "填隙题先写骨架粒子数 N，再写空隙总数和实际填入比例。",
+  },
+  {
+    id: "exam-diamond-si",
+    title: "金刚石与单晶硅",
+    subtitle: "同一种金刚石型骨架，抓住四配位和键数共享",
+    summary:
+      "金刚石和单晶硅都可按金刚石型共价晶体理解。每个 C 或 Si 原子与周围 4 个同种原子成键，常规晶胞均摊后含 8 个原子，键数计算要记得每条共价键被两个原子共享。",
+    coreSteps: [
+      {
+        title: "先认结构类型",
+        body: "金刚石与单晶硅都是三维共价网络，不是由独立小分子堆积而成。考试中看到金刚石型结构时，先把它看成每个原子四配位的空间骨架。",
+      },
+      {
+        title: "锁定四面体配位",
+        body: "每个 C 或 Si 原子周围有 4 个最近邻同种原子，方向接近正四面体。对应的 X-X-X 键角约为 109.5°，这里的 X 可以是 C，也可以迁移为 Si。",
+        formula: "配位数 = 4 · 键角约 109.5°",
+      },
+      {
+        title: "完成常规晶胞均摊",
+        body: "金刚石型常规晶胞可按顶点、面心和晶胞内部原子计数：顶点贡献 1，面心贡献 3，内部 4 个完整属于晶胞，所以一个常规晶胞平均含 8 个原子。",
+        formula: "8 × 1/8 + 6 × 1/2 + 4 = 8",
+      },
+      {
+        title: "用共享关系算共价键",
+        body: "若晶体中有 N 个原子，每个原子连 4 条键端，共有 4N 个键端；每条共价键由两个原子共享，所以实际共价键数为 2N。",
+        formula: "N 个原子 → 4N / 2 = 2N 条共价键",
+      },
+    ],
+    commonMistakes: [
+      "把晶胞图中显示出来的球数直接当作独占原子数。",
+      "把金刚石或单晶硅误认为 C8、Si8 这样独立存在的小分子。",
+      "计算共价键数时忘记一条键连接两个原子，把 4N 误当作总键数。",
+      "只记金刚石结论，遇到单晶硅时不会迁移同样的金刚石型四配位骨架。",
+    ],
+    relatedModuleIds: ["diamond-crystal", "tetrahedral-voids"],
+    classroomPrompt: "先打开金刚石 3D 模块观察四面体配位，再把所有 C 替换想象为 Si，强调空间骨架相同、元素不同。",
+    examTip: "金刚石型题目先写两行：每个原子 4 配位；共价键数 = 原子数 × 4 ÷ 2。",
   },
 ];
 
