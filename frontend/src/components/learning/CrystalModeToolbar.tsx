@@ -1,4 +1,4 @@
-import { Box, Calculator, GitCompare, Layers3, Network, Orbit, Share2, Tags } from "lucide-react";
+import { Box, Calculator, GitCompare, Layers3, Network, Orbit, Pyramid, Share2, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type {
   CrystalModelStyle,
@@ -24,6 +24,7 @@ const modeIcons: Record<CrystalViewMode, typeof Box> = {
   piElectron: Network,
   cell: Box,
   coordination: Network,
+  coordinationAnion: Pyramid,
   counting: Calculator,
   voids: Layers3,
   comparison: GitCompare,

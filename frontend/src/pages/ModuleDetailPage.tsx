@@ -30,6 +30,9 @@ const GraphiteCell = lazy(() =>
 const PbaCell = lazy(() =>
   import("@/components/three/PbaCell").then((m) => ({ default: m.PbaCell })),
 );
+const CaF2Cell = lazy(() =>
+  import("@/components/three/CaF2Cell").then((m) => ({ default: m.CaF2Cell })),
+);
 const OrganicCoplanarViewer = lazy(() =>
   import("@/components/three/OrganicCoplanarViewer").then((m) => ({ default: m.OrganicCoplanarViewer })),
 );
@@ -124,6 +127,7 @@ type ViewerKind =
   | "crystal-void"
   | "crystal-graphite"
   | "crystal-pba"
+  | "crystal-caf2"
   | "molecule"
   | "placeholder";
 
@@ -182,6 +186,8 @@ function deriveViewerKind(
         return "crystal-graphite";
       case "pba":
         return "crystal-pba";
+      case "caf2":
+        return "crystal-caf2";
       default:
         break;
     }
@@ -681,6 +687,21 @@ export function ModuleDetailPage() {
       viewer: () =>
         molecule ? (
           <PbaCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            voidStage={voidStage}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-caf2": {
+      viewer: () =>
+        molecule ? (
+          <CaF2Cell
             loading={viewerLoading}
             modelStyle={crystalModelStyle}
             molecule={molecule}

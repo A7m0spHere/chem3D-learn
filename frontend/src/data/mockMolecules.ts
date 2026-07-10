@@ -15,6 +15,7 @@ import graphiteData from "@/data/manual/graphite.json";
 import hbnData from "@/data/manual/hbn.json";
 import ethylenePlanarData from "@/data/manual/ethylene-planar.json";
 import pbaData from "@/data/manual/pba.json";
+import caf2Data from "@/data/manual/caf2.json";
 
 export type MockMoleculeRecord = MoleculeRecord & {
   geometryZh: string;
@@ -56,6 +57,7 @@ const realMoleculesById = new Map<string, MoleculeRecord>([
   ["hbn", hbnData as unknown as MoleculeRecord],
   ["ethylene-planar", ethylenePlanarData as unknown as MoleculeRecord],
   ["pba", pbaData as unknown as MoleculeRecord],
+  ["caf2", caf2Data as unknown as MoleculeRecord],
 ]);
 
 /** Returns the hand-authored 3D data for a molecule, or undefined. */

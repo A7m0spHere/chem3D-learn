@@ -227,6 +227,58 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     expect(hasViewerHorizontalOverflow).toBe(false);
     await expectCanvasAreaHasDetail(canvasArea);
   });
+
+  test("CaF₂ 支持双配位、四面体空隙三阶段和反萤石对比模式", async ({ page }) => {
+    await page.goto("/module/caf2-fluorite");
+
+    const viewer = page.getByTestId("caf2-viewer");
+    const canvasArea = page.getByTestId("caf2-canvas");
+    await expect(viewer).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(viewer.getByText("CaF₂｜完整萤石晶胞", { exact: true })).toBeVisible();
+    const caf2Guide = page.getByTestId("observation-guide-card");
+    await expect(caf2Guide.getByText("自学观察顺序", { exact: true })).toBeVisible();
+    await expect(caf2Guide.locator("article")).toHaveCount(4);
+    await expect(caf2Guide.getByText("先看完整晶胞", { exact: true })).toBeVisible();
+    await expect(caf2Guide.getByText("拆出 Ca²⁺ 骨架与四面体空隙", { exact: true })).toBeVisible();
+    await expect(caf2Guide.getByText("分别数两种离子的配位数", { exact: true })).toBeVisible();
+    await expect(caf2Guide.getByText("均摊计数并迁移到反萤石", { exact: true })).toBeVisible();
+    await expect(
+      caf2Guide.getByText(
+        "自查：把 Ca²⁺ 与 F⁻ 的位置互换并换成 Li⁺ / O²⁻ 后，两种离子的配位数各是多少？化学式为什么变成 Li₂O？",
+        { exact: true },
+      ),
+    ).toBeVisible();
+
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("caf2-cell-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "Ca²⁺ 8配位" }).click();
+    await expect(viewer.getByText("CaF₂｜Ca²⁺ 的立方体 8 配位", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("caf2-ca-coordination-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "F⁻ 4配位" }).click();
+    await expect(viewer.getByText("CaF₂｜F⁻ 的四面体 4 配位", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "晶胞计数" }).click();
+    await expect(viewer.getByText("CaF₂｜均摊法计数", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "四面体空隙" }).click();
+    await expect(viewer.getByText("CaF₂｜第一步：Ca²⁺ 面心立方骨架", { exact: true })).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "显示空隙" }).click();
+    await expect(viewer.getByText("CaF₂｜第二步：标出 8 个四面体空隙", { exact: true })).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "F⁻ 全部填入" }).click();
+    await expect(viewer.getByText("CaF₂｜第三步：F⁻ 填满全部 8 个空隙", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("caf2-voids-filled-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "反萤石对比" }).click();
+    await expect(viewer.getByText("CaF₂｜反萤石：Li₂O 型结构", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expect(canvasArea).toHaveScreenshot("caf2-antifluorite-viewer.png");
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
 });
 
 async function expectCanvasAreaHasDetail(canvasArea: Locator) {

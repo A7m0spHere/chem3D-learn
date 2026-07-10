@@ -7,6 +7,7 @@ export type CrystalViewMode =
   | "piElectron"
   | "cell"
   | "coordination"
+  | "coordinationAnion"
   | "counting"
   | "voids"
   | "comparison"

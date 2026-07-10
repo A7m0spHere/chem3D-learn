@@ -151,7 +151,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛入门",
     partition: "竞赛视野",
-    status: "planned",
+    status: "ready",
+    route: "/module/caf2-fluorite",
   },
   {
     id: "exam-hbn",
