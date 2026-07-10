@@ -19,6 +19,10 @@ import {
   toVec3,
   vectorFromVec,
 } from "@/components/three/OrbitalPrimitives";
+import {
+  teachingAccentLabelClass,
+  teachingSceneLabelClass,
+} from "@/components/three/teachingLabelStyles";
 import { useDisposable } from "@/components/three/useDisposable";
 import type {
   BondingBasicsMode,
@@ -171,7 +175,9 @@ function SceneOverlay({
             <span className="h-2.5 w-2.5 rounded-full bg-accent" />
             副瓣
           </span>
-          <span>{controls.renderMode === "solid" ? "实体轨道" : "电子云"}</span>
+          <span data-testid="hybrid-cloud-density-legend">
+            {controls.renderMode === "solid" ? "实体轨道" : "采样点表示电子云密度"}
+          </span>
         </div>
       </div>
     </Html>
@@ -242,14 +248,28 @@ function HybridOrbital({
       <GuideCylinder color={primaryDark} opacity={0.16 + progress * 0.18} radius={0.008} start={[0, 0, 0]} end={guideEnd} />
       {renderMode === "cloud" ? (
         <>
+          <LobeSurface
+            color={primary}
+            direction={normalized}
+            length={mainLength}
+            opacity={Math.min(0.14, opacity * 0.18)}
+            width={mainWidth}
+          />
           <LobeCloud
             color={primary}
             direction={normalized}
             length={mainLength}
             opacity={opacity * 0.95}
             seed={100 + index * 13}
-            size={0.029}
+            size={0.031}
             width={mainWidth}
+          />
+          <LobeSurface
+            color={accent}
+            direction={negativeDirection}
+            length={tailLength}
+            opacity={Math.min(0.11, opacity * 0.16)}
+            width={tailWidth}
           />
           <LobeCloud
             color={accent}
@@ -257,7 +277,7 @@ function HybridOrbital({
             length={tailLength}
             opacity={opacity * 0.78}
             seed={200 + index * 17}
-            size={0.024}
+            size={0.026}
             width={tailWidth}
           />
         </>
@@ -379,7 +399,7 @@ function LobeCloud({
 }) {
   const [dx, dy, dz] = direction;
   const geometry = useDisposable(
-    () => createLobeCloudGeometry([dx, dy, dz], length, width, 220, seed),
+    () => createLobeCloudGeometry([dx, dy, dz], length, width, 260, seed),
     [dx, dy, dz, length, seed, width],
   );
 
@@ -398,8 +418,8 @@ function PointCloud({
   size: number;
 }) {
   return (
-    <points geometry={geometry}>
-      <pointsMaterial color={color} depthWrite={false} opacity={opacity} size={size} transparent />
+    <points geometry={geometry} renderOrder={12}>
+      <pointsMaterial color={color} depthTest={false} depthWrite={false} opacity={opacity} size={size} sizeAttenuation transparent />
     </points>
   );
 }
@@ -578,7 +598,7 @@ function SceneBadge({ position, text, color }: { position: Vec3; text: string; c
   return (
     <Html center distanceFactor={7.2} pointerEvents="none" position={position}>
       <span
-        className="whitespace-nowrap rounded-full bg-white/88 px-2 py-0.5 text-center text-[10px] font-semibold leading-tight shadow-sm ring-1 ring-white/80 sm:px-2.5 sm:py-1 sm:text-xs"
+        className={color === accentDark ? teachingAccentLabelClass : teachingSceneLabelClass}
         style={{ color }}
       >
         {text}

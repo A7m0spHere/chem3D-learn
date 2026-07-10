@@ -7,6 +7,10 @@ import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { CameraRig } from "@/components/three/CameraRig";
 import { POrbitalPair, PiCloudBand } from "@/components/three/OrbitalPrimitives";
+import {
+  teachingAccentLabelClass,
+  teachingSceneLabelClass,
+} from "@/components/three/teachingLabelStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getAcetyleneLinearModeInfo, type AcetyleneLineView } from "@/data/acetyleneLinear";
 import type { AcetyleneLinearMode, Atom, Bond } from "@/types/molecule";
@@ -55,6 +59,7 @@ export function AcetyleneLinearCell({
       <Canvas
         camera={{ position: getCameraPosition(mode, lineView), fov: mode === "line" ? 38 : 42 }}
         frameloop="demand"
+        gl={{ alpha: false }}
         style={{ height: "100%", width: "100%" }}
       >
         <CameraRig
@@ -62,6 +67,7 @@ export function AcetyleneLinearCell({
           position={getCameraPosition(mode, lineView)}
           resetKey={`${mode}-${lineView}`}
         />
+        <color attach="background" args={["#F7FAF9"]} />
         <SceneLighting ambient={0.68} mainIntensity={1.3} mainPosition={[3.6, 4.4, 4.8]} secondaryIntensity={0.34} secondaryPosition={[-3.2, -2.4, 2.4]} />
         <group rotation={getSceneRotation(mode, lineView)} scale={1.03}>
           <AcetyleneCore atomsById={atomsById} mode={mode} />
@@ -134,7 +140,7 @@ function LineOverlay({ lineView }: { lineView: AcetyleneLineView }) {
       ) : null}
       <Html center distanceFactor={6.4} pointerEvents="none" position={[0, -0.34, 0.34]}>
         <span
-          className="whitespace-nowrap text-[12px] font-bold text-primary-dark/75 drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
+          className={teachingSceneLabelClass}
           data-testid="acetylene-line-label"
         >
           H–C≡C–H 共线
@@ -165,7 +171,7 @@ function AngleOverlay() {
       />
       <Html center distanceFactor={6.2} pointerEvents="none" position={[-0.36, 0.56, 0.22]}>
         <span
-          className="whitespace-nowrap text-[12px] font-bold text-[#B96320] drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
+          className={teachingAccentLabelClass}
           data-testid="acetylene-angle-label"
         >
           180°
@@ -237,7 +243,7 @@ function TripleBondOverlay() {
       />
       <Html center distanceFactor={6.6} pointerEvents="none" position={[0, -0.52, 0.42]}>
         <span
-          className="whitespace-nowrap text-[11px] font-semibold text-primary-dark/75 drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
+          className={teachingSceneLabelClass}
           data-testid="acetylene-triple-label"
         >
           1σ + 2π
@@ -273,8 +279,12 @@ function PiCloud({
       length={0.82}
       opacity={axis === "z" ? 0.32 : 0.22}
       orientation={axis === "z" ? "xy" : "xz"}
+      particleCount={axis === "z" ? 230 : 180}
+      particleOpacity={axis === "z" ? 0.44 : 0.36}
+      particleSize={0.02}
       scale={scale}
       seed={seed}
+      showParticles
       thickness={axis === "z" ? 0.12 : 0.1}
       tone={color === "#F4A261" ? "warm" : "primary"}
       waist={0.28}

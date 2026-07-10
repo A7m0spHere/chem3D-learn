@@ -5,7 +5,6 @@ import {
   DoubleSide,
   Float32BufferAttribute,
   Quaternion,
-  SphereGeometry,
   Vector3,
 } from "three";
 import { useDisposable } from "@/components/three/useDisposable";
@@ -79,6 +78,7 @@ type DeterministicPointCloudProps = {
   depthTest?: boolean;
   sizeAttenuation?: boolean;
   colorVariant?: "main" | "dark";
+  renderOrder?: number;
 };
 
 export function DeterministicPointCloud({
@@ -86,14 +86,15 @@ export function DeterministicPointCloud({
   opacity = 0.42,
   size = 0.024,
   tone = "primary",
-  depthTest = true,
+  depthTest = false,
   sizeAttenuation = true,
   colorVariant = "main",
+  renderOrder,
 }: DeterministicPointCloudProps) {
   const colors = toneColors[tone];
 
   return (
-    <points geometry={geometry}>
+    <points geometry={geometry} renderOrder={renderOrder}>
       <pointsMaterial
         color={colorVariant === "dark" ? colors.dark : colors.main}
         depthTest={depthTest}
@@ -333,8 +334,8 @@ export function PiCloudBand({
   const colors = toneColors[tone];
   const floatsAboveAtoms = cloudStyle === "overlap-lobes";
   const particleGeometry = useDisposable(
-    () => new SphereGeometry(particleSize, 8, 8),
-    [particleSize],
+    () => createPointCloudGeometry(particlePositions),
+    [particlePositions],
   );
 
   return (
@@ -357,22 +358,24 @@ export function PiCloudBand({
         </mesh>
       ) : null}
       {showParticles && renderStyle !== "surface" ? (
-        <group>
-          {particlePositions.map((position, index) => (
-            <mesh geometry={particleGeometry} key={`pi-particle-${index}`} position={position} renderOrder={12}>
-              <meshBasicMaterial
-                color={colors.dark}
-                depthTest={false}
-                depthWrite={false}
-                opacity={Math.min(0.9, particleOpacity)}
-                transparent
-              />
-            </mesh>
-          ))}
-        </group>
+        <DeterministicPointCloud
+          colorVariant="dark"
+          depthTest={false}
+          geometry={particleGeometry}
+          opacity={Math.min(0.9, particleOpacity)}
+          renderOrder={12}
+          size={particleSize}
+          tone={tone}
+        />
       ) : null}
     </group>
   );
+}
+
+function createPointCloudGeometry(positions: Vec3[]) {
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new Float32BufferAttribute(positions.flat(), 3));
+  return geometry;
 }
 
 function resolvePiCloudDimensions({

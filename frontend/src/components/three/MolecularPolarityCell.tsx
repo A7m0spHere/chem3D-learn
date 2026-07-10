@@ -5,6 +5,11 @@ import { Quaternion, Vector3 } from "three";
 import { CameraRig } from "@/components/three/CameraRig";
 import { PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { SceneLighting } from "@/components/three/SceneLighting";
+import {
+  teachingAccentLabelClass,
+  teachingCloudLabelClass,
+  teachingCompactLabelClass,
+} from "@/components/three/teachingLabelStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import {
   bondDipoleExamples,
@@ -65,9 +70,11 @@ export function MolecularPolarityCell({
           <Canvas
             camera={{ position: getCameraPosition(mode), fov: 42 }}
             frameloop="demand"
+            gl={{ alpha: false }}
             style={{ height: "100%", width: "100%" }}
           >
             <CameraRig fov={42} position={getCameraPosition(mode)} resetKey={mode} />
+            <color attach="background" args={["#F7FAF9"]} />
             <SceneLighting ambient={0.72} mainIntensity={1.36} mainPosition={[3.4, 4.6, 4.2]} secondaryIntensity={0.34} secondaryPosition={[-3, -2.5, 2.6]} />
             <group
               position={getScenePosition(mode)}
@@ -113,7 +120,9 @@ function ElectronegativityScene() {
         end={[0.46, -0.92, 0]}
         start={[-0.46, -0.92, 0]}
       />
-      <TinyDipoleLabel position={[0, -0.68, 0]}>F 明显更吸电子</TinyDipoleLabel>
+      <TinyDipoleLabel position={[-1.08, -0.68, 0]} testId="electronegativity-hint-label">
+        F 更吸电子
+      </TinyDipoleLabel>
     </>
   );
 }
@@ -290,8 +299,28 @@ function ElectronCloud({
 }) {
   return (
     <group>
-      <PiCloudBand center={center} opacity={0.18} scale={meshScale} seed={701} tone="primary" />
-      <TinyDipoleLabel position={[center[0] + 0.08, center[1] + 0.34, center[2]]}>
+      <PiCloudBand
+        center={center}
+        opacity={0.24}
+        particleCount={320}
+        particleOpacity={0.5}
+        particleSize={0.024}
+        scale={meshScale}
+        seed={701}
+        showParticles
+        tone="primary"
+      />
+      <Line
+        color="#2A9D8F"
+        lineWidth={1.2}
+        opacity={0.7}
+        points={[
+          [center[0] + 0.08, center[1] + 0.2, center[2]],
+          [center[0] - 0.06, center[1] + 0.38, center[2]],
+        ]}
+        transparent
+      />
+      <TinyDipoleLabel position={[center[0] - 0.1, center[1] + 0.48, center[2]]} testId="electron-cloud-density-label" variant="cloud">
         电子云偏向 F
       </TinyDipoleLabel>
     </group>
@@ -369,7 +398,7 @@ function getSceneOverlayInfo(mode: MolecularPolarityMode): SceneOverlayInfo {
 function TinyAtomLabel({ label, position }: { label: string; position: Vec3 }) {
   return (
     <Html center distanceFactor={7.4} pointerEvents="none" position={position}>
-      <span className="select-none text-[10px] font-bold leading-none text-text-primary/80 drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] sm:text-[11px]">
+      <span className={teachingCompactLabelClass}>
         {label}
       </span>
     </Html>
@@ -379,7 +408,7 @@ function TinyAtomLabel({ label, position }: { label: string; position: Vec3 }) {
 function ChargeMarker({ charge, position }: { charge: string; position: Vec3 }) {
   return (
     <Html center distanceFactor={7.8} pointerEvents="none" position={position}>
-      <span className="select-none text-[9px] font-semibold leading-none text-primary-dark/65 sm:text-[10px]">
+      <span className="inline-flex select-none items-center rounded-full border border-primary/25 bg-white/92 px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-dark shadow-[0_2px_6px_rgba(31,111,104,0.12)] ring-1 ring-white/80">
         {charge}
       </span>
     </Html>
@@ -390,16 +419,24 @@ function TinyDipoleLabel({
   children,
   position,
   tone = "primary",
+  testId,
+  variant = "compact",
 }: {
   children: string;
   position: Vec3;
   tone?: "primary" | "accent";
+  testId?: string;
+  variant?: "cloud" | "compact";
 }) {
-  const colorClass = tone === "accent" ? "text-primary-dark/75" : "text-primary-dark/65";
+  const className = variant === "cloud"
+    ? teachingCloudLabelClass
+    : tone === "accent"
+      ? teachingAccentLabelClass
+      : teachingCompactLabelClass;
 
   return (
     <Html center distanceFactor={7.3} pointerEvents="none" position={position}>
-      <span className={`select-none whitespace-nowrap text-[9px] font-semibold leading-none ${colorClass} sm:text-[10px]`}>
+      <span className={className} data-testid={testId}>
         {children}
       </span>
     </Html>

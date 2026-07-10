@@ -8,6 +8,10 @@ import { CameraRig } from "@/components/three/CameraRig";
 import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { POrbitalPair, PiCloudBand } from "@/components/three/OrbitalPrimitives";
+import {
+  teachingAccentLabelClass,
+  teachingCloudLabelClass,
+} from "@/components/three/teachingLabelStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getBenzenePlanarModeInfo, type BenzenePlaneView } from "@/data/benzenePlanar";
 import type { AngleSpec, Atom, BenzenePlanarMode, Bond } from "@/types/molecule";
@@ -107,6 +111,7 @@ export function BenzenePlanarCell({
       <Canvas
         camera={{ position: getCameraPosition(mode, planeView), fov: mode === "plane" ? 38 : 42 }}
         frameloop="demand"
+        gl={{ alpha: false }}
         style={{ height: "100%", width: "100%" }}
       >
         <CameraRig
@@ -114,6 +119,7 @@ export function BenzenePlanarCell({
           position={getCameraPosition(mode, planeView)}
           resetKey={`${mode}-${planeView}`}
         />
+        <color attach="background" args={["#F7FAF9"]} />
         <SceneLighting ambient={0.68} mainIntensity={1.28} mainPosition={[3.6, 4.4, 4.8]} secondaryIntensity={0.36} secondaryPosition={[-3.4, -2.8, 2.6]} />
         <group rotation={getSceneRotation(mode, planeView)} scale={1.03}>
           <ReferencePlane mode={mode} planeView={planeView} />
@@ -271,7 +277,7 @@ function DiagonalOverlay() {
       />
       <Html center distanceFactor={6.4} pointerEvents="none" position={[0, -0.22, 0.34]}>
         <span
-          className="whitespace-nowrap text-[12px] font-bold text-[#B96320] drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
+          className={teachingAccentLabelClass}
           data-testid="benzene-diagonal-label"
         >
           H–C–C–H 共线
@@ -310,7 +316,7 @@ function PiBondOverlay() {
       <PiCloud center={[0, 0, -0.52]} tone="warm" />
       <Html center distanceFactor={7.8} pointerEvents="none" position={[0.92, 0.72, 0.78]}>
         <span
-          className="whitespace-nowrap rounded-full bg-white/75 px-2 py-0.5 text-[10px] font-semibold text-primary-dark/70 shadow-sm"
+          className={teachingCloudLabelClass}
           data-testid="benzene-pi-label"
         >
           大 π 电子云
@@ -328,7 +334,11 @@ function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
       length={1.18}
       opacity={0.24}
       orientation="xy"
+      particleCount={280}
+      particleOpacity={0.42}
+      particleSize={0.02}
       seed={center[2] > 0 ? 509 : 523}
+      showParticles
       thickness={0.09}
       tone={tone}
       waist={0.04}

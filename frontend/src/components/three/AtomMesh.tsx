@@ -1,4 +1,4 @@
-import { Html } from "@react-three/drei";
+import { Html, Line } from "@react-three/drei";
 import { htmlOverlayLabelClass } from "@/components/three/htmlOverlayStyles";
 import type { Atom } from "@/types/molecule";
 
@@ -31,11 +31,20 @@ export function AtomMesh({ atom, isFocused = false, atomScale = 1, showLabel = t
         />
       </mesh>
       {showLabel ? (
-        <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.16, 0]}>
+        <>
+          <Line
+            color="#64748B"
+            lineWidth={1}
+            opacity={0.7}
+            points={[[0, radius * 0.86, 0], [0, radius + 0.24, 0]]}
+            transparent
+          />
+          <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.34, 0]}>
           <span className={htmlOverlayLabelClass}>
             {atom.label}
           </span>
-        </Html>
+          </Html>
+        </>
       ) : null}
     </group>
   );

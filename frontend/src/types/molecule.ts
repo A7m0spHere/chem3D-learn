@@ -76,6 +76,21 @@ export type CrystalVoidStageTeaching = {
   bodyZh: string;
 };
 
+export type CrystalObservationGuideStep = {
+  labelZh: string;
+  titleZh: string;
+  bodyZh: string;
+  modeId?: CrystalViewMode;
+  stageId?: CrystalVoidStage;
+};
+
+export type CrystalObservationGuide = {
+  titleZh: string;
+  subtitleZh: string;
+  steps: CrystalObservationGuideStep[];
+  teacherPromptZh: string;
+};
+
 export type CrystalTeaching = {
   currentModelZh?: string;
   structureTypeZh: string;
@@ -95,6 +110,7 @@ export type CrystalTeaching = {
   };
   coordinationDescriptionZh: string[];
   commonMistakesZh: string[];
+  observationGuide?: CrystalObservationGuide;
   viewModes: CrystalTeachingViewMode[];
   voidStages?: CrystalVoidStageTeaching[];
 };

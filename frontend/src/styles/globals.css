@@ -9,8 +9,8 @@
 }
 
 html {
-  background: #f9fafb;
-  color: #111827;
+  background: #f7faf9;
+  color: #1f2933;
 }
 
 body {
@@ -35,7 +35,7 @@ select {
 @layer components {
   .chem-viewer-stage {
     background:
-      radial-gradient(circle at 50% 42%, #f4f8fb 0%, #eaf1f4 46%, #dce8e8 100%);
+      radial-gradient(circle at 50% 42%, #ffffff 0%, #f2f7f5 48%, #e5efeb 100%);
   }
 
   .chem-viewer-stage canvas {
@@ -44,14 +44,14 @@ select {
   }
 
   .chem-control-console {
-    @apply mx-auto w-fit max-w-full rounded-2xl border border-border bg-white/90 p-2 shadow-panel backdrop-blur-md;
+    @apply w-fit max-w-full rounded-lg bg-transparent p-0 shadow-none;
   }
 
   .chem-control-grid {
-    @apply grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center;
+    @apply grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center;
   }
 
   .chem-touch-button {
-    @apply h-12 min-w-[112px] rounded-xl px-4 text-sm font-semibold whitespace-nowrap sm:h-11;
+    @apply h-11 min-w-[108px] rounded-lg px-4 text-sm font-semibold whitespace-nowrap;
   }
 }

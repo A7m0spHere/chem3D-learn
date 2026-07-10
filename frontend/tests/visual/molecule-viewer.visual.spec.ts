@@ -1,18 +1,21 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("普通分子 Viewer 三段式教学信息", () => {
-  test("NH3 孤电子对步骤使用顶部结论和底部原因", async ({ page }) => {
+test.describe("普通分子 Viewer 自由探索与按需讲解", () => {
+  test("NH3 默认自由探索，选择讲解后显示孤电子对步骤", async ({ page }) => {
     await page.goto("/module/pyramidal-nh3");
 
     const viewer = page.getByTestId("molecule-viewer");
+    await expect(viewer.getByText("NH3｜自由探索", { exact: true })).toBeVisible();
+    await expect(page.getByText("先旋转模型，观察原子在空间中的相对位置；需要提示时再打开下方讲解。", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { name: /识别孤电子对/ }).click();
     await expect(viewer.getByText("NH3｜识别孤电子对", { exact: true })).toBeVisible();
     await expect(
-      viewer.getByText(
+      viewer.getByTestId("molecule-viewer-summary").getByText(
         "氮原子上方有一对孤电子对。它参与电子对空间排布，但不是一个原子。",
         { exact: true },
       ),
     ).toBeVisible();
-    await page.getByRole("button", { exact: true, name: "孤电子对" }).click();
     const canvasArea = page.getByTestId("molecule-viewer-canvas");
     await expect(canvasArea.locator("canvas")).toBeVisible();
     await expect(canvasArea.getByText("孤电子对", { exact: true })).toBeVisible();
@@ -23,8 +26,7 @@ test.describe("普通分子 Viewer 三段式教学信息", () => {
 
   test("H2O 键角步骤保留角弧但解释不进入 Canvas", async ({ page }) => {
     await page.goto("/module/v-shape-h2o");
-    await page.getByRole("button", { exact: true, name: "下一步" }).click();
-    await page.getByRole("button", { exact: true, name: "下一步" }).click();
+    await page.getByRole("button", { name: /观察键角进一步减小/ }).click();
     // 到达 bond-angle 步骤后，goToStep 依据 step.showAngles 自动显示角弧，
     // 因此无需再点“键角”toggle（那会把已显示的角弧关掉，与“保留角弧”的用意相悖）。
 
@@ -32,7 +34,8 @@ test.describe("普通分子 Viewer 三段式教学信息", () => {
     const canvasArea = page.getByTestId("molecule-viewer-canvas");
     await expect(viewer.getByText("H2O｜观察键角进一步减小", { exact: true })).toBeVisible();
     await expect(canvasArea.getByText("约 104.5°", { exact: true })).toBeVisible();
-    await expect(canvasArea.getByText("孤电子对", { exact: true })).toHaveCount(2);
+    // 两个相同的孤电子对轨道共用一个说明标签，避免投影时文字互相遮挡。
+    await expect(canvasArea.getByText("孤电子对", { exact: true })).toHaveCount(1);
     await expect(
       canvasArea.getByText(
         "显示 H-O-H 键角后，可以看到水分子的典型键角约为 104.5°，比 NH3 的键角更小。",
@@ -43,7 +46,7 @@ test.describe("普通分子 Viewer 三段式教学信息", () => {
 
   test("BF3 平面三角形步骤显示模式摘要", async ({ page }) => {
     await page.goto("/module/planar-bf3");
-    await page.getByRole("button", { exact: true, name: "下一步" }).click();
+    await page.getByRole("button", { name: /观察平面三角形/ }).click();
 
     const viewer = page.getByTestId("molecule-viewer");
     await expect(viewer.getByText("BF3｜观察平面三角形", { exact: true })).toBeVisible();

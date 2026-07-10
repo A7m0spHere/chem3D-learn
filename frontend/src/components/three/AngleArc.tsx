@@ -25,7 +25,7 @@ export function AngleArc({
   atomsById,
   radius = 0.82,
   labelOffset = DEFAULT_LABEL_OFFSET,
-  showGuideLine = false,
+  showGuideLine = true,
   labelVariant = "default",
   htmlPointerEvents = "auto",
 }: AngleArcProps) {
@@ -75,8 +75,8 @@ export function AngleArc({
       {showGuideLine ? (
         <Line
           color="#F4A261"
-          lineWidth={1}
-          opacity={0.72}
+          lineWidth={1.5}
+          opacity={0.82}
           points={[arc.guideStart, arc.labelPosition]}
           transparent
         />

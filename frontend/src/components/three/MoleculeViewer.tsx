@@ -13,6 +13,7 @@ type MoleculeViewerProps = {
   activeStep: LessonStep;
   autoRotate: boolean;
   loading?: boolean;
+  isGuidedMode?: boolean;
   showAngles: boolean;
   showAtomLabels?: boolean;
   showLonePairs: boolean;
@@ -27,6 +28,7 @@ export function MoleculeViewer({
   activeStep,
   autoRotate,
   loading = false,
+  isGuidedMode = false,
   showAngles,
   showAtomLabels = false,
   showLonePairs,
@@ -48,8 +50,8 @@ export function MoleculeViewer({
 
     return [0, -(min[1] + max[1]) / 2, 0] as [number, number, number];
   }, [molecule.atoms]);
-  const focusedAtomIds = new Set(activeStep.focusAtomIds ?? []);
-  const focusedBondIds = new Set(activeStep.focusBondIds ?? []);
+  const focusedAtomIds = new Set(isGuidedMode ? activeStep.focusAtomIds ?? [] : []);
+  const focusedBondIds = new Set(isGuidedMode ? activeStep.focusBondIds ?? [] : []);
   const visibleAngleIds = new Set(activeStep.focusAngleIds ?? molecule.keyAngles.map((angle) => angle.id));
   const displayName = molecule.names?.zh ?? molecule.nameZh;
   const cameraPosition: [number, number, number] = molecule.rendering?.cameraPosition ?? [3.6, 3, 4.2];
@@ -63,13 +65,19 @@ export function MoleculeViewer({
     <ThreeViewerFrame
       className="min-h-[420px] transition-shadow duration-base ease-out-soft hover:shadow-lg lg:min-h-[620px]"
       loading={loading}
-      meta={`${displayName} · 拖拽旋转`}
+      meta={isGuidedMode ? `${displayName} · 跟随讲解` : `${displayName} · 自由探索`}
       stageTestId="molecule-viewer-canvas"
-      summary={activeStep.bodyZh}
-      title={`${molecule.formula}｜${activeStep.titleZh}`}
+      summary={isGuidedMode ? activeStep.bodyZh : "拖拽旋转、滚轮缩放；可用下方控制显示键角、孤电子对和原子标记。"}
+      title={`${molecule.formula}｜${isGuidedMode ? activeStep.titleZh : "自由探索"}`}
       viewerTestId="molecule-viewer"
     >
-      <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop={autoRotate ? "always" : "demand"} style={{ height: "100%", width: "100%" }}>
+      <Canvas
+        camera={{ position: cameraPosition, fov: cameraFov }}
+        frameloop={autoRotate ? "always" : "demand"}
+        gl={{ alpha: false }}
+        style={{ height: "100%", width: "100%" }}
+      >
+          <color attach="background" args={["#F7FAF9"]} />
           <ambientLight intensity={0.6} />
           <directionalLight position={[4, 5, 3]} intensity={1.45} />
           <group position={sceneOffset} rotation={[0, -0.35, 0]}>
@@ -104,8 +112,16 @@ export function MoleculeViewer({
                   />
                 ))}
             {showLonePairs &&
-              molecule.lonePairs.map((lonePair) => (
-                <LonePairMesh atomsById={atomsById} key={lonePair.id} lonePair={lonePair} />
+              molecule.lonePairs.map((lonePair, index) => (
+                <LonePairMesh
+                  atomsById={atomsById}
+                  key={lonePair.id}
+                  lonePair={lonePair}
+                  showLabel={
+                    !lonePair.label ||
+                    molecule.lonePairs.findIndex((candidate) => candidate.label === lonePair.label) === index
+                  }
+                />
               ))}
           </group>
           <OrbitControls

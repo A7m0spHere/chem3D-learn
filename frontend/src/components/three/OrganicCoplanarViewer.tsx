@@ -96,7 +96,13 @@ export function OrganicCoplanarViewer({
       title={modeInfo.viewerTitle}
       viewerTestId="organic-coplanar-viewer"
     >
-        <Canvas camera={{ position: [0.2, 0.2, 5.8], fov: 42 }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
+        <Canvas
+          camera={{ position: [0.2, 0.2, 5.8], fov: 42 }}
+          frameloop="demand"
+          gl={{ alpha: false }}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <color attach="background" args={["#F7FAF9"]} />
           <SceneLighting ambient={0.68} mainIntensity={1.32} mainPosition={[3.4, 4.5, 4.2]} secondaryIntensity={0.36} secondaryPosition={[-3, -2, 3]} />
           <group rotation={[-0.62, 0.06, -0.24]} scale={0.67}>
             <ReferenceGeometry

@@ -11,6 +11,7 @@ import {
   SOrbitalCloud,
 } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import { teachingSceneLabelClass } from "@/components/three/teachingLabelStyles";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { getOrbitalBondModeInfo } from "@/data/sigmaPiBonds";
 import type { OrbitalBondLessonType, PiBondMode, SigmaBondMode } from "@/data/sigmaPiBonds";
@@ -51,6 +52,7 @@ export function SigmaPiBondCell(props: SigmaPiBondCellProps) {
       <Canvas
         camera={{ position: getCameraPosition(props.lessonType), fov: 42 }}
         frameloop={isPiPlaying ? "always" : "demand"}
+        gl={{ alpha: false }}
         style={{ height: "100%", width: "100%" }}
       >
         <CameraRig
@@ -58,6 +60,7 @@ export function SigmaPiBondCell(props: SigmaPiBondCellProps) {
           position={getCameraPosition(props.lessonType)}
           resetKey={`${props.lessonType}-${props.mode}`}
         />
+        <color attach="background" args={["#F7FAF9"]} />
         <SceneLighting ambient={0.74} mainIntensity={1.28} mainPosition={[3.4, 4.6, 4.2]} secondaryIntensity={0.34} secondaryPosition={[-3.2, -2.4, 2.6]} />
         <group rotation={[-0.18, 0.1, 0]} scale={1.12}>
           <CoordinateAxes showLabels={props.showLabels ?? false} />
@@ -249,7 +252,11 @@ function PiOverlapCloud({ tone }: { tone: "top" | "bottom" }) {
       length={1}
       opacity={0.34}
       orientation="xy"
+      particleCount={280}
+      particleOpacity={0.46}
+      particleSize={0.022}
       seed={tone === "top" ? 173 : 211}
+      showParticles
       thickness={0.13}
       tone={tone === "top" ? "primary" : "warm"}
       waist={0.24}
@@ -273,7 +280,7 @@ function SceneLabel({ position, text, color }: { position: Vec3; text: string; c
   return (
     <Html center distanceFactor={6.5} pointerEvents="none" position={position}>
       <span
-        className="whitespace-nowrap rounded-full bg-white/85 px-2.5 py-1 text-[11px] font-semibold shadow-sm drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
+        className={teachingSceneLabelClass}
         style={{ color }}
       >
         {text}

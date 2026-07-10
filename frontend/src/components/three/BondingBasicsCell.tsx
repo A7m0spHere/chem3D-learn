@@ -10,6 +10,7 @@ import {
 } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { HybridOrbitalScene } from "@/components/three/HybridOrbitalScene";
+import { teachingSceneLabelClass } from "@/components/three/teachingLabelStyles";
 import { getBondingBasicsModeInfo } from "@/data/bondingBasics";
 import type {
   BondingBasicsMode,
@@ -67,9 +68,11 @@ export function BondingBasicsCell({
       <Canvas
         camera={{ position: [3.15, -3.8, 2.8], fov: 37 }}
         frameloop="demand"
+        gl={{ alpha: false }}
         style={{ height: "100%", width: "100%" }}
       >
         <CameraRig fov={37} position={[3.15, -3.8, 2.8]} resetKey={`${moduleId}-${mode}`} />
+        <color attach="background" args={["#F7FAF9"]} />
         <SceneLighting ambient={0.74} mainIntensity={1.3} mainPosition={[3.5, 4.6, 4.2]} secondaryIntensity={0.34} secondaryPosition={[-3.2, -2.4, 2.6]} />
         <group position={[0, 0.08, 0]} rotation={[-0.16, 0.12, 0]} scale={sceneScale}>
           {moduleId === "hybrid-orbitals-sp" ? (
@@ -243,7 +246,7 @@ function SceneLabel({ position, text, color }: { position: Vec3; text: string; c
   return (
     <Html center distanceFactor={6.5} pointerEvents="none" position={position}>
       <span
-        className="whitespace-nowrap rounded-full bg-white/90 px-2 py-1 text-center text-[10px] font-semibold leading-tight shadow-sm drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)] sm:px-3 sm:py-1.5 sm:text-xs"
+        className={teachingSceneLabelClass}
         style={{ color }}
       >
         {text}

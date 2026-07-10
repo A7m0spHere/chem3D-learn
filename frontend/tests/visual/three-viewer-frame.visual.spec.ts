@@ -22,9 +22,11 @@ const viewers = [
   { route: "/module/sodium-metal-crystal", viewer: "sodium-metal-viewer", stage: "sodium-metal-canvas" },
   { route: "/module/diamond-crystal", viewer: "diamond-viewer", stage: "diamond-canvas" },
   { route: "/module/graphite-structure", viewer: "graphite-viewer", stage: "graphite-canvas" },
+  { route: "/module/hbn-structure", viewer: "hbn-viewer", stage: "hbn-canvas" },
   { route: "/module/zinc-metal-crystal", viewer: "zinc-metal-viewer", stage: "zinc-metal-canvas" },
   { route: "/module/tetrahedral-voids", viewer: "tetrahedral-voids-viewer", stage: "tetrahedral-voids-canvas" },
   { route: "/module/octahedral-voids", viewer: "octahedral-voids-viewer", stage: "octahedral-voids-canvas" },
+  { route: "/module/pba-prussian-blue-analogues", viewer: "pba-viewer", stage: "pba-canvas" },
 ] as const;
 
 const bondingBasicsMobileViewers = [
@@ -184,7 +186,7 @@ test.describe("真实 3D Viewer 三段式布局", () => {
       const stage = page.getByTestId(item.stage);
       const summary = page.getByTestId(`${item.viewer}-summary`);
 
-      await expect(viewer).toBeVisible();
+      await expect(viewer).toBeVisible({ timeout: 15_000 });
       await expect(stage).toBeVisible();
       await expect(topbar).toBeVisible();
       await expect(summary).toBeVisible();

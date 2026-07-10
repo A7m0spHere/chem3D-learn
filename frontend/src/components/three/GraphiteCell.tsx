@@ -24,8 +24,13 @@ type GraphiteCellProps = {
   loading?: boolean;
 };
 
-const focusAtomIds = new Set(["c-a1-1", "c-a1-2", "c-a1-6", "c-a2-1"]);
-const focusBondIds = new Set(["a1-1-2", "a1-6-1", "a-1-a2-1"]);
+type Layer = "upper" | "lower";
+
+type FocusState = {
+  atomIds: Set<string>;
+  bondIds: Set<string>;
+  centerAtomId?: string;
+};
 
 const defaultGraphiteInterlayerForces: InterlayerForce[] = [
   {
@@ -63,20 +68,24 @@ export function GraphiteCell({
     [molecule.atoms],
   );
   const upperAtoms = useMemo(
-    () => molecule.atoms.filter((atom) => atom.id.startsWith("c-a")),
+    () => molecule.atoms.filter((atom) => getAtomLayer(atom.id) === "upper"),
     [molecule.atoms],
   );
   const lowerAtoms = useMemo(
-    () => molecule.atoms.filter((atom) => atom.id.startsWith("c-b")),
+    () => molecule.atoms.filter((atom) => getAtomLayer(atom.id) === "lower"),
     [molecule.atoms],
   );
   const upperBonds = useMemo(
-    () => molecule.bonds.filter((bond) => bond.atomIds.every((atomId) => atomId.startsWith("c-a"))),
+    () => molecule.bonds.filter((bond) => bond.atomIds.every((atomId) => getAtomLayer(atomId) === "upper")),
     [molecule.bonds],
   );
   const lowerBonds = useMemo(
-    () => molecule.bonds.filter((bond) => bond.atomIds.every((atomId) => atomId.startsWith("c-b"))),
+    () => molecule.bonds.filter((bond) => bond.atomIds.every((atomId) => getAtomLayer(atomId) === "lower")),
     [molecule.bonds],
+  );
+  const focusState = useMemo(
+    () => createFocusState(upperAtoms, upperBonds),
+    [upperAtoms, upperBonds],
   );
   const interlayerForces =
     molecule.interlayerForces && molecule.interlayerForces.length > 0
@@ -86,66 +95,72 @@ export function GraphiteCell({
   const cameraPosition = molecule.rendering?.cameraPosition ?? [3.2, 2.35, 3.7];
   const cameraFov = molecule.rendering?.cameraFov ?? 39;
   const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const hasPiElectronMode = Boolean(molecule.crystalTeaching?.viewModes.some((mode) => mode.id === "piElectron"));
   const showLayerPlanes = viewMode === "layer" || viewMode === "comparison" || viewMode === "interlayerForce";
   const showInterlayer = viewMode === "interlayerForce";
   const showPiCloud = viewMode === "piElectron";
+  const upperLayerY = averageAtomY(upperAtoms, 0.28);
+  const lowerLayerY = averageAtomY(lowerAtoms, -0.46);
 
   return (
     <ThreeViewerFrame
-      footerMeta={<GraphiteLegend />}
+      footerMeta={<LayeredHexLegend molecule={molecule} showPiCloudLegend={hasPiElectronMode} />}
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}
       summary={activeMode?.bodyZh ?? molecule.summaryZh}
-      title={`${molecule.formula}｜${activeMode?.titleZh ?? "平行碳层堆叠"}`}
+      title={`${molecule.formula}｜${activeMode?.titleZh ?? "平行层状结构"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas
-          camera={{ position: cameraPosition, fov: cameraFov }}
-          frameloop={showInterlayer || showPiCloud ? "always" : "demand"}
-          style={{ height: "100%", width: "100%" }}
-        >
-          <SceneLighting ambient={0.74} mainIntensity={1.36} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
-          <group position={[-0.08, 0.28, 0]} rotation={[0.18, -0.46, 0]} scale={1.15}>
-            {showLayerPlanes ? <LayerPlane y={0.28} tone="upper" /> : null}
-            {showLayerPlanes ? <LayerPlane y={-0.46} tone="lower" /> : null}
-            {showPiCloud ? <PiElectronCloud /> : null}
-            {showInterlayer ? (
-              <InterlayerForceBand
-                forces={interlayerForces}
-                lowerAtoms={lowerAtoms}
-                upperAtoms={upperAtoms}
-              />
-            ) : null}
+      <Canvas
+        camera={{ position: cameraPosition, fov: cameraFov }}
+        frameloop={showInterlayer || showPiCloud ? "always" : "demand"}
+        gl={{ alpha: false }}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <color attach="background" args={["#F7FAF9"]} />
+        <SceneLighting ambient={0.74} mainIntensity={1.36} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
+        <group position={[-0.08, 0.28, 0]} rotation={[0.18, -0.46, 0]} scale={1.15}>
+          {showLayerPlanes ? <LayerPlane y={upperLayerY} tone="upper" /> : null}
+          {showLayerPlanes ? <LayerPlane y={lowerLayerY} tone="lower" /> : null}
+          {showPiCloud ? <PiElectronCloud /> : null}
+          {showInterlayer ? (
+            <InterlayerForceBand
+              forces={interlayerForces}
+              lowerAtoms={lowerAtoms}
+              upperAtoms={upperAtoms}
+            />
+          ) : null}
 
-            <AnimatedUpperLayer active={viewMode === "interlayerForce"}>
-              <CarbonLayer
-                atoms={upperAtoms}
-                atomsById={atomsById}
-                bonds={upperBonds}
-                layer="upper"
-                showLabels={showLabels}
-                viewMode={viewMode}
-              />
-            </AnimatedUpperLayer>
-            <CarbonLayer
-              atoms={lowerAtoms}
+          <AnimatedUpperLayer active={viewMode === "interlayerForce"}>
+            <LayeredHexLayer
+              atoms={upperAtoms}
               atomsById={atomsById}
-              bonds={lowerBonds}
-              layer="lower"
+              bonds={upperBonds}
+              focusState={focusState}
+              layer="upper"
               showLabels={showLabels}
               viewMode={viewMode}
             />
-
-          </group>
-          <OrbitControls
-            enableDamping
-            enablePan={false}
-            maxDistance={6.2}
-            minDistance={1.9}
-            target={[0, -0.02, 0]}
+          </AnimatedUpperLayer>
+          <LayeredHexLayer
+            atoms={lowerAtoms}
+            atomsById={atomsById}
+            bonds={lowerBonds}
+            focusState={focusState}
+            layer="lower"
+            showLabels={showLabels}
+            viewMode={viewMode}
           />
-        </Canvas>
+        </group>
+        <OrbitControls
+          enableDamping
+          enablePan={false}
+          maxDistance={6.2}
+          minDistance={1.9}
+          target={[0, -0.02, 0]}
+        />
+      </Canvas>
     </ThreeViewerFrame>
   );
 }
@@ -169,10 +184,11 @@ function AnimatedUpperLayer({
   return <group ref={groupRef}>{children}</group>;
 }
 
-function CarbonLayer({
+function LayeredHexLayer({
   atoms,
   atomsById,
   bonds,
+  focusState,
   layer,
   showLabels,
   viewMode,
@@ -180,24 +196,27 @@ function CarbonLayer({
   atoms: Atom[];
   atomsById: Map<string, Atom>;
   bonds: Bond[];
-  layer: "upper" | "lower";
+  focusState: FocusState;
+  layer: Layer;
   showLabels: boolean;
   viewMode: CrystalViewMode;
 }) {
   return (
     <>
       {bonds.map((bond) => (
-        <CarbonBond
+        <LayeredHexBond
           atomsById={atomsById}
           bond={bond}
+          focusState={focusState}
           key={bond.id}
           layer={layer}
           viewMode={viewMode}
         />
       ))}
       {atoms.map((atom) => (
-        <CarbonAtom
+        <LayeredHexAtom
           atom={atom}
+          focusState={focusState}
           key={atom.id}
           layer={layer}
           showLabel={showLabels}
@@ -208,18 +227,21 @@ function CarbonLayer({
   );
 }
 
-type CarbonAtomProps = {
+type LayeredHexAtomProps = {
   atom: Atom;
-  layer: "upper" | "lower";
+  focusState: FocusState;
+  layer: Layer;
   viewMode: CrystalViewMode;
   showLabel: boolean;
 };
 
-function CarbonAtom({ atom, layer, viewMode, showLabel }: CarbonAtomProps) {
+function LayeredHexAtom({ atom, focusState, layer, viewMode, showLabel }: LayeredHexAtomProps) {
   const radius = atom.radius ?? 0.075;
+  const atomColor = atom.color ?? getFallbackAtomColor(atom.element);
+  const elementText = getElementText(atom);
   const isFocusMode = viewMode === "inPlaneBond";
-  const isFocusAtom = focusAtomIds.has(atom.id);
-  const isCenterAtom = atom.id === "c-a1-1";
+  const isFocusAtom = focusState.atomIds.has(atom.id);
+  const isCenterAtom = focusState.centerAtomId === atom.id;
   const isLower = layer === "lower";
   const scale = isFocusMode
     ? isCenterAtom
@@ -251,28 +273,19 @@ function CarbonAtom({ atom, layer, viewMode, showLabel }: CarbonAtomProps) {
       ? "#2A9D8F"
       : "#000000";
   const emissiveIntensity = isFocusMode && isFocusAtom ? 0.24 : viewMode === "piElectron" && layer === "upper" ? 0.1 : 0;
-  const shouldShowLabel =
-    showLabel &&
-    (isCenterAtom ||
-      atom.id === "c-a1-2" ||
-      atom.id === "c-a1-6" ||
-      atom.id === "c-a2-1" ||
-      atom.id === "c-b1-1" ||
-      viewMode === "inPlaneBond");
+  const shouldShowLabel = showLabel && (isCenterAtom || isFocusAtom || viewMode === "inPlaneBond");
   const labelText = isCenterAtom
-    ? "中心 C · sp²"
+    ? `中心 ${elementText} · sp²`
     : isFocusAtom
-      ? "相邻 C"
-      : layer === "upper"
-        ? "C · 上层"
-        : "C · 下层";
+      ? `相邻 ${elementText}`
+      : `${elementText} · ${layer === "upper" ? "上层" : "下层"}`;
 
   return (
     <group position={atom.position}>
       <mesh scale={scale}>
         <sphereGeometry args={[radius, 32, 32]} />
         <meshStandardMaterial
-          color={atom.color}
+          color={atomColor}
           emissive={emissive}
           emissiveIntensity={emissiveIntensity}
           metalness={0.08}
@@ -298,22 +311,24 @@ function CarbonAtom({ atom, layer, viewMode, showLabel }: CarbonAtomProps) {
   );
 }
 
-type CarbonBondProps = {
+type LayeredHexBondProps = {
   atomsById: Map<string, Atom>;
   bond: Bond;
-  layer: "upper" | "lower";
+  focusState: FocusState;
+  layer: Layer;
   viewMode: CrystalViewMode;
 };
 
-function CarbonBond({ atomsById, bond, layer, viewMode }: CarbonBondProps) {
+function LayeredHexBond({ atomsById, bond, focusState, layer, viewMode }: LayeredHexBondProps) {
   const startAtom = atomsById.get(bond.atomIds[0]);
   const endAtom = atomsById.get(bond.atomIds[1]);
 
   if (!startAtom || !endAtom) return null;
 
   const isFocusMode = viewMode === "inPlaneBond";
-  const isFocusBond = focusBondIds.has(bond.id);
+  const isFocusBond = focusState.bondIds.has(bond.id);
   const isLower = layer === "lower";
+  const baseColor = startAtom.element === endAtom.element ? "#4B5563" : "#64748B";
   const opacity = isFocusMode
     ? isFocusBond
       ? 0.96
@@ -325,7 +340,7 @@ function CarbonBond({ atomsById, bond, layer, viewMode }: CarbonBondProps) {
       : viewMode === "comparison" && isLower
         ? 0.5
         : 0.72;
-  const color = isFocusMode && isFocusBond ? "#2A9D8F" : "#4B5563";
+  const color = isFocusMode && isFocusBond ? "#2A9D8F" : baseColor;
   const radius = isFocusMode && isFocusBond ? 0.013 : viewMode === "interlayerForce" ? 0.0045 : 0.007;
 
   return (
@@ -339,7 +354,7 @@ function CarbonBond({ atomsById, bond, layer, viewMode }: CarbonBondProps) {
   );
 }
 
-function LayerPlane({ y, tone }: { y: number; tone: "upper" | "lower" }) {
+function LayerPlane({ y, tone }: { y: number; tone: Layer }) {
   return (
     <mesh position={[0.12, y - 0.012, 0.08]} rotation={[Math.PI / 2, 0, 0]}>
       <planeGeometry args={[3.35, 1.72]} />
@@ -363,9 +378,7 @@ function InterlayerForceBand({
   upperAtoms: Atom[];
 }) {
   const interlayerY = useMemo(() => {
-    const averageY = (atoms: Atom[]) =>
-      atoms.reduce((sum, atom) => sum + atom.position[1], 0) / Math.max(atoms.length, 1);
-    return (averageY(upperAtoms) + averageY(lowerAtoms)) / 2;
+    return (averageAtomY(upperAtoms, 0.28) + averageAtomY(lowerAtoms, -0.46)) / 2;
   }, [lowerAtoms, upperAtoms]);
 
   return (
@@ -448,18 +461,40 @@ function PiElectronParticle({ offset }: { offset: number }) {
   );
 }
 
-function GraphiteLegend() {
+function LayeredHexLegend({
+  molecule,
+  showPiCloudLegend,
+}: {
+  molecule: MoleculeRecord;
+  showPiCloudLegend: boolean;
+}) {
+  const atomLegendItems = getDistinctLegendAtoms(molecule.atoms);
+  const bondLabel = buildBondLegendLabel(atomLegendItems);
+
   return (
     <div className="pointer-events-none hidden items-center gap-3 text-[11px] text-text-secondary xl:flex">
       <span className="font-semibold text-text-primary">图例</span>
       <div className="flex items-center gap-3">
-        <LegendItem marker={<span className="h-3 w-3 rounded-full bg-[#374151]" />} label="C 原子" />
-        <LegendItem marker={<span className="h-0.5 w-5 rounded-full bg-[#4B5563]" />} label="层内 C-C 共价键" />
+        {atomLegendItems.map((atom) => (
+          <LegendItem
+            key={atom.element}
+            marker={
+              <span
+                className="h-3 w-3 rounded-full ring-1 ring-black/10"
+                style={{ backgroundColor: atom.color ?? getFallbackAtomColor(atom.element) }}
+              />
+            }
+            label={`${getElementText(atom)} 原子`}
+          />
+        ))}
+        <LegendItem marker={<span className="h-0.5 w-5 rounded-full bg-[#4B5563]" />} label={bondLabel} />
         <LegendItem
           marker={<span className="h-0.5 w-5 border-t border-dashed border-[#64748B]" />}
-          label="蓝灰虚线带：层间范德华力示意"
+          label="蓝灰虚线带：层间弱相互作用示意"
         />
-        <LegendItem marker={<span className="h-3 w-5 rounded-full bg-primary/20 ring-1 ring-primary/30" />} label="π 电子云" />
+        {showPiCloudLegend ? (
+          <LegendItem marker={<span className="h-3 w-5 rounded-full bg-primary/20 ring-1 ring-primary/30" />} label="π 电子云" />
+        ) : null}
       </div>
     </div>
   );
@@ -542,4 +577,72 @@ function StaticCylinder({
   return (
     <StickCylinder color={color} depthWrite={depthWrite} end={end} opacity={opacity} radius={radius} start={start} />
   );
+}
+
+function getAtomLayer(atomId: string): Layer | null {
+  if (/-a\d+-/.test(atomId)) return "upper";
+  if (/-b\d+-/.test(atomId)) return "lower";
+  return null;
+}
+
+function createFocusState(upperAtoms: Atom[], upperBonds: Bond[]): FocusState {
+  const centerAtom = upperAtoms.find((atom) => atom.id.endsWith("-a1-1")) ?? upperAtoms[0];
+  const atomIds = new Set<string>();
+  const bondIds = new Set<string>();
+
+  if (!centerAtom) {
+    return { atomIds, bondIds };
+  }
+
+  atomIds.add(centerAtom.id);
+  upperBonds
+    .filter((bond) => bond.atomIds.includes(centerAtom.id))
+    .slice(0, 3)
+    .forEach((bond) => {
+      bondIds.add(bond.id);
+      bond.atomIds.forEach((atomId) => atomIds.add(atomId));
+    });
+
+  return {
+    atomIds,
+    bondIds,
+    centerAtomId: centerAtom.id,
+  };
+}
+
+function averageAtomY(atoms: Atom[], fallback: number) {
+  if (atoms.length === 0) return fallback;
+  return atoms.reduce((sum, atom) => sum + atom.position[1], 0) / atoms.length;
+}
+
+function getElementText(atom: Atom) {
+  return atom.label || atom.element;
+}
+
+function getFallbackAtomColor(element: string) {
+  if (element === "B") return "#F4A261";
+  if (element === "N") return "#2563EB";
+  if (element === "C") return "#374151";
+  return "#64748B";
+}
+
+function getDistinctLegendAtoms(atoms: Atom[]) {
+  const seen = new Set<string>();
+  const legendAtoms: Atom[] = [];
+
+  atoms.forEach((atom) => {
+    if (seen.has(atom.element)) return;
+    seen.add(atom.element);
+    legendAtoms.push(atom);
+  });
+
+  return legendAtoms;
+}
+
+function buildBondLegendLabel(atoms: Atom[]) {
+  const elementTexts = atoms.map(getElementText);
+
+  if (elementTexts.length === 0) return "层内共价键";
+  if (elementTexts.length === 1) return `层内 ${elementTexts[0]}-${elementTexts[0]} 共价键`;
+  return `层内 ${elementTexts.join("-")} 共价键`;
 }

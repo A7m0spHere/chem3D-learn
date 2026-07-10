@@ -78,7 +78,8 @@ export function EthylenePlanarCell({
     >
         <Canvas
           camera={{ position: cameraPosition, fov: mode === "plane" && planeView === "side" ? 36 : 42 }}
-            frameloop="demand"
+          frameloop="demand"
+          gl={{ alpha: false }}
           style={{ height: "100%", width: "100%" }}
         >
           <CameraRig
@@ -86,6 +87,7 @@ export function EthylenePlanarCell({
             position={cameraPosition}
             resetKey={`${mode}-${planeView}`}
           />
+          <color attach="background" args={["#F7FAF9"]} />
           <SceneLighting ambient={0.68} mainIntensity={1.35} mainPosition={[3.4, 4.6, 4.2]} secondaryIntensity={0.32} secondaryPosition={[-3.2, -2.4, 2.6]} />
           <group rotation={getSceneRotation(mode, planeView)} scale={1.02}>
             <ReferenceGeometry mode={mode} planeView={planeView} />
@@ -272,8 +274,12 @@ function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
         length={0.84}
         opacity={0.38}
         orientation="xy"
+        particleCount={240}
+        particleOpacity={0.44}
+        particleSize={0.021}
         phaseTone="same"
         seed={center[2] > 0 ? 307 : 317}
+        showParticles
         thickness={0.15}
         tone={tone}
         waist={0.34}

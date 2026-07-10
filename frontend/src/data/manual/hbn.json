@@ -1,0 +1,181 @@
+{
+  "id": "hbn",
+  "kind": "crystal",
+  "formula": "BN",
+  "names": {
+    "zh": "六方氮化硼",
+    "en": "Hexagonal boron nitride"
+  },
+  "nameZh": "h-BN 六方氮化硼",
+  "category": "crystal",
+  "summaryZh": "h-BN 是与石墨相似的层状六方晶体，但每一层由 B 和 N 原子交替排列形成 B-N 共价键。层间主要是较弱相互作用，通常不表现出石墨那样的良好导电性。",
+  "atoms": [
+    { "id": "b-a1-1", "element": "B", "label": "B", "position": [0.72, 0.28, 0], "radius": 0.086, "color": "#F4A261" },
+    { "id": "n-a1-2", "element": "N", "label": "N", "position": [0.36, 0.28, 0.624], "radius": 0.078, "color": "#2563EB" },
+    { "id": "b-a1-3", "element": "B", "label": "B", "position": [-0.36, 0.28, 0.624], "radius": 0.086, "color": "#F4A261" },
+    { "id": "n-a1-4", "element": "N", "label": "N", "position": [-0.72, 0.28, 0], "radius": 0.078, "color": "#2563EB" },
+    { "id": "b-a1-5", "element": "B", "label": "B", "position": [-0.36, 0.28, -0.624], "radius": 0.086, "color": "#F4A261" },
+    { "id": "n-a1-6", "element": "N", "label": "N", "position": [0.36, 0.28, -0.624], "radius": 0.078, "color": "#2563EB" },
+    { "id": "n-a2-1", "element": "N", "label": "N", "position": [1.44, 0.28, 0], "radius": 0.078, "color": "#2563EB" },
+    { "id": "b-a2-2", "element": "B", "label": "B", "position": [1.08, 0.28, 0.624], "radius": 0.086, "color": "#F4A261" },
+    { "id": "b-a2-6", "element": "B", "label": "B", "position": [1.08, 0.28, -0.624], "radius": 0.086, "color": "#F4A261" },
+    { "id": "n-a3-3", "element": "N", "label": "N", "position": [-1.08, 0.28, 0.624], "radius": 0.078, "color": "#2563EB" },
+    { "id": "b-a3-4", "element": "B", "label": "B", "position": [-1.44, 0.28, 0], "radius": 0.086, "color": "#F4A261" },
+    { "id": "n-a3-5", "element": "N", "label": "N", "position": [-1.08, 0.28, -0.624], "radius": 0.078, "color": "#2563EB" },
+
+    { "id": "n-b1-1", "element": "N", "label": "N", "position": [0.72, -0.46, 0], "radius": 0.078, "color": "#1D4ED8" },
+    { "id": "b-b1-2", "element": "B", "label": "B", "position": [0.36, -0.46, 0.624], "radius": 0.086, "color": "#E9A54F" },
+    { "id": "n-b1-3", "element": "N", "label": "N", "position": [-0.36, -0.46, 0.624], "radius": 0.078, "color": "#1D4ED8" },
+    { "id": "b-b1-4", "element": "B", "label": "B", "position": [-0.72, -0.46, 0], "radius": 0.086, "color": "#E9A54F" },
+    { "id": "n-b1-5", "element": "N", "label": "N", "position": [-0.36, -0.46, -0.624], "radius": 0.078, "color": "#1D4ED8" },
+    { "id": "b-b1-6", "element": "B", "label": "B", "position": [0.36, -0.46, -0.624], "radius": 0.086, "color": "#E9A54F" },
+    { "id": "b-b2-1", "element": "B", "label": "B", "position": [1.44, -0.46, 0], "radius": 0.086, "color": "#E9A54F" },
+    { "id": "n-b2-2", "element": "N", "label": "N", "position": [1.08, -0.46, 0.624], "radius": 0.078, "color": "#1D4ED8" },
+    { "id": "n-b2-6", "element": "N", "label": "N", "position": [1.08, -0.46, -0.624], "radius": 0.078, "color": "#1D4ED8" },
+    { "id": "b-b3-3", "element": "B", "label": "B", "position": [-1.08, -0.46, 0.624], "radius": 0.086, "color": "#E9A54F" },
+    { "id": "n-b3-4", "element": "N", "label": "N", "position": [-1.44, -0.46, 0], "radius": 0.078, "color": "#1D4ED8" },
+    { "id": "b-b3-5", "element": "B", "label": "B", "position": [-1.08, -0.46, -0.624], "radius": 0.086, "color": "#E9A54F" }
+  ],
+  "bonds": [
+    { "id": "a1-1-2", "atomIds": ["b-a1-1", "n-a1-2"], "order": 1, "kind": "single" },
+    { "id": "a1-2-3", "atomIds": ["n-a1-2", "b-a1-3"], "order": 1, "kind": "single" },
+    { "id": "a1-3-4", "atomIds": ["b-a1-3", "n-a1-4"], "order": 1, "kind": "single" },
+    { "id": "a1-4-5", "atomIds": ["n-a1-4", "b-a1-5"], "order": 1, "kind": "single" },
+    { "id": "a1-5-6", "atomIds": ["b-a1-5", "n-a1-6"], "order": 1, "kind": "single" },
+    { "id": "a1-6-1", "atomIds": ["n-a1-6", "b-a1-1"], "order": 1, "kind": "single" },
+    { "id": "a-1-a2-1", "atomIds": ["b-a1-1", "n-a2-1"], "order": 1, "kind": "single" },
+    { "id": "a-2-a2-2", "atomIds": ["n-a1-2", "b-a2-2"], "order": 1, "kind": "single" },
+    { "id": "a2-1-2", "atomIds": ["n-a2-1", "b-a2-2"], "order": 1, "kind": "single" },
+    { "id": "a2-6-1", "atomIds": ["b-a2-6", "n-a2-1"], "order": 1, "kind": "single" },
+    { "id": "a-6-a2-6", "atomIds": ["n-a1-6", "b-a2-6"], "order": 1, "kind": "single" },
+    { "id": "a-3-a3-3", "atomIds": ["b-a1-3", "n-a3-3"], "order": 1, "kind": "single" },
+    { "id": "a3-3-4", "atomIds": ["n-a3-3", "b-a3-4"], "order": 1, "kind": "single" },
+    { "id": "a3-4-5", "atomIds": ["b-a3-4", "n-a3-5"], "order": 1, "kind": "single" },
+    { "id": "a-4-a3-4", "atomIds": ["n-a1-4", "b-a3-4"], "order": 1, "kind": "single" },
+    { "id": "a-5-a3-5", "atomIds": ["b-a1-5", "n-a3-5"], "order": 1, "kind": "single" },
+
+    { "id": "b1-1-2", "atomIds": ["n-b1-1", "b-b1-2"], "order": 1, "kind": "single" },
+    { "id": "b1-2-3", "atomIds": ["b-b1-2", "n-b1-3"], "order": 1, "kind": "single" },
+    { "id": "b1-3-4", "atomIds": ["n-b1-3", "b-b1-4"], "order": 1, "kind": "single" },
+    { "id": "b1-4-5", "atomIds": ["b-b1-4", "n-b1-5"], "order": 1, "kind": "single" },
+    { "id": "b1-5-6", "atomIds": ["n-b1-5", "b-b1-6"], "order": 1, "kind": "single" },
+    { "id": "b1-6-1", "atomIds": ["b-b1-6", "n-b1-1"], "order": 1, "kind": "single" },
+    { "id": "b-1-b2-1", "atomIds": ["n-b1-1", "b-b2-1"], "order": 1, "kind": "single" },
+    { "id": "b-2-b2-2", "atomIds": ["b-b1-2", "n-b2-2"], "order": 1, "kind": "single" },
+    { "id": "b2-1-2", "atomIds": ["b-b2-1", "n-b2-2"], "order": 1, "kind": "single" },
+    { "id": "b2-6-1", "atomIds": ["n-b2-6", "b-b2-1"], "order": 1, "kind": "single" },
+    { "id": "b-6-b2-6", "atomIds": ["b-b1-6", "n-b2-6"], "order": 1, "kind": "single" },
+    { "id": "b-3-b3-3", "atomIds": ["n-b1-3", "b-b3-3"], "order": 1, "kind": "single" },
+    { "id": "b3-3-4", "atomIds": ["b-b3-3", "n-b3-4"], "order": 1, "kind": "single" },
+    { "id": "b3-4-5", "atomIds": ["n-b3-4", "b-b3-5"], "order": 1, "kind": "single" },
+    { "id": "b-4-b3-4", "atomIds": ["b-b1-4", "n-b3-4"], "order": 1, "kind": "single" },
+    { "id": "b-5-b3-5", "atomIds": ["n-b1-5", "b-b3-5"], "order": 1, "kind": "single" }
+  ],
+  "interlayerForces": [
+    { "id": "hbn-vdw-1", "start": [-1.18, 0, -0.48], "end": [1.16, 0, -0.36], "kind": "vanDerWaals", "labelZh": "层间弱相互作用" },
+    { "id": "hbn-vdw-2", "start": [-1.0, 0, 0.02], "end": [1.32, 0, 0.14], "kind": "vanDerWaals", "labelZh": "层间弱相互作用" },
+    { "id": "hbn-vdw-3", "start": [-0.82, 0, 0.52], "end": [1.0, 0, 0.62], "kind": "vanDerWaals", "labelZh": "层间弱相互作用" }
+  ],
+  "lonePairs": [],
+  "keyAngles": [
+    {
+      "id": "n-b-n-120",
+      "atomIds": ["n-a1-2", "b-a1-1", "n-a1-6"],
+      "valueDeg": 120,
+      "label": "120°",
+      "descriptionZh": "h-BN 层内 B 和 N 交替排列，局部近似平面三角环境，N-B-N 键角约为 120°。"
+    }
+  ],
+  "lessonSteps": [],
+  "rendering": {
+    "cameraPosition": [3.2, 2.35, 3.7],
+    "cameraFov": 39,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "Hand-authored teaching model; structure facts summarized from boron nitride references.",
+    "notesZh": "用于说明 h-BN 的 B/N 交替六方层状结构、层内 B-N 共价键、层间弱相互作用，以及与石墨导电性的差异。坐标为教学示意，不表示真实晶格参数。",
+    "verified": true
+  },
+  "crystalTeaching": {
+    "structureTypeZh": "层状共价晶体",
+    "modelZh": "h-BN 层状教学模型",
+    "coordinationNumberZh": "层内每个 B 与 3 个 N 相连，每个 N 与 3 个 B 相连",
+    "spatialFeatureZh": "平面六元环中 B/N 交替排列，层与层近似平行堆叠",
+    "unitCellDescriptionZh": "本模型展示上下两层 h-BN 片段。每层内 B 与 N 原子交替形成六方网络，下层用 B/N 对调的 AA' 教学堆叠帮助观察不同元素的上下对应关系。",
+    "particleCountZh": {
+      "lines": ["层内 B 与 N 交替排列", "每个六元环包含 3 个 B 与 3 个 N", "整体化学式按 B : N = 1 : 1 表示为 BN"],
+      "ratio": "h-BN 的基本组成比例：B : N = 1 : 1。"
+    },
+    "coordinationDescriptionZh": [
+      "每个 B 周围连接 3 个 N，每个 N 周围连接 3 个 B。",
+      "层内 B-N 键具有明显极性，但仍形成连续的平面六方网络。",
+      "层间主要是较弱相互作用，适合与石墨的层间范德华力类比。",
+      "与石墨不同，h-BN 通常为绝缘材料，不能把它简单等同于导电石墨。"
+    ],
+    "commonMistakesZh": [
+      "不要把 h-BN 画成一整层全是同一种原子，B 和 N 必须交替出现。",
+      "层间虚线只表示较弱相互作用，不是普通 B-N 共价键。",
+      "h-BN 结构像石墨，但通常不具有石墨那样的导电性。",
+      "本模型是课堂示意，不用于真实晶格参数或能带数值计算。"
+    ],
+    "observationGuide": {
+      "titleZh": "课堂观察顺序",
+      "subtitleZh": "投影时按结构层次从整体到对比推进。",
+      "steps": [
+        {
+          "labelZh": "六元环",
+          "titleZh": "先看 B/N 交替六元环",
+          "bodyZh": "让学生先说出同一层里 B 和 N 是否交替出现，不把它看成一层全同种原子的石墨。",
+          "modeId": "layer"
+        },
+        {
+          "labelZh": "层内键",
+          "titleZh": "再看层内 B-N 共价键",
+          "bodyZh": "切到 B-N 共价键模式，强调每个 B 连 3 个 N、每个 N 连 3 个 B，局部近似平面三角形，键角约 120°。",
+          "modeId": "inPlaneBond"
+        },
+        {
+          "labelZh": "层间力",
+          "titleZh": "接着区分层间弱相互作用",
+          "bodyZh": "观察层间虚线，只把它当作层间弱相互作用示意，不当作普通 B-N 共价键。",
+          "modeId": "interlayerForce"
+        },
+        {
+          "labelZh": "对比",
+          "titleZh": "最后对比石墨",
+          "bodyZh": "引导学生说出二者都有六方层状骨架，但 h-BN 由 B/N 交替组成，通常绝缘；石墨可沿层内导电。",
+          "modeId": "comparison"
+        }
+      ],
+      "teacherPromptZh": "追问：如果把图中 B 和 N 全部改成 C，结构和导电性判断会发生什么变化？"
+    },
+    "viewModes": [
+      {
+        "id": "layer",
+        "labelZh": "层状结构",
+        "titleZh": "B/N 交替层状结构",
+        "bodyZh": "先看整体：h-BN 与石墨一样由平行层堆叠，但同一层中不是全 C 原子，而是 B 与 N 原子交替构成六元环。"
+      },
+      {
+        "id": "inPlaneBond",
+        "labelZh": "B-N 共价键",
+        "titleZh": "层内 B-N 共价键",
+        "bodyZh": "同一层内，每个 B 原子连接 3 个 N 原子，每个 N 原子连接 3 个 B 原子，形成近似 120° 的平面六方网络。"
+      },
+      {
+        "id": "interlayerForce",
+        "labelZh": "层间作用力",
+        "titleZh": "层间弱相互作用",
+        "bodyZh": "层间虚线表示较弱相互作用。与石墨一样，层与层之间不是普通共价键，但 B/N 交替会带来不同的上下层对应方式。"
+      },
+      {
+        "id": "comparison",
+        "labelZh": "对比石墨",
+        "titleZh": "像石墨，但不是石墨",
+        "bodyZh": "h-BN 常被称作白石墨：它有类似石墨的六方层状骨架，但由 B/N 两种元素交替组成，通常表现为绝缘材料。"
+      }
+    ]
+  }
+}

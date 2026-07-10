@@ -27,6 +27,9 @@ const VoidStructureCell = lazy(() =>
 const GraphiteCell = lazy(() =>
   import("@/components/three/GraphiteCell").then((m) => ({ default: m.GraphiteCell })),
 );
+const PbaCell = lazy(() =>
+  import("@/components/three/PbaCell").then((m) => ({ default: m.PbaCell })),
+);
 const OrganicCoplanarViewer = lazy(() =>
   import("@/components/three/OrganicCoplanarViewer").then((m) => ({ default: m.OrganicCoplanarViewer })),
 );
@@ -65,7 +68,7 @@ import { BondingBasicsPanel } from "@/components/learning/BondingBasicsPanel";
 import { BondingBasicsToolbar } from "@/components/learning/BondingBasicsToolbar";
 import { MolecularPolarityPanel } from "@/components/learning/MolecularPolarityPanel";
 import { MolecularPolarityToolbar } from "@/components/learning/MolecularPolarityToolbar";
-import { LessonPanel } from "@/components/learning/LessonPanel";
+import { ExplorerPanel } from "@/components/learning/ExplorerPanel";
 import { FloatingToolbar } from "@/components/learning/FloatingToolbar";
 
 import { getModuleById } from "@/data/learningModules";
@@ -120,6 +123,7 @@ type ViewerKind =
   | "crystal-zinc"
   | "crystal-void"
   | "crystal-graphite"
+  | "crystal-pba"
   | "molecule"
   | "placeholder";
 
@@ -174,7 +178,10 @@ function deriveViewerKind(
       case "tetrahedral-voids":
         return "crystal-void";
       case "graphite":
+      case "hbn":
         return "crystal-graphite";
+      case "pba":
+        return "crystal-pba";
       default:
         break;
     }
@@ -246,6 +253,7 @@ export function ModuleDetailPage() {
     useState<MolecularPolarityMode>("electronegativity");
   const [viewerLoading, setViewerLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [isGuidedMode, setIsGuidedMode] = useState(false);
 
   useEffect(() => {
     setActiveStepIndex(0);
@@ -281,6 +289,7 @@ export function ModuleDetailPage() {
     setMolecularPolarityMode("electronegativity");
     setViewerLoading(true);
     setCompletedSteps(new Set());
+    setIsGuidedMode(false);
     const timer = setTimeout(() => setViewerLoading(false), 300);
     return () => clearTimeout(timer);
   }, [id]);
@@ -325,6 +334,7 @@ export function ModuleDetailPage() {
     const nextStep = molecule.lessonSteps[clampedIndex];
 
     setActiveStepIndex(clampedIndex);
+    setIsGuidedMode(true);
     setCompletedSteps((prev) => {
       const next = new Set(prev);
       for (let i = 0; i < clampedIndex; i++) {
@@ -667,12 +677,28 @@ export function ModuleDetailPage() {
       toolbar: () => crystalToolbar,
       panel: () => crystalPanel,
     },
+    "crystal-pba": {
+      viewer: () =>
+        molecule ? (
+          <PbaCell
+            loading={viewerLoading}
+            modelStyle={crystalModelStyle}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            voidStage={voidStage}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
     molecule: {
       viewer: () =>
         activeStep && molecule ? (
           <MoleculeViewer
             activeStep={activeStep}
             autoRotate={autoRotate}
+            isGuidedMode={isGuidedMode}
             loading={viewerLoading}
             molecule={molecule}
             onToggleAngles={() => setShowAngles((value) => !value)}
@@ -705,14 +731,16 @@ export function ModuleDetailPage() {
       panel: () =>
         molecule ? (
           <div className="flex-1 min-h-[400px]">
-            <LessonPanel
+            <ExplorerPanel
               activeStep={activeStep!}
               molecule={molecule}
               lessonSteps={molecule.lessonSteps}
               activeStepIndex={activeStepIndex}
               completedStepIndices={completedSteps}
+              isGuidedMode={isGuidedMode}
               onPrevious={() => goToStep(activeStepIndex - 1)}
               onNext={() => goToStep(activeStepIndex + 1)}
+              onSelectStep={goToStep}
             />
           </div>
         ) : null,
@@ -755,8 +783,8 @@ export function ModuleDetailPage() {
   return (
     <main className="motion-page-enter bg-background min-h-screen pb-20">
       {/* 1. 顶部信息区 */}
-      <div className="border-b border-white/40 bg-gradient-to-b from-primary/5 to-transparent backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="border-b border-border bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           <nav className="flex items-center text-sm font-medium text-text-secondary/80 mb-4">
             <Link to="/" className="hover:text-primary transition-colors"><Home className="h-4 w-4" /></Link>
             <ChevronRight className="h-4 w-4 mx-2" />
@@ -786,7 +814,7 @@ export function ModuleDetailPage() {
               <p className="mt-2 text-lg text-text-secondary">{moduleData.subtitle}</p>
             </div>
             {moduleData.formula && (
-              <div className="text-5xl font-black text-primary/20 select-none">
+              <div className="text-5xl font-black text-primary/15 select-none">
                 {moduleData.formula}
               </div>
             )}
@@ -795,32 +823,32 @@ export function ModuleDetailPage() {
       </div>
 
       {/* 2. 主体学习区 */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-[1fr_450px]">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
 
           {/* 左侧：3D Viewer */}
-          <div className="lg:col-span-2 xl:col-span-1 flex flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-3">
             <div
-              className={`relative flex min-h-[430px] overflow-hidden rounded-2xl border border-border bg-white/70 shadow-panel backdrop-blur-xl sm:min-h-[500px] ${
+              className={`relative flex min-h-[480px] overflow-hidden rounded-2xl border border-border bg-white shadow-panel sm:min-h-[560px] ${
                 viewerKind === "sigma-bond" ||
                 viewerKind === "pi-bond" ||
                 viewerKind === "bonding-basics"
-                  ? "lg:h-[calc(100vh-280px)] lg:min-h-[500px]"
-                  : "lg:h-[calc(100vh-220px)] lg:min-h-[600px]"
+                  ? "xl:h-[calc(100vh-235px)] xl:min-h-[560px]"
+                  : "xl:h-[calc(100vh-205px)] xl:min-h-[640px]"
               }`}
             >
               <Suspense fallback={<ViewerChunkFallback />}>{spec.viewer()}</Suspense>
             </div>
 
             {/* 独立操作台 (Control Console) */}
-            <div className="w-full flex justify-center">
-              <div className="max-w-full overflow-x-auto no-scrollbar pb-2">{spec.toolbar()}</div>
+            <div className="w-full rounded-xl border border-border bg-white px-3 py-2 shadow-sm">
+              <div className="max-w-full overflow-x-auto pb-1">{spec.toolbar()}</div>
             </div>
           </div>
 
           {/* 右侧：知识点与步骤 */}
-          <div className="flex flex-col gap-6">
-            {/* 如果有互动步骤，展示 LessonPanel，否则展示静态说明 */}
+          <div className="flex min-w-0 flex-col gap-5 xl:sticky xl:top-[76px]">
+            {/* 普通分子提供自由探索与按需讲解；专题模块保留各自知识面板。 */}
             {spec.panel()}
           </div>
         </div>
