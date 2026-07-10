@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronRight, Home, Map, MonitorPlay, Route as RouteIcon } from "lucide-react";
+import { ArrowRight, BookOpenCheck, ChevronRight, Home, Map, Route as RouteIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,18 +8,18 @@ import {
   type LearningPath,
 } from "@/data/learningModules";
 
-const pathTeachingNotes: Record<string, { focus: string; classroom: string }> = {
+const pathTeachingNotes: Record<string, { focus: string; selfStudy: string }> = {
   "vsepr-intro": {
     focus: "先建立电子对排斥的空间直觉，再用孤对电子解释键角递变。",
-    classroom: "适合一节课从 CH4 讲到 BF3，最后用极性判断做收束。",
+    selfStudy: "适合学 VSEPR 时对照课本从 CH4 看到 BF3，最后用极性判断检验自己是否真的理解。",
   },
   "crystal-intro": {
     focus: "先练均摊计数，再观察配位数和密堆积空隙。",
-    classroom: "适合课堂投影时边旋转晶胞边数顶点、体心、面心和最近邻。",
+    selfStudy: "适合做晶胞计算题卡壳时，边旋转晶胞边亲手数顶点、体心、面心和最近邻。",
   },
   "organic-spatial": {
     focus: "从平面、直线、苯环三个母体出发，迁移到复杂有机物共线共面。",
-    classroom: "适合复习有机结构题前快速建立空间骨架判断顺序。",
+    selfStudy: "适合做共线共面题之前，先把三个基础母体转熟，再看综合模型。",
   },
 };
 
@@ -33,29 +33,29 @@ export function PathsPage() {
               <Home className="h-4 w-4" />
             </Link>
             <ChevronRight className="mx-2 h-4 w-4" />
-            <span className="text-text-primary">学习路径</span>
+            <span className="text-text-primary">参考顺序</span>
           </nav>
 
           <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-semibold text-primary-dark">
                 <RouteIcon className="h-4 w-4" aria-hidden="true" />
-                课堂串讲路线
+                自学参考顺序
               </div>
               <h1 className="mt-5 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-                按理解顺序学习结构化学
+                不知道先看哪个？按理解顺序参考
               </h1>
               <p className="mt-4 max-w-3xl text-lg leading-8 text-text-secondary">
-                把已有 3D 模块串成适合自学和课堂投影的路线。每条路径从基础模型开始，逐步过渡到对比、迁移和考试常见判断。
+                这里把常一起对照的结构按课本递进排成几条参考路线。它们不是必须完成的课程——你随时可以跳到任何一步，或者直接回结构库搜自己需要的模型。
               </p>
             </div>
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
               <div className="flex items-center gap-3 text-primary-dark">
-                <MonitorPlay className="h-5 w-5" aria-hidden="true" />
-                <h2 className="font-bold">投影使用建议</h2>
+                <BookOpenCheck className="h-5 w-5" aria-hidden="true" />
+                <h2 className="font-bold">自学建议</h2>
               </div>
               <p className="mt-3 text-sm leading-6 text-text-secondary">
-                每次只打开一个路径，按步骤进入模块。先让学生观察结构，再显示角度、标签或配位关系，最后回到路径页切换下一步。
+                结合手头的课本或题目使用：先自己观察结构、做出判断，再打开角度、标签或配位提示核对。卡在哪一步，就多转一会儿哪一步。
               </p>
             </div>
           </div>
@@ -88,9 +88,9 @@ function LearningPathSection({ path }: { path: LearningPath }) {
           <p className="mt-2 text-sm leading-6 text-text-secondary">{path.subtitle}</p>
           {note && (
             <div className="mt-5 rounded-xl border border-border bg-background p-4">
-              <div className="text-xs font-bold text-primary-dark">串讲重点</div>
+              <div className="text-xs font-bold text-primary-dark">观察重点</div>
               <p className="mt-2 text-sm leading-6 text-text-primary">{note.focus}</p>
-              <p className="mt-3 text-xs leading-5 text-text-secondary">{note.classroom}</p>
+              <p className="mt-3 text-xs leading-5 text-text-secondary">{note.selfStudy}</p>
             </div>
           )}
         </div>
@@ -127,7 +127,7 @@ function LearningPathSection({ path }: { path: LearningPath }) {
               </div>
               <Button asChild className="mt-5 w-full">
                 <Link to={module.route}>
-                  进入第 {index + 1} 步
+                  打开这个结构
                   <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" />
                 </Link>
               </Button>

@@ -1,5 +1,6 @@
 // ---------------------------------------------------------------------------
 // Learning Modules Data — 知识点驱动的学习模块数据
+// 分类与模块顺序对应课本递进：化学键 → 分子构型 → 晶体 → 有机立体
 // ---------------------------------------------------------------------------
 
 export type ModuleCategory =
@@ -8,7 +9,7 @@ export type ModuleCategory =
   | "organic-stereochemistry"
   | "bonding-orbitals";
 
-export type DifficultyLevel = "基础" | "核心" | "拓展";
+export type DifficultyLevel = "基础" | "核心" | "拓展" | "竞赛入门";
 
 export interface LearningModule {
   id: string;
@@ -42,6 +43,14 @@ export interface CategoryMeta {
 
 export const categories: CategoryMeta[] = [
   {
+    id: "bonding-orbitals",
+    title: "化学键与轨道",
+    subtitle: "σ 键 · π 键 · sp/sp²/sp³ · 配位键",
+    description:
+      "理解轨道重叠方式、电子云方向性，以及不同类型化学键的本质区别，建立微观成键图像。",
+    iconName: "Link2",
+  },
+  {
     id: "molecular-geometry",
     title: "分子空间构型",
     subtitle: "VSEPR · 杂化轨道 · 键角 · 极性",
@@ -65,18 +74,82 @@ export const categories: CategoryMeta[] = [
       "从乙烯、乙炔到苯环，观察碳骨架的平面和直线片段，建立有机物共线共面的空间判断基础。",
     iconName: "Hexagon",
   },
-  {
-    id: "bonding-orbitals",
-    title: "化学键与轨道",
-    subtitle: "σ 键 · π 键 · sp/sp²/sp³ · 配位键",
-    description:
-      "理解轨道重叠方式、电子云方向性，以及不同类型化学键的本质区别，建立微观成键图像。",
-    iconName: "Link2",
-  },
 ];
 
 export const learningModules: LearningModule[] = [
-  // === 1. 分子空间构型 (molecular-geometry) ===
+  // === 1. 化学键与轨道 (bonding-orbitals) ===
+  {
+    id: "ionic-bond-formation",
+    title: "离子键形成",
+    subtitle: "电子转移与静电作用",
+    category: "bonding-orbitals",
+    difficulty: "基础",
+    tags: ["离子键", "静电作用"],
+    representativeModels: [],
+    description: "电负性差异大的原子间通过电子得失形成阴阳离子，并靠静电引力结合。",
+    keyPoints: ["无方向性", "无饱和性", "决定了离子晶体特有的物理性质"],
+    examValue: "物质结构基础概念题，区别于共价键的特性。",
+    visualFocus: "动态展示电子跳跃转移过程以及静电力场的建立。",
+    route: "/module/ionic-bond-formation",
+  },
+  {
+    id: "sigma-bond-orbitals",
+    title: "σ 键",
+    subtitle: "s-s 与 s-p 的头碰头重叠",
+    category: "bonding-orbitals",
+    difficulty: "核心",
+    tags: ["σ 键", "s-s", "s-p"],
+    representativeModels: [],
+    description: "不以具体分子为例，直接观察 s-s 和 s-p 轨道沿键轴正面重叠，理解 σ 键的轴向对称特征。",
+    keyPoints: ["X 轴是两核连线，也是键轴", "s-s 可头碰头重叠形成 σ 键", "s-p 沿键轴正面重叠也形成 σ 键"],
+    examValue: "高考常用：清点单键、双键和三键中的 σ 键，并理解“沿键轴正面重叠”的判断标准。",
+    visualFocus: "在 XYZ 坐标系中观察球形 s 轨道和哑铃状 p 轨道如何沿键轴重叠。本模块为高中教学示意，不是真实电子云计算图。",
+    route: "/module/sigma-bond-orbitals",
+  },
+  {
+    id: "pi-bond-orbitals",
+    title: "π 键",
+    subtitle: "p-p 轨道肩并肩重叠",
+    category: "bonding-orbitals",
+    difficulty: "核心",
+    tags: ["π 键", "p-p", "侧向重叠"],
+    representativeModels: [],
+    description: "用两个平行 p 轨道展示 π 键的形成过程，观察成键前、成键中和成键后电子云在键轴两侧的变化。",
+    keyPoints: ["p 轨道必须保持平行", "π 键来自 p-p 侧向重叠", "π 电子云分布在键轴上下两侧"],
+    examValue: "高考常用：解释双键不能自由旋转、判断双键和三键中的 π 键数量。",
+    visualFocus: "在 XYZ 坐标系中用微动画展示 p-p 侧向重叠从分离到成键后的变化。本模块为高中教学示意，不是真实电子云计算图。",
+    route: "/module/pi-bond-orbitals",
+  },
+  {
+    id: "hybrid-orbitals-sp",
+    title: "sp / sp² / sp³ 杂化轨道",
+    subtitle: "原子轨道的混合与空间重排",
+    category: "bonding-orbitals",
+    difficulty: "核心",
+    tags: ["杂化轨道", "sp系"],
+    representativeModels: [],
+    description: "中心原子为了更好的成键，将 s 轨道与 p 轨道重新组合，形成能量相等、方向特定的新轨道的过程。",
+    keyPoints: ["杂化轨道的总数等于参与杂化的轨道总数", "sp³(四面体), sp²(平面), sp(直线)"],
+    examValue: "根据分子构型反推杂化方式，或根据杂化判断构型。",
+    visualFocus: "动画展示 s 和 p 轨道如何融合形成不对称的“大头小尾”杂化轨道并散开。",
+    route: "/module/hybrid-orbitals-sp",
+  },
+  {
+    id: "coordinate-bond-formation",
+    title: "配位键形成",
+    subtitle: "孤对电子的单向奔赴",
+    category: "bonding-orbitals",
+    difficulty: "拓展",
+    tags: ["配位键", "孤对电子", "配合物"],
+    representativeModels: [],
+    description: "一种特殊的共价键，共用电子对由一个原子单方面提供，另一个原子提供空轨道接受。",
+    keyPoints: ["形成条件：提供者有孤对电子，接受者有空轨道", "在配合物中广泛存在（如 [Cu(NH₃)₄]²⁺）"],
+    examValue: "判断某些特殊离子或络合物中的配位键存在情况。",
+    visualFocus: "明确区分单向提供的电子云和空轨道，一旦形成则与普通共价键无异。",
+    route: "/module/coordinate-bond-formation",
+  },
+
+  // === 2. 分子空间构型 (molecular-geometry) ===
   {
     id: "tetrahedral-ch4",
     title: "四面体构型：CH₄",
@@ -192,7 +265,37 @@ export const learningModules: LearningModule[] = [
     route: "/module/polarity-judgment",
   },
 
-  // === 2. 晶体结构 (crystal-structure) ===
+  // === 3. 晶体结构 (crystal-structure) ===
+  {
+    id: "sodium-metal-crystal",
+    title: "金属钠晶体结构",
+    subtitle: "体心立方晶胞与均摊计数",
+    category: "crystal-structure",
+    difficulty: "核心",
+    tags: ["金属晶体", "体心立方", "均摊法"],
+    representativeModels: ["sodium-metal"],
+    description: "教材中的金属钠晶胞可用体心立方模型理解：8 个顶点 Na 原子各被 8 个晶胞共享，体心 Na 原子完全属于本晶胞。",
+    keyPoints: ["顶点 8 个 Na 各占 1/8", "体心 1 个 Na 独占", "平均每个晶胞含 2 个 Na 原子"],
+    examValue: "用真实晶体实例练习均摊法，比单独记忆“顶点、棱、面、体”更容易迁移到计算题。",
+    visualFocus: "先数顶点，再看体心；把 8 × 1/8 和 1 × 1 合并，得到每个晶胞平均 2 个 Na 原子。",
+    route: "/module/sodium-metal-crystal",
+    formula: "Na",
+  },
+  {
+    id: "zinc-metal-crystal",
+    title: "金属锌晶体结构",
+    subtitle: "六方最密堆积与十二配位",
+    category: "crystal-structure",
+    difficulty: "核心",
+    tags: ["金属晶体", "六方最密堆积", "A-B-A", "配位数", "晶胞计数"],
+    representativeModels: ["zinc-metal"],
+    description: "教材中的金属锌晶体可作为六方最密堆积实例观察：六方晶胞呈 A-B-A 金属原子堆积，局部配位环境中一个 Zn 周围有 12 个最近邻。",
+    keyPoints: ["A-B-A 六方最密堆积", "配位数为 12", "六方晶胞平均含 6 个 Zn 原子"],
+    examValue: "用具体晶体区分“配位数”和“晶胞平均占有数”：配位环境数 6 + 3 + 3，晶胞计数算 12×1/6 + 2×1/2 + 3。",
+    visualFocus: "先看六方晶胞和 A-B-A 分层，再切换到周期延展后的局部配位簇数出 12 配位，最后完成晶胞平均占有计数。",
+    route: "/module/zinc-metal-crystal",
+    formula: "Zn",
+  },
   {
     id: "nacl-crystal",
     title: "NaCl 型晶体结构（氯化钠晶胞）",
@@ -224,21 +327,6 @@ export const learningModules: LearningModule[] = [
     formula: "CsCl",
   },
   {
-    id: "sodium-metal-crystal",
-    title: "金属钠晶体结构",
-    subtitle: "体心立方晶胞与均摊计数",
-    category: "crystal-structure",
-    difficulty: "核心",
-    tags: ["金属晶体", "体心立方", "均摊法"],
-    representativeModels: ["sodium-metal"],
-    description: "教材中的金属钠晶胞可用体心立方模型理解：8 个顶点 Na 原子各被 8 个晶胞共享，体心 Na 原子完全属于本晶胞。",
-    keyPoints: ["顶点 8 个 Na 各占 1/8", "体心 1 个 Na 独占", "平均每个晶胞含 2 个 Na 原子"],
-    examValue: "用真实晶体实例练习均摊法，比单独记忆“顶点、棱、面、体”更容易迁移到计算题。",
-    visualFocus: "先数顶点，再看体心；把 8 × 1/8 和 1 × 1 合并，得到每个晶胞平均 2 个 Na 原子。",
-    route: "/module/sodium-metal-crystal",
-    formula: "Na",
-  },
-  {
     id: "diamond-crystal",
     title: "金刚石晶体结构",
     subtitle: "正四面体配位的共价晶体",
@@ -268,21 +356,6 @@ export const learningModules: LearningModule[] = [
     route: "/module/graphite-structure",
   },
   {
-    id: "zinc-metal-crystal",
-    title: "金属锌晶体结构",
-    subtitle: "六方最密堆积与十二配位",
-    category: "crystal-structure",
-    difficulty: "核心",
-    tags: ["金属晶体", "六方最密堆积", "A-B-A", "配位数", "晶胞计数"],
-    representativeModels: ["zinc-metal"],
-    description: "教材中的金属锌晶体可作为六方最密堆积实例观察：六方晶胞呈 A-B-A 金属原子堆积，局部配位环境中一个 Zn 周围有 12 个最近邻。",
-    keyPoints: ["A-B-A 六方最密堆积", "配位数为 12", "六方晶胞平均含 6 个 Zn 原子"],
-    examValue: "用具体晶体区分“配位数”和“晶胞平均占有数”：配位环境数 6 + 3 + 3，晶胞计数算 12×1/6 + 2×1/2 + 3。",
-    visualFocus: "先看六方晶胞和 A-B-A 分层，再切换到周期延展后的局部配位簇数出 12 配位，最后完成晶胞平均占有计数。",
-    route: "/module/zinc-metal-crystal",
-    formula: "Zn",
-  },
-  {
     id: "octahedral-voids",
     title: "八面体空隙",
     subtitle: "密堆积中的六配位空隙",
@@ -310,22 +383,38 @@ export const learningModules: LearningModule[] = [
     visualFocus: "展示面心立方晶胞内部 8 个角落的四面体空隙位置。",
     route: "/module/tetrahedral-voids",
   },
-
-  // === 3. 有机立体结构 (organic-stereochemistry) ===
   {
-    id: "organic-coplanar",
-    title: "有机物原子共线共面分析",
-    subtitle: "结合单双三键判断原子共面",
-    category: "organic-stereochemistry",
-    difficulty: "核心",
-    tags: ["共面", "共线", "有机结构"],
-    representativeModels: [],
-    description: "通过一个多取代苯综合模型，同时观察苯环平面、sp³ 四面体、sp² 平面、sp 直线和胺基结构，理解有机物中原子共线共面的判断方法。",
-    keyPoints: ["苯环平面是判断起点", "sp³ 片段具有四面体空间性", "sp²、sp 片段分别对应平面与直线", "单键旋转会影响能否对齐共面"],
-    examValue: "用于建立共线共面判断的空间直觉，本模块只做 3D 概念示例，不做题目训练。",
-    visualFocus: "在同一个多取代苯模型中切换观察苯环平面、甲基四面体、乙烯基平面、乙炔基直线和胺基空间片段。",
-    route: "/module/organic-coplanar",
+    id: "hbn-structure",
+    title: "h-BN 六方氮化硼",
+    subtitle: "B/N 交替的层状六方晶体",
+    category: "crystal-structure",
+    difficulty: "竞赛入门",
+    tags: ["层状晶体", "B-N 共价键", "对比石墨"],
+    representativeModels: ["hbn"],
+    description: "h-BN 与石墨一样具有平面六方层状骨架，但层内由 B 和 N 原子交替排列，通常表现为绝缘材料，适合用来对比“像石墨但不是石墨”。",
+    keyPoints: ["B/N 在同一层中交替排列", "层内 B-N 共价键，层间弱相互作用", "与石墨相比通常不导电"],
+    examValue: "竞赛入门：读懂非碳层状材料结构图，区分 B-N 交替、层间弱作用和石墨导电性的差异。",
+    visualFocus: "先观察 B/N 交替六元环，再切换层间作用力和对比石墨，避免把 h-BN 当成一层全同种原子的石墨。",
+    route: "/module/hbn-structure",
+    formula: "BN",
   },
+  {
+    id: "pba-prussian-blue-analogues",
+    title: "PBA 普鲁士蓝类似物",
+    subtitle: "双金属氰基桥联配位框架",
+    category: "crystal-structure",
+    difficulty: "竞赛入门",
+    tags: ["晶体化学", "竞赛入门", "配位晶胞"],
+    representativeModels: ["pba"],
+    description: "先看 M / M′ 双金属节点，再看 C≡N 桥联和空位水合，建立配合物框架晶体的空间直觉。",
+    keyPoints: ["M 与 M′ 通过 C≡N 桥联形成三维配位框架", "M′(CN)₆ 可看成八面体配位单元", "空位、水合和 A 位离子会改变化学式与孔道环境"],
+    examValue: "竞赛入门：帮助读懂陌生配合物晶胞图，区分金属节点、配体桥和可变占位，而不是机械套用 NaCl / CsCl 模板。",
+    visualFocus: "旋转观察 M / M′ 节点如何被 C≡N 桥连接，再切换空位水合模式看通式变量。",
+    route: "/module/pba-prussian-blue-analogues",
+    formula: "PBA",
+  },
+
+  // === 4. 有机立体结构 (organic-stereochemistry) ===
   {
     id: "ethylene-planar",
     title: "乙烯平面结构",
@@ -376,78 +465,31 @@ export const learningModules: LearningModule[] = [
     hybridization: "sp²",
     bondAngle: "≈ 120°",
   },
-  // === 4. 化学键与轨道 (bonding-orbitals) ===
   {
-    id: "sigma-bond-orbitals",
-    title: "σ 键",
-    subtitle: "s-s 与 s-p 的头碰头重叠",
-    category: "bonding-orbitals",
+    id: "organic-coplanar",
+    title: "有机物原子共线共面分析",
+    subtitle: "结合单双三键判断原子共面",
+    category: "organic-stereochemistry",
     difficulty: "核心",
-    tags: ["σ 键", "s-s", "s-p"],
+    tags: ["共面", "共线", "有机结构"],
     representativeModels: [],
-    description: "不以具体分子为例，直接观察 s-s 和 s-p 轨道沿键轴正面重叠，理解 σ 键的轴向对称特征。",
-    keyPoints: ["X 轴是两核连线，也是键轴", "s-s 可头碰头重叠形成 σ 键", "s-p 沿键轴正面重叠也形成 σ 键"],
-    examValue: "高考常用：清点单键、双键和三键中的 σ 键，并理解“沿键轴正面重叠”的判断标准。",
-    visualFocus: "在 XYZ 坐标系中观察球形 s 轨道和哑铃状 p 轨道如何沿键轴重叠。本模块为高中教学示意，不是真实电子云计算图。",
-    route: "/module/sigma-bond-orbitals",
-  },
-  {
-    id: "pi-bond-orbitals",
-    title: "π 键",
-    subtitle: "p-p 轨道肩并肩重叠",
-    category: "bonding-orbitals",
-    difficulty: "核心",
-    tags: ["π 键", "p-p", "侧向重叠"],
-    representativeModels: [],
-    description: "用两个平行 p 轨道展示 π 键的形成过程，观察成键前、成键中和成键后电子云在键轴两侧的变化。",
-    keyPoints: ["p 轨道必须保持平行", "π 键来自 p-p 侧向重叠", "π 电子云分布在键轴上下两侧"],
-    examValue: "高考常用：解释双键不能自由旋转、判断双键和三键中的 π 键数量。",
-    visualFocus: "在 XYZ 坐标系中用微动画展示 p-p 侧向重叠从分离到成键后的变化。本模块为高中教学示意，不是真实电子云计算图。",
-    route: "/module/pi-bond-orbitals",
-  },
-  {
-    id: "hybrid-orbitals-sp",
-    title: "sp / sp² / sp³ 杂化轨道",
-    subtitle: "原子轨道的混合与空间重排",
-    category: "bonding-orbitals",
-    difficulty: "核心",
-    tags: ["杂化轨道", "sp系"],
-    representativeModels: [],
-    description: "中心原子为了更好的成键，将 s 轨道与 p 轨道重新组合，形成能量相等、方向特定的新轨道的过程。",
-    keyPoints: ["杂化轨道的总数等于参与杂化的轨道总数", "sp³(四面体), sp²(平面), sp(直线)"],
-    examValue: "根据分子构型反推杂化方式，或根据杂化判断构型。",
-    visualFocus: "动画展示 s 和 p 轨道如何融合形成不对称的“大头小尾”杂化轨道并散开。",
-    route: "/module/hybrid-orbitals-sp",
-  },
-  {
-    id: "ionic-bond-formation",
-    title: "离子键形成",
-    subtitle: "电子转移与静电作用",
-    category: "bonding-orbitals",
-    difficulty: "基础",
-    tags: ["离子键", "静电作用"],
-    representativeModels: [],
-    description: "电负性差异大的原子间通过电子得失形成阴阳离子，并靠静电引力结合。",
-    keyPoints: ["无方向性", "无饱和性", "决定了离子晶体特有的物理性质"],
-    examValue: "物质结构基础概念题，区别于共价键的特性。",
-    visualFocus: "动态展示电子跳跃转移过程以及静电力场的建立。",
-    route: "/module/ionic-bond-formation",
-  },
-  {
-    id: "coordinate-bond-formation",
-    title: "配位键形成",
-    subtitle: "孤对电子的单向奔赴",
-    category: "bonding-orbitals",
-    difficulty: "拓展",
-    tags: ["配位键", "孤对电子", "配合物"],
-    representativeModels: [],
-    description: "一种特殊的共价键，共用电子对由一个原子单方面提供，另一个原子提供空轨道接受。",
-    keyPoints: ["形成条件：提供者有孤对电子，接受者有空轨道", "在配合物中广泛存在（如 [Cu(NH₃)₄]²⁺）"],
-    examValue: "判断某些特殊离子或络合物中的配位键存在情况。",
-    visualFocus: "明确区分单向提供的电子云和空轨道，一旦形成则与普通共价键无异。",
-    route: "/module/coordinate-bond-formation",
+    description: "通过一个多取代苯综合模型，同时观察苯环平面、sp³ 四面体、sp² 平面、sp 直线和胺基结构，理解有机物中原子共线共面的判断方法。",
+    keyPoints: ["苯环平面是判断起点", "sp³ 片段具有四面体空间性", "sp²、sp 片段分别对应平面与直线", "单键旋转会影响能否对齐共面"],
+    examValue: "用于建立共线共面判断的空间直觉，本模块只做 3D 概念示例，不做题目训练。",
+    visualFocus: "在同一个多取代苯模型中切换观察苯环平面、甲基四面体、乙烯基平面、乙炔基直线和胺基空间片段。",
+    route: "/module/organic-coplanar",
   },
 
+];
+
+// 首页“常查结构”精选：学生做题时最常需要对照的模型
+export const featuredModuleIds: string[] = [
+  "tetrahedral-ch4",
+  "pyramidal-nh3",
+  "v-shape-h2o",
+  "nacl-crystal",
+  "diamond-crystal",
+  "benzene-planar",
 ];
 
 // Helper functions
@@ -463,6 +505,12 @@ export function getModuleById(id: string): LearningModule | undefined {
         ? "polarity-judgment"
         : id;
   return learningModules.find((m) => m.id === canonicalId);
+}
+
+export function getFeaturedModules(): LearningModule[] {
+  return featuredModuleIds
+    .map((id) => getModuleById(id))
+    .filter((m): m is LearningModule => Boolean(m));
 }
 
 // Learning Paths

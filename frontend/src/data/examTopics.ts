@@ -27,7 +27,7 @@ export interface ExamTopicDetail {
   coreSteps: ExamTopicStep[];
   commonMistakes: string[];
   relatedModuleIds: string[];
-  classroomPrompt: string;
+  selfStudyPrompt: string;
   examTip: string;
 }
 
@@ -229,7 +229,7 @@ export const examTopicDetails: ExamTopicDetail[] = [
       "把面心 1/2、棱心 1/4 和体心 1 混淆。",
     ],
     relatedModuleIds: ["sodium-metal-crystal", "nacl-crystal", "cscl-crystal"],
-    classroomPrompt: "投影时先让学生只数顶点，再打开完整晶胞，强调“画出来”不等于“完全属于”。",
+    selfStudyPrompt: "自己先只数顶点，再打开完整晶胞对照：“画出来”不等于“完全属于”这个晶胞。",
     examTip: "遇到陌生晶胞，先写位置贡献表，再代入比例；不要先猜化学式。",
   },
   {
@@ -258,7 +258,7 @@ export const examTopicDetails: ExamTopicDetail[] = [
       "把第二近邻也算进第一配位层。",
     ],
     relatedModuleIds: ["nacl-crystal", "cscl-crystal", "zinc-metal-crystal"],
-    classroomPrompt: "先在 NaCl 中数 6 个最近邻，再切换 CsCl 对比 8 个最近邻，让学生看到配位数来自空间包围。",
+    selfStudyPrompt: "先在 NaCl 模型里亲手数出 6 个最近邻，再切到 CsCl 对比 8 个最近邻，体会配位数来自空间包围。",
     examTip: "题目问配位数时，优先画出目标粒子的局部包围结构，而不是完整晶胞。",
   },
   {
@@ -288,7 +288,7 @@ export const examTopicDetails: ExamTopicDetail[] = [
       "没有看清题目原点，导致三个分量整体偏移。",
     ],
     relatedModuleIds: ["nacl-crystal", "diamond-crystal", "zinc-metal-crystal"],
-    classroomPrompt: "用立方体前下左角作原点，让学生先说体心坐标，再说面心和棱心坐标。",
+    selfStudyPrompt: "以立方体前下左角为原点，先自己说出体心坐标，再挑战面心和棱心坐标，最后旋转模型核对。",
     examTip: "分数坐标题先画三轴小坐标系，按 x、y、z 顺序逐个读数。",
   },
   {
@@ -319,7 +319,7 @@ export const examTopicDetails: ExamTopicDetail[] = [
       "只用边长 a 做分母，忘记体积是 a³。",
     ],
     relatedModuleIds: ["nacl-crystal", "cscl-crystal", "diamond-crystal"],
-    classroomPrompt: "先让学生口算 Z，再单独列出单位换算，避免所有错误混在同一步。",
+    selfStudyPrompt: "先口算出 Z，再单独写一行单位换算，把两类最容易出错的步骤分开检查。",
     examTip: "密度题固定三行：Z、V_cell、ρ 公式；每行都带单位检查。",
   },
   {
@@ -349,7 +349,7 @@ export const examTopicDetails: ExamTopicDetail[] = [
       "看到 NaCl 就只背结论，没有理解 Na+ 填入八面体空隙。",
     ],
     relatedModuleIds: ["octahedral-voids", "tetrahedral-voids", "nacl-crystal"],
-    classroomPrompt: "先隔离一个空隙局部模型，再回到完整晶胞，帮助学生把局部配位和整体计数分开。",
+    selfStudyPrompt: "先打开单个空隙的局部模型看清配位，再回到完整晶胞数总量，把局部配位和整体计数分开理解。",
     examTip: "填隙题先写骨架粒子数 N，再写空隙总数和实际填入比例。",
   },
   {
@@ -386,7 +386,7 @@ export const examTopicDetails: ExamTopicDetail[] = [
       "只记金刚石结论，遇到单晶硅时不会迁移同样的金刚石型四配位骨架。",
     ],
     relatedModuleIds: ["diamond-crystal", "tetrahedral-voids"],
-    classroomPrompt: "先打开金刚石 3D 模块观察四面体配位，再把所有 C 替换想象为 Si，强调空间骨架相同、元素不同。",
+    selfStudyPrompt: "先打开金刚石 3D 模块观察四面体配位，再把所有 C 在脑中替换成 Si：空间骨架相同，只是元素不同。",
     examTip: "金刚石型题目先写两行：每个原子 4 配位；共价键数 = 原子数 × 4 ÷ 2。",
   },
 ];

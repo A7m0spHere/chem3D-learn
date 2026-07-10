@@ -116,8 +116,8 @@ export function ExamTopicDetailPage() {
           </section>
 
           <section className="rounded-2xl border border-border bg-white p-5 shadow-sm">
-            <h2 className="font-bold text-text-primary">课堂提示</h2>
-            <p className="mt-3 text-sm leading-6 text-text-secondary">{detail.classroomPrompt}</p>
+            <h2 className="font-bold text-text-primary">自查提示</h2>
+            <p className="mt-3 text-sm leading-6 text-text-secondary">{detail.selfStudyPrompt}</p>
           </section>
         </aside>
       </div>
