@@ -73,6 +73,7 @@ export function CrystalKnowledgePanel({
             activeStage={voidStage}
             activeStageBody={activeVoidStage?.bodyZh}
             activeStageTitle={activeVoidStage?.titleZh}
+            guidanceLines={teaching.voidGuidanceZh}
             onStageChange={onVoidStageChange}
           />
         ) : mode ? (
@@ -235,6 +236,7 @@ type VoidModeCardProps = {
   activeStage: CrystalVoidStage;
   activeStageTitle?: string;
   activeStageBody?: string;
+  guidanceLines?: string[];
   onStageChange: (stage: CrystalVoidStage) => void;
 };
 
@@ -245,8 +247,14 @@ function VoidModeCard({
   activeStage,
   activeStageTitle,
   activeStageBody,
+  guidanceLines,
   onStageChange,
 }: VoidModeCardProps) {
+  const resolvedGuidanceLines = guidanceLines ?? [
+    "中心标记用于提示可填入小球的位置。",
+    "辅助线和轮廓只表示空隙或配位关系，不表示共价键。",
+  ];
+
   return (
     <section className="rounded-2xl border border-primary/20 bg-primary-light/30 p-5">
       <h2 className="flex items-center gap-2 text-base font-semibold text-primary-dark">
@@ -258,6 +266,7 @@ function VoidModeCard({
       <div className="mt-4 flex flex-wrap gap-2">
         {stages.map((stage) => (
           <Button
+            aria-pressed={stage.id === activeStage}
             className="rounded-full px-3"
             key={stage.id}
             onClick={() => onStageChange(stage.id)}
@@ -278,8 +287,9 @@ function VoidModeCard({
       ) : null}
 
       <div className="mt-4 space-y-2 text-sm leading-6 text-text-secondary">
-        <p>中心标记用于提示可填入小球的位置。</p>
-        <p>辅助线和轮廓只表示空隙或配位关系，不表示共价键。</p>
+        {resolvedGuidanceLines.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
       </div>
     </section>
   );

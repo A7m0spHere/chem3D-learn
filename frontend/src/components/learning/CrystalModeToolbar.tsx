@@ -30,6 +30,12 @@ const modeIcons: Record<CrystalViewMode, typeof Box> = {
   comparison: GitCompare,
   metallicBond: Orbit,
   covalentNetwork: Share2,
+  polyhedron: Pyramid,
+  aSiteCoordination: Network,
+  bSiteCoordination: Network,
+  originShift: GitCompare,
+  hcpStacking: Layers3,
+  fccStacking: Layers3,
 };
 
 export function CrystalModeToolbar({
@@ -51,6 +57,7 @@ export function CrystalModeToolbar({
 
           return (
             <Button
+              aria-pressed={isActive}
               className="chem-touch-button"
               key={mode.id}
               onClick={() => onModeChange(mode.id)}
@@ -67,6 +74,7 @@ export function CrystalModeToolbar({
         {supportsModelStyle && onModelStyleChange ? (
           <>
             <Button
+              aria-pressed={modelStyle === "ballStick"}
               className="chem-touch-button"
               onClick={() => onModelStyleChange("ballStick")}
               size="sm"
@@ -78,6 +86,7 @@ export function CrystalModeToolbar({
               球棍模型
             </Button>
             <Button
+              aria-pressed={modelStyle === "packing"}
               className="chem-touch-button"
               onClick={() => onModelStyleChange("packing")}
               size="sm"
@@ -91,6 +100,7 @@ export function CrystalModeToolbar({
           </>
         ) : null}
         <Button
+          aria-pressed={showLabels}
           className="chem-touch-button"
           onClick={onToggleLabels}
           size="sm"

@@ -12,7 +12,13 @@ export type CrystalViewMode =
   | "voids"
   | "comparison"
   | "metallicBond"
-  | "covalentNetwork";
+  | "covalentNetwork"
+  | "polyhedron"
+  | "aSiteCoordination"
+  | "bSiteCoordination"
+  | "originShift"
+  | "hcpStacking"
+  | "fccStacking";
 export type CrystalModelStyle = "ballStick" | "packing";
 export type CrystalSiteType = "corner" | "face-center" | "edge-center" | "body-center";
 export type CrystalVoidStage = "framework" | "voids" | "filled";
@@ -114,6 +120,7 @@ export type CrystalTeaching = {
   observationGuide?: CrystalObservationGuide;
   viewModes: CrystalTeachingViewMode[];
   voidStages?: CrystalVoidStageTeaching[];
+  voidGuidanceZh?: string[];
 };
 
 export type Atom = {

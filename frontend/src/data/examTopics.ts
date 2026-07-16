@@ -112,7 +112,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考提高",
     partition: "高考真题结构",
-    status: "planned",
+    status: "ready",
+    route: "/module/batio3-perovskite",
   },
   {
     id: "exam-fcc-hcp",
@@ -121,7 +122,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "高考提高",
     partition: "高考真题结构",
-    status: "planned",
+    status: "ready",
+    route: "/module/metal-close-packing",
   },
 
   // === 晶体化学 · 竞赛视野 ===
@@ -142,7 +144,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛入门",
     partition: "竞赛视野",
-    status: "planned",
+    status: "ready",
+    route: "/module/zns-polytypes",
   },
   {
     id: "exam-caf2",
@@ -171,7 +174,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛拓展",
     partition: "竞赛视野",
-    status: "planned",
+    status: "ready",
+    route: "/module/mof-metal-organic-framework",
   },
   {
     id: "exam-mxene",
@@ -180,7 +184,8 @@ export const examTopics: ExamTopic[] = [
     domain: "晶体化学",
     difficulty: "竞赛拓展",
     partition: "竞赛视野",
-    status: "planned",
+    status: "ready",
+    route: "/module/mxene-2d-material",
   },
   {
     id: "exam-ren3",

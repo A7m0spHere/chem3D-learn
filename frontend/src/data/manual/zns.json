@@ -1,0 +1,209 @@
+{
+  "id": "zns",
+  "kind": "crystal",
+  "formula": "ZnS",
+  "names": {
+    "zh": "ZnS 闪锌矿 / 纤锌矿",
+    "en": "Zinc blende / wurtzite ZnS"
+  },
+  "nameZh": "ZnS 闪锌矿 / 纤锌矿",
+  "category": "crystal",
+  "summaryZh": "闪锌矿与纤锌矿都可理解为 Zn 占据 S 密堆积骨架中一半的四面体空隙。两者的局部 4:4 配位相同，主要区别是闪锌矿采用 ABCABC 层序，纤锌矿采用 ABAB 层序。",
+  "atoms": [
+    { "id": "zb-s-corner-1", "element": "S", "label": "S", "position": [-0.5, -0.5, -0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "corner" },
+    { "id": "zb-s-corner-2", "element": "S", "label": "S", "position": [-0.5, -0.5, 0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "corner" },
+    { "id": "zb-s-corner-3", "element": "S", "label": "S", "position": [-0.5, 0.5, -0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "corner" },
+    { "id": "zb-s-corner-4", "element": "S", "label": "S", "position": [-0.5, 0.5, 0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "corner" },
+    { "id": "zb-s-corner-5", "element": "S", "label": "S", "position": [0.5, -0.5, -0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "corner" },
+    { "id": "zb-s-corner-6", "element": "S", "label": "S", "position": [0.5, -0.5, 0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "corner" },
+    { "id": "zb-s-corner-7", "element": "S", "label": "S", "position": [0.5, 0.5, -0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "corner" },
+    { "id": "zb-s-corner-8", "element": "S", "label": "S", "position": [0.5, 0.5, 0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "corner" },
+    { "id": "zb-s-face-x-neg", "element": "S", "label": "S", "position": [-0.5, 0, 0], "radius": 0.14, "color": "#D6A33A", "siteType": "face-center" },
+    { "id": "zb-s-face-x-pos", "element": "S", "label": "S", "position": [0.5, 0, 0], "radius": 0.14, "color": "#D6A33A", "siteType": "face-center" },
+    { "id": "zb-s-face-y-neg", "element": "S", "label": "S", "position": [0, -0.5, 0], "radius": 0.14, "color": "#D6A33A", "siteType": "face-center" },
+    { "id": "zb-s-face-y-pos", "element": "S", "label": "S", "position": [0, 0.5, 0], "radius": 0.14, "color": "#D6A33A", "siteType": "face-center" },
+    { "id": "zb-s-face-z-neg", "element": "S", "label": "S", "position": [0, 0, -0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "face-center" },
+    { "id": "zb-s-face-z-pos", "element": "S", "label": "S", "position": [0, 0, 0.5], "radius": 0.14, "color": "#D6A33A", "siteType": "face-center" },
+    { "id": "zb-zn-1", "element": "Zn", "label": "Zn", "position": [-0.25, -0.25, -0.25], "radius": 0.12, "color": "#2A9D8F" },
+    { "id": "zb-zn-2", "element": "Zn", "label": "Zn", "position": [-0.25, 0.25, 0.25], "radius": 0.12, "color": "#2A9D8F" },
+    { "id": "zb-zn-3", "element": "Zn", "label": "Zn", "position": [0.25, -0.25, 0.25], "radius": 0.12, "color": "#2A9D8F" },
+    { "id": "zb-zn-4", "element": "Zn", "label": "Zn", "position": [0.25, 0.25, -0.25], "radius": 0.12, "color": "#2A9D8F" },
+    { "id": "wz-s-1", "element": "S", "label": "S", "position": [-0.25, -0.7144, 0.1443], "radius": 0.14, "color": "#D6A33A" },
+    { "id": "wz-s-2", "element": "S", "label": "S", "position": [0.25, 0.1021, -0.1443], "radius": 0.14, "color": "#D6A33A" },
+    { "id": "wz-zn-1", "element": "Zn", "label": "Zn", "position": [-0.25, -0.1021, 0.1443], "radius": 0.12, "color": "#2A9D8F" },
+    { "id": "wz-zn-2", "element": "Zn", "label": "Zn", "position": [0.25, 0.7144, -0.1443], "radius": 0.12, "color": "#2A9D8F" }
+  ],
+  "bonds": [],
+  "coordinationLinks": [],
+  "lonePairs": [],
+  "keyAngles": [],
+  "crystal": {
+    "typeZh": "ZnS 多晶型",
+    "latticeZh": "闪锌矿 F-43m；纤锌矿 P6₃mc",
+    "coordination": "Zn：4；S：4",
+    "unitCellCount": {
+      "zincBlendeZn": 4,
+      "zincBlendeS": 4,
+      "wurtziteZn": 2,
+      "wurtziteS": 2
+    },
+    "formulaExplanationZh": "两种晶胞所含化学式单位数不同，但 Zn:S 都为 1:1，化学式均为 ZnS。"
+  },
+  "lessonSteps": [
+    {
+      "id": "comparison",
+      "titleZh": "先看两种晶胞",
+      "bodyZh": "闪锌矿是立方结构，纤锌矿是六方结构；先只比较晶胞外形和层序。"
+    },
+    {
+      "id": "stacking",
+      "titleZh": "复用 FCC/HCP 层序",
+      "bodyZh": "闪锌矿的 S 骨架按 ABCABC 堆积，纤锌矿的 S 骨架按 ABAB 堆积。"
+    },
+    {
+      "id": "voids",
+      "titleZh": "填一半四面体空隙",
+      "bodyZh": "N 个密堆积 S 形成 2N 个四面体空隙，Zn 只占其中 N 个。"
+    },
+    {
+      "id": "coordination",
+      "titleZh": "检查 4:4 配位",
+      "bodyZh": "每个 Zn 最近邻 4 个 S，每个 S 最近邻也有 4 个 Zn。"
+    },
+    {
+      "id": "counting",
+      "titleZh": "最后比较晶胞计数",
+      "bodyZh": "闪锌矿常规立方晶胞含 4 ZnS，纤锌矿 P 六方晶胞含 2 ZnS。"
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [4.6, 3.5, 5.8],
+    "cameraFov": 39,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "IUCr Close-packed structures; IUCrJ; Materials Project/OSTI; hand-authored teaching model",
+    "notesZh": "采用理想闪锌矿与理想纤锌矿教学坐标。纤锌矿取 u=3/8、c/a=√(8/3)；真实 ZnS 可有轻微四面体畸变。本模型不描述能带、相稳定性或 Zn-S 键的离子性与共价性比例。",
+    "verified": true
+  },
+  "crystalTeaching": {
+    "currentModelZh": "ZnS 闪锌矿 / 纤锌矿对比",
+    "structureTypeZh": "二元四面体配位晶体",
+    "modelZh": "理想闪锌矿与理想纤锌矿",
+    "coordinationNumberZh": "Zn：4；S：4",
+    "spatialFeatureLabelZh": "层序与空隙占据",
+    "spatialFeatureZh": "闪锌矿：ABCABC；纤锌矿：ABAB；Zn 均占一半四面体空隙",
+    "teachingTipZh": "模型边界：本模块用 S 作为密堆积骨架只是便于结构拆解，并不表示晶体按该过程实际生成。辅助线只表示最近邻；真实纤锌矿的四面体可有轻微畸变。",
+    "unitCellDescriptionZh": "闪锌矿常规立方晶胞中，S 位于面心立方骨架位置，4 个 Zn 位于晶胞内部的一半四面体空隙。理想纤锌矿的 P 六方晶胞含 2 个 Zn 和 2 个 S。",
+    "particleCountZh": {
+      "lines": [
+        "闪锌矿 S：8 × 1/8 + 6 × 1/2 = 4",
+        "闪锌矿 Zn：4 × 1 = 4 → 4 ZnS",
+        "纤锌矿：2 Zn + 2 S → 2 ZnS"
+      ],
+      "ratio": "晶胞所含化学式单位数不同，但两者的 Zn : S 都是 1 : 1。"
+    },
+    "coordinationDescriptionZh": [
+      "每个 Zn 的第一近邻是 4 个 S，形成 ZnS₄ 四面体。",
+      "每个 S 的第一近邻也是 4 个 Zn，形成 SZn₄ 四面体。",
+      "闪锌矿和纤锌矿的局部配位相同，差异主要来自四面体网络的远程堆积层序。"
+    ],
+    "commonMistakesZh": [
+      "ZnS 只占一半四面体空隙；不要与 CaF₂ 中全部四面体空隙被占据混淆。",
+      "Zn 和 S 都是 4 配位，不是只有填隙的 Zn 为 4 配位。",
+      "A、B、C 颜色只表示层的位置；S 仍用统一暖金色，Zn 仍用统一青绿色。",
+      "两种晶胞含 ZnS 单位数不同，不代表化学式或 Zn:S 比例改变。"
+    ],
+    "observationGuide": {
+      "titleZh": "课堂观察顺序",
+      "subtitleZh": "把刚学过的 FCC/HCP 层序迁移到 ZnS。",
+      "steps": [
+        {
+          "labelZh": "第 1 步",
+          "titleZh": "先辨认 ABC 与 AB",
+          "bodyZh": "只看 S 骨架：闪锌矿对应 FCC/CCP，纤锌矿对应 HCP。",
+          "modeId": "comparison"
+        },
+        {
+          "labelZh": "第 2 步",
+          "titleZh": "再填一半四面体空隙",
+          "bodyZh": "从 S 骨架开始，依次查看全部空隙与 Zn 占据其中一半。",
+          "modeId": "voids",
+          "stageId": "filled"
+        },
+        {
+          "labelZh": "第 3 步",
+          "titleZh": "检查 Zn 与 S 的 4:4 配位",
+          "bodyZh": "切换中心原子，确认 ZnS₄ 与 SZn₄ 都是四面体局部环境。",
+          "modeId": "polyhedron"
+        },
+        {
+          "labelZh": "第 4 步",
+          "titleZh": "最后比较晶胞计数",
+          "bodyZh": "闪锌矿含 4 ZnS，纤锌矿含 2 ZnS，但化学式都保持 ZnS。",
+          "modeId": "counting"
+        }
+      ],
+      "teacherPromptZh": "如果只把 S 的第三层从 A 位改到 C 位，局部 4 配位会改变吗？晶体的长程层序又会怎样改变？"
+    },
+    "voidStages": [
+      {
+        "id": "framework",
+        "labelZh": "S 骨架",
+        "titleZh": "先只看 S 密堆积骨架",
+        "bodyZh": "暂时隐藏 Zn，只比较闪锌矿 ABC 与纤锌矿 AB 的 S 层序。"
+      },
+      {
+        "id": "voids",
+        "labelZh": "全部空隙",
+        "titleZh": "标出两组四面体空隙",
+        "bodyZh": "N 个密堆积 S 对应 2N 个四面体空隙；两组空隙用方向相反的标记表示。"
+      },
+      {
+        "id": "filled",
+        "labelZh": "Zn 占一半",
+        "titleZh": "Zn 只占一半四面体空隙",
+        "bodyZh": "把其中一组空隙替换为 Zn，另一组保持空置，因此 Zn:S = 1:1。"
+      }
+    ],
+    "viewModes": [
+      {
+        "id": "comparison",
+        "labelZh": "晶型总览",
+        "titleZh": "局部相同，长程层序不同",
+        "bodyZh": "闪锌矿为立方 F-43m、ABCABC 层序；纤锌矿为六方 P6₃mc、ABAB 层序。两者都保持 4:4 配位。"
+      },
+      {
+        "id": "fccStacking",
+        "labelZh": "闪锌矿｜ABC",
+        "titleZh": "闪锌矿：S 骨架 ABCABC",
+        "bodyZh": "S 的密堆积层依次进入 A、B、C 位，随后重复；Zn 位于其中一半四面体空隙。"
+      },
+      {
+        "id": "hcpStacking",
+        "labelZh": "纤锌矿｜AB",
+        "titleZh": "纤锌矿：S 骨架 ABAB",
+        "bodyZh": "S 的第三层回到 A 位，形成 ABAB 层序；Zn 同样只占一半四面体空隙。"
+      },
+      {
+        "id": "voids",
+        "labelZh": "半填空隙",
+        "titleZh": "从全部四面体空隙到半数占据",
+        "bodyZh": "对任一晶型，先看 S 骨架，再标出 2N 个四面体空隙，最后观察 Zn 只占其中 N 个。"
+      },
+      {
+        "id": "polyhedron",
+        "labelZh": "4:4 配位",
+        "titleZh": "ZnS₄ 与 SZn₄ 四面体",
+        "bodyZh": "切换中心原子可见：Zn 最近邻 4 个 S，S 最近邻 4 个 Zn。辅助线只表示最近邻关系。"
+      },
+      {
+        "id": "counting",
+        "labelZh": "晶胞计数",
+        "titleZh": "4 ZnS 与 2 ZnS",
+        "bodyZh": "闪锌矿常规立方晶胞含 4 个 Zn 和 4 个 S；纤锌矿 P 六方晶胞含 2 个 Zn 和 2 个 S。"
+      }
+    ]
+  }
+}

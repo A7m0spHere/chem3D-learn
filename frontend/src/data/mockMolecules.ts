@@ -16,6 +16,11 @@ import hbnData from "@/data/manual/hbn.json";
 import ethylenePlanarData from "@/data/manual/ethylene-planar.json";
 import pbaData from "@/data/manual/pba.json";
 import caf2Data from "@/data/manual/caf2.json";
+import batio3Data from "@/data/manual/batio3.json";
+import metalClosePackingData from "@/data/manual/metal-close-packing.json";
+import znsData from "@/data/manual/zns.json";
+import mof5Data from "@/data/manual/mof5.json";
+import ti3c2txData from "@/data/manual/ti3c2tx.json";
 
 export type MockMoleculeRecord = MoleculeRecord & {
   geometryZh: string;
@@ -58,6 +63,11 @@ const realMoleculesById = new Map<string, MoleculeRecord>([
   ["ethylene-planar", ethylenePlanarData as unknown as MoleculeRecord],
   ["pba", pbaData as unknown as MoleculeRecord],
   ["caf2", caf2Data as unknown as MoleculeRecord],
+  ["batio3", batio3Data as unknown as MoleculeRecord],
+  ["metal-close-packing", metalClosePackingData as unknown as MoleculeRecord],
+  ["zns", znsData as unknown as MoleculeRecord],
+  ["mof5", mof5Data as unknown as MoleculeRecord],
+  ["ti3c2tx", ti3c2txData as unknown as MoleculeRecord],
 ]);
 
 /** Returns the hand-authored 3D data for a molecule, or undefined. */

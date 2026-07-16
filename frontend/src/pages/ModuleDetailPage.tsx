@@ -21,6 +21,18 @@ const DiamondCell = lazy(() =>
 const ZincMetalCell = lazy(() =>
   import("@/components/three/ZincMetalCell").then((m) => ({ default: m.ZincMetalCell })),
 );
+const MetalClosePackingCell = lazy(() =>
+  import("@/components/three/MetalClosePackingCell").then((m) => ({ default: m.MetalClosePackingCell })),
+);
+const ZnSPolytypeCell = lazy(() =>
+  import("@/components/three/ZnSPolytypeCell").then((m) => ({ default: m.ZnSPolytypeCell })),
+);
+const Mof5Cell = lazy(() =>
+  import("@/components/three/Mof5Cell").then((m) => ({ default: m.Mof5Cell })),
+);
+const MxeneCell = lazy(() =>
+  import("@/components/three/MxeneCell").then((m) => ({ default: m.MxeneCell })),
+);
 const VoidStructureCell = lazy(() =>
   import("@/components/three/VoidStructureCell").then((m) => ({ default: m.VoidStructureCell })),
 );
@@ -32,6 +44,9 @@ const PbaCell = lazy(() =>
 );
 const CaF2Cell = lazy(() =>
   import("@/components/three/CaF2Cell").then((m) => ({ default: m.CaF2Cell })),
+);
+const BaTiO3Cell = lazy(() =>
+  import("@/components/three/BaTiO3Cell").then((m) => ({ default: m.BaTiO3Cell })),
 );
 const OrganicCoplanarViewer = lazy(() =>
   import("@/components/three/OrganicCoplanarViewer").then((m) => ({ default: m.OrganicCoplanarViewer })),
@@ -128,6 +143,11 @@ type ViewerKind =
   | "crystal-graphite"
   | "crystal-pba"
   | "crystal-caf2"
+  | "crystal-batio3"
+  | "crystal-close-packing"
+  | "crystal-zns"
+  | "crystal-mof5"
+  | "crystal-mxene"
   | "molecule"
   | "placeholder";
 
@@ -188,6 +208,16 @@ function deriveViewerKind(
         return "crystal-pba";
       case "caf2":
         return "crystal-caf2";
+      case "batio3":
+        return "crystal-batio3";
+      case "metal-close-packing":
+        return "crystal-close-packing";
+      case "zns":
+        return "crystal-zns";
+      case "mof5":
+        return "crystal-mof5";
+      case "ti3c2tx":
+        return "crystal-mxene";
       default:
         break;
     }
@@ -707,6 +737,73 @@ export function ModuleDetailPage() {
             molecule={molecule}
             showLabels={showCrystalLabels}
             voidStage={voidStage}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-batio3": {
+      viewer: () =>
+        molecule ? (
+          <BaTiO3Cell
+            loading={viewerLoading}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-close-packing": {
+      viewer: () =>
+        molecule ? (
+          <MetalClosePackingCell
+            loading={viewerLoading}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-zns": {
+      viewer: () =>
+        molecule ? (
+          <ZnSPolytypeCell
+            loading={viewerLoading}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            voidStage={voidStage}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-mof5": {
+      viewer: () =>
+        molecule ? (
+          <Mof5Cell
+            loading={viewerLoading}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            voidStage={voidStage}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
+    "crystal-mxene": {
+      viewer: () =>
+        molecule ? (
+          <MxeneCell
+            loading={viewerLoading}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
             viewMode={activeCrystalViewMode}
           />
         ) : null,

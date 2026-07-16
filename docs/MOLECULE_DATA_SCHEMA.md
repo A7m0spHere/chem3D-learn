@@ -45,6 +45,7 @@ type MoleculeRecord = {
   lessonSteps: LessonStep[];
   rendering?: MoleculeRendering;
   metadata?: MoleculeMetadata;
+  crystalTeaching?: CrystalTeaching;
 };
 ```
 
@@ -63,6 +64,7 @@ Field semantics:
 - `lessonSteps`: ordered explanation steps.
 - `rendering`: optional viewer tuning for camera, atom scale, bond radius, and labels.
 - `metadata`: optional source and verification metadata.
+- `crystalTeaching`: optional crystal-specific teaching modes, observation steps, counting copy, and void guidance.
 
 ## Atom
 
@@ -204,6 +206,21 @@ Field semantics:
 - `source`: short source or authoring note.
 - `notesZh`: Chinese notes for limitations, simplifications, or teaching intent.
 - `verified`: whether chemistry content has been manually reviewed.
+
+## CrystalTeaching Void Guidance
+
+Crystal modules that use the shared void-mode panel may override its generic hints:
+
+```ts
+type CrystalTeaching = {
+  voidStages?: CrystalVoidStageTeaching[];
+  voidGuidanceZh?: string[];
+  // Other crystal teaching fields omitted here.
+};
+```
+
+- `voidStages`: optional ordered interaction stages such as framework, visible voids, and filled sites.
+- `voidGuidanceZh`: optional module-specific explanation shown below the stage controls. Use it when the shared “center marker” wording does not match the rendered model, for example a porous framework that visualizes pore volume and guest molecules.
 
 ## Data Rules
 

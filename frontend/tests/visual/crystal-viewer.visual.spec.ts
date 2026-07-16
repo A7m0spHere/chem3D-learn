@@ -1,6 +1,8 @@
 import { expect, test, type Locator } from "@playwright/test";
 import { inflateSync } from "node:zlib";
 
+test.use({ viewport: { width: 1280, height: 1100 } });
+
 test.describe("晶体与空隙 Viewer 模式摘要", () => {
   test("NaCl 配位与计数结论位于 Viewer 外壳", async ({ page }) => {
     await page.goto("/module/nacl-crystal");
@@ -48,7 +50,7 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     ).toBeVisible();
 
     await page.waitForTimeout(600);
-    await expect(canvasArea).toHaveScreenshot("graphite-pi-electron-cloud-viewer.png");
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "graphite-pi-electron-cloud-viewer.png");
   });
 
   test("h-BN 支持 B/N 交替、层间作用力和对比石墨模式", async ({ page }) => {
@@ -131,11 +133,19 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
 
   test("Zn 分层模式和四面体空隙计数使用底部信息区", async ({ page }) => {
     await page.goto("/module/zinc-metal-crystal");
-    await page.getByRole("button", { exact: true, name: "分层堆积" }).click();
+    const layerModeButton = page.getByRole("button", { exact: true, name: "分层堆积" });
+    const ballStickButton = page.getByRole("button", { exact: true, name: "球棍模型" });
+    const packingButton = page.getByRole("button", { exact: true, name: "堆积模型" });
+    await expect(ballStickButton).toHaveAttribute("aria-pressed", "true");
+    await expect(packingButton).toHaveAttribute("aria-pressed", "false");
+    await layerModeButton.click();
+    await expect(layerModeButton).toHaveAttribute("aria-pressed", "true");
     await expect(
       page.getByTestId("zinc-metal-viewer").getByText("Zn｜A-B-A 层状堆积", { exact: true }),
     ).toBeVisible();
-    await page.getByRole("button", { exact: true, name: "堆积模型" }).click();
+    await packingButton.click();
+    await expect(ballStickButton).toHaveAttribute("aria-pressed", "false");
+    await expect(packingButton).toHaveAttribute("aria-pressed", "true");
     await expect(
       page.getByTestId("zinc-metal-viewer").getByText("堆积模型 · 拖拽旋转", { exact: true }),
     ).toBeVisible();
@@ -251,12 +261,12 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     ).toBeVisible();
 
     await page.waitForTimeout(600);
-    await expect(canvasArea).toHaveScreenshot("caf2-cell-viewer.png");
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "caf2-cell-viewer.png");
 
     await page.getByRole("button", { exact: true, name: "Ca²⁺ 8配位" }).click();
     await expect(viewer.getByText("CaF₂｜Ca²⁺ 的立方体 8 配位", { exact: true })).toBeVisible();
     await page.waitForTimeout(600);
-    await expect(canvasArea).toHaveScreenshot("caf2-ca-coordination-viewer.png");
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "caf2-ca-coordination-viewer.png");
 
     await page.getByRole("button", { exact: true, name: "F⁻ 4配位" }).click();
     await expect(viewer.getByText("CaF₂｜F⁻ 的四面体 4 配位", { exact: true })).toBeVisible();
@@ -271,12 +281,704 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     await page.getByRole("button", { exact: true, name: "F⁻ 全部填入" }).click();
     await expect(viewer.getByText("CaF₂｜第三步：F⁻ 填满全部 8 个空隙", { exact: true })).toBeVisible();
     await page.waitForTimeout(600);
-    await expect(canvasArea).toHaveScreenshot("caf2-voids-filled-viewer.png");
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "caf2-voids-filled-viewer.png");
 
     await page.getByRole("button", { exact: true, name: "反萤石对比" }).click();
     await expect(viewer.getByText("CaF₂｜反萤石：Li₂O 型结构", { exact: true })).toBeVisible();
     await page.waitForTimeout(600);
-    await expect(canvasArea).toHaveScreenshot("caf2-antifluorite-viewer.png");
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "caf2-antifluorite-viewer.png");
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("BaTiO₃ 支持 TiO₆、双配位、晶胞计数和等价原点", async ({ page }) => {
+    await page.goto("/module/batio3-perovskite");
+
+    const viewer = page.getByTestId("batio3-viewer");
+    const canvasArea = page.getByTestId("batio3-canvas");
+    await expect(viewer).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(
+      viewer.getByText("BaTiO₃｜理想立方钙钛矿晶胞", { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { exact: true, name: "晶胞结构" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    const guide = page.getByTestId("observation-guide-card");
+    await expect(guide.getByText("课堂观察顺序", { exact: true })).toBeVisible();
+    await expect(guide.locator("article")).toHaveCount(4);
+    await expect(guide.getByText("先认三类晶胞位置", { exact: true })).toBeVisible();
+    await expect(guide.getByText("再看 TiO₆ 几何与 Ti 的 6 配位", { exact: true })).toBeVisible();
+    await expect(guide.getByText("补齐 Ba²⁺ 的 12 个最近邻", { exact: true })).toBeVisible();
+    await expect(guide.getByText("均摊计数后比较等价原点", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText(
+        "模型边界：高考题常用理想立方钙钛矿图帮助计数和判断配位。室温 BaTiO₃ 通常为四方相，本模块不把理想立方图当作所有温度下的真实结构。",
+        { exact: true },
+      ),
+    ).toBeVisible();
+
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "batio3-cell-viewer.png");
+
+    const tiOctahedronButton = page.getByRole("button", { exact: true, name: "TiO₆ 八面体" });
+    await tiOctahedronButton.click();
+    await expect(tiOctahedronButton).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { exact: true, name: "晶胞结构" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    await expect(viewer.getByText("BaTiO₃｜TiO₆ 理想八面体", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "batio3-ti-octahedron-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "Ti⁴⁺ 6配位" }).click();
+    await expect(viewer.getByText("BaTiO₃｜Ti⁴⁺ 的 6 配位", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "batio3-ti-coordination-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "Ba²⁺ 12配位" }).click();
+    await expect(viewer.getByText("BaTiO₃｜Ba²⁺ 的 12 配位", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("12 个最近邻 O²⁻", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "batio3-ba-coordination-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "晶胞计数" }).click();
+    await expect(
+      viewer.getByText("BaTiO₃｜均摊法得到 BaTiO₃", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      viewer.getByText("Ba：8×1/8=1；Ti：1×1=1；O：6×1/2=3，所以 Ba : Ti : O = 1 : 1 : 3。", {
+        exact: true,
+      }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "等价原点" }).click();
+    await expect(
+      viewer.getByText("BaTiO₃｜两种等价晶胞画法｜Ba 顶点画法", { exact: true }),
+    ).toBeVisible();
+    const baOriginButton = viewer.getByRole("button", { exact: true, name: "Ba 顶点画法" });
+    const tiOriginButton = viewer.getByRole("button", { exact: true, name: "Ti 顶点画法" });
+    await expect(baOriginButton).toHaveAttribute("aria-pressed", "true");
+    await expect(tiOriginButton).toHaveAttribute("aria-pressed", "false");
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "batio3-alternate-drawing-viewer.png");
+
+    await tiOriginButton.click();
+    await expect(baOriginButton).toHaveAttribute("aria-pressed", "false");
+    await expect(tiOriginButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      viewer.getByText("BaTiO₃｜两种等价晶胞画法｜Ti 顶点画法", { exact: true }),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "batio3-alt-origin-viewer.png");
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("BaTiO₃ 在 390px 手机宽度下可操作且不横向溢出", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/module/batio3-perovskite");
+
+    const viewer = page.getByTestId("batio3-viewer");
+    const topbar = page.getByTestId("batio3-viewer-topbar");
+    const canvasArea = page.getByTestId("batio3-canvas");
+    const summary = page.getByTestId("batio3-viewer-summary");
+
+    await expect(viewer).toBeVisible();
+    await expect(topbar).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(summary).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "等价原点" }).click();
+    await expect(viewer.getByRole("button", { exact: true, name: "Ti 顶点画法" })).toBeVisible();
+
+    const [topbarBox, canvasBox, summaryBox] = await Promise.all([
+      topbar.boundingBox(),
+      canvasArea.boundingBox(),
+      summary.boundingBox(),
+    ]);
+    expect(topbarBox).not.toBeNull();
+    expect(canvasBox).not.toBeNull();
+    expect(summaryBox).not.toBeNull();
+    expect(topbarBox!.y + topbarBox!.height).toBeLessThanOrEqual(canvasBox!.y + 1);
+    expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(summaryBox!.y + 1);
+    expect(canvasBox!.height).toBeGreaterThan(200);
+
+    const hasPageHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+    const hasViewerHorizontalOverflow = await viewer.evaluate(
+      (element) => element.scrollWidth > element.clientWidth + 1,
+    );
+    expect(hasPageHorizontalOverflow).toBe(false);
+    expect(hasViewerHorizontalOverflow).toBe(false);
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("FCC/HCP 密堆积支持层序、十二配位、晶胞计数和对比总结", async ({ page }) => {
+    await page.goto("/modules?category=crystal-structure");
+
+    const moduleCard = page.locator("article").filter({ hasText: "金属晶体密堆积" });
+    const moduleLink = moduleCard.getByRole("link", { name: /进入模块/ });
+    await expect(moduleCard).toBeVisible();
+    await expect(moduleCard.getByText("可交互 3D", { exact: true })).toBeVisible();
+    await expect(moduleLink).toHaveAttribute("href", "/module/metal-close-packing");
+    await page.goto("/module/metal-close-packing");
+
+    const viewer = page.getByTestId("metal-close-packing-viewer");
+    const canvasArea = page.getByTestId("metal-close-packing-canvas");
+    await expect(viewer).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(viewer.getByText("M｜二维六方密排层", { exact: true })).toBeVisible();
+
+    const guide = page.getByTestId("observation-guide-card");
+    await expect(guide.getByText("课堂观察顺序", { exact: true })).toBeVisible();
+    await expect(guide.locator("article")).toHaveCount(4);
+    await expect(guide.getByText("先认单层六方密排", { exact: true })).toBeVisible();
+    await expect(guide.getByText("比较第三层是否回到 A 位", { exact: true })).toBeVisible();
+    await expect(guide.getByText("数出 6 + 3 + 3", { exact: true })).toBeVisible();
+    await expect(guide.getByText("最后分开计数与利用率", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText(
+        "模型边界：FCC 在密堆积语境中也称立方最密堆积 CCP；它不是体心立方 BCC。本模块只比较理想等径硬球，不据此判断某种金属在特定温度下的真实稳定晶型。",
+        { exact: true },
+      ),
+    ).toBeVisible();
+
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "metal-close-packing-layer-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "HCP｜ABAB" }).click();
+    await expect(viewer.getByText("M｜HCP：ABAB 层序", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "metal-close-packing-hcp-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "FCC｜ABCABC" }).click();
+    await expect(viewer.getByText("M｜FCC：ABCABC 层序", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "metal-close-packing-fcc-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "12 配位" }).click();
+    await expect(viewer.getByText("M｜共同的十二配位", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("合计配位数 12", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "metal-close-packing-coordination-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "晶胞计数" }).click();
+    await expect(viewer.getByText("M｜两种常用晶胞计数", { exact: true })).toBeVisible();
+    await expect(
+      viewer.getByText(
+        "FCC：8×1/8 + 6×1/2 = 4；HCP：12×1/6 + 2×1/2 + 3×1 = 6。",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "metal-close-packing-counting-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "对比总结" }).click();
+    await expect(
+      viewer.getByText("M｜同配位、同利用率、不同层序", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      viewer.getByText(
+        "相同：配位数 12、理想空间利用率约 74%；不同：HCP 为 ABAB，FCC 为 ABCABC。",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "metal-close-packing-comparison-viewer.png");
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("FCC/HCP 密堆积在 390px 手机宽度下可操作且不横向溢出", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/module/metal-close-packing");
+
+    const viewer = page.getByTestId("metal-close-packing-viewer");
+    const topbar = page.getByTestId("metal-close-packing-viewer-topbar");
+    const canvasArea = page.getByTestId("metal-close-packing-canvas");
+    const summary = page.getByTestId("metal-close-packing-viewer-summary");
+
+    await expect(viewer).toBeVisible();
+    await expect(topbar).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(summary).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "对比总结" }).click();
+    await expect(canvasArea.getByText("共同：配位数 12｜η ≈ 74%", { exact: true })).toBeVisible();
+
+    const [topbarBox, canvasBox, summaryBox] = await Promise.all([
+      topbar.boundingBox(),
+      canvasArea.boundingBox(),
+      summary.boundingBox(),
+    ]);
+    expect(topbarBox).not.toBeNull();
+    expect(canvasBox).not.toBeNull();
+    expect(summaryBox).not.toBeNull();
+    expect(topbarBox!.y + topbarBox!.height).toBeLessThanOrEqual(canvasBox!.y + 1);
+    expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(summaryBox!.y + 1);
+    expect(canvasBox!.height).toBeGreaterThan(200);
+
+    const hasPageHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+    const hasViewerHorizontalOverflow = await viewer.evaluate(
+      (element) => element.scrollWidth > element.clientWidth + 1,
+    );
+    expect(hasPageHorizontalOverflow).toBe(false);
+    expect(hasViewerHorizontalOverflow).toBe(false);
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("ZnS 支持晶型总览、层序、半填空隙、4:4 配位和晶胞计数", async ({ page }) => {
+    await page.goto("/modules?category=crystal-structure");
+
+    const moduleCard = page.locator("article").filter({ hasText: "ZnS 闪锌矿 / 纤锌矿" });
+    const moduleLink = moduleCard.getByRole("link", { name: /进入模块/ });
+    await expect(moduleCard).toBeVisible();
+    await expect(moduleCard.getByText("可交互 3D", { exact: true })).toBeVisible();
+    await expect(moduleLink).toHaveAttribute("href", "/module/zns-polytypes");
+    await page.goto("/module/zns-polytypes");
+
+    const viewer = page.getByTestId("zns-viewer");
+    const canvasArea = page.getByTestId("zns-canvas");
+    await expect(viewer).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(
+      viewer.getByText("ZnS｜局部相同，长程层序不同", { exact: true }),
+    ).toBeVisible();
+    const overviewButton = page.getByRole("button", { exact: true, name: "晶型总览" });
+    const zincBlendeStackingButton = page.getByRole("button", {
+      exact: true,
+      name: "闪锌矿｜ABC",
+    });
+    await expect(overviewButton).toHaveAttribute("aria-pressed", "true");
+
+    const guide = page.getByTestId("observation-guide-card");
+    await expect(guide.getByText("课堂观察顺序", { exact: true })).toBeVisible();
+    await expect(guide.locator("article")).toHaveCount(4);
+    await expect(guide.getByText("先辨认 ABC 与 AB", { exact: true })).toBeVisible();
+    await expect(guide.getByText("再填一半四面体空隙", { exact: true })).toBeVisible();
+    await expect(guide.getByText("检查 Zn 与 S 的 4:4 配位", { exact: true })).toBeVisible();
+    await expect(guide.getByText("最后比较晶胞计数", { exact: true })).toBeVisible();
+
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "zns-comparison-viewer.png");
+
+    await zincBlendeStackingButton.click();
+    await expect(overviewButton).toHaveAttribute("aria-pressed", "false");
+    await expect(zincBlendeStackingButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      viewer.getByText("ZnS｜闪锌矿：S 骨架 ABCABC", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("闪锌矿｜ABCABC", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "zns-zinc-blende-stacking-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "纤锌矿｜AB" }).click();
+    await expect(
+      viewer.getByText("ZnS｜纤锌矿：S 骨架 ABAB", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("纤锌矿｜ABAB", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "zns-wurtzite-stacking-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "半填空隙" }).click();
+    await expect(
+      viewer.getByText("ZnS｜先只看 S 密堆积骨架｜闪锌矿", { exact: true }),
+    ).toBeVisible();
+    const frameworkStageButton = page.getByRole("button", { exact: true, name: "S 骨架" });
+    const allVoidsStageButton = page.getByRole("button", { exact: true, name: "全部空隙" });
+    await expect(frameworkStageButton).toHaveAttribute("aria-pressed", "true");
+    await allVoidsStageButton.click();
+    await expect(frameworkStageButton).toHaveAttribute("aria-pressed", "false");
+    await expect(allVoidsStageButton).toHaveAttribute("aria-pressed", "true");
+    await expect(canvasArea.getByText("N 个 S → 2N 个四面体空隙", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "zns-zinc-blende-voids-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "Zn 占一半" }).click();
+    await expect(canvasArea.getByText("Zn 占 N 个｜恰好 1/2", { exact: true })).toBeVisible();
+    const zincBlendeButton = viewer.getByRole("button", { exact: true, name: "闪锌矿" });
+    const wurtziteButton = viewer.getByRole("button", { exact: true, name: "纤锌矿" });
+    await expect(zincBlendeButton).toHaveAttribute("aria-pressed", "true");
+    await wurtziteButton.click();
+    await expect(zincBlendeButton).toHaveAttribute("aria-pressed", "false");
+    await expect(wurtziteButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      viewer.getByText("ZnS｜Zn 只占一半四面体空隙｜纤锌矿", { exact: true }),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "zns-wurtzite-half-filled-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "4:4 配位" }).click();
+    await expect(
+      viewer.getByText("ZnS｜ZnS₄ 与 SZn₄ 四面体｜Zn 中心", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("ZnS₄｜Zn 配位数 4", { exact: true })).toBeVisible();
+    const znCenterButton = viewer.getByRole("button", { exact: true, name: "Zn 中心" });
+    const sCenterButton = viewer.getByRole("button", { exact: true, name: "S 中心" });
+    await expect(znCenterButton).toHaveAttribute("aria-pressed", "true");
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "zns-zn-coordination-viewer.png");
+
+    await sCenterButton.click();
+    await expect(znCenterButton).toHaveAttribute("aria-pressed", "false");
+    await expect(sCenterButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      viewer.getByText("ZnS｜ZnS₄ 与 SZn₄ 四面体｜S 中心", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("SZn₄｜S 配位数 4", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "zns-s-coordination-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "晶胞计数" }).click();
+    await expect(viewer.getByText("ZnS｜4 ZnS 与 2 ZnS", { exact: true })).toBeVisible();
+    await expect(
+      viewer.getByText(
+        "闪锌矿：S = 8×1/8 + 6×1/2 = 4，Zn = 4；纤锌矿：2 Zn + 2 S。两者均化简为 ZnS。",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("都化简为 ZnS", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "zns-counting-viewer.png");
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("ZnS 在 390px 手机宽度下可切换空隙晶型且不横向溢出", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/module/zns-polytypes");
+
+    const viewer = page.getByTestId("zns-viewer");
+    const topbar = page.getByTestId("zns-viewer-topbar");
+    const canvasArea = page.getByTestId("zns-canvas");
+    const summary = page.getByTestId("zns-viewer-summary");
+
+    await expect(viewer).toBeVisible();
+    await expect(topbar).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(summary).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "半填空隙" }).click();
+    await page.getByRole("button", { exact: true, name: "Zn 占一半" }).click();
+    await page.getByRole("button", { exact: true, name: "纤锌矿" }).click();
+    await expect(canvasArea.getByText("纤锌矿｜ABA", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("Zn 占 N 个｜恰好 1/2", { exact: true })).toBeVisible();
+
+    const [topbarBox, canvasBox, summaryBox] = await Promise.all([
+      topbar.boundingBox(),
+      canvasArea.boundingBox(),
+      summary.boundingBox(),
+    ]);
+    expect(topbarBox).not.toBeNull();
+    expect(canvasBox).not.toBeNull();
+    expect(summaryBox).not.toBeNull();
+    expect(topbarBox!.y + topbarBox!.height).toBeLessThanOrEqual(canvasBox!.y + 1);
+    expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(summaryBox!.y + 1);
+    expect(canvasBox!.height).toBeGreaterThan(200);
+
+    const hasPageHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+    const hasViewerHorizontalOverflow = await viewer.evaluate(
+      (element) => element.scrollWidth > element.clientWidth + 1,
+    );
+    expect(hasPageHorizontalOverflow).toBe(false);
+    expect(hasViewerHorizontalOverflow).toBe(false);
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("MOF-5 支持构筑单元、局部配位、pcu 拓扑、孔隙客体和组成计数", async ({ page }) => {
+    await page.goto("/modules?category=crystal-structure");
+
+    const moduleCard = page.locator("article").filter({ hasText: "MOF 金属有机框架" });
+    const moduleLink = moduleCard.getByRole("link", { name: /进入模块/ });
+    await expect(moduleCard).toBeVisible();
+    await expect(moduleCard.getByText("可交互 3D", { exact: true })).toBeVisible();
+    await expect(moduleLink).toHaveAttribute("href", "/module/mof-metal-organic-framework");
+
+    await page.goto("/module/mof-metal-organic-framework");
+    const viewer = page.getByTestId("mof5-viewer");
+    const canvasArea = page.getByTestId("mof5-canvas");
+    await expect(viewer).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(
+      viewer.getByText("MOF-5｜立方 pcu 拓扑框架", { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { exact: true, name: "立方拓扑" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(
+      canvasArea.getByText("虚线末端｜跨晶胞继续连接", { exact: true }),
+    ).toBeVisible();
+
+    const guide = page.getByTestId("observation-guide-card");
+    await expect(guide.getByText("课堂观察顺序", { exact: true })).toBeVisible();
+    await expect(guide.locator("article")).toHaveCount(4);
+    await expect(guide.getByText("分清节点与连接体", { exact: true })).toBeVisible();
+    await expect(guide.getByText("检查局部配位与桥联", { exact: true })).toBeVisible();
+    await expect(guide.getByText("抽象成六连接 pcu 网络", { exact: true })).toBeVisible();
+    await expect(guide.getByText("显出孔隙后完成计数", { exact: true })).toBeVisible();
+
+    const labelButton = page.getByRole("button", { exact: true, name: "标签" });
+    await expect(labelButton).toHaveAttribute("aria-pressed", "false");
+    await labelButton.click();
+    await expect(labelButton).toHaveAttribute("aria-pressed", "true");
+    await expect(canvasArea.getByText("Zn₄O SBU 节点", { exact: true })).toBeVisible();
+    await labelButton.click();
+    await expect(labelButton).toHaveAttribute("aria-pressed", "false");
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mof5-cell-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "构筑单元" }).click();
+    await expect(
+      viewer.getByText("MOF-5｜Zn₄O 节点 + BDC 连接体", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("金属簇节点｜Zn₄O SBU", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("有机连接体｜BDC", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mof5-building-units-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "Zn₄O 节点" }).click();
+    await expect(
+      viewer.getByText("MOF-5｜Zn₄O 次级构筑单元", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("Zn₄O 核心｜4 个 Zn", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("单个 Zn：O 四配位", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("整个 SBU：六连接方向", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mof5-node-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "BDC 连接体" }).click();
+    await expect(viewer.getByText("MOF-5｜BDC 线性连接体", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("BDC²⁻｜线性二连接体", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("羧酸根接入节点", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mof5-bdc-linker-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "孔隙与客体" }).click();
+    await expect(
+      viewer.getByText("MOF-5｜先看节点与连接体围成的裸框架", { exact: true }),
+    ).toBeVisible();
+    const bareFrameworkButton = page.getByRole("button", { exact: true, name: "裸框架" });
+    const poreVolumeButton = page.getByRole("button", { exact: true, name: "孔隙体积" });
+    await expect(bareFrameworkButton).toHaveAttribute("aria-pressed", "true");
+    await expect(poreVolumeButton).toHaveAttribute("aria-pressed", "false");
+    await expect(
+      page.getByText("孔隙体积是框架围出的空间示意，不代表一种新粒子。", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("客体小球仅说明孔隙可容纳分子，不对应固定吸附位点或吸附容量。", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("中心标记用于提示可填入小球的位置。", { exact: true }),
+    ).toHaveCount(0);
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mof5-bare-framework-viewer.png");
+
+    await poreVolumeButton.click();
+    await expect(bareFrameworkButton).toHaveAttribute("aria-pressed", "false");
+    await expect(poreVolumeButton).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      viewer.getByText("MOF-5｜把框架内部的孔隙体积显出来", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("孔隙体积（教学示意）", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mof5-pore-volume-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "加入客体" }).click();
+    await expect(
+      viewer.getByText("MOF-5｜在孔隙中加入客体分子示意", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("客体分子（示意）", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mof5-guest-filled-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "组成计数" }).click();
+    await expect(
+      viewer.getByText("MOF-5｜拓扑单元与常规晶胞", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      viewer.getByText(
+        "教学拓扑立方用共享关系得到 Zn₄O(BDC)₃；真实 Fm-3m 常规晶胞含 8 个化学式单位。",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("8×1/8 = 1 SBU", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("12×1/4 = 3 BDC", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("Zn₄O(BDC)₃", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("Fm-3m 常规晶胞：Z = 8", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mof5-counting-viewer.png");
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("MOF-5 在 390px 手机宽度下可切换孔隙阶段且不横向溢出", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/module/mof-metal-organic-framework");
+
+    const viewer = page.getByTestId("mof5-viewer");
+    const topbar = page.getByTestId("mof5-viewer-topbar");
+    const canvasArea = page.getByTestId("mof5-canvas");
+    const summary = page.getByTestId("mof5-viewer-summary");
+    await expect(viewer).toBeVisible();
+    await expect(topbar).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(summary).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "孔隙与客体" }).click();
+    await page.getByRole("button", { exact: true, name: "孔隙体积" }).click();
+    await expect(canvasArea.getByText("孔隙体积（教学示意）", { exact: true })).toBeVisible();
+
+    const [topbarBox, canvasBox, summaryBox] = await Promise.all([
+      topbar.boundingBox(),
+      canvasArea.boundingBox(),
+      summary.boundingBox(),
+    ]);
+    expect(topbarBox).not.toBeNull();
+    expect(canvasBox).not.toBeNull();
+    expect(summaryBox).not.toBeNull();
+    expect(topbarBox!.y + topbarBox!.height).toBeLessThanOrEqual(canvasBox!.y + 1);
+    expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(summaryBox!.y + 1);
+    expect(canvasBox!.height).toBeGreaterThan(200);
+
+    const hasPageHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+    const hasViewerHorizontalOverflow = await viewer.evaluate(
+      (element) => element.scrollWidth > element.clientWidth + 1,
+    );
+    expect(hasPageHorizontalOverflow).toBe(false);
+    expect(hasViewerHorizontalOverflow).toBe(false);
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("MXene 支持 MAX 来源、五层片层、六配位、混合端基、重新堆叠和组成表达", async ({ page }) => {
+    await page.goto("/modules?category=crystal-structure");
+
+    const moduleCard = page.locator("article").filter({ hasText: "MXene 二维层状材料" });
+    const moduleLink = moduleCard.getByRole("link", { name: /进入模块/ });
+    await expect(moduleCard).toBeVisible();
+    await expect(moduleCard.getByText("可交互 3D", { exact: true })).toBeVisible();
+    await expect(moduleLink).toHaveAttribute("href", "/module/mxene-2d-material");
+
+    await page.goto("/module/mxene-2d-material");
+    const viewer = page.getByTestId("mxene-viewer");
+    const canvasArea = page.getByTestId("mxene-canvas");
+    await expect(viewer).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(
+      viewer.getByText("Ti₃C₂Tₓ｜从 Ti₃AlC₂ 到 Ti₃C₂Tₓ", { exact: true }),
+    ).toBeVisible();
+
+    const guide = page.getByTestId("observation-guide-card");
+    await expect(guide.getByText("课堂观察顺序", { exact: true })).toBeVisible();
+    await expect(guide.locator("article")).toHaveCount(4);
+    await expect(guide.getByText("从 MAX 相中找出 Al", { exact: true })).toBeVisible();
+    await expect(guide.getByText("侧看五层、局部看六配位", { exact: true })).toBeVisible();
+    await expect(guide.getByText("辨认两侧混合端基", { exact: true })).toBeVisible();
+    await expect(guide.getByText("联系重新堆叠与组成表达", { exact: true })).toBeVisible();
+
+    await expect(canvasArea.getByText("MAX 前驱体｜Ti₃AlC₂", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("Al 层", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("二维片层｜Ti₃C₂Tₓ", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mxene-max-to-mxene-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "五层片层" }).click();
+    await expect(
+      viewer.getByText("Ti₃C₂Tₓ｜Ti–C–Ti–C–Ti 五层骨架", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("厚度方向：Ti–C–Ti–C–Ti", { exact: true })).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "标签" }).click();
+    await expect(canvasArea.getByText("内部 Ti", { exact: true })).toBeVisible();
+    await page.getByRole("button", { exact: true, name: "标签" }).click();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mxene-five-layer-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "C 六配位" }).click();
+    await expect(
+      viewer.getByText("Ti₃C₂Tₓ｜C 周围的 Ti₆ 八面体近邻", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("C 中心｜6 个 Ti 最近邻", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("Ti₆ 八面体轮廓", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mxene-carbon-coordination-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "表面端基" }).click();
+    await expect(
+      viewer.getByText("Ti₃C₂Tₓ｜O / OH / F 混合端基示意", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("O / OH / F 混合端基示意", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("O", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("OH", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("F", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mxene-mixed-terminations-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "重新堆叠" }).click();
+    await expect(
+      viewer.getByText("Ti₃C₂Tₓ｜端基化片层的层间空间", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("端基化片层重新堆叠", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("层间水 / 离子（示意）", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mxene-restacking-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "组成表达" }).click();
+    await expect(
+      viewer.getByText("Ti₃C₂Tₓ｜读懂 Mₙ₊₁XₙTₓ 与 Ti₃C₂Tₓ", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("通式：Mₙ₊₁XₙTₓ", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("Ti₃AlC₂", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("Ti₃C₂", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("Ti₃C₂Tₓ", { exact: true })).toBeVisible();
+    await expect(
+      canvasArea.getByText("Ti:C = 3:2 固定；Tₓ 的种类与数量可变", { exact: true }),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "mxene-formula-viewer.png");
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("MXene 在 390px 手机宽度下可观察混合端基且不横向溢出", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/module/mxene-2d-material");
+
+    const viewer = page.getByTestId("mxene-viewer");
+    const topbar = page.getByTestId("mxene-viewer-topbar");
+    const canvasArea = page.getByTestId("mxene-canvas");
+    const summary = page.getByTestId("mxene-viewer-summary");
+    await expect(viewer).toBeVisible();
+    await expect(topbar).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(summary).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "表面端基" }).click();
+    await expect(canvasArea.getByText("O / OH / F 混合端基示意", { exact: true })).toBeVisible();
+
+    const [topbarBox, canvasBox, summaryBox] = await Promise.all([
+      topbar.boundingBox(),
+      canvasArea.boundingBox(),
+      summary.boundingBox(),
+    ]);
+    expect(topbarBox).not.toBeNull();
+    expect(canvasBox).not.toBeNull();
+    expect(summaryBox).not.toBeNull();
+    expect(topbarBox!.y + topbarBox!.height).toBeLessThanOrEqual(canvasBox!.y + 1);
+    expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(summaryBox!.y + 1);
+    expect(canvasBox!.height).toBeGreaterThan(200);
+
+    const hasPageHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+    const hasViewerHorizontalOverflow = await viewer.evaluate(
+      (element) => element.scrollWidth > element.clientWidth + 1,
+    );
+    expect(hasPageHorizontalOverflow).toBe(false);
+    expect(hasViewerHorizontalOverflow).toBe(false);
     await expectCanvasAreaHasDetail(canvasArea);
   });
 });
@@ -298,6 +1000,63 @@ async function expectCanvasAreaHasDetail(canvasArea: Locator) {
   }
 
   expect(detailedPixels).toBeGreaterThan(image.width * image.height * 0.01);
+}
+
+async function positionCanvasForSnapshot(canvasArea: Locator) {
+  await canvasArea.evaluate(async (element) => {
+    const rect = element.getBoundingClientRect();
+    window.scrollTo({
+      left: 0,
+      top: Math.max(0, window.scrollY + rect.top - 72),
+    });
+    window.dispatchEvent(new Event("resize"));
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+  });
+
+  // 工具栏位于 Viewer 下方，点击模式按钮会把 demand-frame Canvas 滚到部分离屏处。
+  // 在截图前轻微重置视口尺寸，强制 R3F 在完整可见的画布上重新计算并绘制一帧。
+  const page = canvasArea.page();
+  const viewport = page.viewportSize();
+  if (viewport) {
+    await page.setViewportSize({ ...viewport, height: viewport.height - 1 });
+    await page.waitForTimeout(150);
+    await page.setViewportSize(viewport);
+  }
+  await page.waitForTimeout(300);
+}
+
+async function expectCanvasAreaToHaveScreenshot(canvasArea: Locator, name: string) {
+  await positionCanvasForSnapshot(canvasArea);
+  const box = await canvasArea.boundingBox();
+  const viewport = canvasArea.page().viewportSize();
+  expect(box).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  expect(box!.y).toBeGreaterThanOrEqual(60);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(viewport!.height);
+
+  const screenshot = await canvasArea.screenshot({ animations: "disabled" });
+  expectLightSnapshotCorners(screenshot);
+  expect(screenshot).toMatchSnapshot(name, {
+    maxDiffPixelRatio: 0.01,
+    threshold: 0.2,
+  });
+}
+
+function expectLightSnapshotCorners(screenshot: Buffer) {
+  const image = decodePng(screenshot);
+  const cornerIndexes = [
+    0,
+    (image.width - 1) * 4,
+    (image.height - 1) * image.width * 4,
+    (image.height * image.width - 1) * 4,
+  ];
+
+  for (const index of cornerIndexes) {
+    const luminance = image.pixels[index] + image.pixels[index + 1] + image.pixels[index + 2];
+    expect(luminance).toBeGreaterThan(660);
+  }
 }
 
 function decodePng(buffer: Buffer) {

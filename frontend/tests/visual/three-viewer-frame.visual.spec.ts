@@ -27,6 +27,11 @@ const viewers = [
   { route: "/module/tetrahedral-voids", viewer: "tetrahedral-voids-viewer", stage: "tetrahedral-voids-canvas" },
   { route: "/module/octahedral-voids", viewer: "octahedral-voids-viewer", stage: "octahedral-voids-canvas" },
   { route: "/module/pba-prussian-blue-analogues", viewer: "pba-viewer", stage: "pba-canvas" },
+  { route: "/module/batio3-perovskite", viewer: "batio3-viewer", stage: "batio3-canvas" },
+  { route: "/module/metal-close-packing", viewer: "metal-close-packing-viewer", stage: "metal-close-packing-canvas" },
+  { route: "/module/zns-polytypes", viewer: "zns-viewer", stage: "zns-canvas" },
+  { route: "/module/mof-metal-organic-framework", viewer: "mof5-viewer", stage: "mof5-canvas" },
+  { route: "/module/mxene-2d-material", viewer: "mxene-viewer", stage: "mxene-canvas" },
 ] as const;
 
 const bondingBasicsMobileViewers = [

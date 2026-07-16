@@ -1,0 +1,177 @@
+{
+  "id": "ti3c2tx",
+  "kind": "crystal",
+  "formula": "Ti₃C₂Tₓ",
+  "names": {
+    "zh": "MXene 二维层状材料（以 Ti₃C₂Tₓ 为例）",
+    "en": "Ti3C2Tx MXene teaching model"
+  },
+  "nameZh": "MXene 二维层状材料（以 Ti₃C₂Tₓ 为例）",
+  "category": "crystal",
+  "summaryZh": "Ti₃C₂Tₓ 可由 Ti₃AlC₂ MAX 相选择性移除 Al 后获得。片层内部是 Ti–C–Ti–C–Ti 五层骨架，最外侧 Ti 表面常带有 O、OH、F 等混合端基。",
+  "atoms": [
+    { "id": "ti-top", "element": "Ti", "label": "表面 Ti", "position": [0, 0.56, 0], "radius": 0.13, "color": "#2A9D8F" },
+    { "id": "c-top", "element": "C", "label": "C", "position": [0.25, 0.28, 0.14], "radius": 0.09, "color": "#334155" },
+    { "id": "ti-inner", "element": "Ti", "label": "内部 Ti", "position": [0, 0, 0.28], "radius": 0.13, "color": "#1F6F68" },
+    { "id": "c-bottom", "element": "C", "label": "C", "position": [0.25, -0.28, 0.14], "radius": 0.09, "color": "#334155" },
+    { "id": "ti-bottom", "element": "Ti", "label": "表面 Ti", "position": [0, -0.56, 0], "radius": 0.13, "color": "#2A9D8F" },
+    { "id": "termination-o", "element": "O", "label": "O 端基", "position": [0, 0.84, 0], "radius": 0.08, "color": "#DC2626" },
+    { "id": "termination-f", "element": "F", "label": "F 端基", "position": [0.5, 0.84, 0], "radius": 0.08, "color": "#6CCFC3" }
+  ],
+  "bonds": [],
+  "coordinationLinks": [],
+  "lonePairs": [],
+  "keyAngles": [],
+  "crystal": {
+    "typeZh": "二维过渡金属碳化物 MXene",
+    "latticeZh": "Ti₃C₂Tₓ 理想六方片层教学模型",
+    "coordination": "C：6 个 Ti 八面体近邻；表面 Ti 与端基相连",
+    "unitCellCount": {
+      "ti": 3,
+      "c": 2
+    },
+    "formulaExplanationZh": "从 Ti₃AlC₂ 中移除 Al 得到 Ti₃C₂ 骨架；表面再带有数量和种类可变的端基 Tₓ，因此写作 Ti₃C₂Tₓ。"
+  },
+  "lessonSteps": [
+    {
+      "id": "max-to-mxene",
+      "titleZh": "先找出 MAX 相中的 Al 层",
+      "bodyZh": "Ti₃AlC₂ 中的 Al 位于 Ti₃C₂ 层块之间；选择性移除 Al 并剥离后，得到二维 Ti₃C₂ 基础片层。"
+    },
+    {
+      "id": "five-planes",
+      "titleZh": "从侧面数五个原子层",
+      "bodyZh": "单层骨架按 Ti–C–Ti–C–Ti 排列，最外侧是 Ti，C 位于相邻 Ti 层之间。"
+    },
+    {
+      "id": "coordination",
+      "titleZh": "以 C 为中心检查最近邻",
+      "bodyZh": "一个代表性 C 周围有 6 个 Ti 近邻，可抽象为 Ti₆ 八面体局部配位。"
+    },
+    {
+      "id": "terminations",
+      "titleZh": "再看两侧表面端基",
+      "bodyZh": "O、OH、F 等端基连接在外侧 Ti 表面；混合端基示意不代表固定比例或精确排布。"
+    },
+    {
+      "id": "restacking",
+      "titleZh": "由单层回到多层堆叠",
+      "bodyZh": "剥离片层可以重新堆叠，层间距和层间环境会受端基、含水状态及插层物种影响。"
+    },
+    {
+      "id": "formula",
+      "titleZh": "最后读懂 Ti₃C₂Tₓ",
+      "bodyZh": "Ti₃C₂ 表示骨架中 Ti:C = 3:2；Tₓ 表示可变表面端基，不是名为 T 的元素。"
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [4.6, 3.4, 5.8],
+    "cameraFov": 39,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "Naguib et al., Advanced Materials 23, 4248-4253 (2011), DOI 10.1002/adma.201102306; Wang et al., JACS 137, 2715-2721 (2015), DOI 10.1021/ja512820k; hand-authored teaching model",
+    "notesZh": "本模块使用理想化六方原子片层和代表性混合端基位点，不导入完整实验结构。端基比例、占位、缺陷、层间距和插层位置均可能随制备与环境改变。",
+    "verified": true
+  },
+  "crystalTeaching": {
+    "currentModelZh": "Ti₃C₂Tₓ 理想教学模型",
+    "structureTypeZh": "二维过渡金属碳化物 MXene",
+    "modelZh": "Ti–C–Ti–C–Ti 五层骨架 + 两侧混合端基",
+    "coordinationNumberZh": "代表性 C：Ti 六配位；表面 Ti：连接端基",
+    "spatialFeatureLabelZh": "片层与表面",
+    "spatialFeatureZh": "强 Ti–C 骨架形成二维片层，外侧 Ti 表面被可变端基修饰，片层可剥离并重新堆叠",
+    "teachingTipZh": "模型边界：O、OH、F 只表示常见端基类别。图中的混合位置、数量、层间距和层间物种均为课堂示意，不对应某个样品的精确结构或固定化学计量。",
+    "unitCellDescriptionZh": "本模块不做常规晶胞均摊，而是追踪组成变化：Ti₃AlC₂ 去除 Al 后保留 Ti₃C₂ 骨架，再用 Tₓ 表示两侧可变表面端基。",
+    "particleCountZh": {
+      "lines": [
+        "MAX 前驱体：Ti₃AlC₂",
+        "选择性移除 Al → Ti₃C₂ 基础片层",
+        "表面引入可变端基 → Ti₃C₂Tₓ",
+        "Tₓ = O / OH / F 等混合；x 不写成固定整数"
+      ],
+      "ratio": "Ti:C = 3:2 描述基础骨架；Tₓ 单独记录可变表面化学。"
+    },
+    "coordinationDescriptionZh": [
+      "Ti₃C₂ 单层骨架可按 Ti–C–Ti–C–Ti 五个原子平面观察。",
+      "代表性 C 位于 Ti 构成的八面体近邻环境中，最近邻 Ti 数为 6。",
+      "最外侧 Ti 是端基连接位置；实际端基种类、比例和占位并不固定。"
+    ],
+    "commonMistakesZh": [
+      "MXene 不是单层 Ti 原子，而是包含多层原子平面的二维片层。",
+      "Ti₃AlC₂ 是 MAX 前驱体；移除 Al 后才得到 Ti₃C₂ 基础骨架。",
+      "Tₓ 不是元素 T，也不表示每个样品都有相同的端基比例。",
+      "重新堆叠的片层间环境受端基、水和插层物种影响，不能一概说成纯范德华力。"
+    ],
+    "observationGuide": {
+      "titleZh": "课堂观察顺序",
+      "subtitleZh": "先理解来源，再从片层内部走到表面与层间。",
+      "steps": [
+        {
+          "labelZh": "第 1 步",
+          "titleZh": "从 MAX 相中找出 Al",
+          "bodyZh": "对比 Ti₃AlC₂ 与 Ti₃C₂Tₓ，确认移除的是层块之间的 Al，而不是 Ti 或 C。",
+          "modeId": "comparison"
+        },
+        {
+          "labelZh": "第 2 步",
+          "titleZh": "侧看五层、局部看六配位",
+          "bodyZh": "先数 Ti–C–Ti–C–Ti，再以一个 C 为中心确认周围 6 个 Ti 近邻。",
+          "modeId": "coordination"
+        },
+        {
+          "labelZh": "第 3 步",
+          "titleZh": "辨认两侧混合端基",
+          "bodyZh": "只把 O、OH、F 当作代表性类别，重点看它们位于片层外表面。",
+          "modeId": "covalentNetwork"
+        },
+        {
+          "labelZh": "第 4 步",
+          "titleZh": "联系重新堆叠与组成表达",
+          "bodyZh": "观察层间空间后，用 Ti₃C₂Tₓ 区分固定骨架与可变表面化学。",
+          "modeId": "counting"
+        }
+      ],
+      "teacherPromptZh": "如果只看到 Ti₃C₂Tₓ，你能否指出哪一部分来自 MAX 骨架、哪一部分描述表面，并解释为什么 x 不应随意写成固定整数？"
+    },
+    "viewModes": [
+      {
+        "id": "comparison",
+        "labelZh": "MAX → MXene",
+        "titleZh": "从 Ti₃AlC₂ 到 Ti₃C₂Tₓ",
+        "bodyZh": "Al 层位于 Ti₃C₂ 层块之间。选择性移除 Al 并剥离后，保留 Ti–C 骨架并形成可被端基修饰的二维表面。"
+      },
+      {
+        "id": "layer",
+        "labelZh": "五层片层",
+        "titleZh": "Ti–C–Ti–C–Ti 五层骨架",
+        "bodyZh": "从侧面可依次识别五个原子平面；最外层是 Ti，两个 C 层夹在三层 Ti 之间。"
+      },
+      {
+        "id": "coordination",
+        "labelZh": "C 六配位",
+        "titleZh": "C 周围的 Ti₆ 八面体近邻",
+        "bodyZh": "突出一个 C 及其上下两侧共 6 个 Ti 最近邻。八面体轮廓是局部配位辅助线，不表示额外化学键。"
+      },
+      {
+        "id": "covalentNetwork",
+        "labelZh": "表面端基",
+        "titleZh": "O / OH / F 混合端基示意",
+        "bodyZh": "端基位于片层两侧的外层 Ti 表面。不同颜色只帮助辨认类别，不代表真实样品中的比例、精确占位或均匀全覆盖。"
+      },
+      {
+        "id": "interlayerForce",
+        "labelZh": "重新堆叠",
+        "titleZh": "端基化片层的层间空间",
+        "bodyZh": "多层 Ti₃C₂Tₓ 可由单层重新堆叠。层间距与层间环境会受到端基、含水状态和插层物种共同影响。"
+      },
+      {
+        "id": "counting",
+        "labelZh": "组成表达",
+        "titleZh": "读懂 Mₙ₊₁XₙTₓ 与 Ti₃C₂Tₓ",
+        "bodyZh": "M 表示过渡金属，X 表示 C 和/或 N，Tₓ 表示可变表面端基；代表结构 Ti₃C₂Tₓ 的基础骨架满足 Ti:C = 3:2。"
+      }
+    ]
+  }
+}
