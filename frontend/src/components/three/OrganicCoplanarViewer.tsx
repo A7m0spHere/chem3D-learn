@@ -9,7 +9,10 @@ import {
 } from "@/components/three/htmlOverlayStyles";
 import { LonePairOrbital as SharedLonePairOrbital } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import { AtomPullHandle } from "@/components/three/AtomPullHandle";
 import { getOrganicCoplanarModeInfo } from "@/data/organicCoplanar";
+import { usePullTransitionProgress } from "@/hooks/usePullTransitionProgress";
+import { applyAtomPullOffset } from "@/lib/atomPullTransition";
 import type { OrganicCoplanarMode } from "@/types/molecule";
 
 type OrganicCoplanarViewerProps = {
@@ -17,6 +20,8 @@ type OrganicCoplanarViewerProps = {
   loading?: boolean;
   showLabels: boolean;
   vinylAligned: boolean;
+  onAtomPull?: (atomId: string) => void;
+  pullingAtomId?: string;
 };
 
 type Vec3 = [number, number, number];
@@ -33,8 +38,7 @@ type OrganicAtom = {
 
 type OrganicBond = {
   id: string;
-  start: Vec3;
-  end: Vec3;
+  atomIds: [string, string];
   order: 1 | 2 | 3;
   fragment: FragmentKey;
 };
@@ -77,15 +81,28 @@ export function OrganicCoplanarViewer({
   loading = false,
   showLabels,
   vinylAligned,
+  onAtomPull,
+  pullingAtomId,
 }: OrganicCoplanarViewerProps) {
   const scene = useMemo(() => buildOrganicCoplanarScene(vinylAligned), [vinylAligned]);
+  const pullProgress = usePullTransitionProgress(pullingAtomId);
+  const displayAtoms = useMemo(
+    () => applyAtomPullOffset(scene.atoms, pullingAtomId, pullProgress),
+    [pullProgress, pullingAtomId, scene.atoms],
+  );
+  const atomsById = useMemo(
+    () => new Map(displayAtoms.map((candidate) => [candidate.id, candidate])),
+    [displayAtoms],
+  );
   const modeInfo = getOrganicCoplanarModeInfo(activeMode);
   const alignmentMeta =
     activeMode === "rotation"
       ? vinylAligned
         ? "乙烯基已对齐"
         : "乙烯基保持默认夹角"
-      : "拖拽旋转 · 滚轮或触控板缩放";
+      : onAtomPull
+        ? "拖动空白旋转 · 抓住原子进入拼装"
+        : "拖拽旋转 · 滚轮或触控板缩放";
 
   return (
     <ThreeViewerFrame
@@ -112,18 +129,21 @@ export function OrganicCoplanarViewer({
             />
             {scene.bonds.map((bond) => (
               <OrganicBondMesh
+                atomsById={atomsById}
                 bond={bond}
                 isDimmed={shouldDimFragment(activeMode, bond.fragment, vinylAligned)}
                 isFocused={isFocusedFragment(activeMode, bond.fragment, vinylAligned)}
                 key={bond.id}
               />
             ))}
-            {scene.atoms.map((atom) => (
+            {displayAtoms.map((atom) => (
               <OrganicAtomMesh
                 atom={atom}
                 isDimmed={shouldDimAtom(activeMode, atom, vinylAligned)}
                 isFocused={isFocusedAtom(activeMode, atom, vinylAligned)}
+                isPulling={pullingAtomId === atom.id}
                 key={atom.id}
+                onPullIntent={onAtomPull}
                 showLabel={showLabels}
               />
             ))}
@@ -136,6 +156,7 @@ export function OrganicCoplanarViewer({
             <ModeLabels activeMode={activeMode} scene={scene} showLabels={showLabels} />
           </group>
           <OrbitControls
+            enabled={!pullingAtomId}
             enableDamping
             enablePan={false}
             maxDistance={8}
@@ -163,17 +184,16 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
     fragment: "ring",
   }));
 
-  const bonds: OrganicBond[] = ringPositions.map((position, index) => ({
+  const bonds: OrganicBond[] = ringPositions.map((_, index) => ({
     id: `ring-${index + 1}`,
-    start: position,
-    end: ringPositions[(index + 1) % ringPositions.length],
+    atomIds: [`ringC${index + 1}`, `ringC${((index + 1) % ringPositions.length) + 1}`],
     order: index % 2 === 0 ? 2 : 1,
     fragment: "ring",
   }));
 
   const addAtom = (atom: OrganicAtom) => atoms.push(atom);
-  const addBond = (id: string, start: Vec3, end: Vec3, order: 1 | 2 | 3, fragment: FragmentKey) =>
-    bonds.push({ id, start, end, order, fragment });
+  const addBond = (id: string, firstAtomId: string, secondAtomId: string, order: 1 | 2 | 3, fragment: FragmentKey) =>
+    bonds.push({ id, atomIds: [firstAtomId, secondAtomId], order, fragment });
   const radial = (ringIndex: number): Vec3 => normalize(ringPositions[ringIndex]);
   const tangent = (direction: Vec3): Vec3 => normalize([-direction[1], direction[0], 0]);
 
@@ -189,7 +209,7 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
       radius: 0.105,
       fragment: "ringHydrogen",
     });
-    addBond(`ringC${ringIndex + 1}-H`, ringPositions[ringIndex], hPosition, 1, "ringHydrogen");
+    addBond(`ringC${ringIndex + 1}-H`, `ringC${ringIndex + 1}`, `ringH${ringIndex + 1}`, 1, "ringHydrogen");
   });
 
   // ringC1 -> -CH3, with tetrahedral H placement.
@@ -197,7 +217,7 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
   const methylTangent = tangent(methylDirection);
   const methylC = add(ringPositions[0], scale(methylDirection, 0.92));
   addAtom({ id: "methylC", element: "C", label: "CH3", position: methylC, radius: 0.16, fragment: "sp3" });
-  addBond("ringC1-methylC", ringPositions[0], methylC, 1, "sp3");
+  addBond("ringC1-methylC", "ringC1", "methylC", 1, "sp3");
   const methylHs: Vec3[] = [
     add(add(methylC, scale(methylDirection, 0.34)), scale(zAxis, 0.48)),
     add(add(add(methylC, scale(methylDirection, 0.34)), scale(methylTangent, 0.42)), scale(zAxis, -0.24)),
@@ -205,7 +225,7 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
   ];
   methylHs.forEach((position, index) => {
     addAtom({ id: `methylH${index + 1}`, element: "H", label: "H", position, radius: 0.1, fragment: "sp3" });
-    addBond(`methylC-H${index + 1}`, methylC, position, 1, "sp3");
+    addBond(`methylC-H${index + 1}`, "methylC", `methylH${index + 1}`, 1, "sp3");
   });
 
   // ringC2 -> -CH=CH2. Its own plane is rotated around ringC2 -> vinylC1.
@@ -236,11 +256,11 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
   [vinylH1, vinylH2, vinylH3].forEach((position, index) => {
     addAtom({ id: `vinylH${index + 1}`, element: "H", label: "H", position, radius: 0.1, fragment: "sp2" });
   });
-  addBond("ringC2-vinylC1", ringPositions[1], vinylC1, 1, "sp2");
-  addBond("vinylC1-vinylC2", vinylC1, vinylC2, 2, "sp2");
-  addBond("vinylC1-H", vinylC1, vinylH1, 1, "sp2");
-  addBond("vinylC2-H1", vinylC2, vinylH2, 1, "sp2");
-  addBond("vinylC2-H2", vinylC2, vinylH3, 1, "sp2");
+  addBond("ringC2-vinylC1", "ringC2", "vinylC1", 1, "sp2");
+  addBond("vinylC1-vinylC2", "vinylC1", "vinylC2", 2, "sp2");
+  addBond("vinylC1-H", "vinylC1", "vinylH1", 1, "sp2");
+  addBond("vinylC2-H1", "vinylC2", "vinylH2", 1, "sp2");
+  addBond("vinylC2-H2", "vinylC2", "vinylH3", 1, "sp2");
 
   // ringC4 -> -C≡CH, exactly collinear along the radial direction.
   const ethynylDirection = radial(3);
@@ -261,9 +281,9 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
       fragment: "sp",
     });
   });
-  addBond("ringC4-ethynylC1", ringPositions[3], ethynylC1, 1, "sp");
-  addBond("ethynylC1-ethynylC2", ethynylC1, ethynylC2, 3, "sp");
-  addBond("ethynylC2-H", ethynylC2, ethynylH, 1, "sp");
+  addBond("ringC4-ethynylC1", "ringC4", "ethynylC1", 1, "sp");
+  addBond("ethynylC1-ethynylC2", "ethynylC1", "ethynylC2", 3, "sp");
+  addBond("ethynylC2-H", "ethynylC2", "ethynylH", 1, "sp");
 
   // ringC5 -> -NH2. H atoms and lone pair are slightly out of the benzene plane.
   const amineDirection = radial(4);
@@ -275,9 +295,9 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
   addAtom({ id: "amineN", element: "N", label: "N", position: amineN, radius: 0.15, fragment: "amine" });
   addAtom({ id: "amineH1", element: "H", label: "H", position: amineH1, radius: 0.1, fragment: "amine" });
   addAtom({ id: "amineH2", element: "H", label: "H", position: amineH2, radius: 0.1, fragment: "amine" });
-  addBond("ringC5-amineN", ringPositions[4], amineN, 1, "amine");
-  addBond("amineN-H1", amineN, amineH1, 1, "amine");
-  addBond("amineN-H2", amineN, amineH2, 1, "amine");
+  addBond("ringC5-amineN", "ringC5", "amineN", 1, "amine");
+  addBond("amineN-H1", "amineN", "amineH1", 1, "amine");
+  addBond("amineN-H2", "amineN", "amineH2", 1, "amine");
 
   const vinylPlaneNormal = normalize(cross(vinylDirection, vinylPlaneVector));
 
@@ -375,15 +395,19 @@ function OrganicAtomMesh({
   atom,
   isFocused,
   isDimmed,
+  isPulling,
+  onPullIntent,
   showLabel,
 }: {
   atom: OrganicAtom;
   isFocused: boolean;
   isDimmed: boolean;
+  isPulling: boolean;
+  onPullIntent?: (atomId: string) => void;
   showLabel: boolean;
 }) {
   const color = elementColors[atom.element];
-  const focusScale = isFocused ? 1.14 : 1;
+  const focusScale = isFocused || isPulling ? 1.14 : 1;
   const radius = atom.radius * focusScale;
   const opacity = isDimmed ? 0.34 : 1;
   const labelShouldShow =
@@ -393,12 +417,24 @@ function OrganicAtomMesh({
 
   return (
     <group position={atom.position}>
+      {onPullIntent && isPulling ? (
+        <mesh scale={1.42}>
+          <sphereGeometry args={[atom.radius, 24, 24]} />
+          <meshBasicMaterial
+            color="#F4A261"
+            depthWrite={false}
+            opacity={0.2}
+            transparent
+          />
+        </mesh>
+      ) : null}
       <mesh scale={focusScale}>
         <sphereGeometry args={[atom.radius, 32, 32]} />
         <meshStandardMaterial
           color={color}
-          emissive={isFocused ? fragmentColors[atom.fragment] : "#000000"}
-          emissiveIntensity={isFocused ? 0.18 : 0}
+          emissive={isPulling ? "#F4A261" : isFocused ? fragmentColors[atom.fragment] : "#000000"}
+          emissiveIntensity={isPulling ? 0.28 : isFocused ? 0.18 : 0}
+          key={isDimmed ? "dimmed" : "solid"}
           metalness={0.04}
           opacity={opacity}
           roughness={0.36}
@@ -412,15 +448,20 @@ function OrganicAtomMesh({
           </span>
         </Html>
       ) : null}
+      {onPullIntent && !isPulling ? (
+        <AtomPullHandle atomId={atom.id} label={atom.label} onPullIntent={onPullIntent} />
+      ) : null}
     </group>
   );
 }
 
 function OrganicBondMesh({
+  atomsById,
   bond,
   isFocused,
   isDimmed,
 }: {
+  atomsById: Map<string, OrganicAtom>;
   bond: OrganicBond;
   isFocused: boolean;
   isDimmed: boolean;
@@ -429,12 +470,15 @@ function OrganicBondMesh({
   const focusScale = isFocused ? 0.024 / 0.018 : 1;
   const offsetDistance = order === 1 ? 0 : order === 2 ? 0.048 : 0.06;
   const offsets = order === 1 ? [0] : order === 2 ? [-offsetDistance, offsetDistance] : [-offsetDistance, 0, offsetDistance];
-  const start = new Vector3(...bond.start);
-  const end = new Vector3(...bond.end);
+  const startAtom = atomsById.get(bond.atomIds[0]);
+  const endAtom = atomsById.get(bond.atomIds[1]);
+  if (!startAtom || !endAtom) return null;
+  const start = new Vector3(...startAtom.position);
+  const end = new Vector3(...endAtom.position);
   const direction = new Vector3().subVectors(end, start);
   const midpoint = new Vector3().addVectors(start, end).multiplyScalar(0.5);
   const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
-  const offsetVector = getOffsetVector(bond.start, bond.end);
+  const offsetVector = getOffsetVector(startAtom.position, endAtom.position);
   const color = isFocused ? fragmentColors[bond.fragment] : "#B7C7C3";
 
   return (
@@ -449,6 +493,7 @@ function OrganicBondMesh({
           <cylinderGeometry args={[0.018, 0.018, direction.length(), 24]} />
           <meshStandardMaterial
             color={color}
+            key={isDimmed ? "dimmed" : "solid"}
             opacity={isDimmed ? 0.22 : 0.88}
             roughness={0.45}
             transparent={isDimmed}

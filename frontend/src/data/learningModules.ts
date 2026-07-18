@@ -19,6 +19,10 @@ export interface LearningModule {
   difficulty: DifficultyLevel;
   tags: string[];
   representativeModels: string[];
+  /** 专题 Viewer 提供交互 3D 时显式标记，不与手写结构数据绑定混为一谈。 */
+  hasInteractiveViewer?: boolean;
+  /** 配置后，学生可从当前有机 3D 模型直接抓取原子进入拼装实验室。 */
+  builderSeedId?: string;
   description: string;
   keyPoints: string[];
   examValue: string;
@@ -513,6 +517,7 @@ export const learningModules: LearningModule[] = [
     difficulty: "基础",
     tags: ["乙烯", "sp²", "共面"],
     representativeModels: ["ethylene-planar"],
+    builderSeedId: "ethylene-planar",
     description: "由于 C=C 双键中 π 键的限制，乙烯分子不能自由旋转，2 个 C 和 4 个 H 严格共面。",
     keyPoints: ["键角约 120°", "双键刚性"],
     examValue: "基础判断模块，常作为大分子的一部分出现。",
@@ -527,6 +532,8 @@ export const learningModules: LearningModule[] = [
     difficulty: "基础",
     tags: ["乙炔", "sp", "共线"],
     representativeModels: [],
+    hasInteractiveViewer: true,
+    builderSeedId: "acetylene-linear",
     description: "C≡C 三键使得碳原子采用 sp 杂化，4 个原子在同一条直线上。",
     keyPoints: ["键角 180°", "共线必然共面"],
     examValue: "提供一条绝对直线，在大分子中共面判断中起到核心骨架作用。",
@@ -545,6 +552,8 @@ export const learningModules: LearningModule[] = [
     difficulty: "核心",
     tags: ["苯", "共面", "大 π 键"],
     representativeModels: [],
+    hasInteractiveViewer: true,
+    builderSeedId: "benzene-planar",
     description: "苯环的 6 个 C 和 6 个 H 全部位于同一平面内，是判断复杂有机物共面的“定盘星”。",
     keyPoints: ["正六边形，键角 120°", "对角线上的 4 个原子共线"],
     examValue: "围绕苯环旋转单键是高考最爱考察的共面极限题型。",
@@ -563,6 +572,8 @@ export const learningModules: LearningModule[] = [
     difficulty: "核心",
     tags: ["共面", "共线", "有机结构"],
     representativeModels: [],
+    hasInteractiveViewer: true,
+    builderSeedId: "organic-coplanar",
     description: "通过一个多取代苯综合模型，同时观察苯环平面、sp³ 四面体、sp² 平面、sp 直线和胺基结构，理解有机物中原子共线共面的判断方法。",
     keyPoints: ["苯环平面是判断起点", "sp³ 片段具有四面体空间性", "sp²、sp 片段分别对应平面与直线", "单键旋转会影响能否对齐共面"],
     examValue: "用于建立共线共面判断的空间直觉，本模块只做 3D 概念示例，不做题目训练。",

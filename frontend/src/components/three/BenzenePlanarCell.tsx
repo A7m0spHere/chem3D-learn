@@ -14,6 +14,9 @@ import {
 } from "@/components/three/teachingLabelStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getBenzenePlanarModeInfo, type BenzenePlaneView } from "@/data/benzenePlanar";
+import { benzeneBuilderSeed } from "@/data/organicBuilderSeeds";
+import { usePullTransitionProgress } from "@/hooks/usePullTransitionProgress";
+import { applyAtomPullOffset } from "@/lib/atomPullTransition";
 import type { AngleSpec, Atom, BenzenePlanarMode, Bond } from "@/types/molecule";
 
 type Vec3 = [number, number, number];
@@ -22,50 +25,19 @@ type BenzenePlanarCellProps = {
   mode: BenzenePlanarMode;
   loading?: boolean;
   planeView?: BenzenePlaneView;
+  onAtomPull?: (atomId: string) => void;
+  pullingAtomId?: string;
 };
 
-const carbonRadius = 1.12;
-const hydrogenRadius = 1.78;
-
-const ringAngles = [0, 60, 120, 180, 240, 300].map((angle) => (angle * Math.PI) / 180);
-
-const benzeneAtoms: Atom[] = [
-  ...ringAngles.map((angle, index): Atom => ({
-    id: `c${index + 1}`,
-    element: "C",
-    label: `C${index + 1}`,
-    position: [
-      Number((carbonRadius * Math.cos(angle)).toFixed(4)),
-      Number((carbonRadius * Math.sin(angle)).toFixed(4)),
-      0,
-    ],
-    color: "#1F2933",
-    radius: 0.2,
-  })),
-  ...ringAngles.map((angle, index): Atom => ({
-    id: `h${index + 1}`,
-    element: "H",
-    label: "H",
-    position: [
-      Number((hydrogenRadius * Math.cos(angle)).toFixed(4)),
-      Number((hydrogenRadius * Math.sin(angle)).toFixed(4)),
-      0,
-    ],
-    color: "#FFFFFF",
-    radius: 0.14,
-  })),
-];
+const benzeneAtoms: Atom[] = benzeneBuilderSeed.atoms.map((candidate) => ({
+  ...candidate,
+  label: candidate.id.startsWith("c") ? candidate.id.toUpperCase() : candidate.element,
+}));
 
 const benzeneBonds: Bond[] = [
-  ...[1, 2, 3, 4, 5, 6].map((index): Bond => ({
-    id: `c${index}-c${index === 6 ? 1 : index + 1}`,
-    atomIds: [`c${index}`, `c${index === 6 ? 1 : index + 1}`],
-    kind: "single",
-    order: 1,
-  })),
-  ...[1, 2, 3, 4, 5, 6].map((index): Bond => ({
-    id: `c${index}-h${index}`,
-    atomIds: [`c${index}`, `h${index}`],
+  ...benzeneBuilderSeed.bonds.map((candidate): Bond => ({
+    ...candidate,
+    // 观察态配合芳香环圆圈使用等价单棒；拼装态保留交替单双键用于计价。
     kind: "single",
     order: 1,
   })),
@@ -92,17 +64,24 @@ export function BenzenePlanarCell({
   mode,
   loading = false,
   planeView = "top",
+  onAtomPull,
+  pullingAtomId,
 }: BenzenePlanarCellProps) {
   const modeInfo = getBenzenePlanarModeInfo(mode);
+  const pullProgress = usePullTransitionProgress(pullingAtomId);
+  const displayAtoms = useMemo(
+    () => applyAtomPullOffset(benzeneAtoms, pullingAtomId, pullProgress),
+    [pullProgress, pullingAtomId],
+  );
   const atomsById = useMemo(
-    () => new Map(benzeneAtoms.map((atom) => [atom.id, atom])),
-    [],
+    () => new Map(displayAtoms.map((atom) => [atom.id, atom])),
+    [displayAtoms],
   );
 
   return (
     <ThreeViewerFrame
       loading={loading}
-      meta="拖拽旋转 · 滚轮或触控板缩放"
+      meta={onAtomPull ? "拖动空白旋转 · 抓住原子进入拼装" : "拖拽旋转 · 滚轮或触控板缩放"}
       stageTestId="benzene-planar-canvas"
       summary={modeInfo.summary}
       title={modeInfo.viewerTitle}
@@ -123,12 +102,19 @@ export function BenzenePlanarCell({
         <SceneLighting ambient={0.68} mainIntensity={1.28} mainPosition={[3.6, 4.4, 4.8]} secondaryIntensity={0.36} secondaryPosition={[-3.4, -2.8, 2.6]} />
         <group rotation={getSceneRotation(mode, planeView)} scale={1.03}>
           <ReferencePlane mode={mode} planeView={planeView} />
-          <BenzeneCore atomsById={atomsById} mode={mode} />
+          <BenzeneCore
+            atoms={displayAtoms}
+            atomsById={atomsById}
+            mode={mode}
+            onAtomPull={onAtomPull}
+            pullingAtomId={pullingAtomId}
+          />
           {mode === "angle" ? <AngleOverlay atomsById={atomsById} /> : null}
           {mode === "diagonal" ? <DiagonalOverlay /> : null}
           {mode === "piBond" ? <PiBondOverlay /> : null}
         </group>
         <OrbitControls
+          enabled={!pullingAtomId}
           enableDamping
           enablePan={false}
           makeDefault
@@ -142,11 +128,17 @@ export function BenzenePlanarCell({
 }
 
 function BenzeneCore({
+  atoms,
   atomsById,
   mode,
+  onAtomPull,
+  pullingAtomId,
 }: {
+  atoms: Atom[];
   atomsById: Map<string, Atom>;
   mode: BenzenePlanarMode;
+  onAtomPull?: (atomId: string) => void;
+  pullingAtomId?: string;
 }) {
   const focusedAtoms = mode === "diagonal" ? new Set(["h1", "c1", "c4", "h4"]) : new Set<string>();
   const focusedBonds =
@@ -168,12 +160,14 @@ function BenzeneCore({
         />
       ))}
       <AromaticRing active={mode === "overview" || mode === "piBond"} />
-      {benzeneAtoms.map((atom) => (
+      {atoms.map((atom) => (
         <AtomMesh
           atom={atom}
           atomScale={1}
           isFocused={focusedAtoms.has(atom.id)}
+          isPulling={pullingAtomId === atom.id}
           key={atom.id}
+          onPullIntent={onAtomPull}
           showLabel={false}
         />
       ))}

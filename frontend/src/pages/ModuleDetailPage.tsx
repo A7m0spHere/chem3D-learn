@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useState, type ReactNode } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { ChevronRight, Home, LayoutList } from "lucide-react";
 
 // 3D viewers 按需懒加载：使 three.js / R3F 不进入首页、考试页等非 3D 页面的初始包。
@@ -228,6 +228,7 @@ function deriveViewerKind(
 
 export function ModuleDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const moduleData = getModuleById(id ?? "");
 
   // 3D logic
@@ -290,6 +291,18 @@ export function ModuleDetailPage() {
   const [viewerLoading, setViewerLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isGuidedMode, setIsGuidedMode] = useState(false);
+  const [pullingBuilderAtomId, setPullingBuilderAtomId] = useState<string>();
+
+  useEffect(() => {
+    if (!pullingBuilderAtomId || !moduleData?.builderSeedId) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => {
+      navigate(`/lab/organic-builder/${moduleData.builderSeedId}`, {
+        state: { detachAtomId: pullingBuilderAtomId, sourceModuleId: moduleData.id },
+      });
+    }, reducedMotion ? 40 : 320);
+    return () => window.clearTimeout(timer);
+  }, [moduleData, navigate, pullingBuilderAtomId]);
 
   useEffect(() => {
     setActiveStepIndex(0);
@@ -326,6 +339,7 @@ export function ModuleDetailPage() {
     setViewerLoading(true);
     setCompletedSteps(new Set());
     setIsGuidedMode(false);
+    setPullingBuilderAtomId(undefined);
     const timer = setTimeout(() => setViewerLoading(false), 300);
     return () => clearTimeout(timer);
   }, [id]);
@@ -523,7 +537,9 @@ export function ModuleDetailPage() {
         <EthylenePlanarCell
           loading={viewerLoading}
           mode={ethyleneMode}
+          onAtomPull={moduleData.builderSeedId ? setPullingBuilderAtomId : undefined}
           planeView={ethylenePlaneView}
+          pullingAtomId={pullingBuilderAtomId}
         />
       ),
       toolbar: () => (
@@ -545,7 +561,9 @@ export function ModuleDetailPage() {
         <BenzenePlanarCell
           loading={viewerLoading}
           mode={benzeneMode}
+          onAtomPull={moduleData.builderSeedId ? setPullingBuilderAtomId : undefined}
           planeView={benzenePlaneView}
+          pullingAtomId={pullingBuilderAtomId}
         />
       ),
       toolbar: () => (
@@ -568,6 +586,8 @@ export function ModuleDetailPage() {
           lineView={acetyleneLineView}
           loading={viewerLoading}
           mode={acetyleneMode}
+          onAtomPull={moduleData.builderSeedId ? setPullingBuilderAtomId : undefined}
+          pullingAtomId={pullingBuilderAtomId}
         />
       ),
       toolbar: () => (
@@ -589,6 +609,8 @@ export function ModuleDetailPage() {
         <OrganicCoplanarViewer
           activeMode={organicCoplanarMode}
           loading={viewerLoading}
+          onAtomPull={moduleData.builderSeedId ? setPullingBuilderAtomId : undefined}
+          pullingAtomId={pullingBuilderAtomId}
           showLabels={showOrganicLabels}
           vinylAligned={organicVinylAligned}
         />
@@ -899,7 +921,7 @@ export function ModuleDetailPage() {
   const spec = viewerRegistry[viewerKind];
 
   return (
-    <main className="motion-page-enter bg-background min-h-screen pb-20">
+    <main className={`motion-page-enter min-h-screen bg-background pb-20 transition-opacity duration-300 ${pullingBuilderAtomId ? "opacity-80" : "opacity-100"}`}>
       {/* 1. 顶部信息区 */}
       <div className="border-b border-border bg-white">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">

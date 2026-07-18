@@ -1,14 +1,6 @@
 import { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { AppHeader } from "@/components/common/AppHeader";
-import { HomePage } from "@/pages/HomePage";
-import { ModulesPage } from "@/pages/ModulesPage";
-import { ModuleDetailPage } from "@/pages/ModuleDetailPage";
-import { PathsPage } from "@/pages/PathsPage";
-
-import { ExamPage } from "@/pages/ExamPage";
-import { ExamTopicDetailPage } from "@/pages/ExamTopicDetailPage";
-import { AboutPage } from "@/pages/AboutPage";
 
 export default function App() {
   return (
@@ -16,17 +8,7 @@ export default function App() {
       <RouteScrollHandler />
       <AppHeader />
       <div className="pt-[60px] min-h-screen flex flex-col">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/modules" element={<ModulesPage />} />
-          <Route path="/paths" element={<PathsPage />} />
-          <Route path="/module/:id" element={<ModuleDetailPage />} />
-
-          <Route path="/exam" element={<ExamPage />} />
-          <Route path="/exam/:id" element={<ExamTopicDetailPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="*" element={<HomePage />} />
-        </Routes>
+        <Outlet />
       </div>
     </>
   );

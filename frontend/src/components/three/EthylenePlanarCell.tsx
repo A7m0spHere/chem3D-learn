@@ -11,6 +11,9 @@ import { htmlOverlaySp2LabelClass } from "@/components/three/htmlOverlayStyles";
 import { POrbitalPair, PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getEthylenePlanarModeInfo, type EthylenePlaneView } from "@/data/ethylenePlanar";
+import { ethyleneBuilderSeed } from "@/data/organicBuilderSeeds";
+import { usePullTransitionProgress } from "@/hooks/usePullTransitionProgress";
+import { applyAtomPullOffset } from "@/lib/atomPullTransition";
 import type { AngleSpec, Atom, Bond, EthylenePlanarMode } from "@/types/molecule";
 
 type Vec3 = [number, number, number];
@@ -19,24 +22,19 @@ type EthylenePlanarCellProps = {
   mode: EthylenePlanarMode;
   loading?: boolean;
   planeView?: EthylenePlaneView;
+  onAtomPull?: (atomId: string) => void;
+  pullingAtomId?: string;
 };
 
-const ethyleneAtoms: Atom[] = [
-  { id: "c1", element: "C", label: "C1", position: [-0.67, 0, 0], color: "#1F2933", radius: 0.22 },
-  { id: "c2", element: "C", label: "C2", position: [0.67, 0, 0], color: "#1F2933", radius: 0.22 },
-  { id: "h1", element: "H", label: "H", position: [-1.215, 0.944, 0], color: "#FFFFFF", radius: 0.15 },
-  { id: "h2", element: "H", label: "H", position: [-1.215, -0.944, 0], color: "#FFFFFF", radius: 0.15 },
-  { id: "h3", element: "H", label: "H", position: [1.215, 0.944, 0], color: "#FFFFFF", radius: 0.15 },
-  { id: "h4", element: "H", label: "H", position: [1.215, -0.944, 0], color: "#FFFFFF", radius: 0.15 },
-];
+const ethyleneAtoms: Atom[] = ethyleneBuilderSeed.atoms.map((candidate, index) => ({
+  ...candidate,
+  label: candidate.element === "C" ? `C${index + 1}` : candidate.element,
+}));
 
-const ethyleneBonds: Bond[] = [
-  { id: "c1-c2", atomIds: ["c1", "c2"], kind: "double", order: 2 },
-  { id: "c1-h1", atomIds: ["c1", "h1"], kind: "single", order: 1 },
-  { id: "c1-h2", atomIds: ["c1", "h2"], kind: "single", order: 1 },
-  { id: "c2-h3", atomIds: ["c2", "h3"], kind: "single", order: 1 },
-  { id: "c2-h4", atomIds: ["c2", "h4"], kind: "single", order: 1 },
-];
+const ethyleneBonds: Bond[] = ethyleneBuilderSeed.bonds.map((candidate) => ({
+  ...candidate,
+  kind: candidate.order === 2 ? "double" : "single",
+}));
 
 const angleSpecs: AngleSpec[] = [
   {
@@ -59,18 +57,25 @@ export function EthylenePlanarCell({
   mode,
   loading = false,
   planeView = "top",
+  onAtomPull,
+  pullingAtomId,
 }: EthylenePlanarCellProps) {
   const modeInfo = getEthylenePlanarModeInfo(mode);
+  const pullProgress = usePullTransitionProgress(pullingAtomId);
+  const displayAtoms = useMemo(
+    () => applyAtomPullOffset(ethyleneAtoms, pullingAtomId, pullProgress),
+    [pullProgress, pullingAtomId],
+  );
   const atomsById = useMemo(
-    () => new Map(ethyleneAtoms.map((atom) => [atom.id, atom])),
-    [],
+    () => new Map(displayAtoms.map((atom) => [atom.id, atom])),
+    [displayAtoms],
   );
   const cameraPosition = getCameraPosition(mode, planeView);
 
   return (
     <ThreeViewerFrame
       loading={loading}
-      meta="拖拽旋转 · 滚轮或触控板缩放"
+      meta={onAtomPull ? "拖动空白旋转 · 抓住原子进入拼装" : "拖拽旋转 · 滚轮或触控板缩放"}
       stageTestId="ethylene-planar-canvas"
       summary={modeInfo.summary}
       title={modeInfo.viewerTitle}
@@ -91,13 +96,20 @@ export function EthylenePlanarCell({
           <SceneLighting ambient={0.68} mainIntensity={1.35} mainPosition={[3.4, 4.6, 4.2]} secondaryIntensity={0.32} secondaryPosition={[-3.2, -2.4, 2.6]} />
           <group rotation={getSceneRotation(mode, planeView)} scale={1.02}>
             <ReferenceGeometry mode={mode} planeView={planeView} />
-            <MoleculeCore atomsById={atomsById} mode={mode} />
+            <MoleculeCore
+              atoms={displayAtoms}
+              atomsById={atomsById}
+              mode={mode}
+              onAtomPull={onAtomPull}
+              pullingAtomId={pullingAtomId}
+            />
             {mode === "overview" || mode === "angle" ? <Sp2Labels /> : null}
             {mode === "angle" ? <AngleOverlay atomsById={atomsById} /> : null}
             {mode === "piBond" ? <PiBondOverlay /> : null}
             {mode === "rotationLock" ? <RotationLockOverlay /> : null}
           </group>
           <OrbitControls
+            enabled={!pullingAtomId}
             enableDamping
             enablePan={false}
             makeDefault
@@ -111,11 +123,17 @@ export function EthylenePlanarCell({
 }
 
 function MoleculeCore({
+  atoms,
   atomsById,
   mode,
+  onAtomPull,
+  pullingAtomId,
 }: {
+  atoms: Atom[];
   atomsById: Map<string, Atom>;
   mode: EthylenePlanarMode;
+  onAtomPull?: (atomId: string) => void;
+  pullingAtomId?: string;
 }) {
   const focusedBondId = mode === "piBond" || mode === "rotationLock" ? "c1-c2" : "";
 
@@ -130,12 +148,14 @@ function MoleculeCore({
           radius={bond.id === "c1-c2" ? 0.032 : 0.026}
         />
       ))}
-      {ethyleneAtoms.map((atom) => (
+      {atoms.map((atom) => (
         <AtomMesh
           atom={atom}
           atomScale={1}
           isFocused={mode !== "overview" && atom.element === "C"}
+          isPulling={pullingAtomId === atom.id}
           key={atom.id}
+          onPullIntent={onAtomPull}
           showLabel={false}
         />
       ))}

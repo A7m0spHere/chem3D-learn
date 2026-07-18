@@ -13,6 +13,9 @@ import {
 } from "@/components/three/teachingLabelStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { getAcetyleneLinearModeInfo, type AcetyleneLineView } from "@/data/acetyleneLinear";
+import { acetyleneBuilderSeed } from "@/data/organicBuilderSeeds";
+import { usePullTransitionProgress } from "@/hooks/usePullTransitionProgress";
+import { applyAtomPullOffset } from "@/lib/atomPullTransition";
 import type { AcetyleneLinearMode, Atom, Bond } from "@/types/molecule";
 
 type Vec3 = [number, number, number];
@@ -21,36 +24,42 @@ type AcetyleneLinearCellProps = {
   mode: AcetyleneLinearMode;
   loading?: boolean;
   lineView?: AcetyleneLineView;
+  onAtomPull?: (atomId: string) => void;
+  pullingAtomId?: string;
 };
 
-const acetyleneAtoms: Atom[] = [
-  { id: "h1", element: "H", label: "H", position: [-1.72, 0, 0], color: "#FFFFFF", radius: 0.15 },
-  { id: "c1", element: "C", label: "C1", position: [-0.62, 0, 0], color: "#1F2933", radius: 0.22 },
-  { id: "c2", element: "C", label: "C2", position: [0.62, 0, 0], color: "#1F2933", radius: 0.22 },
-  { id: "h2", element: "H", label: "H", position: [1.72, 0, 0], color: "#FFFFFF", radius: 0.15 },
-];
+const acetyleneAtoms: Atom[] = acetyleneBuilderSeed.atoms.map((candidate) => ({
+  ...candidate,
+  label: candidate.id.startsWith("c") ? candidate.id.toUpperCase() : candidate.element,
+}));
 
-const acetyleneBonds: Bond[] = [
-  { id: "h1-c1", atomIds: ["h1", "c1"], kind: "single", order: 1 },
-  { id: "c1-c2", atomIds: ["c1", "c2"], kind: "triple", order: 3 },
-  { id: "c2-h2", atomIds: ["c2", "h2"], kind: "single", order: 1 },
-];
+const acetyleneBonds: Bond[] = acetyleneBuilderSeed.bonds.map((candidate) => ({
+  ...candidate,
+  kind: candidate.order === 3 ? "triple" : "single",
+}));
 
 export function AcetyleneLinearCell({
   mode,
   loading = false,
   lineView = "front",
+  onAtomPull,
+  pullingAtomId,
 }: AcetyleneLinearCellProps) {
   const modeInfo = getAcetyleneLinearModeInfo(mode);
+  const pullProgress = usePullTransitionProgress(pullingAtomId);
+  const displayAtoms = useMemo(
+    () => applyAtomPullOffset(acetyleneAtoms, pullingAtomId, pullProgress),
+    [pullProgress, pullingAtomId],
+  );
   const atomsById = useMemo(
-    () => new Map(acetyleneAtoms.map((atom) => [atom.id, atom])),
-    [],
+    () => new Map(displayAtoms.map((atom) => [atom.id, atom])),
+    [displayAtoms],
   );
 
   return (
     <ThreeViewerFrame
       loading={loading}
-      meta="拖拽旋转 · 滚轮或触控板缩放"
+      meta={onAtomPull ? "拖动空白旋转 · 抓住原子进入拼装" : "拖拽旋转 · 滚轮或触控板缩放"}
       stageTestId="acetylene-linear-canvas"
       summary={modeInfo.summary}
       title={modeInfo.viewerTitle}
@@ -70,13 +79,20 @@ export function AcetyleneLinearCell({
         <color attach="background" args={["#F7FAF9"]} />
         <SceneLighting ambient={0.68} mainIntensity={1.3} mainPosition={[3.6, 4.4, 4.8]} secondaryIntensity={0.34} secondaryPosition={[-3.2, -2.4, 2.4]} />
         <group rotation={getSceneRotation(mode, lineView)} scale={1.03}>
-          <AcetyleneCore atomsById={atomsById} mode={mode} />
+          <AcetyleneCore
+            atoms={displayAtoms}
+            atomsById={atomsById}
+            mode={mode}
+            onAtomPull={onAtomPull}
+            pullingAtomId={pullingAtomId}
+          />
           {mode === "line" ? <LineOverlay lineView={lineView} /> : null}
           {mode === "angle" ? <AngleOverlay /> : null}
           {mode === "piBond" ? <PiBondOverlay /> : null}
           {mode === "tripleBond" ? <TripleBondOverlay /> : null}
         </group>
         <OrbitControls
+          enabled={!pullingAtomId}
           enableDamping
           enablePan={false}
           makeDefault
@@ -90,11 +106,17 @@ export function AcetyleneLinearCell({
 }
 
 function AcetyleneCore({
+  atoms,
   atomsById,
   mode,
+  onAtomPull,
+  pullingAtomId,
 }: {
+  atoms: Atom[];
   atomsById: Map<string, Atom>;
   mode: AcetyleneLinearMode;
+  onAtomPull?: (atomId: string) => void;
+  pullingAtomId?: string;
 }) {
   const focusedBondId = mode === "piBond" || mode === "tripleBond" ? "c1-c2" : "";
 
@@ -109,12 +131,14 @@ function AcetyleneCore({
           radius={bond.id === "c1-c2" ? 0.028 : 0.026}
         />
       ))}
-      {acetyleneAtoms.map((atom) => (
+      {atoms.map((atom) => (
         <AtomMesh
           atom={atom}
           atomScale={1}
           isFocused={mode !== "overview" && atom.element === "C"}
+          isPulling={pullingAtomId === atom.id}
           key={atom.id}
+          onPullIntent={onAtomPull}
           showLabel={false}
         />
       ))}
