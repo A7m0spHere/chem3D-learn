@@ -1,0 +1,51 @@
+[
+  {
+    "text": "在结构化学里，很多问题不是算不出来，而是想象不出它的空间形状。",
+    "startMs": 500,
+    "endMs": 3700,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Chem3D Learn 把课本里的分子、晶体和轨道专题，变成可以亲手观察的三维结构。",
+    "startMs": 4200,
+    "endMs": 11600,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "可以按主题筛选，也可以直接搜索名称或化学式，快速找到正在学习的结构。",
+    "startMs": 12200,
+    "endMs": 20600,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "以甲烷为例，拖拽旋转、滚轮缩放，再打开键角标注，就能从不同方向理解正四面体和 109.5 度键角。",
+    "startMs": 21200,
+    "endMs": 36500,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "再把甲烷、氨和水放在一起比较，就能直观看见孤对电子如何让键角从 109.5 度逐步减小。",
+    "startMs": 37200,
+    "endMs": 49500,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "学习还可以继续延伸到氯化钠晶胞、配位关系、学习顺序和高考空间判断。",
+    "startMs": 50200,
+    "endMs": 57600,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "不必死记一个静止图。让每一个空间结构，都能亲手转一转。",
+    "startMs": 58200,
+    "endMs": 64500,
+    "timestampMs": null,
+    "confidence": null
+  }
+]
