@@ -170,7 +170,7 @@ export const examTopics: ExamTopic[] = [
   {
     id: "exam-mof",
     title: "MOF 多孔晶体",
-    description: "金属有机框架材料的空间拓扑网络与孔道结构初步认知。",
+    description: "需综合理解金属节点、有机连接体、空间拓扑与孔道结构，概念较抽象，对三维空间想象要求较高。",
     domain: "晶体化学",
     difficulty: "竞赛拓展",
     partition: "竞赛视野",
@@ -180,7 +180,7 @@ export const examTopics: ExamTopic[] = [
   {
     id: "exam-mxene",
     title: "MXene 二维层状材料",
-    description: "过渡金属碳化物二维剥离层状结构及表面端基空间分布。",
+    description: "需同时理解 MAX 前驱体、二维层状骨架与可变表面端基，结构层次较多，理解难度较高。",
     domain: "晶体化学",
     difficulty: "竞赛拓展",
     partition: "竞赛视野",
@@ -190,11 +190,12 @@ export const examTopics: ExamTopic[] = [
   {
     id: "exam-ren3",
     title: "ReN₃ 高压氮化物",
-    description: "非极性强共价晶格在高压环境下的特殊配位方式。",
+    description: "理论预测的 Imm2 高压相包含 N₃ 单元与 ReN₇ 局部多面体；有限费米能级态密度意味着不能简单称为非极性纯共价晶格。",
     domain: "晶体化学",
     difficulty: "竞赛拓展",
     partition: "竞赛视野",
-    status: "planned",
+    status: "ready",
+    route: "/module/ren3-high-pressure-nitride",
   },
   {
     id: "exam-xeo",

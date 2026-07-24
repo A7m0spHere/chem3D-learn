@@ -17,17 +17,17 @@ export function LonePairMesh({ atomsById, lonePair, showLabel = true }: LonePair
   const direction = target.clone().sub(center);
   const safeDirection = direction.lengthSq() > 0.0001 ? direction.normalize() : new Vector3(0, 1, 0);
   const directionTuple: [number, number, number] = [safeDirection.x, safeDirection.y, safeDirection.z];
-  const labelPosition = center.clone().add(safeDirection.clone().multiplyScalar(centerAtom ? 1.38 : 0.82));
+  const labelPosition = center.clone().add(safeDirection.clone().multiplyScalar(centerAtom ? 1.16 : 0.76));
 
   return (
     <group>
       <LonePairOrbital
         direction={directionTuple}
-        distance={centerAtom ? 0.5 : 0}
-        length={0.58}
-        opacity={0.42}
+        distance={centerAtom ? 0.44 : 0}
+        length={0.52}
+        opacity={0.36}
         origin={[center.x, center.y, center.z]}
-        width={0.25}
+        width={0.19}
       />
       {showLabel && lonePair.label ? (
         <Html center distanceFactor={7} pointerEvents="none" position={labelPosition}>

@@ -133,6 +133,115 @@
   animation: motion-skeleton 1.2s ease-in-out infinite;
 }
 
+/* --- Organic builder shared-stage transition --- */
+
+.module-builder-transition::after {
+  position: fixed;
+  z-index: 20;
+  inset: 60px 0 0;
+  background: rgba(247, 250, 249, 0.78);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms var(--ease-out-soft);
+}
+
+.module-builder-transition[data-builder-transition-phase="expanding"]::after {
+  opacity: 1;
+}
+
+.organic-builder-transition-source {
+  z-index: 21;
+  transform: scale(1);
+  transform-origin: center;
+  transition:
+    transform 120ms var(--ease-out-soft),
+    border-color 120ms ease,
+    box-shadow 120ms var(--ease-out-soft);
+}
+
+.module-builder-transition[data-builder-transition-phase="expanding"]
+  .organic-builder-transition-source {
+  border-color: rgba(42, 157, 143, 0.36);
+  box-shadow: 0 24px 70px rgba(31, 41, 51, 0.16);
+  transform: scale(1.012);
+}
+
+::view-transition-group(organic-builder-stage) {
+  z-index: 40;
+  animation-duration: 520ms;
+  animation-timing-function: var(--ease-out-soft);
+}
+
+::view-transition-image-pair(organic-builder-stage) {
+  overflow: clip;
+  border-radius: inherit;
+  isolation: isolate;
+}
+
+::view-transition-old(organic-builder-stage),
+::view-transition-new(organic-builder-stage) {
+  height: 100%;
+  mix-blend-mode: normal;
+  object-fit: cover;
+}
+
+::view-transition-old(organic-builder-stage) {
+  animation: organic-builder-stage-old 520ms var(--ease-out-soft) both;
+}
+
+::view-transition-new(organic-builder-stage) {
+  animation: organic-builder-stage-new 520ms var(--ease-out-soft) both;
+}
+
+html[data-organic-builder-transition="viewer-expand"]::view-transition-old(root) {
+  animation: organic-builder-root-old 520ms var(--ease-out-soft) both;
+}
+
+html[data-organic-builder-transition="viewer-expand"]::view-transition-new(root) {
+  animation: organic-builder-root-new 520ms var(--ease-out-soft) both;
+}
+
+@keyframes organic-builder-stage-old {
+  0%,
+  62% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes organic-builder-stage-new {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes organic-builder-root-old {
+  0%,
+  24% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes organic-builder-root-new {
+  0%,
+  56% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 /* --- Section 4: prefers-reduced-motion (global opt-out) --- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -142,5 +251,9 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .organic-builder-transition-source {
+    transform: none !important;
   }
 }

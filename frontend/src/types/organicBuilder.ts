@@ -2,6 +2,12 @@ export type BuilderElement = "C" | "H" | "O" | "N" | "F" | "Cl" | "Br" | "I";
 export type BuilderBondOrder = 1 | 2 | 3;
 export type BuilderVec3 = [number, number, number];
 
+export type OrganicBuilderNavigationState = {
+  detachAtomId?: string;
+  sourceModuleId?: string;
+  entryTransition?: "viewer-expand";
+};
+
 export type BuilderAtom = {
   id: string;
   element: BuilderElement;
@@ -42,6 +48,18 @@ export type ValidationResult = {
   completeAtomCount: number;
   totalAtomCount: number;
   issues: BuilderIssue[];
+};
+
+export type BuilderBondAngleMatch = {
+  id: string;
+  atomIds: [string, string, string];
+  centerAtomId: string;
+  centerElement: BuilderElement;
+  valueDeg: number;
+  label: string;
+  geometryZh: string;
+  hybridization: "sp" | "sp²" | "sp³";
+  descriptionZh: string;
 };
 
 export type KnownMolecule = {

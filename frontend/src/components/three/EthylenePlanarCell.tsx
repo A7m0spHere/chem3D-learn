@@ -143,7 +143,7 @@ function MoleculeCore({
         <BondMesh
           atomsById={atomsById}
           bond={bond}
-          isFocused={bond.id === focusedBondId}
+          isFocused={bond.id === focusedBondId || Boolean(pullingAtomId && bond.atomIds.includes(pullingAtomId))}
           key={bond.id}
           radius={bond.id === "c1-c2" ? 0.032 : 0.026}
         />
@@ -279,13 +279,13 @@ function PiBondOverlay() {
           />
         </group>
       ))}
-      <PiCloud center={[0, 0, 0.58]} tone="primary" />
-      <PiCloud center={[0, 0, -0.58]} tone="warm" />
+      <PiCloud center={[0, 0, 0.58]} />
+      <PiCloud center={[0, 0, -0.58]} />
     </>
   );
 }
 
-function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
+function PiCloud({ center }: { center: Vec3 }) {
   return (
     <group>
       <PiCloudBand
@@ -294,14 +294,10 @@ function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
         length={0.84}
         opacity={0.38}
         orientation="xy"
-        particleCount={240}
-        particleOpacity={0.44}
-        particleSize={0.021}
         phaseTone="same"
         seed={center[2] > 0 ? 307 : 317}
-        showParticles
         thickness={0.15}
-        tone={tone}
+        tone="warm"
         waist={0.34}
         width={0.26}
       />

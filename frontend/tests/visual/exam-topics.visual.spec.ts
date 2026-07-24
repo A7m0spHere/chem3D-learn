@@ -90,6 +90,23 @@ test.describe("能力扩展专题接线", () => {
     ).toBeVisible();
   });
 
+  test("ReN₃ 卡片已开放并直达高压预测相完整 3D 模块", async ({ page }) => {
+    await page.goto("/exam");
+
+    const ren3Card = page.locator("article").filter({ hasText: "ReN₃ 高压氮化物" });
+    const moduleLink = ren3Card.getByRole("link", { name: /进入专题/ });
+    await expect(ren3Card).toBeVisible();
+    await expect(ren3Card.getByText("已开放", { exact: true })).toBeVisible();
+    await expect(moduleLink).toHaveAttribute("href", "/module/ren3-high-pressure-nitride");
+
+    await moduleLink.click();
+    await expect(page).toHaveURL(/\/module\/ren3-high-pressure-nitride$/);
+    await expect(page.getByTestId("ren3-viewer")).toBeVisible();
+    await expect(
+      page.getByText("理论预测 Imm2 相的高压窗口、N₃ 单元与 ReN₇ 网络", { exact: true }),
+    ).toBeVisible();
+  });
+
   test("exam-diamond-si 从考试卡片进入详情页并连到金刚石 3D 模块", async ({ page }) => {
     await page.goto("/exam");
 

@@ -11,6 +11,7 @@ import { PathsPage } from "@/pages/PathsPage";
 export const appRouter = createBrowserRouter([
   {
     element: <App />,
+    hydrateFallbackElement: <RouteHydrateFallback />,
     children: [
       { path: "/", element: <HomePage /> },
       { path: "/modules", element: <ModulesPage /> },
@@ -30,3 +31,13 @@ export const appRouter = createBrowserRouter([
     ],
   },
 ]);
+
+function RouteHydrateFallback() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="motion-fade-in rounded-full border border-border bg-white px-5 py-3 text-sm font-semibold text-text-secondary shadow-sm">
+        正在加载 3D 学习空间…
+      </div>
+    </main>
+  );
+}

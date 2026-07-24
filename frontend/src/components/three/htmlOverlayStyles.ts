@@ -17,7 +17,7 @@ export const htmlOverlayAngleLabelClass =
   "inline-flex whitespace-nowrap rounded-full border border-accent/75 bg-[#FFF8F1]/95 px-2.5 py-1 text-xs font-bold leading-none text-[#9A4E13] shadow-[0_3px_10px_rgba(154,78,19,0.16)] ring-1 ring-white/90";
 
 export const htmlOverlayLonePairLabelClass =
-  "inline-flex items-center whitespace-nowrap rounded-full border border-blue-200 bg-[#F5F9FF]/95 px-2 py-1 text-xs font-bold leading-none text-[#1D4ED8] shadow-[0_3px_10px_rgba(29,78,216,0.14)] ring-1 ring-white/90 before:mr-1 before:content-['··']";
+  "inline-flex items-center whitespace-nowrap rounded-full border border-blue-200 bg-[#F5F9FF]/95 px-2 py-1 text-xs font-bold leading-none text-[#1D4ED8] shadow-[0_3px_10px_rgba(29,78,216,0.14)] ring-1 ring-white/90";
 
 export const htmlOverlaySubtleLabelClass =
   "rounded border border-primary/10 bg-white/50 px-1 py-0.5 text-[11px] font-semibold text-text-primary/70 shadow-[0_1px_3px_rgba(31,41,51,0.04)]";

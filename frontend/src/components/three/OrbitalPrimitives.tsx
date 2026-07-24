@@ -54,19 +54,18 @@ export function OrbitalSurface({
   const colors = toneColors[tone];
 
   return (
-    <mesh geometry={geometry} position={position} quaternion={quaternion}>
-      <meshPhysicalMaterial
-        clearcoat={0.5}
-        clearcoatRoughness={0.18}
-        color={colors.main}
-        depthWrite={false}
-        emissive={colors.light}
-        emissiveIntensity={0.08}
-        opacity={opacity}
-        roughness={0.34}
-        transparent
-      />
-    </mesh>
+    <group position={position} quaternion={quaternion}>
+      <mesh geometry={geometry}>
+        <meshPhysicalMaterial
+          color={colors.main}
+          depthTest
+          depthWrite={false}
+          opacity={opacity}
+          roughness={0.58}
+          transparent
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -122,10 +121,16 @@ export function SOrbitalCloud({
   radius = 0.42,
   opacity = 0.34,
   tone = "primary",
-  renderStyle = "mixed",
+  renderStyle = "surface",
   seed = 17,
 }: SOrbitalCloudProps) {
-  const cloudGeometry = useDisposable(() => createSphereCloudGeometry(radius * 1.02, 180, seed), [radius, seed]);
+  const cloudGeometry = useDisposable(
+    () =>
+      renderStyle === "surface"
+        ? createPointCloudGeometry([])
+        : createSphereCloudGeometry(radius * 1.02, 180, seed),
+    [radius, renderStyle, seed],
+  );
   const colors = toneColors[tone];
 
   return (
@@ -134,13 +139,11 @@ export function SOrbitalCloud({
         <mesh>
           <sphereGeometry args={[radius, 48, 32]} />
           <meshPhysicalMaterial
-            clearcoat={0.3}
-            color={colors.light}
+            color={colors.main}
+            depthTest
             depthWrite={false}
-            emissive={colors.light}
-            emissiveIntensity={0.05}
             opacity={opacity}
-            roughness={0.36}
+            roughness={0.58}
             transparent
           />
         </mesh>
@@ -148,8 +151,8 @@ export function SOrbitalCloud({
       {renderStyle !== "surface" ? (
         <DeterministicPointCloud
           geometry={cloudGeometry}
-          opacity={Math.min(0.62, opacity * 1.25)}
-          size={0.022}
+          opacity={Math.min(0.7, opacity * 1.4)}
+          size={0.026}
           tone={tone}
         />
       ) : null}
@@ -177,8 +180,8 @@ export function POrbitalPair({
   width = 0.2,
   opacity = 0.46,
   positiveTone = "primary",
-  negativeTone = "warm",
-  renderStyle = "mixed",
+  negativeTone = "primary",
+  renderStyle = "surface",
   showAxis = true,
   seed = 31,
 }: POrbitalPairProps) {
@@ -186,12 +189,18 @@ export function POrbitalPair({
   const normalized = useMemo(() => normalize([dx, dy, dz]), [dx, dy, dz]);
   const negativeDirection = useMemo(() => scale(normalized, -1), [normalized]);
   const positiveGeometry = useDisposable(
-    () => createLobeCloudGeometry(normalized, length, width, 120, seed),
-    [length, normalized, seed, width],
+    () =>
+      renderStyle === "surface"
+        ? createPointCloudGeometry([])
+        : createLobeCloudGeometry(normalized, length, width, 120, seed),
+    [length, normalized, renderStyle, seed, width],
   );
   const negativeGeometry = useDisposable(
-    () => createLobeCloudGeometry(negativeDirection, length, width, 120, seed + 73),
-    [length, negativeDirection, seed, width],
+    () =>
+      renderStyle === "surface"
+        ? createPointCloudGeometry([])
+        : createLobeCloudGeometry(negativeDirection, length, width, 120, seed + 73),
+    [length, negativeDirection, renderStyle, seed, width],
   );
 
   return (
@@ -217,7 +226,7 @@ export function POrbitalPair({
           <OrbitalSurface
             direction={negativeDirection}
             length={length}
-            opacity={opacity * 0.78}
+            opacity={opacity}
             tone={negativeTone}
             width={width}
           />
@@ -233,8 +242,8 @@ export function POrbitalPair({
           />
           <DeterministicPointCloud
             geometry={negativeGeometry}
-            opacity={opacity * 0.72}
-            size={0.022}
+            opacity={opacity * 0.86}
+            size={0.023}
             tone={negativeTone}
           />
         </>
@@ -276,10 +285,10 @@ export function PiCloudBand({
   particleOpacity = 0.44,
   particleSize = 0.018,
   phaseTone = "same",
-  showParticles = false,
+  showParticles = true,
   opacity = 0.2,
   tone = "primary",
-  renderStyle = "mixed",
+  renderStyle = "surface",
   seed = 101,
 }: PiCloudBandProps) {
   const dimensions = resolvePiCloudDimensions({
@@ -291,15 +300,17 @@ export function PiCloudBand({
   });
   const surfaceGeometry = useDisposable(
     () =>
-      createPiCloudSurfaceGeometry({
-        cloudStyle,
-        length: dimensions.length,
-        orientation: dimensions.orientation,
-        phaseTone,
-        thickness: dimensions.thickness,
-        waist,
-        width: dimensions.width,
-      }),
+      renderStyle === "cloud"
+        ? new BufferGeometry()
+        : createPiCloudSurfaceGeometry({
+            cloudStyle,
+            length: dimensions.length,
+            orientation: dimensions.orientation,
+            phaseTone,
+            thickness: dimensions.thickness,
+            waist,
+            width: dimensions.width,
+          }),
     [
       cloudStyle,
       dimensions.length,
@@ -307,12 +318,14 @@ export function PiCloudBand({
       dimensions.thickness,
       dimensions.width,
       phaseTone,
+      renderStyle,
       waist,
     ],
   );
   const particlePositions = useMemo(
-    () =>
-      createPiCloudParticlePositions({
+    () => {
+      if (!showParticles || renderStyle === "surface") return [];
+      return createPiCloudParticlePositions({
         count: Math.min(96, Math.max(24, Math.round(particleCount / 4))),
         length: dimensions.length,
         orientation: dimensions.orientation,
@@ -320,19 +333,21 @@ export function PiCloudBand({
         thickness: dimensions.thickness,
         waist,
         width: dimensions.width,
-      }),
+      });
+    },
     [
       dimensions.length,
       dimensions.orientation,
       dimensions.thickness,
       dimensions.width,
       particleCount,
+      renderStyle,
       seed,
+      showParticles,
       waist,
     ],
   );
   const colors = toneColors[tone];
-  const floatsAboveAtoms = cloudStyle === "overlap-lobes";
   const particleGeometry = useDisposable(
     () => createPointCloudGeometry(particlePositions),
     [particlePositions],
@@ -341,17 +356,14 @@ export function PiCloudBand({
   return (
     <group position={center}>
       {renderStyle !== "cloud" ? (
-        <mesh geometry={surfaceGeometry} renderOrder={floatsAboveAtoms ? 8 : 0}>
+        <mesh geometry={surfaceGeometry}>
           <meshPhysicalMaterial
-            clearcoat={0.5}
-            clearcoatRoughness={0.18}
             color={colors.main}
-            depthTest={!floatsAboveAtoms}
+            depthTest
             depthWrite={false}
-            emissive={colors.light}
-            emissiveIntensity={0.08}
+            forceSinglePass
             opacity={opacity}
-            roughness={0.32}
+            roughness={0.58}
             side={DoubleSide}
             transparent
           />
@@ -487,49 +499,40 @@ function createPiOverlapLobeGeometry({
   orientation: PiCloudOrientation;
   phaseTone: PiPhaseTone;
 }) {
-  const rings = 30;
-  const segments = 44;
+  const rings = 52;
+  const segments = 48;
   const positions: number[] = [];
   const indices: number[] = [];
-  const lobeOffset = length * 0.72;
-  const lobeLength = length * (0.78 + 0.05 * waist);
-  const lobeWidth = width * 1.02;
-  const lobeThickness = Math.max(thickness, width * 0.32);
+  const halfLength = length * 0.86;
+  const phaseScale = phaseTone === "opposite" ? 0.98 : 1;
 
-  for (const side of [-1, 1]) {
-    const lobeStart = positions.length / 3;
-    const origin = side * lobeOffset;
-    const direction = -side;
-    const phaseShift = phaseTone === "opposite" && side > 0 ? 0.08 : 0;
+  for (let ring = 0; ring <= rings; ring += 1) {
+    const u = -1 + (ring / rings) * 2;
+    const endTaper = Math.pow(Math.max(0, 1 - u * u), 0.42);
+    const centerPinch = 1 - waist * Math.exp(-((u / 0.3) ** 2));
+    const lobeBoost = 0.88 + 0.18 * Math.exp(-(((Math.abs(u) - 0.5) / 0.3) ** 2));
+    const lateralRadius = width * endTaper * centerPinch * lobeBoost;
+    const normalRadius =
+      Math.max(thickness, width * 0.32) * endTaper * (0.84 + 0.16 * centerPinch) * phaseScale;
+    const centerLine = u * halfLength;
 
-    for (let ring = 0; ring <= rings; ring += 1) {
-      const t = ring / rings;
-      const centerLine = origin + direction * lobeLength * t;
-      const taperToOverlap = Math.pow(Math.max(0, 1 - t * 0.18), 0.4);
-      const profile = Math.pow(Math.sin(Math.PI * t), 0.56) * (0.34 + 0.86 * t);
-      const radius = lobeWidth * profile * taperToOverlap;
-      const normalRadius = lobeThickness * profile * (0.76 + 0.24 * t);
-
-      for (let segment = 0; segment <= segments; segment += 1) {
-        const phi = (Math.PI * 2 * segment) / segments + phaseShift;
-        const lateral = Math.cos(phi) * radius;
-        const normal = Math.sin(phi) * normalRadius;
-        positions.push(...mapPiCloudPoint(orientation, centerLine, lateral, normal));
-      }
+    for (let segment = 0; segment <= segments; segment += 1) {
+      const phi = (Math.PI * 2 * segment) / segments;
+      const lateral = Math.cos(phi) * lateralRadius;
+      const normal = Math.sin(phi) * normalRadius;
+      positions.push(...mapPiCloudPoint(orientation, centerLine, lateral, normal));
     }
+  }
 
-    const ringSize = segments + 1;
-
-    for (let ring = 0; ring < rings; ring += 1) {
-      for (let segment = 0; segment < segments; segment += 1) {
-        const a = lobeStart + ring * ringSize + segment;
-        const b = a + ringSize;
-        const c = a + 1;
-        const d = b + 1;
-
-        indices.push(a, b, c);
-        indices.push(b, d, c);
-      }
+  const ringSize = segments + 1;
+  for (let ring = 0; ring < rings; ring += 1) {
+    for (let segment = 0; segment < segments; segment += 1) {
+      const a = ring * ringSize + segment;
+      const b = a + ringSize;
+      const c = a + 1;
+      const d = b + 1;
+      indices.push(a, b, c);
+      indices.push(b, d, c);
     }
   }
 
@@ -728,19 +731,15 @@ export function LonePairOrbital({
   width = 0.24,
   opacity = 0.42,
   tone = "blue",
-  electronTones = ["neutral", "warm"],
+  electronTones = ["blue", "blue"],
 }: LonePairOrbitalProps) {
   const [dx, dy, dz] = direction;
   const normalized = useMemo(() => normalize([dx, dy, dz]), [dx, dy, dz]);
-  const cloudGeometry = useDisposable(
-    () => createLobeCloudGeometry(normalized, length, width, 120, 317),
-    [length, normalized, width],
-  );
   const { electronOne, electronTwo } = useMemo(() => {
-    const [basisA, basisB] = makeBasis(vectorFromVec(normalized));
+    const [basisA] = makeBasis(vectorFromVec(normalized));
     return {
-      electronOne: add(scale(normalized, 0.18), toVec3(basisA.clone().multiplyScalar(-0.075).add(basisB.clone().multiplyScalar(0.03)))),
-      electronTwo: add(scale(normalized, 0.18), toVec3(basisA.clone().multiplyScalar(0.075).add(basisB.clone().multiplyScalar(-0.03)))),
+      electronOne: add(scale(normalized, 0.22), toVec3(basisA.clone().multiplyScalar(-0.078))),
+      electronTwo: add(scale(normalized, 0.22), toVec3(basisA.clone().multiplyScalar(0.078))),
     };
   }, [normalized]);
   const center = add(origin, scale(normalized, distance));
@@ -754,14 +753,8 @@ export function LonePairOrbital({
         tone={tone}
         width={width}
       />
-      <DeterministicPointCloud
-        geometry={cloudGeometry}
-        opacity={opacity * 0.86}
-        size={0.023}
-        tone={tone}
-      />
-      <ElectronDot position={electronOne} tone={electronTones[0]} />
-      <ElectronDot position={electronTwo} tone={electronTones[1]} />
+      <ElectronDot position={electronOne} radius={0.045} tone={electronTones[0]} />
+      <ElectronDot position={electronTwo} radius={0.045} tone={electronTones[1]} />
     </group>
   );
 }

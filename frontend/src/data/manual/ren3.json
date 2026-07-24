@@ -1,0 +1,173 @@
+{
+  "id": "ren3",
+  "kind": "crystal",
+  "formula": "ReN₃",
+  "names": {
+    "zh": "ReN₃ 高压氮化物（Imm2 理论预测相）",
+    "en": "Predicted high-pressure Imm2 ReN3"
+  },
+  "nameZh": "ReN₃ 高压氮化物（Imm2 理论预测相）",
+  "category": "crystal",
+  "summaryZh": "Imm2-ReN₃ 是计算预测的氮富集高压相。其结构包含 ReN₇ 七配位多面体和 N1–N2–N1 三氮单元，并通过 Re–N 与 N–N 方向性连接形成三维周期网络。",
+  "atoms": [
+    { "id": "re-2b-seed", "element": "Re", "label": "Re 2b", "position": [0.5, 0, 0.3466], "radius": 0.15, "color": "#64748B" },
+    { "id": "n1-4c-seed", "element": "N", "label": "N1 4c", "position": [0.21, 0.5, 0.2455], "radius": 0.1, "color": "#2563EB" },
+    { "id": "n2-2b-seed", "element": "N", "label": "N2 2b", "position": [0, 0.5, 0.4123], "radius": 0.1, "color": "#2563EB" }
+  ],
+  "bonds": [],
+  "coordinationLinks": [],
+  "lonePairs": [],
+  "keyAngles": [],
+  "crystal": {
+    "typeZh": "氮富集过渡金属氮化物理论预测相",
+    "latticeZh": "正交 Imm2；0 GPa 松弛参考参数 a=5.25 Å、b=2.81 Å、c=4.75 Å",
+    "coordination": "Re：7 个 N 最近邻；N1–N2–N1 构成三氮连接单元",
+    "unitCellCount": {
+      "re": 2,
+      "n": 6
+    },
+    "formulaExplanationZh": "常规 Imm2 晶胞中 Re 位点 multiplicity 为 2；N1 4c 与 N2 2b 共给出 6 个 N，因此 2 Re : 6 N 化简为 ReN₃。"
+  },
+  "lessonSteps": [
+    {
+      "id": "pressure-window",
+      "titleZh": "先分清计算预测与实验确认",
+      "bodyZh": "原始结构搜索预测 Imm2-ReN₃ 在约 38.3–100 GPa 的研究范围内进入稳定区；本模块不把它表述成已经实验确认合成的 Imm2 相。"
+    },
+    {
+      "id": "orthorhombic-cell",
+      "titleZh": "读取正交晶胞与周期关系",
+      "bodyZh": "论文公布的 0 GPa 松弛参考晶胞满足 a≠b≠c。由镜面对称和 I 心平移可生成 2 个 Re 与 6 个 N。"
+    },
+    {
+      "id": "tri-nitrogen",
+      "titleZh": "找出 N1–N2–N1 三氮单元",
+      "bodyZh": "一个 N2 位点连接两个 N1 位点，形成折线形 N₃ 结构单元；它属于延展晶体，不是图外独立存在的小分子。"
+    },
+    {
+      "id": "re-seven-coordinate",
+      "titleZh": "以 Re 为中心数七个最近邻",
+      "bodyZh": "按 0 GPa 参考坐标计算，代表性 Re 周围有 7 个距离不超过 2.25 Å 的 N 最近邻，可抽象为 ReN₇ 七配位多面体。"
+    },
+    {
+      "id": "polyhedral-network",
+      "titleZh": "把局部多面体接回周期网络",
+      "bodyZh": "相邻 ReN₇ 多面体通过共享 N 位点与 N₃ 单元连接，形成三维延展网络，而不是互不相连的 ReN₇ 分子。"
+    },
+    {
+      "id": "formula-property",
+      "titleZh": "最后由位点数得到 ReN₃",
+      "bodyZh": "常规晶胞含 2 Re 和 6 N，即 2 个 ReN₃。氮富集与 Re–N/N–N 方向性网络有助于解释预测的力学增强，但不等于材料是纯共价绝缘体。"
+    }
+  ],
+  "rendering": {
+    "cameraPosition": [5.2, 3.8, 6.2],
+    "cameraFov": 39,
+    "showAtomLabels": false
+  },
+  "metadata": {
+    "level": "high-school",
+    "source": "Zhao et al., Scientific Reports 4, 4797 (2014), DOI 10.1038/srep04797; Bykov et al., Angewandte Chemie International Edition 57, 9048-9053 (2018), DOI 10.1002/anie.201805152; hand-authored teaching model",
+    "notesZh": "仅模拟 2014 年结构搜索提出的 Imm2-ReN₃。晶格参数与分数坐标采用论文表中的 0 GPa 松弛参考值；压力视图只表达计算稳定范围，不模拟压力下的连续晶格收缩。",
+    "verified": true
+  },
+  "crystalTeaching": {
+    "currentModelZh": "Imm2-ReN₃ 理论预测相",
+    "structureTypeZh": "氮富集高压氮化物三维多面体网络",
+    "modelZh": "0 GPa 松弛参考晶胞 + 约 38.3–100 GPa 计算稳定窗口",
+    "coordinationNumberZh": "Re：N 七配位；N1–N2–N1：三氮连接单元",
+    "spatialFeatureLabelZh": "局部单元与周期网络",
+    "spatialFeatureZh": "ReN₇ 七配位多面体与折线形 N₃ 单元相互连接，构成包含 Re–N 和 N–N 方向性连接的三维周期结构",
+    "teachingTipZh": "模型边界：Imm2-ReN₃ 是理论预测结构。0 GPa 参数用于课堂观察，并不表示该相在常压已经实验合成；强方向性连接也不等于完全没有金属性。",
+    "unitCellDescriptionZh": "常规 Imm2 晶胞由 Re 2b、N1 4c 和 N2 2b 位点生成，共含 2 Re + 6 N = 2 ReN₃。位点 multiplicity 用于计数，不能直接数周期边界上为展示而补画的球。",
+    "particleCountZh": {
+      "lines": [
+        "Re：2b → 2",
+        "N：4c + 2b → 4 + 2 = 6",
+        "2 Re + 6 N = 2 ReN₃",
+        "化简得到 Re:N = 1:3"
+      ],
+      "ratio": "常规晶胞含 2 个化学式单位；局部 ReN₇ 表示配位环境，不是 ReN₇ 化学式。"
+    },
+    "coordinationDescriptionZh": [
+      "代表性 Re 周围有 7 个 N 最近邻，其中 6 个来自 N1 4c 位点，1 个来自 N2 2b 位点。",
+      "N2 与两个 N1 形成 N1–N2–N1 三氮单元；由论文坐标计算的短 N–N 距离约为 1.36 Å。",
+      "ReN₇ 多面体和 N₃ 单元在三个方向周期延展，构成三维网络。"
+    ],
+    "commonMistakesZh": [
+      "ReN₇ 是以 Re 为中心的七配位局部多面体，不是该晶体的化学式。",
+      "图中的 N₃ 是晶体网络中的连接单元，不能仅凭结构示意把它当作自由 N₃ 分子或直接指定固定电荷。",
+      "约 38.3–100 GPa 是计算预测稳定范围，不代表 Imm2-ReN₃ 已在该范围被实验确认合成。",
+      "方向性 Re–N/N–N 连接增强不等于纯共价绝缘体；计算仍给出有限费米能级态密度。"
+    ],
+    "observationGuide": {
+      "titleZh": "课堂观察顺序",
+      "subtitleZh": "先确认预测边界，再从局部单元走向三维网络。",
+      "steps": [
+        {
+          "labelZh": "第 1 步",
+          "titleZh": "先读高压窗口与模型身份",
+          "bodyZh": "确认约 38.3–100 GPa 是计算稳定区，当前展示的是理论预测的 Imm2 相。",
+          "modeId": "pressure"
+        },
+        {
+          "labelZh": "第 2 步",
+          "titleZh": "在晶胞中找 N₃ 和 ReN₇",
+          "bodyZh": "先看三个晶格轴，再分别隔离三氮单元与一个 Re 的七个 N 最近邻。",
+          "modeId": "coordination"
+        },
+        {
+          "labelZh": "第 3 步",
+          "titleZh": "把多面体接回周期网络",
+          "bodyZh": "观察共享 N 位点和 N–N 连接如何把局部多面体扩展到三维。",
+          "modeId": "polyhedron"
+        },
+        {
+          "labelZh": "第 4 步",
+          "titleZh": "按位点 multiplicity 完成计数",
+          "bodyZh": "用 2b、4c、2b 得到 2 Re 与 6 N，再区分化学式、局部配位和性质趋势。",
+          "modeId": "counting"
+        }
+      ],
+      "teacherPromptZh": "如果看到 ReN₇ 多面体，你能否解释为什么晶体化学式仍是 ReN₃，并指出哪些结论来自计算预测而不是实验确认？"
+    },
+    "viewModes": [
+      {
+        "id": "pressure",
+        "labelZh": "高压窗口",
+        "titleZh": "计算预测的稳定压力范围",
+        "bodyZh": "结构搜索预测 Imm2-ReN₃ 在约 38.3–100 GPa 的研究区间内进入稳定区。压力条只表达计算结果，不按比例改变晶格。"
+      },
+      {
+        "id": "cell",
+        "labelZh": "正交晶胞",
+        "titleZh": "Imm2 常规晶胞与三条晶格轴",
+        "bodyZh": "使用论文公布的 0 GPa 松弛参考参数 a=5.25 Å、b=2.81 Å、c=4.75 Å，由镜面对称和 I 心平移生成完整位点。"
+      },
+      {
+        "id": "covalentNetwork",
+        "labelZh": "N₃ 单元",
+        "titleZh": "折线形 N1–N2–N1 连接单元",
+        "bodyZh": "N2 位于两个 N1 之间，两条短 N–N 距离约为 1.36 Å。它是三维晶体网络的一部分，不是独立小分子。"
+      },
+      {
+        "id": "coordination",
+        "labelZh": "Re 七配位",
+        "titleZh": "ReN₇ 七配位局部多面体",
+        "bodyZh": "突出一个 Re 与 7 个 N 最近邻。半透明表面和轮廓帮助辨认局部几何，辅助线不额外指定统一键级。"
+      },
+      {
+        "id": "polyhedron",
+        "labelZh": "多面体网络",
+        "titleZh": "共享 N 位点的三维周期网络",
+        "bodyZh": "多个 ReN₇ 多面体通过共享 N 位点与 N₃ 单元相连，形成周期延展的三维结构，而不是离散分子。"
+      },
+      {
+        "id": "counting",
+        "labelZh": "组成与性质",
+        "titleZh": "由位点 multiplicity 得到 ReN₃",
+        "bodyZh": "Re 2b 给出 2 个 Re；N1 4c 与 N2 2b 共给出 6 个 N，因此常规晶胞含 2 ReN₃。方向性网络对应预测的力学增强趋势。"
+      }
+    ]
+  }
+}

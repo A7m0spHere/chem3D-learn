@@ -1,21 +1,30 @@
-import { AlertCircle, CheckCircle2, FlaskConical, Info, Network } from "lucide-react";
-import type { KnownMolecule, ValidationResult } from "@/types/organicBuilder";
+import { AlertCircle, CheckCircle2, FlaskConical, Info, Network, Sparkles } from "lucide-react";
+import type { OrganicSystematicNameResult } from "@/lib/organicBuilderNomenclature";
+import type {
+  BuilderBondAngleMatch,
+  KnownMolecule,
+  ValidationResult,
+} from "@/types/organicBuilder";
 
 type OrganicBuilderInfoPanelProps = {
+  bondAngles: BuilderBondAngleMatch[];
   formula: string;
   functionalGroups: string[];
   knownMolecule?: KnownMolecule;
   relativeMass: number;
   seedNoteZh?: string;
+  systematicName?: OrganicSystematicNameResult;
   validation: ValidationResult;
 };
 
 export function OrganicBuilderInfoPanel({
+  bondAngles,
   formula,
   functionalGroups,
   knownMolecule,
   relativeMass,
   seedNoteZh,
+  systematicName,
   validation,
 }: OrganicBuilderInfoPanelProps) {
   const progress = validation.totalAtomCount === 0
@@ -25,10 +34,16 @@ export function OrganicBuilderInfoPanel({
   const primaryIssues = [...validation.issues]
     .sort((first, second) => issuePriority[first.kind] - issuePriority[second.kind])
     .slice(0, 4);
+  const generatedName = systematicName?.status === "generated" ? systematicName : undefined;
+  const hasResolvedName = Boolean(knownMolecule || generatedName);
+  const pendingNameReason = systematicName?.status === "not-ready"
+    ? systematicName.reasonZh
+    : "完成价态并连接为一个整体后，系统会先匹配教学词典，再按本地规则生成名称。";
+  const angleGroups = groupBondAngleMatches(bondAngles);
 
   return (
     <aside className="space-y-4" data-testid="organic-builder-info">
-      <section className="rounded-2xl border border-border bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl">
         <div className="flex items-center gap-2 text-primary-dark">
           <FlaskConical className="h-5 w-5" />
           <h2 className="font-bold">结构信息</h2>
@@ -41,15 +56,59 @@ export function OrganicBuilderInfoPanel({
         </div>
       </section>
 
-      <section className={`rounded-2xl border p-5 shadow-sm ${knownMolecule ? "border-primary/30 bg-primary/5" : "border-border bg-white"}`}>
+      {angleGroups.length > 0 ? (
+        <section
+          className="rounded-2xl border border-accent/30 bg-white/92 p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl"
+          data-testid="builder-bond-angle-matches"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-primary-dark">
+              <Network className="h-5 w-5" />
+              <h2 className="font-bold">自动键角匹配</h2>
+            </div>
+            <span className="rounded-full bg-accent/15 px-2.5 py-1 text-xs font-bold text-amber-800">结构完整</span>
+          </div>
+          <div className="mt-4 space-y-2.5">
+            {angleGroups.map((group) => (
+              <div
+                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2.5"
+                key={group.key}
+              >
+                <div className="min-w-0">
+                  <div className="font-bold text-text-primary">{group.geometryZh} · {group.hybridization}</div>
+                  <div className="mt-0.5 text-xs text-text-secondary">
+                    {group.centerElements.join("/")} 中心 · {group.count} 处
+                  </div>
+                </div>
+                <div className="shrink-0 text-base font-black text-accent">{group.label}</div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs leading-5 text-text-secondary">
+            依据局部连接、键级和中性价态匹配典型教学值；不是对当前坐标进行量化计算得到的实测键角。
+          </p>
+        </section>
+      ) : null}
+
+      <section className={`rounded-2xl border p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl ${hasResolvedName ? "border-primary/30 bg-primary/10" : "border-white/80 bg-white/90"}`}>
         <div className="flex items-start gap-3">
           {knownMolecule ? (
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+          ) : generatedName ? (
+            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           ) : (
             <Info className="mt-0.5 h-5 w-5 shrink-0 text-text-secondary" />
           )}
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary">精确结构识别</div>
+          <div className="min-w-0">
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary">
+              {knownMolecule
+                ? "精确结构识别"
+                : generatedName
+                  ? "系统命名（本地基础规则）"
+                  : systematicName?.status === "unsupported"
+                    ? "系统命名"
+                    : "结构名称"}
+            </div>
             {knownMolecule ? (
               <>
                 <h3 className="mt-1 text-xl font-black text-text-primary" data-testid="builder-known-name">
@@ -58,11 +117,45 @@ export function OrganicBuilderInfoPanel({
                 <p className="text-sm text-text-secondary">{knownMolecule.nameEn} · {knownMolecule.categoryZh}</p>
                 <p className="mt-3 text-sm leading-6 text-text-primary">{knownMolecule.summaryZh}</p>
               </>
+            ) : generatedName ? (
+              <>
+                <h3 className="mt-1 break-words text-xl font-black text-text-primary" data-testid="builder-systematic-name">
+                  {generatedName.nameZh}
+                </h3>
+                <p className="break-words text-sm text-text-secondary">
+                  {generatedName.nameEn} · {generatedName.categoryZh}
+                </p>
+                {generatedName.teachingAlias ? (
+                  <div
+                    className="mt-3 rounded-xl border border-primary/20 bg-white/70 px-3 py-2.5"
+                    data-testid="builder-position-alias"
+                  >
+                    <div className="text-xs font-semibold text-primary-dark">位次教学别名</div>
+                    <p className="mt-1 text-sm font-bold text-text-primary">
+                      {generatedName.teachingAlias.descriptorZh} · {generatedName.teachingAlias.descriptorEn}
+                    </p>
+                    {generatedName.teachingAlias.nameZh ? (
+                      <p className="mt-1 text-sm text-text-primary">{generatedName.teachingAlias.nameZh}</p>
+                    ) : null}
+                    {generatedName.teachingAlias.nameEn ? (
+                      <p className="break-words text-xs text-text-secondary">{generatedName.teachingAlias.nameEn}</p>
+                    ) : null}
+                  </div>
+                ) : null}
+                <p className="mt-3 text-sm leading-6 text-text-primary">{generatedName.noteZh}</p>
+              </>
+            ) : systematicName?.status === "unsupported" ? (
+              <>
+                <h3 className="mt-1 font-bold text-text-primary" data-testid="builder-name-unsupported">
+                  超出当前命名范围
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-text-secondary">{systematicName.reasonZh}</p>
+              </>
             ) : (
               <>
-                <h3 className="mt-1 font-bold text-text-primary">暂未收录该结构名称</h3>
+                <h3 className="mt-1 font-bold text-text-primary">完成结构后生成名称</h3>
                 <p className="mt-2 text-sm leading-6 text-text-secondary">
-                  系统不会只按分子式猜名称。完成价态并连接为一个整体后，才会与教学词典进行精确匹配。
+                  {pendingNameReason}
                 </p>
               </>
             )}
@@ -70,7 +163,7 @@ export function OrganicBuilderInfoPanel({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Network className="h-5 w-5 text-primary-dark" />
@@ -101,7 +194,7 @@ export function OrganicBuilderInfoPanel({
       </section>
 
       {functionalGroups.length > 0 ? (
-        <section className="rounded-2xl border border-border bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl">
           <h2 className="font-bold text-text-primary">识别到的结构片段</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {functionalGroups.map((group) => (
@@ -113,7 +206,7 @@ export function OrganicBuilderInfoPanel({
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-border bg-background p-4 text-sm leading-6 text-text-secondary">
+      <section className="rounded-2xl border border-white/80 bg-white/80 p-4 text-sm leading-6 text-text-secondary shadow-lg backdrop-blur-xl">
         <div className="flex items-start gap-2">
           <Info className="mt-1 h-4 w-4 shrink-0" />
           <p>{seedNoteZh ?? "这里的键长、键角和自动排布用于建立空间直觉，不代表量化计算得到的最低能量构象。"}</p>
@@ -121,6 +214,35 @@ export function OrganicBuilderInfoPanel({
       </section>
     </aside>
   );
+}
+
+function groupBondAngleMatches(matches: BuilderBondAngleMatch[]) {
+  const grouped = new Map<string, {
+    key: string;
+    label: string;
+    geometryZh: string;
+    hybridization: BuilderBondAngleMatch["hybridization"];
+    centerElements: Set<string>;
+    count: number;
+  }>();
+  for (const match of matches) {
+    const key = `${match.geometryZh}-${match.hybridization}-${match.label}`;
+    const current = grouped.get(key) ?? {
+      key,
+      label: match.label,
+      geometryZh: match.geometryZh,
+      hybridization: match.hybridization,
+      centerElements: new Set<string>(),
+      count: 0,
+    };
+    current.centerElements.add(match.centerElement);
+    current.count += 1;
+    grouped.set(key, current);
+  }
+  return [...grouped.values()].map((group) => ({
+    ...group,
+    centerElements: [...group.centerElements].sort(),
+  }));
 }
 
 function InfoCell({ label, value, testId }: { label: string; value: string; testId?: string }) {

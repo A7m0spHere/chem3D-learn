@@ -1,4 +1,4 @@
-import { Box, Calculator, GitCompare, Layers3, Network, Orbit, Pyramid, Share2, Tags } from "lucide-react";
+import { Box, Calculator, Gauge, GitCompare, Layers3, Network, Orbit, Pyramid, Share2, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type {
   CrystalModelStyle,
@@ -18,6 +18,7 @@ type CrystalModeToolbarProps = {
 };
 
 const modeIcons: Record<CrystalViewMode, typeof Box> = {
+  pressure: Gauge,
   layer: Layers3,
   inPlaneBond: Share2,
   interlayerForce: Orbit,

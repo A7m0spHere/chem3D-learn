@@ -13,7 +13,7 @@ export function applyAtomPullOffset<T extends { id: string; position: [number, n
     return {
       ...candidate,
       position: candidate.position.map(
-        (value, index) => value + direction[index] * 0.58 * progress,
+        (value, index) => value + direction[index] * 0.24 * progress,
       ) as [number, number, number],
     };
   });

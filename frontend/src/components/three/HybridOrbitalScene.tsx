@@ -138,6 +138,8 @@ function SceneOverlay({
   config: HybridSceneConfig;
   controls: HybridOrbitalControls;
 }) {
+  const isSourceState = controls.progress <= 4;
+
   return (
     <Html fullscreen pointerEvents="none">
       <div className="absolute left-3 top-3 max-w-[min(330px,calc(100%-24px))] rounded-xl border border-white/70 bg-white/85 px-3 py-2.5 text-left shadow-sm backdrop-blur-sm sm:left-4 sm:top-4 sm:px-4">
@@ -167,14 +169,29 @@ function SceneOverlay({
 
       <div className="absolute right-3 top-3 hidden rounded-xl border border-white/70 bg-white/80 px-3 py-2 text-[11px] font-semibold text-text-secondary shadow-sm backdrop-blur-sm sm:block">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-            主瓣
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-accent" />
-            副瓣
-          </span>
+          {isSourceState ? (
+            <>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-slate-400" />
+                s 轨道
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                p 轨道
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                主瓣
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+                副瓣
+              </span>
+            </>
+          )}
           <span data-testid="hybrid-cloud-density-legend">
             {controls.renderMode === "solid" ? "实体轨道" : "采样点表示电子云密度"}
           </span>
@@ -198,7 +215,7 @@ function SourceOrbitals({
       <SOrbitalCloud
         opacity={opacity * 0.5}
         radius={0.38}
-        renderStyle={renderMode === "cloud" ? "cloud" : "mixed"}
+        renderStyle={renderMode === "cloud" ? "cloud" : "surface"}
         seed={71}
         tone="neutral"
       />
@@ -207,10 +224,10 @@ function SourceOrbitals({
           center={[0, 0, 0]}
           direction={axis}
           length={0.72}
-          negativeTone="warm"
+          negativeTone="primary"
           opacity={opacity * 0.52}
-          positiveTone={index % 2 === 0 ? "primary" : "blue"}
-          renderStyle={renderMode === "cloud" ? "cloud" : "mixed"}
+          positiveTone="primary"
+          renderStyle={renderMode === "cloud" ? "cloud" : "surface"}
           seed={91 + index * 19}
           showAxis
           width={0.18}
@@ -329,10 +346,10 @@ function UnhybridizedPOrbital({
         center={[0, 0, 0]}
         direction={normalized}
         length={0.92}
-        negativeTone="warm"
+        negativeTone="neutral"
         opacity={opacity}
         positiveTone="neutral"
-        renderStyle={renderMode === "cloud" ? "cloud" : "mixed"}
+        renderStyle={renderMode === "cloud" ? "cloud" : "surface"}
         seed={310 + index * 31}
         showAxis={false}
         width={0.22}
@@ -364,19 +381,18 @@ function LobeSurface({
   const quaternion = useMemo(() => getQuaternionForDirection([dx, dy, dz]), [dx, dy, dz]);
 
   return (
-    <mesh geometry={geometry} quaternion={quaternion} scale={[width, length, width]}>
-      <meshPhysicalMaterial
-        clearcoat={0.52}
-        clearcoatRoughness={0.18}
-        color={color}
-        depthWrite={false}
-        emissive={color}
-        emissiveIntensity={0.04}
-        opacity={opacity}
-        roughness={0.34}
-        transparent
-      />
-    </mesh>
+    <group quaternion={quaternion}>
+      <mesh geometry={geometry} scale={[width, length, width]}>
+        <meshPhysicalMaterial
+          color={color}
+          depthTest
+          depthWrite={false}
+          opacity={opacity}
+          roughness={0.58}
+          transparent
+        />
+      </mesh>
+    </group>
   );
 }
 

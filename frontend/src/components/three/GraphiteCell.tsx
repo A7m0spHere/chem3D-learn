@@ -407,11 +407,11 @@ function PiElectronCloud() {
         cloudStyle="layer"
         center={[0.12, 0.39, 0.04]}
         length={1.66}
-        opacity={0.18}
+        opacity={0.13}
         orientation="xz"
         seed={601}
         thickness={0.08}
-        tone="primary"
+        tone="warm"
         waist={0.04}
         width={0.86}
       />
@@ -419,7 +419,7 @@ function PiElectronCloud() {
         cloudStyle="layer"
         center={[0.12, 0.2, 0.04]}
         length={1.48}
-        opacity={0.09}
+        opacity={0.06}
         orientation="xz"
         seed={607}
         thickness={0.06}

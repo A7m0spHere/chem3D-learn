@@ -1,6 +1,7 @@
 export type MoleculeCategory = "vsepr" | "crystal";
 export type MoleculeKind = "molecule" | "crystal";
 export type CrystalViewMode =
+  | "pressure"
   | "layer"
   | "inPlaneBond"
   | "interlayerForce"

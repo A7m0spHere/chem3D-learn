@@ -32,6 +32,7 @@ const viewers = [
   { route: "/module/zns-polytypes", viewer: "zns-viewer", stage: "zns-canvas" },
   { route: "/module/mof-metal-organic-framework", viewer: "mof5-viewer", stage: "mof5-canvas" },
   { route: "/module/mxene-2d-material", viewer: "mxene-viewer", stage: "mxene-canvas" },
+  { route: "/module/ren3-high-pressure-nitride", viewer: "ren3-viewer", stage: "ren3-canvas" },
 ] as const;
 
 const bondingBasicsMobileViewers = [
@@ -70,6 +71,19 @@ const bondingBasicsMobileViewers = [
 async function expectVisibleStageLabel(stage: Locator, label: string) {
   const labelLocator = stage.getByText(label, { exact: true });
   await expect(labelLocator.first()).toBeVisible();
+}
+
+async function setRangeValue(slider: Locator, value: number) {
+  await slider.evaluate((element, nextValue) => {
+    const input = element as HTMLInputElement;
+    const nativeSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value",
+    )?.set;
+    nativeSetter?.call(input, String(nextValue));
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }, value);
 }
 
 async function expectStageScreenshotHasDetail(stage: Locator) {
@@ -269,16 +283,19 @@ test.describe("真实 3D Viewer 三段式布局", () => {
     const progressSlider = page.getByTestId("hybrid-progress-slider");
     await expect(progressSlider).toBeVisible();
 
-    await progressSlider.evaluate((element) => {
-      const input = element as HTMLInputElement;
-      const nativeSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype,
-        "value",
-      )?.set;
-      nativeSetter?.call(input, "45");
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      input.dispatchEvent(new Event("change", { bubbles: true }));
+    await setRangeValue(progressSlider, 0);
+    await expect(page.getByTestId("hybrid-progress-value")).toHaveText("0%");
+    await expectVisibleStageLabel(stage, "0% 杂化");
+    await expectVisibleStageLabel(stage, "s 轨道");
+    await expectVisibleStageLabel(stage, "p 轨道");
+    await expect(stage.getByText("主瓣", { exact: true })).toHaveCount(0);
+    await expect(stage.getByText("副瓣", { exact: true })).toHaveCount(0);
+    await page.waitForTimeout(300);
+    await expect(stage).toHaveScreenshot("hybrid-orbitals-source-state-viewer.png", {
+      maxDiffPixelRatio: 0.005,
     });
+
+    await setRangeValue(progressSlider, 45);
     await expect(page.getByTestId("hybrid-progress-value")).toHaveText("45%");
     await expectVisibleStageLabel(stage, "45% 杂化");
 

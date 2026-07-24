@@ -63,7 +63,7 @@ export function OrganicBuilderToolbox({
       : "未选择部件：新增内容将放入待连接区";
 
   return (
-    <aside className="rounded-2xl border border-border bg-white p-4 shadow-sm" data-testid="organic-builder-toolbox">
+    <aside className="rounded-2xl border border-white/80 bg-white/90 p-4 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl" data-testid="organic-builder-toolbox">
       <div className="flex items-center gap-2">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary-dark">
           <Atom className="h-5 w-5" />

@@ -19,4 +19,28 @@ test.describe("核心学习入口页面", () => {
     await expect(page.getByText("可交互 3D").first()).toBeVisible();
     await expect(page.locator("main")).toHaveScreenshot("modules-molecular-geometry-filter.png", { timeout: 15_000 });
   });
+
+  test("专题 Viewer 模块在结构库中标记为可交互 3D", async ({ page }) => {
+    await page.goto("/modules");
+
+    const customViewerModules = [
+      "离子键形成",
+      "σ 键",
+      "π 键",
+      "sp / sp² / sp³ 杂化轨道",
+      "配位键形成",
+      "分子极性判断",
+      "乙炔直线结构",
+      "苯环平面结构",
+      "有机物原子共线共面分析",
+    ];
+
+    for (const title of customViewerModules) {
+      const moduleCard = page.locator("article").filter({
+        has: page.getByRole("heading", { level: 3, name: title, exact: true }),
+      });
+      await expect(moduleCard).toBeVisible();
+      await expect(moduleCard.getByText("可交互 3D", { exact: true })).toBeVisible();
+    }
+  });
 });

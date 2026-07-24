@@ -154,7 +154,7 @@ function BenzeneCore({
         <BondMesh
           atomsById={atomsById}
           bond={bond}
-          isFocused={focusedBonds.has(bond.id)}
+          isFocused={focusedBonds.has(bond.id) || Boolean(pullingAtomId && bond.atomIds.includes(pullingAtomId))}
           key={bond.id}
           radius={bond.id.includes("-h") ? 0.024 : 0.031}
         />
@@ -306,8 +306,8 @@ function PiBondOverlay() {
             />
           </group>
         ))}
-      <PiCloud center={[0, 0, 0.52]} tone="primary" />
-      <PiCloud center={[0, 0, -0.52]} tone="warm" />
+      <PiCloud center={[0, 0, 0.52]} />
+      <PiCloud center={[0, 0, -0.52]} />
       <Html center distanceFactor={7.8} pointerEvents="none" position={[0.92, 0.72, 0.78]}>
         <span
           className={teachingCloudLabelClass}
@@ -320,7 +320,7 @@ function PiBondOverlay() {
   );
 }
 
-function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
+function PiCloud({ center }: { center: Vec3 }) {
   return (
     <PiCloudBand
       cloudStyle="delocalized-ring"
@@ -328,13 +328,9 @@ function PiCloud({ center, tone }: { center: Vec3; tone: "primary" | "warm" }) {
       length={1.18}
       opacity={0.24}
       orientation="xy"
-      particleCount={280}
-      particleOpacity={0.42}
-      particleSize={0.02}
       seed={center[2] > 0 ? 509 : 523}
-      showParticles
       thickness={0.09}
-      tone={tone}
+      tone="warm"
       waist={0.04}
       width={0.94}
     />

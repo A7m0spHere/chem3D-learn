@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ChevronRight, Home, LayoutList } from "lucide-react";
 
@@ -32,6 +32,9 @@ const Mof5Cell = lazy(() =>
 );
 const MxeneCell = lazy(() =>
   import("@/components/three/MxeneCell").then((m) => ({ default: m.MxeneCell })),
+);
+const Ren3Cell = lazy(() =>
+  import("@/components/three/Ren3Cell").then((m) => ({ default: m.Ren3Cell })),
 );
 const VoidStructureCell = lazy(() =>
   import("@/components/three/VoidStructureCell").then((m) => ({ default: m.VoidStructureCell })),
@@ -90,6 +93,8 @@ import { ExplorerPanel } from "@/components/learning/ExplorerPanel";
 import { FloatingToolbar } from "@/components/learning/FloatingToolbar";
 
 import { getModuleById } from "@/data/learningModules";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import type { OrganicBuilderNavigationState } from "@/types/organicBuilder";
 import {
   getMockMolecule,
   getRealMoleculeData,
@@ -148,6 +153,7 @@ type ViewerKind =
   | "crystal-zns"
   | "crystal-mof5"
   | "crystal-mxene"
+  | "crystal-ren3"
   | "molecule"
   | "placeholder";
 
@@ -218,6 +224,8 @@ function deriveViewerKind(
         return "crystal-mof5";
       case "ti3c2tx":
         return "crystal-mxene";
+      case "ren3":
+        return "crystal-ren3";
       default:
         break;
     }
@@ -292,24 +300,53 @@ export function ModuleDetailPage() {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isGuidedMode, setIsGuidedMode] = useState(false);
   const [pullingBuilderAtomId, setPullingBuilderAtomId] = useState<string>();
+  const [builderTransitionPhase, setBuilderTransitionPhase] = useState<"idle" | "pulling" | "expanding">("idle");
+  const prefersReducedMotion = useReducedMotion();
+
+  const handleBuilderAtomPull = (atomId: string) => {
+    if (pullingBuilderAtomId) return;
+    setPullingBuilderAtomId(atomId);
+    setBuilderTransitionPhase("pulling");
+  };
+
+  useEffect(() => {
+    if (!moduleData?.builderSeedId) return;
+    void import("@/pages/OrganicBuilderPage");
+  }, [moduleData?.builderSeedId]);
 
   useEffect(() => {
     if (!pullingBuilderAtomId || !moduleData?.builderSeedId) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(() => {
+    const expandTimer = window.setTimeout(() => {
+      setBuilderTransitionPhase("expanding");
+    }, prefersReducedMotion ? 0 : 70);
+    const navigateTimer = window.setTimeout(() => {
+      const navigationState: OrganicBuilderNavigationState = {
+        detachAtomId: pullingBuilderAtomId,
+        sourceModuleId: moduleData.id,
+        entryTransition: "viewer-expand",
+      };
+      if (!prefersReducedMotion) {
+        document.documentElement.dataset.organicBuilderTransition = "viewer-expand";
+      }
       navigate(`/lab/organic-builder/${moduleData.builderSeedId}`, {
-        state: { detachAtomId: pullingBuilderAtomId, sourceModuleId: moduleData.id },
+        state: navigationState,
+        viewTransition: !prefersReducedMotion,
       });
-    }, reducedMotion ? 40 : 320);
-    return () => window.clearTimeout(timer);
-  }, [moduleData, navigate, pullingBuilderAtomId]);
+    }, prefersReducedMotion ? 100 : 120);
+    return () => {
+      window.clearTimeout(expandTimer);
+      window.clearTimeout(navigateTimer);
+    };
+  }, [moduleData, navigate, prefersReducedMotion, pullingBuilderAtomId]);
 
   useEffect(() => {
     setActiveStepIndex(0);
     setShowAngles(false);
     setShowLonePairs(false);
     setShowAtomLabels(false);
-    setCrystalViewMode("cell");
+    setPullingBuilderAtomId(undefined);
+    setBuilderTransitionPhase("idle");
+    setCrystalViewMode(id === "ren3-high-pressure-nitride" ? "pressure" : "cell");
     setCrystalModelStyle("ballStick");
     setVoidStage("framework");
     setShowCrystalLabels(false);
@@ -537,7 +574,7 @@ export function ModuleDetailPage() {
         <EthylenePlanarCell
           loading={viewerLoading}
           mode={ethyleneMode}
-          onAtomPull={moduleData.builderSeedId ? setPullingBuilderAtomId : undefined}
+          onAtomPull={moduleData.builderSeedId ? handleBuilderAtomPull : undefined}
           planeView={ethylenePlaneView}
           pullingAtomId={pullingBuilderAtomId}
         />
@@ -561,7 +598,7 @@ export function ModuleDetailPage() {
         <BenzenePlanarCell
           loading={viewerLoading}
           mode={benzeneMode}
-          onAtomPull={moduleData.builderSeedId ? setPullingBuilderAtomId : undefined}
+          onAtomPull={moduleData.builderSeedId ? handleBuilderAtomPull : undefined}
           planeView={benzenePlaneView}
           pullingAtomId={pullingBuilderAtomId}
         />
@@ -586,7 +623,7 @@ export function ModuleDetailPage() {
           lineView={acetyleneLineView}
           loading={viewerLoading}
           mode={acetyleneMode}
-          onAtomPull={moduleData.builderSeedId ? setPullingBuilderAtomId : undefined}
+          onAtomPull={moduleData.builderSeedId ? handleBuilderAtomPull : undefined}
           pullingAtomId={pullingBuilderAtomId}
         />
       ),
@@ -609,7 +646,7 @@ export function ModuleDetailPage() {
         <OrganicCoplanarViewer
           activeMode={organicCoplanarMode}
           loading={viewerLoading}
-          onAtomPull={moduleData.builderSeedId ? setPullingBuilderAtomId : undefined}
+          onAtomPull={moduleData.builderSeedId ? handleBuilderAtomPull : undefined}
           pullingAtomId={pullingBuilderAtomId}
           showLabels={showOrganicLabels}
           vinylAligned={organicVinylAligned}
@@ -832,6 +869,19 @@ export function ModuleDetailPage() {
       toolbar: () => crystalToolbar,
       panel: () => crystalPanel,
     },
+    "crystal-ren3": {
+      viewer: () =>
+        molecule ? (
+          <Ren3Cell
+            loading={viewerLoading}
+            molecule={molecule}
+            showLabels={showCrystalLabels}
+            viewMode={activeCrystalViewMode}
+          />
+        ) : null,
+      toolbar: () => crystalToolbar,
+      panel: () => crystalPanel,
+    },
     molecule: {
       viewer: () =>
         activeStep && molecule ? (
@@ -921,7 +971,10 @@ export function ModuleDetailPage() {
   const spec = viewerRegistry[viewerKind];
 
   return (
-    <main className={`motion-page-enter min-h-screen bg-background pb-20 transition-opacity duration-300 ${pullingBuilderAtomId ? "opacity-80" : "opacity-100"}`}>
+    <main
+      className="module-builder-transition motion-page-enter relative isolate min-h-screen bg-background pb-20"
+      data-builder-transition-phase={builderTransitionPhase}
+    >
       {/* 1. 顶部信息区 */}
       <div className="border-b border-border bg-white">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
@@ -969,13 +1022,17 @@ export function ModuleDetailPage() {
           {/* 左侧：3D Viewer */}
           <div className="flex min-w-0 flex-col gap-3">
             <div
-              className={`relative flex min-h-[480px] overflow-hidden rounded-2xl border border-border bg-white shadow-panel sm:min-h-[560px] ${
+              className={`organic-builder-transition-source relative flex min-h-[480px] overflow-hidden rounded-2xl border border-border bg-white shadow-panel sm:min-h-[560px] ${pullingBuilderAtomId ? "pointer-events-none" : ""} ${
                 viewerKind === "sigma-bond" ||
                 viewerKind === "pi-bond" ||
                 viewerKind === "bonding-basics"
                   ? "xl:h-[calc(100vh-235px)] xl:min-h-[560px]"
                   : "xl:h-[calc(100vh-205px)] xl:min-h-[640px]"
               }`}
+              data-testid="module-builder-transition-stage"
+              style={pullingBuilderAtomId && !prefersReducedMotion
+                ? ({ viewTransitionName: "organic-builder-stage" } as CSSProperties)
+                : undefined}
             >
               <Suspense fallback={<ViewerChunkFallback />}>{spec.viewer()}</Suspense>
             </div>

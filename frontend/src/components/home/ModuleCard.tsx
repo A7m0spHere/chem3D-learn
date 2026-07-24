@@ -10,7 +10,8 @@ type ModuleCardProps = {
 
 export function ModuleCard({ module }: ModuleCardProps) {
   const primaryFact = module.geometryName ?? module.bondAngle ?? module.polarity ?? module.hybridization;
-  const hasInteractiveModel = module.representativeModels.length > 0;
+  const hasInteractiveModel =
+    module.hasInteractiveViewer === true || module.representativeModels.length > 0;
 
   return (
     <article

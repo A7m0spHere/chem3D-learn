@@ -21,6 +21,7 @@ import metalClosePackingData from "@/data/manual/metal-close-packing.json";
 import znsData from "@/data/manual/zns.json";
 import mof5Data from "@/data/manual/mof5.json";
 import ti3c2txData from "@/data/manual/ti3c2tx.json";
+import ren3Data from "@/data/manual/ren3.json";
 
 export type MockMoleculeRecord = MoleculeRecord & {
   geometryZh: string;
@@ -68,6 +69,7 @@ const realMoleculesById = new Map<string, MoleculeRecord>([
   ["zns", znsData as unknown as MoleculeRecord],
   ["mof5", mof5Data as unknown as MoleculeRecord],
   ["ti3c2tx", ti3c2txData as unknown as MoleculeRecord],
+  ["ren3", ren3Data as unknown as MoleculeRecord],
 ]);
 
 /** Returns the hand-authored 3D data for a molecule, or undefined. */

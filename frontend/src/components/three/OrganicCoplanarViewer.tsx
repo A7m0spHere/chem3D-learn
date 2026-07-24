@@ -133,6 +133,7 @@ export function OrganicCoplanarViewer({
                 bond={bond}
                 isDimmed={shouldDimFragment(activeMode, bond.fragment, vinylAligned)}
                 isFocused={isFocusedFragment(activeMode, bond.fragment, vinylAligned)}
+                isPulling={Boolean(pullingAtomId && bond.atomIds.includes(pullingAtomId))}
                 key={bond.id}
               />
             ))}
@@ -327,7 +328,7 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
         fragment: "sp2",
       },
       { label: "sp · 直线", position: add(ethynylC1, [0, -0.34, 0.36]), fragment: "sp" },
-      { label: "NH2 · 空间示意", position: add(amineN, [-0.52, 0.36, 0.42]), fragment: "amine" },
+      { label: "NH2 · 空间示意", position: add(amineN, [-0.72, 0.52, 0.16]), fragment: "amine" },
     ],
   };
 }
@@ -460,11 +461,13 @@ function OrganicBondMesh({
   bond,
   isFocused,
   isDimmed,
+  isPulling,
 }: {
   atomsById: Map<string, OrganicAtom>;
   bond: OrganicBond;
   isFocused: boolean;
   isDimmed: boolean;
+  isPulling: boolean;
 }) {
   const order = bond.order;
   const focusScale = isFocused ? 0.024 / 0.018 : 1;
@@ -479,7 +482,7 @@ function OrganicBondMesh({
   const midpoint = new Vector3().addVectors(start, end).multiplyScalar(0.5);
   const quaternion = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
   const offsetVector = getOffsetVector(startAtom.position, endAtom.position);
-  const color = isFocused ? fragmentColors[bond.fragment] : "#B7C7C3";
+  const color = isPulling ? "#F4A261" : isFocused ? fragmentColors[bond.fragment] : "#B7C7C3";
 
   return (
     <group>
@@ -581,11 +584,11 @@ function LonePairOrbital({
   return (
     <SharedLonePairOrbital
       direction={direction}
-      distance={0.34}
-      length={0.5}
-      opacity={0.38}
+      distance={0.42}
+      length={0.48}
+      opacity={0.36}
       origin={nPosition}
-      width={0.2}
+      width={0.18}
     />
   );
 }

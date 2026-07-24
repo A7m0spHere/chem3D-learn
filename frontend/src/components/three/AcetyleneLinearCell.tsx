@@ -126,7 +126,7 @@ function AcetyleneCore({
         <BondMesh
           atomsById={atomsById}
           bond={bond}
-          isFocused={bond.id === focusedBondId}
+          isFocused={bond.id === focusedBondId || Boolean(pullingAtomId && bond.atomIds.includes(pullingAtomId))}
           key={bond.id}
           radius={bond.id === "c1-c2" ? 0.028 : 0.026}
         />
@@ -223,9 +223,9 @@ function PiBondOverlay() {
             center={[x, 0, 0]}
             direction={[0, 1, 0]}
             length={0.5}
+            negativeTone="warm"
             opacity={0.2}
             positiveTone="warm"
-            negativeTone="primary"
             seed={x < 0 ? 331 : 341}
             showAxis={false}
             width={0.1}
@@ -246,10 +246,10 @@ function PiBondOverlay() {
           />
         </group>
       ))}
-      <PiCloud center={[0, 0, 0.55]} axis="z" color="#2A9D8F" />
-      <PiCloud center={[0, 0, -0.55]} axis="z" color="#2A9D8F" />
-      <PiCloud center={[0, 0.55, 0]} axis="y" color="#F4A261" />
-      <PiCloud center={[0, -0.55, 0]} axis="y" color="#F4A261" />
+      <PiCloud center={[0, 0, 0.55]} axis="z" />
+      <PiCloud center={[0, 0, -0.55]} axis="z" />
+      <PiCloud center={[0, 0.55, 0]} axis="y" />
+      <PiCloud center={[0, -0.55, 0]} axis="y" />
     </>
   );
 }
@@ -280,11 +280,9 @@ function TripleBondOverlay() {
 function PiCloud({
   center,
   axis,
-  color,
 }: {
   center: Vec3;
   axis: "y" | "z";
-  color: string;
 }) {
   const scale: Vec3 = axis === "z" ? [0.72, 0.18, 0.14] : [0.72, 0.14, 0.18];
   const seed =
@@ -303,14 +301,10 @@ function PiCloud({
       length={0.82}
       opacity={axis === "z" ? 0.32 : 0.22}
       orientation={axis === "z" ? "xy" : "xz"}
-      particleCount={axis === "z" ? 230 : 180}
-      particleOpacity={axis === "z" ? 0.44 : 0.36}
-      particleSize={0.02}
       scale={scale}
       seed={seed}
-      showParticles
       thickness={axis === "z" ? 0.12 : 0.1}
-      tone={color === "#F4A261" ? "warm" : "primary"}
+      tone={axis === "z" ? "primary" : "warm"}
       waist={0.28}
       width={axis === "z" ? 0.24 : 0.21}
     />

@@ -2,15 +2,18 @@ import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { Plane, Quaternion, Vector3 } from "three";
+import { AngleArc } from "@/components/three/AngleArc";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { builderElementConfig } from "@/lib/organicBuilderChemistry";
 import type {
   BuilderAtom,
   BuilderBond,
+  BuilderBondAngleMatch,
   BuilderBondOrder,
   BuilderMolecule,
   BuilderVec3,
 } from "@/types/organicBuilder";
+import type { Atom } from "@/types/molecule";
 
 type DropPayload = {
   atomId: string;
@@ -21,6 +24,7 @@ type DropPayload = {
 };
 
 type OrganicBuilderCanvasProps = {
+  bondAngles: BuilderBondAngleMatch[];
   molecule: BuilderMolecule;
   selectedAtomId?: string;
   selectedBondId?: string;
@@ -28,6 +32,8 @@ type OrganicBuilderCanvasProps = {
   onDropAtom: (payload: DropPayload) => void;
   onSelectAtom: (atomId?: string) => void;
   onSelectBond: (bondId?: string) => void;
+  immersive?: boolean;
+  onReady?: () => void;
 };
 
 type DragState = {
@@ -42,6 +48,7 @@ const DETACH_DISTANCE = 0.56;
 const SNAP_DISTANCE = 0.92;
 
 export function OrganicBuilderCanvas({
+  bondAngles,
   molecule,
   selectedAtomId,
   selectedBondId,
@@ -49,8 +56,11 @@ export function OrganicBuilderCanvas({
   onDropAtom,
   onSelectAtom,
   onSelectBond,
+  immersive = false,
+  onReady,
 }: OrganicBuilderCanvasProps) {
   const [drag, setDrag] = useState<DragState>();
+  const [sceneReady, setSceneReady] = useState(false);
   const displayAtoms = useMemo(
     () => molecule.atoms.map((candidate) =>
       candidate.id === drag?.atomId ? { ...candidate, position: drag.current } : candidate,
@@ -65,6 +75,22 @@ export function OrganicBuilderCanvas({
     () => new Map(displayAtoms.map((candidate) => [candidate.id, candidate])),
     [displayAtoms],
   );
+  const angleAtomsById = useMemo(
+    () => new Map<string, Atom>(displayAtoms.map((candidate) => [candidate.id, {
+      ...candidate,
+      label: candidate.label ?? candidate.element,
+    }])),
+    [displayAtoms],
+  );
+  const visibleBondAngles = useMemo(() => {
+    const seen = new Set<string>();
+    return bondAngles.filter((angle) => {
+      const key = `${angle.geometryZh}-${angle.hybridization}-${angle.label}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 4);
+  }, [bondAngles]);
   const center = useMemo(() => getMoleculeCenter(displayAtoms), [displayAtoms]);
   const dragDistance = drag ? distance(drag.origin, drag.current) : 0;
   const shouldDetach = Boolean(drag?.wasConnected && dragDistance > DETACH_DISTANCE);
@@ -135,24 +161,39 @@ export function OrganicBuilderCanvas({
 
   return (
     <ThreeViewerFrame
-      className="min-h-[520px] lg:min-h-[680px]"
-      footerMeta={shouldDetach ? "松开后整体拔下" : snapTarget ? `松开形成${bondOrderName(selectedBondOrder)}` : undefined}
+      className={immersive ? "" : "min-h-[520px] lg:min-h-[680px]"}
+      footerMeta={shouldDetach
+        ? "松开后整体拔下"
+        : snapTarget
+          ? `松开形成${bondOrderName(selectedBondOrder)}`
+          : bondAngles.length > 0
+            ? `已自动匹配 ${bondAngles.length} 个中心键角`
+            : undefined}
+      immersive={immersive}
       meta="拖动原子拆装 · 拖动空白旋转 · 滚轮缩放"
       stageTestId="organic-builder-canvas"
       summary={molecule.atoms.length === 0
         ? "从原子盒或官能团盒中添加第一个部件。"
-        : "把原子拖远可整体拔下；把游离原子拖到另一原子附近会显示吸附预览。"}
+        : bondAngles.length > 0
+          ? "结构完整，已按局部成键环境自动标注典型键角。"
+          : "把原子拖远可整体拔下；把游离原子拖到另一原子附近会显示吸附预览。"}
       title="3D 拼装区"
+      transitionName="organic-builder-stage"
       viewerTestId="organic-builder-viewer"
     >
       <Canvas
         camera={{ position: [center[0] + 4.4, center[1] + 3.4, center[2] + 6.2], fov: 43 }}
         frameloop="demand"
         gl={{ alpha: false }}
+        onCreated={() => {
+          setSceneReady(true);
+          onReady?.();
+        }}
         onPointerMissed={() => {
           onSelectAtom(undefined);
           onSelectBond(undefined);
         }}
+        style={{ opacity: sceneReady ? 1 : 0, transition: "opacity 180ms var(--ease-out-soft)" }}
       >
         <color attach="background" args={["#F7FAF9"]} />
         <ambientLight intensity={0.74} />
@@ -190,6 +231,18 @@ export function OrganicBuilderCanvas({
             onPointerUp={(event) => handlePointerUp(candidate, event)}
           />
         ))}
+
+        {!drag ? visibleBondAngles.map((angle) => (
+          <AngleArc
+            angle={angle}
+            atomsById={angleAtomsById}
+            htmlPointerEvents="none"
+            key={angle.id}
+            labelVariant="minimal"
+            radius={0.48}
+            showGuideLine={false}
+          />
+        )) : null}
 
         {movingAtom && snapTarget ? (
           <Line

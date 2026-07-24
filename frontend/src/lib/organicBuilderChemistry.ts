@@ -255,6 +255,14 @@ export function findKnownMolecule(molecule: BuilderMolecule): KnownMolecule | un
 export function detectFunctionalGroups(molecule: BuilderMolecule): string[] {
   const groups = new Set<string>();
   const neighbors = buildNeighborMap(molecule);
+  const amideNitrogenIds = new Set<string>();
+  molecule.atoms.filter((candidate) => candidate.element === "C").forEach((carbon) => {
+    const adjacent = neighbors.get(carbon.id) ?? [];
+    if (!adjacent.some((entry) => entry.atom.element === "O" && entry.order === 2)) return;
+    adjacent
+      .filter((entry) => entry.atom.element === "N" && entry.order === 1)
+      .forEach((entry) => amideNitrogenIds.add(entry.atom.id));
+  });
   molecule.bonds.forEach((candidate) => {
     const first = molecule.atoms.find((atomCandidate) => atomCandidate.id === candidate.atomIds[0]);
     const second = molecule.atoms.find((atomCandidate) => atomCandidate.id === candidate.atomIds[1]);
@@ -263,7 +271,15 @@ export function detectFunctionalGroups(molecule: BuilderMolecule): string[] {
     if (elements === "C-C" && candidate.order === 2) groups.add("碳碳双键");
     if (elements === "C-C" && candidate.order === 3) groups.add("碳碳三键");
     if (elements === "C-O" && candidate.order === 2) groups.add("羰基");
-    if (elements === "C-N" && candidate.order === 1) groups.add("氨基/胺键片段");
+    if (elements === "C-N" && candidate.order === 1) {
+      const carbon = first.element === "C" ? first : second;
+      const nitrogen = first.element === "N" ? first : second;
+      const isAmideBond = amideNitrogenIds.has(nitrogen.id)
+        || (neighbors.get(carbon.id) ?? []).some((entry) =>
+          entry.atom.element === "O" && entry.order === 2,
+        );
+      groups.add(isAmideBond ? "酰胺基" : "氨基/胺键片段");
+    }
     if ([first.element, second.element].some((element) => ["F", "Cl", "Br", "I"].includes(element))) {
       groups.add("卤代结构");
     }

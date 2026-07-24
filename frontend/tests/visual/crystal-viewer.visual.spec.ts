@@ -1,5 +1,10 @@
 import { expect, test, type Locator } from "@playwright/test";
 import { inflateSync } from "node:zlib";
+import {
+  REN3_CELL_COUNTS,
+  getRepresentativeRen3Coordination,
+  getRepresentativeTriNitrogenUnit,
+} from "../../src/components/three/ren3Geometry";
 
 test.use({ viewport: { width: 1280, height: 1100 } });
 
@@ -958,6 +963,144 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
 
     await page.getByRole("button", { exact: true, name: "表面端基" }).click();
     await expect(canvasArea.getByText("O / OH / F 混合端基示意", { exact: true })).toBeVisible();
+
+    const [topbarBox, canvasBox, summaryBox] = await Promise.all([
+      topbar.boundingBox(),
+      canvasArea.boundingBox(),
+      summary.boundingBox(),
+    ]);
+    expect(topbarBox).not.toBeNull();
+    expect(canvasBox).not.toBeNull();
+    expect(summaryBox).not.toBeNull();
+    expect(topbarBox!.y + topbarBox!.height).toBeLessThanOrEqual(canvasBox!.y + 1);
+    expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(summaryBox!.y + 1);
+    expect(canvasBox!.height).toBeGreaterThan(200);
+
+    const hasPageHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+    const hasViewerHorizontalOverflow = await viewer.evaluate(
+      (element) => element.scrollWidth > element.clientWidth + 1,
+    );
+    expect(hasPageHorizontalOverflow).toBe(false);
+    expect(hasViewerHorizontalOverflow).toBe(false);
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("ReN₃ 支持压力窗口、N₃ 单元、Re 七配位、周期网络和组成计数", async ({ page }) => {
+    test.setTimeout(120_000);
+    expect(REN3_CELL_COUNTS).toEqual({ Re: 2, N: 6 });
+    const coordination = getRepresentativeRen3Coordination();
+    const triNitrogen = getRepresentativeTriNitrogenUnit();
+    expect(coordination.neighbors).toHaveLength(7);
+    expect(triNitrogen.terminals).toHaveLength(2);
+    for (const terminal of triNitrogen.terminals) {
+      expect(terminal.distance).toBeCloseTo(1.36, 2);
+    }
+
+    await page.goto("/modules");
+    const moduleCard = page.locator("article").filter({ hasText: "ReN₃ 高压氮化物" });
+    await expect(moduleCard).toBeVisible();
+    await expect(moduleCard.getByText("可交互 3D", { exact: true })).toBeVisible();
+    await moduleCard.getByRole("link", { name: /进入模块/ }).click();
+    await expect(page).toHaveURL(/\/module\/ren3-high-pressure-nitride$/);
+
+    const viewer = page.getByTestId("ren3-viewer");
+    const canvasArea = page.getByTestId("ren3-canvas");
+    await expect(viewer).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(
+      viewer.getByText("ReN₃｜计算预测的稳定压力范围", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("Imm2-ReN₃｜理论预测相", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("38.3 GPa", { exact: true })).toBeVisible();
+    await expect(
+      canvasArea.getByText("预测稳定 ≠ 已实验确认；晶格不按压力条比例形变", { exact: true }),
+    ).toBeVisible();
+
+    const guide = page.getByTestId("observation-guide-card");
+    await expect(guide.locator("article")).toHaveCount(4);
+    await expect(guide.getByText("先读高压窗口与模型身份", { exact: true })).toBeVisible();
+    await expect(guide.getByText("在晶胞中找 N₃ 和 ReN₇", { exact: true })).toBeVisible();
+    await expect(guide.getByText("把多面体接回周期网络", { exact: true })).toBeVisible();
+    await expect(guide.getByText("按位点 multiplicity 完成计数", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "ren3-pressure-window-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "正交晶胞" }).click();
+    await expect(
+      viewer.getByText("ReN₃｜Imm2 常规晶胞与三条晶格轴", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      canvasArea.getByText("a = 5.25 Å｜b = 2.81 Å｜c = 4.75 Å（0 GPa 松弛参考）", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "ren3-orthorhombic-cell-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "N₃ 单元" }).click();
+    await expect(
+      viewer.getByText("ReN₃｜折线形 N1–N2–N1 连接单元", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("N₃ 单元｜N1–N2–N1", { exact: true })).toBeVisible();
+    await expect(
+      canvasArea.getByText("两条短 N–N 距离 ≈ 1.36 Å", { exact: true }),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "ren3-trinitrogen-unit-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "Re 七配位" }).click();
+    await expect(
+      viewer.getByText("ReN₃｜ReN₇ 七配位局部多面体", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("Re 中心｜7 个 N 最近邻", { exact: true })).toBeVisible();
+    await expect(
+      canvasArea.getByText("ReN₇ 是局部七配位，不是化学式", { exact: true }),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "ren3-seven-coordination-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "多面体网络" }).click();
+    await expect(
+      viewer.getByText("ReN₃｜共享 N 位点的三维周期网络", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      canvasArea.getByText("ReN₇ 多面体｜三维周期延展", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      canvasArea.getByText("共享 N 位点 + N₃ 连接单元 → 延展晶体网络", { exact: true }),
+    ).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "ren3-polyhedral-network-viewer.png");
+
+    await page.getByRole("button", { exact: true, name: "组成与性质" }).click();
+    await expect(
+      viewer.getByText("ReN₃｜由位点 multiplicity 得到 ReN₃", { exact: true }),
+    ).toBeVisible();
+    await expect(canvasArea.getByText("Re 2b → 2", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("N 4c + 2b → 4 + 2 = 6", { exact: true })).toBeVisible();
+    await expect(canvasArea.getByText("2 Re + 6 N = 2 ReN₃", { exact: true })).toBeVisible();
+    await page.waitForTimeout(600);
+    await expectCanvasAreaToHaveScreenshot(canvasArea, "ren3-counting-property-viewer.png");
+    await expectCanvasAreaHasDetail(canvasArea);
+  });
+
+  test("ReN₃ 在 390px 手机宽度下可切换局部配位且不横向溢出", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/module/ren3-high-pressure-nitride");
+
+    const viewer = page.getByTestId("ren3-viewer");
+    const topbar = page.getByTestId("ren3-viewer-topbar");
+    const canvasArea = page.getByTestId("ren3-canvas");
+    const summary = page.getByTestId("ren3-viewer-summary");
+    await expect(viewer).toBeVisible();
+    await expect(topbar).toBeVisible();
+    await expect(canvasArea.locator("canvas")).toBeVisible();
+    await expect(summary).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "Re 七配位" }).click();
+    await expect(canvasArea.getByText("Re 中心｜7 个 N 最近邻", { exact: true })).toBeVisible();
 
     const [topbarBox, canvasBox, summaryBox] = await Promise.all([
       topbar.boundingBox(),

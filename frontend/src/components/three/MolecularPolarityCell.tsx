@@ -302,12 +302,15 @@ function ElectronCloud({
       <PiCloudBand
         center={center}
         opacity={0.24}
-        particleCount={320}
-        particleOpacity={0.5}
-        particleSize={0.024}
         scale={meshScale}
         seed={701}
-        showParticles
+        tone="primary"
+      />
+      <PiCloudBand
+        center={[center[0] + 0.22, center[1], center[2]]}
+        opacity={0.18}
+        scale={[meshScale[0] * 0.58, meshScale[1] * 0.78, meshScale[2] * 0.78]}
+        seed={709}
         tone="primary"
       />
       <Line

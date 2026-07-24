@@ -62,8 +62,10 @@ export function SigmaPiBondCell(props: SigmaPiBondCellProps) {
         />
         <color attach="background" args={["#F7FAF9"]} />
         <SceneLighting ambient={0.74} mainIntensity={1.28} mainPosition={[3.4, 4.6, 4.2]} secondaryIntensity={0.34} secondaryPosition={[-3.2, -2.4, 2.6]} />
-        <group rotation={[-0.18, 0.1, 0]} scale={1.12}>
+        <group rotation={[-0.18, 0.1, 0]}>
           <CoordinateAxes showLabels={props.showLabels ?? false} />
+        </group>
+        <group rotation={[-0.18, 0.1, 0]} scale={1.26}>
           {props.lessonType === "sigma" ? (
             <SigmaBondScene mode={props.mode} showLabels={props.showLabels ?? false} />
           ) : (
@@ -99,8 +101,8 @@ function SigmaBondScene({ mode, showLabels }: { mode: SigmaBondMode; showLabels:
         <BondAxis showLabel={showLabels} />
         {showLabels ? (
           <>
-            <SceneLabel color="#B96320" position={[0, 0.46, 0.28]} text="s-p 头碰头重叠" />
-            <SceneLabel color="#1F6F68" position={[1.3, -0.38, 0.3]} text="p 轨道沿 X 轴取向" />
+            <SceneLabel color="#B96320" position={[0, 0.82, 0.58]} text="s-p 头碰头重叠" />
+            <SceneLabel color="#1F6F68" position={[1.25, -0.52, 0.45]} text="p 轨道沿 X 轴取向" />
           </>
         ) : null}
       </>
@@ -116,7 +118,7 @@ function SigmaBondScene({ mode, showLabels }: { mode: SigmaBondMode; showLabels:
       <SigmaOverlap center={[0, 0, 0]} scale={[0.86, 0.22, 0.22]} />
       <BondAxis showLabel={showLabels} />
       {showLabels ? (
-        <SceneLabel color="#B96320" position={[0, 0.46, 0.28]} text="s-s 轴向重叠形成 σ 键" />
+        <SceneLabel color="#B96320" position={[0, 0.82, 0.58]} text="s-s 轴向重叠形成 σ 键" />
       ) : null}
     </>
   );
@@ -182,8 +184,16 @@ function PiBondScene({
       <BondAxis showLabel={showLabels} />
       {showLabels ? (
         <>
-          <SceneLabel color="#1F6F68" position={[0, 0.5, 0.88]} text="π 电子云" />
-          <SceneLabel color="#1F6F68" position={[0, -0.42, -0.9]} text="p-p 肩并肩重叠" />
+          <SceneLabel
+            color="#1F6F68"
+            position={[0, 0.5, 1.02]}
+            text={mode === "before" ? "平行 p 轨道" : "π 电子云"}
+          />
+          <SceneLabel
+            color="#1F6F68"
+            position={[0, -0.42, -0.9]}
+            text={mode === "before" ? "尚未有效重叠" : "p-p 肩并肩重叠"}
+          />
         </>
       ) : null}
     </>
@@ -193,9 +203,15 @@ function PiBondScene({
 function CoordinateAxes({ showLabels }: { showLabels: boolean }) {
   return (
     <group>
-      <AxisTriad length={2.2} opacity={0.52} origin={[-2.2, -1.05, -1.05]} />
+      <AxisTriad length={0.82} opacity={0.3} origin={[-1.58, -0.78, -0.66]} />
       {showLabels ? (
-        <SceneLabel color="#B96320" position={[0, -1.28, -1.05]} text="X 轴：键轴 / 两核连线" />
+        <Html fullscreen pointerEvents="none">
+          <div className="absolute right-3 bottom-3">
+            <span className={teachingSceneLabelClass} style={{ color: "#B96320" }}>
+              X 轴：键轴 / 两核连线
+            </span>
+          </div>
+        </Html>
       ) : null}
     </group>
   );
@@ -209,22 +225,22 @@ function Nucleus({ position, label, showLabel }: { position: Vec3; label: string
         <meshStandardMaterial color="#1F2933" roughness={0.34} />
       </mesh>
       {showLabel ? (
-        <SceneLabel color="#1F2933" position={[0, -0.26, 0]} text={label} />
+        <SceneLabel color="#1F2933" position={[0, -0.34, 0.18]} text={label} />
       ) : null}
     </group>
   );
 }
 
 function SOrbital({ center }: { center: Vec3 }) {
-  return <SOrbitalCloud center={center} opacity={0.28} radius={0.46} seed={43} tone="primary" />;
+  return <SOrbitalCloud center={center} opacity={0.3} radius={0.46} renderStyle="surface" seed={43} tone="primary" />;
 }
 
 function POrbitalX({ center }: { center: Vec3 }) {
-  return <POrbitalPair center={center} direction={[1, 0, 0]} length={0.64} opacity={0.42} seed={89} width={0.19} />;
+  return <POrbitalPair center={center} direction={[1, 0, 0]} length={0.64} opacity={0.34} renderStyle="surface" seed={89} showAxis={false} width={0.19} />;
 }
 
 function POrbitalZ({ center }: { center: Vec3 }) {
-  return <POrbitalPair center={center} direction={[0, 0, 1]} length={0.76} opacity={0.42} seed={121} width={0.2} />;
+  return <POrbitalPair center={center} direction={[0, 0, 1]} length={0.76} opacity={0.34} renderStyle="surface" seed={121} showAxis={false} width={0.2} />;
 }
 
 function SigmaOverlap({ center, scale }: { center: Vec3; scale: Vec3 }) {
@@ -232,13 +248,11 @@ function SigmaOverlap({ center, scale }: { center: Vec3; scale: Vec3 }) {
     <mesh position={center} scale={scale}>
       <sphereGeometry args={[1, 48, 32]} />
       <meshPhysicalMaterial
-        clearcoat={0.24}
         color="#F4A261"
+        depthTest
         depthWrite={false}
-        emissive="#FFF0D8"
-        emissiveIntensity={0.08}
-        opacity={0.22}
-        roughness={0.32}
+        opacity={0.34}
+        roughness={0.58}
         transparent
       />
     </mesh>
@@ -250,15 +264,11 @@ function PiOverlapCloud({ tone }: { tone: "top" | "bottom" }) {
     <PiCloudBand
       cloudStyle="overlap-lobes"
       length={1}
-      opacity={0.34}
+      opacity={0.42}
       orientation="xy"
-      particleCount={280}
-      particleOpacity={0.46}
-      particleSize={0.022}
       seed={tone === "top" ? 173 : 211}
-      showParticles
       thickness={0.13}
-      tone={tone === "top" ? "primary" : "warm"}
+      tone="warm"
       waist={0.24}
       width={0.28}
     />
@@ -278,7 +288,7 @@ function BondAxis({ showLabel }: { showLabel: boolean }) {
 
 function SceneLabel({ position, text, color }: { position: Vec3; text: string; color: string }) {
   return (
-    <Html center distanceFactor={6.5} pointerEvents="none" position={position}>
+    <Html center distanceFactor={4.5} pointerEvents="none" position={position}>
       <span
         className={teachingSceneLabelClass}
         style={{ color }}
@@ -290,8 +300,8 @@ function SceneLabel({ position, text, color }: { position: Vec3; text: string; c
 }
 
 function getCameraPosition(lessonType: OrbitalBondLessonType): Vec3 {
-  if (lessonType === "sigma") return [3.4, -4.8, 2.9];
-  return [3.25, -4.9, 3.25];
+  if (lessonType === "sigma") return [2.55, -3.65, 2.15];
+  return [2.45, -3.75, 2.45];
 }
 
 function getPiStageConfig(mode: PiBondMode) {

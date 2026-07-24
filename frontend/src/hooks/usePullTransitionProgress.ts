@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function usePullTransitionProgress(activeAtomId?: string, durationMs = 300): number {
+export function usePullTransitionProgress(activeAtomId?: string, durationMs = 120): number {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -9,7 +9,7 @@ export function usePullTransitionProgress(activeAtomId?: string, durationMs = 30
       return;
     }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setProgress(1);
+      setProgress(0);
       return;
     }
     const startedAt = performance.now();
