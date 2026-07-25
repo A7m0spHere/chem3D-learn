@@ -301,7 +301,7 @@ The `video/` project is a standalone Remotion project. It is **not** part of the
 
 ## Runtime and Environment Variables
 
-- 当前本机 Node.js 为 24.x；`backend/package.json` 明确要求 Node.js `>=20`。前端与视频未声明 `engines`，其最低 Node 版本待确认。
+- 本项目的 Windows 开发环境统一以 Node.js `>=20` 为兼容下限；`backend/package.json` 已显式声明该要求。前端与视频尚未声明 `engines`，因此 Node.js `>=20` 是仓库级开发基线，不代表两个子项目已经通过 package metadata 强制校验。
 - 前端业务代码当前不读取 `VITE_*` 环境变量，也没有 `.env.example`。
 
 | Scope | Variable | Default / purpose |
@@ -314,16 +314,132 @@ The `video/` project is a standalone Remotion project. It is **not** part of the
 
 使用 `createBrowserRouter` 意味着生产静态托管需要 SPA history fallback；当前仓库没有正式部署配置，具体托管方式为**待确认**。
 
-## Environment Note (Windows)
+## Windows Development Environment
 
-`npm install` may fail with `EPERM` if the npm cache points to a protected path
-(e.g. `C:\Program Files\nodejs\node_cache`). Work around it with an explicit cache dir:
+本项目当前按**原生 Windows** 工作流维护，不默认切换到 WSL。精确版本用于记录本机已验证快照，不是强制锁定；兼容下限才是新环境需要满足的要求。
 
-```bash
-npm install --cache d:/chem3D-learn/.tmp-npm-cache
+### 兼容下限与本机快照
+
+| Tool | Requirement | Verified on this computer |
+| --- | --- | --- |
+| Windows | Windows 10 或更高版本，64 位 | Windows 11 专业版 10.0.22631 |
+| PowerShell | PowerShell 7 推荐；Windows PowerShell 仅作兼容回退 | PowerShell 7.6.4 |
+| Node.js | `>=20` | 24.14.0 |
+| npm | 随受支持的 Node.js 安装 | 11.9.0 |
+| Git | Git for Windows；必须可用 `git` 和 Git Bash | 2.54.0.windows.1 / Git Bash 5.3.9 |
+| Browser | 仍受安全更新支持的 Chromium 浏览器；Windows 测试使用系统 Chrome 通道 | Google Chrome 119.0.6045.106（本机快照，不作为推荐版本） |
+| Claude Code | 仅 Claude Code 协作时需要 | 2.1.220 |
+
+本机约有 16 GB 内存，足以完成当前前端构建和 3D 页面开发。版本升级后先运行下方预检和验证矩阵；不要因为快照版本变化就无理由重写 lockfile。
+
+### PowerShell 预检
+
+从仓库根目录 `D:\chem3D-learn` 运行：
+
+```powershell
+$PSVersionTable.PSVersion
+node --version
+npm --version
+git --version
+claude --version
+where.exe node
+where.exe npm
+where.exe git
+npm config get cache
+git config --get core.autocrlf
+git status --short --branch
 ```
 
-`.tmp-npm-cache/` is a scratch directory and must not be committed。该目录当前未被 `.gitignore` 覆盖，提交前必须显式确认它没有被暂存。
+如果某工具不存在或版本低于兼容下限，先报告实际输出再处理；不要擅自升级 Node.js、npm、Git、Chrome 或 Claude Code。
+
+### PowerShell 命令与路径规则
+
+- 面向项目所有者给出的 Windows 命令默认使用 PowerShell 语法，并明确工作目录。
+- 路径含空格或特殊字符时始终加引号；PowerShell 文件操作优先使用 `-LiteralPath`。
+- 一个文件操作必须在同一种 shell 中完成。不要在 PowerShell 中枚举路径后交给 `cmd.exe`、Git Bash 或批处理脚本删除、移动。
+- 不要通过 `Set-ExecutionPolicy Unrestricted`、`Bypass` 等方式降低系统执行策略。若 PowerShell 阻止 `npm.ps1`，改用同目录下的 `npm.cmd`，并报告原因。
+- PowerShell 的环境变量使用进程级语法，例如 `$env:PORT = '4001'`。不要用 `setx` 永久写入本机配置，除非用户明确要求。
+- 当前 `core.autocrlf=true`，仓库没有 `.gitattributes`。保持既有换行方式，不运行全仓库换行归一化或无关格式化；提交前用 `git diff --check` 和 `git diff --stat` 排查换行噪声。
+
+### 依赖安装与 npm 缓存
+
+本机 npm 默认缓存为 `C:\Program Files\nodejs\node_cache`，可能因权限不足导致 `npm install` 报 `EPERM`。不要修改全局 npm 配置；为需要安装依赖的单次命令显式指定仓库本地缓存：
+
+```powershell
+Push-Location 'D:\chem3D-learn\frontend'
+npm install --cache 'D:\chem3D-learn\.tmp-npm-cache'
+Pop-Location
+```
+
+- `.tmp-npm-cache/` 是临时目录，当前未被 `.gitignore` 覆盖，绝对不能暂存或提交。
+- `frontend/` 与 `video/` 各自运行安装命令并维护各自的 `node_modules` / `package-lock.json`；禁止在仓库根目录混装，也禁止复制 lockfile。
+- `backend/` 零运行时依赖，不需要执行 `npm install`。
+- 当前 `frontend/node_modules` 已安装；`video/node_modules` 未安装。只有视频任务才安装 `video/` 依赖。
+
+### Windows 日常命令
+
+短时验证命令可在同一个 PowerShell 会话中顺序运行：
+
+```powershell
+Push-Location 'D:\chem3D-learn\frontend'
+npm run build
+npm run lint
+npm run test:logic
+Pop-Location
+
+Push-Location 'D:\chem3D-learn\backend'
+npm test
+Pop-Location
+
+# 仅在 video/node_modules 已单独安装后
+Push-Location 'D:\chem3D-learn\video'
+npm run lint
+npm run render
+Pop-Location
+```
+
+开发服务器是持续运行进程，每个服务应在独立 PowerShell 终端中启动：
+
+```powershell
+# Frontend terminal
+Push-Location 'D:\chem3D-learn\frontend'
+npm run dev
+
+# Backend terminal
+Push-Location 'D:\chem3D-learn\backend'
+npm start
+
+# Remotion Studio terminal（仅视频任务）
+Push-Location 'D:\chem3D-learn\video'
+npm run dev
+```
+
+上面三个区块是三个独立终端示例，不要整体粘贴到同一个终端。端口或测试通道需要覆盖时使用进程级变量：
+
+```powershell
+$env:PORT = '4001'
+$env:CORS_ORIGIN = 'http://127.0.0.1:5173'
+$env:PLAYWRIGHT_CHANNEL = 'chrome'
+$env:PLAYWRIGHT_PORT = '4173'
+$env:CHEM3D_CAPTURE_URL = 'http://127.0.0.1:5173'
+```
+
+### Windows 验证矩阵
+
+| Scope | Command | Current Windows status |
+| --- | --- | --- |
+| frontend type/build | `npm run build` | 已通过；保留既有 large chunk 警告 |
+| frontend lint | `npm run lint` | 已通过 |
+| frontend pure logic | `npm run test:logic` | 23 / 23 已通过，不依赖浏览器 |
+| frontend browser behavior | 设置 `$env:PLAYWRIGHT_CHANNEL = 'chrome'` 后运行针对性无截图用例 | 系统 Chrome 通道已验证可用 |
+| frontend visual snapshots | `npm run test:visual` | 只有 80 张 Darwin 基线；Windows 不得更新 |
+| backend | `npm test` | 5 / 5 已通过 |
+| video | `npm run lint` / `npm run render` | 本机尚未安装 `video/node_modules`，未验证 |
+
+- Playwright 缓存当前有 Chromium，但缺少默认配置需要的 `chromium_headless_shell`；不要把“缓存存在”误写成完整视觉环境可用。
+- 在 Windows 使用系统 Chrome 时，只运行明确不更新截图的针对性行为用例。不得运行 `test:visual:update`，也不得接受由平台字体、抗锯齿或 GPU 差异造成的 Darwin 快照改写。
+- `npm run check` 包含完整 visual 测试，因此在现有 Windows 环境下不能作为无条件的一键验收命令。
+- 每次测试后用 `git status --short` 确认没有快照、lockfile、缓存或其他无关文件被改写。
 
 ## Code Style
 
