@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-25（Claude Code，T-008 ModuleDetailPage 路由级 lazy 主包瘦身）
+> 最后更新：2026-07-25（Claude Code，T-006 模块卡片按意图预取 3D 资源）
 
 ## 一句话定位
 
@@ -39,8 +39,9 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend npm run lint`：**通过**。
 - `frontend npm run test:logic`：**51 / 51 通过**；其中 T-001 新文件 28 项，原有文件 23 项。
 - `backend npm test`：**15 / 15 通过**（原 5 项纯函数 + T-BE-001 新增 10 项真实 HTTP 集成）。
-- `frontend npm run test:visual -- --list`：发现 **15 个文件、114 个用例**（含 T-002 新增无截图复位回归 `module-state-reset.visual.spec.ts` 5 项）。
+- `frontend npm run test:visual -- --list`：发现 **16 个文件、117 个用例**（含 T-002 无截图复位回归 5 项、T-006 无截图预取回归 `prefetch-viewer-chunks.visual.spec.ts` 3 项）。
 - T-002 复位回归（系统 Chrome 通道，无截图）：**5 / 5 通过**，覆盖晶体 / 普通分子 VSEPR / 杂化 / 有机平面 / σ 键。
+- T-006 预取回归（系统 Chrome 通道，无截图）：**3 / 3 通过**，覆盖首页初始不下载 3D chunk、hover 卡片后预取页面与 viewer chunk、预取后点击仍正常进入并渲染。
 - 视觉基线：共 **80 张，全部为 `*-darwin.png`**；Windows/Linux 基线为 0。
 - 默认 Playwright 冒烟测试：**失败**，缺少 `chromium_headless_shell-1228`。
 - 设置 `PLAYWRIGHT_CHANNEL=chrome` 后，同一无截图冒烟测试：**1 / 1 通过**。
@@ -60,6 +61,10 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 最近完成
 
+- **T-006 模块卡片按意图预取 3D 资源**（2026-07-25）
+  - `lib/prefetch.ts` 的 `prefetchViewerChunks` 在原有 `MoleculeViewer`（three/r3f）预热外，新增 `import("@/pages/ModuleDetailPage")`，与 T-008 lazy 路由指向同一页面 chunk；保留 `warmed` 单次守卫，未改 `ModuleCard`（hover/focus）与 `ModulesPage`（idle）调用点。
+  - 补齐 T-008 后「hover 只预热 three/r3f、页面 chunk 仍等点击」的预取缺口：hover/focus/idle 现在把进入模块所需的全部按需资源一次预热到位。
+  - 新增无截图回归 `tests/visual/prefetch-viewer-chunks.visual.spec.ts`（chrome 通道 3 / 3）：首页初始不下载 three/r3f 或页面 chunk、hover 后预取页面与 viewer chunk、预取后点击仍正常进入并渲染。
 - **T-008 ModuleDetailPage 及 23 个 JSON 移出首屏主包**（2026-07-25）
   - `router.tsx` 把 `/module/:id` 从静态 `element` 改为 React Router 数据路由的 `lazy` 属性（与 `OrganicBuilderPage` 同款），删除静态 `import`。
   - `ModuleDetailPage` 连同它唯一消费的 `mockMolecules.ts` 与 23 个手写 JSON 从 `index` 主包移入独立页面 chunk：首屏主包 496 KB → 209 KB，页面 chunk 约 286 KB，仅访问 `/module/:id` 时下载。

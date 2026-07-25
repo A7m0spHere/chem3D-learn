@@ -10,27 +10,31 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-25
 - **分支**：`main`
-- **任务**：T-008 把 `ModuleDetailPage` 及其 23 个分子 JSON 移出首屏主包（路由级 lazy）
+- **任务**：T-006 模块卡片按意图预取 3D 资源（把 T-008 拆出的 `ModuleDetailPage` chunk 一并预取）
 - **提交**：尚未提交（等待用户确认后再 commit）
 
 ### 本次改动
 
-只改一个源码文件 `frontend/src/router.tsx`，未触碰后端、lockfile、npm 缓存或任何 Darwin 快照。
+只改一个源码文件 `frontend/src/lib/prefetch.ts` + 新增一个无截图测试，未触碰后端、lockfile、npm 缓存或任何 Darwin 快照。
 
-**`router.tsx`（唯一代码改动）**
+**`lib/prefetch.ts`（唯一代码改动）**
 
-- 删除顶部 `import { ModuleDetailPage } from "@/pages/ModuleDetailPage"` 静态导入。
-- `/module/:id` 路由从 `element: <ModuleDetailPage />` 改为 React Router 数据路由的 `lazy: async () => { const { ModuleDetailPage } = await import("@/pages/ModuleDetailPage"); return { Component: ModuleDetailPage }; }`，与既有 `OrganicBuilderPage` 逐字同款。加载态复用已有 `hydrateFallbackElement`（`RouteHydrateFallback`），未新增 UI。
+- `prefetchViewerChunks` 在原有 `import("@/components/three/MoleculeViewer")`（预热 three/r3f 共享 vendor）之外，新增 `import("@/pages/ModuleDetailPage")`，与 `router.tsx` lazy 路由的 import 指向同一 chunk。
+- 保留原 `warmed` 单次守卫；**未改** `ModuleCard`（hover/focus）与 `ModulesPage`（idle）的既有调用点——它们已在调用 `prefetchViewerChunks`，新增的页面 chunk 预取自动随现有触发点生效。
 
-**为什么是路由级 lazy 而非组件内 JSON 动态 import**：`ModuleDetailPage` 是全库唯一消费这 23 条数据（值）的地方，且原先被静态导入，数据才被并入 `index` 主包。把页面变 lazy 即让页面连同 23 个 JSON 一起移出主包，改动面仅一个文件、无首屏闪烁、无异步 plumbing。详见 D-011。`mockMolecules.ts` 与页面内同步 `useMemo` 数据消费保持不变。
+**为什么这样改**：T-008 把 `/module/:id` 改为路由级 lazy 后，页面连同 23 个 JSON 成了独立 chunk。原预取只预热 three/r3f，点击卡片后仍要等页面 chunk 下载才能渲染。补上页面 chunk 预取后，hover/focus/idle 已把「进入模块所需的全部按需资源」预热到位。详见 D-012。
+
+**`tests/visual/prefetch-viewer-chunks.visual.spec.ts`（新增，无截图）**
+
+用网络请求监听断言预取时机：首页初始加载不请求 three/r3f（`.vite/deps/@react-three_*` 或产物 `three-*`/`r3f-*`）或页面 chunk；hover 首页模块卡后 `ModuleDetailPage` 与 `MoleculeViewer` chunk 均被请求；预取后点击卡片仍正常进入模块并渲染 viewer。注意：hover 用例放在**首页**（`/modules` 的 idle 预取会在 hover 前触发 `warmed` 守卫，掩盖 hover 行为）。
 
 ### 验证结果
 
-- `frontend npm run build`：**通过**。`index` 主包 **496 KB → 209 KB**（gzip 137 → 67 KB）；新增 285 KB `ModuleDetailPage` chunk。grep 确认 JSON 教学文案（「甲烷以碳原子为中心」「钙钛矿」）已从 `index` 移入页面 chunk。保留既有 three chunk 警告。
+- `frontend npm run build`：**通过**（保留既有 three chunk 警告）。
 - `frontend npm run lint`：**通过**，无 warning。
 - `frontend npm run test:logic`：**51 / 51 通过**（本任务未增删 logic 用例）。
-- 现有 `module-state-reset.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**5 / 5 通过**，证明页面变 lazy 后懒加载渲染与 SPA 切换行为无回归。
-- `git status --short`：仅 `router.tsx` + 4 份 docs 变动，无快照 / lockfile / 缓存改写。
+- 新增 `prefetch-viewer-chunks.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**3 / 3 通过**。
+- `git status --short`：仅 `prefetch.ts` + 新 spec + 4 份 docs 变动，无快照 / lockfile / 缓存改写。
 - 未运行完整 `test:visual`：只有 Darwin 基线，Windows 不得更新。
 
 ### 当前仍未收口的前序改动（非本任务引入）
@@ -39,11 +43,16 @@
 
 ### 给下一个 Agent 的建议
 
-提交本次改动（建议信息 `perf: lazy-load module detail route to shrink main bundle`，只暂存 `router.tsx` + 4 份 docs，勿混入 lockfile/缓存）。之后可考虑 T-006（模块卡片按意图预取，把新的 `ModuleDetailPage` chunk 一并预取以抵消首访加载态）；或「进入模块只下载当前 1 个 JSON」的组件内数据动态化（属 D-011 边界外的独立优化，需另立任务并权衡首屏闪烁）。
+提交本次改动（建议信息 `perf: prefetch module detail chunk on card intent`，只暂存 `prefetch.ts` + 新 spec + 4 份 docs，勿混入 lockfile/缓存）。本会话授权序列的下一项是 T-007（依赖安全与 lockfile 评估）。
 
 ---
 
 ## 往期
+
+### 2026-07-25 Claude Code：T-008 ModuleDetailPage 路由级 lazy 主包瘦身
+
+- `router.tsx` 的 `/module/:id` 改为 lazy 路由（同 `OrganicBuilderPage` 范式），页面连同 23 个 JSON 移出 `index` 主包（496→209 KB）。详见 D-011。
+- 提交：`232e4ea perf: lazy-load ModuleDetailPage to drop molecule data from main bundle`。
 
 ### 2026-07-25 Claude Code：T-002 拆解 ModuleDetailPage 专题状态到 typed hook
 

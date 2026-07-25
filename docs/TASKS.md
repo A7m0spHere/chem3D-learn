@@ -40,16 +40,6 @@
   - [ ] 前端无需依赖后端即可构建和运行。
   - [ ] 后端 API 响应兼容现有 5 项测试，并增加防漂移断言。
 
-### T-006 模块卡片按意图预取 3D 资源
-
-- **优先级**：低
-- **状态**：搁置
-- **范围**：复用 `lib/prefetch.ts`，在 Modules 卡片 hover / focus 时预取；触屏设备不得因普通渲染自动下载全部 3D chunk。
-- **验收标准**：
-  - [ ] 首页和模块列表初始加载不新增 three/R3F 请求。
-  - [ ] hover / keyboard focus 后只预取目标所需共享 chunk，点击路由仍正常。
-  - [ ] build、lint 和针对性浏览器测试通过。
-
 ### T-007 依赖安全与 lockfile 评估
 
 - **优先级**：低
@@ -64,6 +54,19 @@
 ---
 
 ## 已完成
+
+### T-006 模块卡片按意图预取 3D 资源
+
+- **完成**：2026-07-25（Claude Code）
+- **背景**：T-008 把 `/module/:id` 改为 lazy 后，`ModuleDetailPage` 连同 23 个分子 JSON 成了独立页面 chunk。此前 `prefetchViewerChunks` 只预热 three/r3f（`MoleculeViewer`），hover 卡片后点击仍需等页面 chunk 下载，预取意图不完整。
+- **内容**：
+  - `lib/prefetch.ts` 在原有 `import("@/components/three/MoleculeViewer")` 基础上新增 `import("@/pages/ModuleDetailPage")`，与 `router.tsx` 的 lazy import 指向同一 chunk；保留 `warmed` 单次守卫，只在 hover/focus 卡片或列表页空闲时触发。
+  - 未改 `ModuleCard.tsx` / `ModulesPage.tsx`——它们已调用 `prefetchViewerChunks`，新增的页面 chunk 预取自动随现有 hover/focus/idle 入口生效。
+- **验证**：
+  - [x] 首页初始加载不下载 three/r3f vendor 或 `ModuleDetailPage` chunk（占位组件 `ModulePlaceholderViewer` 属轻量首屏依赖，非 3D vendor）。
+  - [x] hover 模块卡片后预取 `ModuleDetailPage` 与 `MoleculeViewer`（后者拉起 three/r3f）；预取后点击仍正常进入模块并渲染 viewer。
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（51/51）通过；新增 `tests/visual/prefetch-viewer-chunks.visual.spec.ts`（无截图，系统 Chrome 通道）3/3 通过。
+  - [x] 未改数据/viewer 分发/文案；未动 lockfile、缓存或 Darwin 快照。
 
 ### T-008 把 ModuleDetailPage 及其 23 个分子 JSON 移出首屏主包
 
