@@ -8,25 +8,6 @@
 
 ## 进行中
 
-### T-ERR ViewerErrorBoundary 收口与行为验收
-
-- **优先级**：高
-- **状态**：进行中（工作区已有未提交实现）
-- **背景**：`ViewerErrorBoundary.tsx` 已存在，`ModuleDetailPage.tsx` 已接入，但“重新加载模型”目前只清除边界 state。对于 `React.lazy` 缓存的分包拒绝，它是否能真正重新请求资源尚未验证；错误边界也不能覆盖所有异步/R3F 动画帧错误。
-- **范围**：
-  - 先复核现有未提交 diff，不混入 `package-lock.json`、`.tmp-npm-cache/` 或其他治理文件。
-  - 用可恢复的临时故障注入或自动测试验证：正常渲染、渲染期错误 fallback、切换 `resetKey`、点击重试。
-  - 若“重新加载模型”语义不成立，选择最小修复：真正刷新/重建可重试加载路径，或把按钮和文案改为实际能力；不要扩大到监控平台。
-- **验收标准**：
-  - [ ] 正常 3D 模块与接入前行为一致。
-  - [ ] 渲染期故障能显示浅色教学风 fallback，且按钮可键盘操作。
-  - [ ] 切换到其他模块后错误态能够复位。
-  - [ ] 明确记录哪些错误可捕获、哪些不能捕获，不再声称覆盖所有 WebGL/异步故障。
-  - [ ] 重试按钮的名称与实际行为一致；若保留“重新加载模型”，必须证明它能恢复至少一个真实可恢复故障。
-  - [ ] `npm run build`、`npm run lint` 通过。
-  - [ ] 使用 `PLAYWRIGHT_CHANNEL=chrome` 运行相关无截图浏览器回归；不得在 Windows 更新 Darwin 快照。
-  - [ ] `git diff --check` 通过，只提交本任务业务文件。
-
 ### T-000 AI 协作规范交付收口
 
 - **优先级**：高
@@ -127,6 +108,23 @@
 ---
 
 ## 已完成
+
+### T-ERR ViewerErrorBoundary 收口与行为验收
+
+- **完成**：2026-07-25（Codex，commit `bade1aa`）
+- **内容**：
+  - 新增 `ViewerErrorBoundary.tsx`，并在 `ModuleDetailPage.tsx` 包裹 3D viewer 的 `Suspense`。
+  - `resetKey={id}` 负责模块路由变化后的错误态复位。
+  - 重试按钮改为“重新加载页面”，调用 `window.location.reload()`，真实重试被 `React.lazy` 缓存为拒绝状态的分包加载。
+  - fallback 增加 `role="alert"`，修正中文标点和故障边界文案。
+- **验证**：
+  - [x] 正常 CH₄ 模块 Canvas 可见。
+  - [x] 中断一次 `MoleculeViewer` lazy 请求后，fallback 可见且边界记录错误。
+  - [x] 按钮可聚焦并由键盘 Enter 触发；同一路由重新加载后 Canvas 恢复。
+  - [x] 错误态下 SPA 切换到 NaCl 后 fallback 消失、Canvas 恢复。
+  - [x] `npm run build`、`npm run lint`、`git diff --check` 通过。
+  - [x] 未更新 Darwin 快照，未提交 lockfile、缓存或未跟踪治理文件。
+- **已知边界**：不能捕获事件处理、普通异步回调、服务端渲染、边界自身错误，也不保证覆盖所有 R3F 动画帧故障。
 
 ### T-DOC-001 独立复核与治理文档事实校正
 

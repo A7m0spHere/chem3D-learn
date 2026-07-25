@@ -26,15 +26,13 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
-2026-07-25 再次 `git fetch origin` 后，`main` 与 `origin/main` 为 `0 ahead / 0 behind`，但工作区仍有前序 Claude Code 改动没有收口：
+2026-07-25 T-ERR 业务提交 `bade1aa` 完成后，工作区仍有以下前序 Claude Code 改动没有收口：
 
-- `frontend/src/pages/ModuleDetailPage.tsx` 已修改，接入 `ViewerErrorBoundary`。
-- `frontend/src/components/common/ViewerErrorBoundary.tsx` 仍是未跟踪业务文件。
 - `frontend/package-lock.json` 有 39 行 npm 平台元数据删除，是否保留为**待确认**。
 - `.tmp-npm-cache/` 未跟踪、约 10.8 MB，且当前未被 `.gitignore` 覆盖；不得提交。
-- `CLAUDE.md`、`docs/DECISIONS.md` 仍未跟踪。本轮文档事实校正没有修改它们。
+- `CLAUDE.md`、`docs/DECISIONS.md` 仍未跟踪。T-ERR 没有修改或提交它们。
 
-因此，“工作区已有实现”“验证通过”和“已提交/已推送”必须分开表述。`ViewerErrorBoundary` 当前属于**已实现、已静态验证，但尚未完成行为验收与业务改动交付**。
+`ViewerErrorBoundary` 与 `ModuleDetailPage` 接入已作为独立业务提交收口；lockfile、缓存和未跟踪治理文件没有混入。
 
 ## 独立验证结果（2026-07-25）
 
@@ -46,6 +44,11 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 视觉基线：共 **80 张，全部为 `*-darwin.png`**；Windows/Linux 基线为 0。
 - 默认 Playwright 冒烟测试：**失败**，缺少 `chromium_headless_shell-1228`。
 - 设置 `PLAYWRIGHT_CHANNEL=chrome` 后，同一无截图冒烟测试：**1 / 1 通过**。
+- T-ERR 自定义故障注入（系统 Chrome）：
+  - 正常 CH₄ 模块：Canvas 1、fallback 0。
+  - 首次中断 `MoleculeViewer` lazy 请求：显示 `role="alert"` fallback，并记录边界错误。
+  - 键盘 Enter 触发“重新加载页面”：同一路由重新加载后 Canvas 1、fallback 0。
+  - 错误态下通过 SPA 切换到 NaCl：Canvas 1、fallback 0，证明 `resetKey` 路由复位有效。
 - 完整视觉回归：**未运行**，因为当前只有 macOS 基线。
 - `video/`：`node_modules` 未安装，本轮未运行 lint、构建或渲染。
 
@@ -53,19 +56,26 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 正在进行
 
-1. **T-ERR ViewerErrorBoundary 收口**：工作区已有实现，待验证真正的重试语义、故障覆盖范围和视觉效果，并排除无关锁文件/缓存后单独交付。
-2. **T-000 AI 协作规范交付收口**：共享文档已建立并完成本轮事实校正，但 `CLAUDE.md`、`docs/DECISIONS.md` 仍未跟踪，完整交付状态待处理。
+1. **T-000 AI 协作规范交付收口**：共享文档已建立并完成事实校正，但 `CLAUDE.md`、`docs/DECISIONS.md` 仍未跟踪，完整交付状态待处理。
+
+## 最近完成
+
+- **T-ERR ViewerErrorBoundary 收口与行为验收**（2026-07-25，commit `bade1aa`）
+  - 3D viewer 的 `Suspense` 已由错误边界保护。
+  - `resetKey={id}` 已验证可在 SPA 切换到其他 Viewer 时清除错误态。
+  - 重试从“只清 React state”改为明确的整页重新加载，能为 `React.lazy` 创建新的模块加载上下文。
+  - fallback 增加 `role="alert"`，按钮支持键盘 Enter，视觉检查符合浅色课堂风格。
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-1. 先完成 T-ERR，避免未验证业务改动长期留在脏工作区。
+1. 完成 T-000，把 `CLAUDE.md` / `DECISIONS.md` 的真实交付状态收口，且不混入 lockfile 或缓存。
 2. 为 17 个 `knownOrganicMolecules` 补全量、表驱动的识别/命名回归测试，并避免重复现有 23 项逻辑测试。
 3. 拆解 `ModuleDetailPage` 的 33 个状态，并补跨模块切换的状态重置回归测试。
 
 ## 已知风险
 
-- `ViewerErrorBoundary` 的“重新加载模型”按钮目前只清除边界 state；对于 `React.lazy` 已缓存的分包拒绝，是否能真正重新加载为**待验证**。
-- React Error Boundary 不能覆盖所有事件处理、异步回调和 R3F 动画帧错误；“防止所有 WebGL 白屏”的说法缺乏证据。
+- `ViewerErrorBoundary` 的重试会重新加载整个页面，而不是只重建 3D Canvas；这是为绕开 `React.lazy` 缓存拒绝 Promise 的可靠最小方案。
+- React Error Boundary 只能捕获后代组件的渲染、构造和生命周期错误；不能覆盖事件处理、普通异步回调、服务端渲染、边界自身错误，以及所有 R3F 动画帧故障。
 - 23 个 JSON 通过 `as unknown as MoleculeRecord` 接入，绕过了静态结构核验，当前没有运行时 schema / 引用完整性测试。
 - `backend/src/molecules.js` 与前端 6 个核心 JSON 重复，存在数据漂移风险。
 - `createBrowserRouter` 的生产静态托管需要 SPA history fallback；当前仓库没有正式部署配置。
