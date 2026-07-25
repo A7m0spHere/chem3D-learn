@@ -14,23 +14,7 @@
 
 ## 待办（按优先级）
 
-### T-002 拆解 ModuleDetailPage 状态
-
-- **优先级**：中
-- **状态**：待办
-- **背景**：`frontend/src/pages/ModuleDetailPage.tsx` 当前有 33 个 `useState`，`useEffect([id])` 手动重置大量专题状态，每增加模块都可能漏重置。
-- **范围**：
-  - 至少拆出晶体控制、有机平面专题、成键/杂化专题三组 typed hook。
-  - 每个 hook 自管初始值与 `reset(moduleId)`；页面只保留跨专题共享状态和组合调用。
-  - 不改变 `deriveViewerKind` / `viewerRegistry` 的现有分发语义。
-- **验收标准**：
-  - [ ] 从一个已修改控制状态的模块通过 SPA 导航切到另一模块时，所有相关状态恢复目标模块默认值。
-  - [ ] 为“跨模块切换后重置”增加针对性浏览器回归，不只依赖人工点击。
-  - [ ] 普通分子、晶体、有机平面、σ/π、杂化轨道各抽查至少一个模块。
-  - [ ] 页面不再逐项维护当前全部专题状态的长重置列表；新增专题的默认值由对应 hook 管理。
-  - [ ] `npm run build`、`npm run lint`、`npm run test:logic` 通过。
-  - [ ] 使用 `PLAYWRIGHT_CHANNEL=chrome` 运行相关无截图 visual/浏览器测试；不得在 Windows 更新 Darwin 快照。
-  - [ ] 行为和教学文案零变化，`git diff --check` 通过。
+（暂无。）
 
 ---
 
@@ -80,6 +64,23 @@
 ---
 
 ## 已完成
+
+### T-002 拆解 ModuleDetailPage 状态
+
+- **完成**：2026-07-25（Claude Code）
+- **背景**：`ModuleDetailPage.tsx` 有 33 个 `useState`，并由一个约 40 行的 `useEffect([id])` 手动逐项重置大量专题状态，每新增一个专题模块都可能漏掉重置项。
+- **内容**：
+  - 新增 3 个 typed hook，把专题控制状态、setter、派生 handler 与「切模块重置」收敛为唯一真源：
+    - `useCrystalControls(moduleId)` —— 晶体视图模式 / 模型风格 / 空隙阶段 / 标签，含 `handleCrystalModeChange` 与 ren3 默认 `pressure` 特判。
+    - `useOrganicPlanarControls(moduleId)` —— 共面 / 乙烯 / 苯 / 乙炔的 mode 与视角。
+    - `useBondingControls(moduleId)` —— σ / π / 杂化 / 极性，含 `bondingBasicsMode` 的 `getDefaultBondingBasicsMode` 特判。
+  - 页面 `useEffect([id])` 精简为只重置页面自留状态（讲解步骤、VSEPR 开关、有机拼装过渡、`viewerLoading` 定时器）；专题重置下沉到各 hook。
+  - `deriveViewerKind` / `viewerRegistry` 分发语义与优先级不变，未改任何 viewer / toolbar / panel 组件与教学文案。原 `useEffect` 不重置 `autoRotate` 的行为被完整保留。
+  - 新增 `tests/visual/module-state-reset.visual.spec.ts`（无截图）：经底部相关卡片做真实 SPA 跳转（页面保持挂载、只变路由参数），覆盖晶体、普通分子、杂化轨道、有机平面、σ 键 5 类模块的切换复位。
+- **验证**：
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（51/51）通过。
+  - [x] `PLAYWRIGHT_CHANNEL=chrome` 运行新增 spec：5/5 通过，未更新任何 Darwin 快照。
+  - [x] `git status` 确认只改动页面 + 3 个 hook + 1 个新 spec，无 lockfile / 缓存 / 快照被改写。
 
 ### T-003 修复后端两个 P0 缺陷并补集成测试
 

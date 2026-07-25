@@ -10,42 +10,54 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-25
 - **分支**：`main`
-- **任务**：T-003 修复后端两个 P0 并补真实 HTTP 集成测试
+- **任务**：T-002 拆解 `ModuleDetailPage` 专题状态到 typed hook
 - **提交**：尚未提交（等待用户确认后再 commit）
 
 ### 本次改动
 
-改动集中在 `backend/`，未触碰前端、lockfile 或 npm 缓存。
+改动集中在 `frontend/`，未触碰后端、lockfile、npm 缓存或任何 Darwin 快照。
 
-**`backend/src/server.js`（修复 + 加固）**
+**新增 3 个 typed hook（`frontend/src/hooks/`）**
 
-1. **启动守卫**（P0-1）：`import.meta.url === \`file://${process.argv[1]}\`` 改为 `import.meta.url === pathToFileURL(process.argv[1]).href`。原写法在 Windows 上 `argv[1]` 是 `D:\...\server.js`，拼出的 `file://D:\...` 与 `import.meta.url` 的 `file:///D:/...` 永不相等，`npm start` 从不监听端口。路径含空格/中文时同样失配。
-2. **URL 解析收敛**（P0-2）：抽出 `parseRequestPathname(requestUrl)`，用 try/catch 同时兜住两类客户端可触发的异常 —— `decodeURIComponent` 对 `/%`、`/%zz` 抛 `URIError`，`new URL` 对 `//`、`///` 抛 `TypeError`。任一异常返回 `{ malformed: true }`，`handleRequest` 据此回 400 `MALFORMED_REQUEST_URL`，不再冒泡成未捕获异常终止进程。
-3. **监听错误兜底**：`server.on("error", ...)` 打印明确信息并置 `process.exitCode = 1`，端口占用等不再抛未捕获异常。
+- `useCrystalControls(moduleId)`：晶体控制组（`crystalViewMode`/`crystalModelStyle`/`voidStage`/`showCrystalLabels` + `handleCrystalModeChange`）。含 ren3 `pressure` 默认特判。
+- `useOrganicPlanarControls(moduleId)`：有机平面 / 直线专题（共面 / 乙烯 / 苯 / 乙炔）的 mode 与视角状态。
+- `useBondingControls(moduleId)`：σ / π / 杂化 / 极性专题状态。含 `bondingBasicsMode` 按 `getDefaultBondingBasicsMode` 的模块特判。
+- 每个 hook 用一个 `useEffect([moduleId])` 自管「切模块复位回该模块默认值」，默认值只此一处真源。
 
-**`backend/test/server.integration.test.js`（新增）**
+**改 `ModuleDetailPage.tsx`**
 
-用 `createServer()` 起真实 HTTP 服务器 + `fetch` 覆盖原纯函数测试完全没碰的启动/解码/CORS/写出四层：真实监听、结构列表与详情、三类畸形 URL 各返回 400、连发畸形请求后进程仍存活、CORS 响应头、OPTIONS 预检 204、非 GET 405。
+- 用三个 hook 调用替换对应 `useState` 群（33 → 页面自留 9 个），删除页面内重复的 `handleCrystalModeChange`，精简超长 `useEffect([id])`：只保留页面自留状态（讲解步骤、VSEPR 开关、有机拼装过渡、`viewerLoading` 定时器）的重置，专题重置全部下沉到 hook。
+- `deriveViewerKind` / `viewerRegistry` 分发语义、JSX、教学文案零改动。刻意保留原行为：`autoRotate` 原本不在切模块重置列表中，维持不重置。
+
+**新增 `frontend/tests/visual/module-state-reset.visual.spec.ts`（无截图）**
+
+用相关模块卡片的 `<Link to="/module/:id">` 做 SPA 跳转（页面保持挂载、只变路由参数，才真正触发复位 effect；`page.goto` 会整棵重挂而测不到），覆盖晶体 / 普通分子 VSEPR / 杂化 / 有机平面 / σ 键五类。只用 DOM/文本/aria 断言，不碰 Darwin 基线。
 
 ### 验证结果
 
-- `cd backend && npm test`：**15 / 15 通过**（原 5 条纯函数 + 新 10 条真实 HTTP）。
-- 独立端到端脚本实测：`npm start` 现在真实监听并返回 `/health` 200；连发 `/%`、`//` 各返回 400 后进程仍存活、`/health` 仍 200。
-- 未运行前端 build/lint/测试：本任务未改动任何前端代码。
-- `git diff --check`：通过。
+- `frontend npm run build`：**通过**（tsc --noEmit + vite build；仅保留既有 three chunk 警告）。
+- `frontend npm run lint`：**通过**，无 warning。
+- `frontend npm run test:logic`：**51 / 51 通过**（本任务未增删 logic 用例）。
+- 新增复位回归（`PLAYWRIGHT_CHANNEL=chrome`，仅跑该文件）：**5 / 5 通过**。
+- `git status --short`：仅本任务文件变动，无快照 / lockfile / 缓存改写。
+- 未运行完整 `test:visual`：只有 Darwin 基线，Windows 不得更新。
 
-### 当前仍未收口的前序改动（沿用上一次交接，非本任务引入）
+### 当前仍未收口的前序改动（非本任务引入）
 
-- `frontend/package-lock.json`：39 行 npm 平台 `libc` 元数据删除，未暂存、未提交。
-- `.tmp-npm-cache/`：未跟踪、未被当前 `.gitignore` 覆盖，未暂存、未提交。
+- `frontend/package-lock.json` 的 39 行 `libc` 元数据删除与 `.tmp-npm-cache/`：均已在前一批 Git 收尾中处理（lockfile 已还原、`.tmp-npm-cache/` 已加入 `.gitignore`）。开工时工作区应为干净。
 
 ### 给下一个 Agent 的建议
 
-提交本次后端修复（建议信息 `fix: make backend actually start and survive malformed urls`，只暂存 `backend/` 与相关 docs，勿混入 lockfile/缓存）。之后可领取 review 中记录的下一批高优先级项：前端 23 个 JSON 移出主包、移动端导航缺失、或 T-002 拆解 `ModuleDetailPage` 状态。
+提交本次前端重构（建议信息 `refactor: extract ModuleDetailPage topic state into typed hooks`，只暂存 3 个 hook + 页面 + 新 spec + 4 份 docs，勿混入 lockfile/缓存）。之后可领取 review 中记录的下一批高优先级项：前端 23 个 JSON 移出主包（改善模块详情 chunk 体积）、移动端导航缺失，或 T-004/T-006 等搁置项。
 
 ---
 
 ## 往期
+
+### 2026-07-25 Claude Code：T-003 后端两个 P0 修复 + 真实 HTTP 集成测试
+
+- `server.js` 启动守卫改用 `pathToFileURL`、新增 `parseRequestPathname` 收敛畸形 URL、补 `server.on("error")`；新增 `test/server.integration.test.js`（真实 HTTP，15/15）。
+- 提交：`c4ed156 fix: make backend actually start and survive malformed urls`。
 
 ### 2026-07-25 Codex：T-001 已知有机分子全量回归测试
 

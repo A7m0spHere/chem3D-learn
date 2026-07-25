@@ -95,6 +95,9 @@ import { ViewerErrorBoundary } from "@/components/common/ViewerErrorBoundary";
 
 import { getModuleById } from "@/data/learningModules";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useCrystalControls } from "@/hooks/useCrystalControls";
+import { useOrganicPlanarControls } from "@/hooks/useOrganicPlanarControls";
+import { useBondingControls } from "@/hooks/useBondingControls";
 import type { OrganicBuilderNavigationState } from "@/types/organicBuilder";
 import {
   getMockMolecule,
@@ -104,26 +107,9 @@ import {
 } from "@/data/mockMolecules";
 import { ModuleCard } from "@/components/home/ModuleCard";
 import { learningModules } from "@/data/learningModules";
-import type { MolecularPolarityMode } from "@/data/molecularPolarity";
-import type {
-  CrystalModelStyle,
-  CrystalViewMode,
-  CrystalVoidStage,
-  AcetyleneLinearMode,
-  BenzenePlanarMode,
-  EthylenePlanarMode,
-  OrganicCoplanarMode,
-} from "@/types/molecule";
-import type { EthylenePlaneView } from "@/data/ethylenePlanar";
-import type { BenzenePlaneView } from "@/data/benzenePlanar";
-import type { AcetyleneLineView } from "@/data/acetyleneLinear";
-import type { PiBondMode, SigmaBondMode } from "@/data/sigmaPiBonds";
 import {
-  getDefaultBondingBasicsMode,
   isBondingBasicsModuleId,
-  type BondingBasicsMode,
   type HybridOrbitalControls,
-  type HybridRenderMode,
 } from "@/data/bondingBasics";
 
 // ---------------------------------------------------------------------------
@@ -273,30 +259,62 @@ export function ModuleDetailPage() {
   const [showAngles, setShowAngles] = useState(false);
   const [showLonePairs, setShowLonePairs] = useState(false);
   const [showAtomLabels, setShowAtomLabels] = useState(false);
-  const [crystalViewMode, setCrystalViewMode] = useState<CrystalViewMode>("cell");
-  const [crystalModelStyle, setCrystalModelStyle] = useState<CrystalModelStyle>("ballStick");
-  const [voidStage, setVoidStage] = useState<CrystalVoidStage>("framework");
-  const [showCrystalLabels, setShowCrystalLabels] = useState(false);
-  const [organicCoplanarMode, setOrganicCoplanarMode] = useState<OrganicCoplanarMode>("overview");
-  const [organicVinylAligned, setOrganicVinylAligned] = useState(false);
-  const [showOrganicLabels, setShowOrganicLabels] = useState(false);
-  const [ethyleneMode, setEthyleneMode] = useState<EthylenePlanarMode>("overview");
-  const [ethylenePlaneView, setEthylenePlaneView] = useState<EthylenePlaneView>("top");
-  const [benzeneMode, setBenzeneMode] = useState<BenzenePlanarMode>("overview");
-  const [benzenePlaneView, setBenzenePlaneView] = useState<BenzenePlaneView>("top");
-  const [acetyleneMode, setAcetyleneMode] = useState<AcetyleneLinearMode>("overview");
-  const [acetyleneLineView, setAcetyleneLineView] = useState<AcetyleneLineView>("front");
-  const [sigmaBondMode, setSigmaBondMode] = useState<SigmaBondMode>("ss");
-  const [piBondMode, setPiBondMode] = useState<PiBondMode>("before");
-  const [piBondPlaying, setPiBondPlaying] = useState(false);
-  const [showSigmaPiBondLabels, setShowSigmaPiBondLabels] = useState(false);
-  const [bondingBasicsMode, setBondingBasicsMode] = useState<BondingBasicsMode>("sp");
-  const [hybridProgress, setHybridProgress] = useState(100);
-  const [hybridRenderMode, setHybridRenderMode] = useState<HybridRenderMode>("solid");
-  const [showHybridUnhybridizedP, setShowHybridUnhybridizedP] = useState(true);
-  const [showHybridAxes, setShowHybridAxes] = useState(true);
-  const [molecularPolarityMode, setMolecularPolarityMode] =
-    useState<MolecularPolarityMode>("electronegativity");
+
+  // 专题控制状态按组拆进各自 hook：状态、setter、切模块重置与派生 handler 都由 hook 自管，
+  // 页面不再逐项维护它们的默认值（详见各 use*Controls）。
+  const {
+    crystalViewMode,
+    crystalModelStyle,
+    voidStage,
+    showCrystalLabels,
+    setCrystalModelStyle,
+    setVoidStage,
+    setShowCrystalLabels,
+    handleCrystalModeChange,
+  } = useCrystalControls(id);
+  const {
+    organicCoplanarMode,
+    organicVinylAligned,
+    showOrganicLabels,
+    ethyleneMode,
+    ethylenePlaneView,
+    benzeneMode,
+    benzenePlaneView,
+    acetyleneMode,
+    acetyleneLineView,
+    setOrganicCoplanarMode,
+    setOrganicVinylAligned,
+    setShowOrganicLabels,
+    setEthyleneMode,
+    setEthylenePlaneView,
+    setBenzeneMode,
+    setBenzenePlaneView,
+    setAcetyleneMode,
+    setAcetyleneLineView,
+  } = useOrganicPlanarControls(id);
+  const {
+    sigmaBondMode,
+    piBondMode,
+    piBondPlaying,
+    showSigmaPiBondLabels,
+    bondingBasicsMode,
+    hybridProgress,
+    hybridRenderMode,
+    showHybridUnhybridizedP,
+    showHybridAxes,
+    molecularPolarityMode,
+    setSigmaBondMode,
+    setPiBondMode,
+    setPiBondPlaying,
+    setShowSigmaPiBondLabels,
+    setBondingBasicsMode,
+    setHybridProgress,
+    setHybridRenderMode,
+    setShowHybridUnhybridizedP,
+    setShowHybridAxes,
+    setMolecularPolarityMode,
+  } = useBondingControls(id);
+
   const [viewerLoading, setViewerLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isGuidedMode, setIsGuidedMode] = useState(false);
@@ -340,6 +358,8 @@ export function ModuleDetailPage() {
     };
   }, [moduleData, navigate, prefersReducedMotion, pullingBuilderAtomId]);
 
+  // 专题控制状态（晶体 / 有机平面 / 成键杂化）的切模块重置已下沉到各自 hook；
+  // 这里只重置页面自留的状态：讲解步骤、普通分子 VSEPR 开关、有机拼装过渡、viewer 载入。
   useEffect(() => {
     setActiveStepIndex(0);
     setShowAngles(false);
@@ -347,37 +367,9 @@ export function ModuleDetailPage() {
     setShowAtomLabels(false);
     setPullingBuilderAtomId(undefined);
     setBuilderTransitionPhase("idle");
-    setCrystalViewMode(id === "ren3-high-pressure-nitride" ? "pressure" : "cell");
-    setCrystalModelStyle("ballStick");
-    setVoidStage("framework");
-    setShowCrystalLabels(false);
-    setOrganicCoplanarMode("overview");
-    setOrganicVinylAligned(false);
-    setShowOrganicLabels(false);
-    setEthyleneMode("overview");
-    setEthylenePlaneView("top");
-    setBenzeneMode("overview");
-    setBenzenePlaneView("top");
-    setAcetyleneMode("overview");
-    setAcetyleneLineView("front");
-    setSigmaBondMode("ss");
-    setPiBondMode("before");
-    setPiBondPlaying(false);
-    setShowSigmaPiBondLabels(false);
-    if (id && isBondingBasicsModuleId(id)) {
-      setBondingBasicsMode(getDefaultBondingBasicsMode(id));
-    } else {
-      setBondingBasicsMode("sp");
-    }
-    setHybridProgress(100);
-    setHybridRenderMode("solid");
-    setShowHybridUnhybridizedP(true);
-    setShowHybridAxes(true);
-    setMolecularPolarityMode("electronegativity");
     setViewerLoading(true);
     setCompletedSteps(new Set());
     setIsGuidedMode(false);
-    setPullingBuilderAtomId(undefined);
     const timer = setTimeout(() => setViewerLoading(false), 300);
     return () => clearTimeout(timer);
   }, [id]);
@@ -408,13 +400,6 @@ export function ModuleDetailPage() {
   const activeCrystalViewMode = crystalModes.some((mode) => mode.id === crystalViewMode)
     ? crystalViewMode
     : defaultCrystalViewMode;
-
-  const handleCrystalModeChange = (mode: CrystalViewMode) => {
-    setCrystalViewMode(mode);
-    if (mode === "voids") {
-      setVoidStage("framework");
-    }
-  };
 
   const goToStep = (nextIndex: number) => {
     if (!molecule) return;
