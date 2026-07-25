@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-25（Codex 独立复核与事实校正）
+> 最后更新：2026-07-25（Codex，T-001 已知有机分子全量回归测试）
 
 ## 一句话定位
 
@@ -26,19 +26,18 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
-2026-07-25 T-ERR 业务提交 `bade1aa` 完成后，工作区仍有以下前序 Claude Code 改动没有收口：
+2026-07-25 T-001 测试提交 `e15d592` 完成后，工作区仍有以下前序改动没有收口：
 
 - `frontend/package-lock.json` 有 39 行 npm 平台元数据删除，是否保留为**待确认**。
 - `.tmp-npm-cache/` 未跟踪、约 10.8 MB，且当前未被 `.gitignore` 覆盖；不得提交。
-- `CLAUDE.md`、`docs/DECISIONS.md` 仍未跟踪。T-ERR 没有修改或提交它们。
 
-`ViewerErrorBoundary` 与 `ModuleDetailPage` 接入已作为独立业务提交收口；lockfile、缓存和未跟踪治理文件没有混入。
+`CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。T-001 没有混入 lockfile、缓存或业务引擎改动。
 
 ## 独立验证结果（2026-07-25）
 
 - `frontend npm run build`：**通过**；Vite 转换 2313 个模块。
 - `frontend npm run lint`：**通过**。
-- `frontend npm run test:logic`：**23 / 23 通过**。
+- `frontend npm run test:logic`：**51 / 51 通过**；其中 T-001 新文件 28 项，原有文件 23 项。
 - `backend npm test`：**5 / 5 通过**。
 - `frontend npm run test:visual -- --list`：发现 **14 个文件、109 个用例**。
 - 视觉基线：共 **80 张，全部为 `*-darwin.png`**；Windows/Linux 基线为 0。
@@ -56,10 +55,17 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 正在进行
 
-1. **T-000 AI 协作规范交付收口**：共享文档已建立并完成事实校正，但 `CLAUDE.md`、`docs/DECISIONS.md` 仍未跟踪，完整交付状态待处理。
+（暂无。）
 
 ## 最近完成
 
+- **T-001 已知有机分子全量回归测试**（2026-07-25，commit `e15d592`）
+  - 新增独立表驱动测试，直接遍历 `knownOrganicMolecules`；词典新增或删除条目时用例数量自动同步。
+  - 用独立中文名期望表校验全部当前词典 ID，并逐项断言 `findKnownMolecule` 返回精确 `id` / `nameZh`。
+  - 补充词典顺序、原子/键数组顺序、图 ID、坐标和键端点顺序不变性。
+  - 新增丙炔/丙二烯同分异构、编号方向、官能团优先级、醚母体选择和卤素最低位次五类未覆盖边界。
+- **T-000 AI 协作规范交付收口**（2026-07-25，commit `6a5361e`）
+  - `CLAUDE.md` 与 `docs/DECISIONS.md` 已纳入版本控制，治理交付未混入 lockfile 或 npm 缓存。
 - **T-ERR ViewerErrorBoundary 收口与行为验收**（2026-07-25，commit `bade1aa`）
   - 3D viewer 的 `Suspense` 已由错误边界保护。
   - `resetKey={id}` 已验证可在 SPA 切换到其他 Viewer 时清除错误态。
@@ -68,9 +74,9 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-1. 完成 T-000，把 `CLAUDE.md` / `DECISIONS.md` 的真实交付状态收口，且不混入 lockfile 或缓存。
-2. 为 17 个 `knownOrganicMolecules` 补全量、表驱动的识别/命名回归测试，并避免重复现有 23 项逻辑测试。
-3. 拆解 `ModuleDetailPage` 的 33 个状态，并补跨模块切换的状态重置回归测试。
+1. 拆解 `ModuleDetailPage` 的 33 个状态，并补跨模块切换的状态重置回归测试。
+2. 评估 `ZnSPolytypeCell.tsx` / `ZincMetalCell.tsx` 的纯几何计算下沉。
+3. 设计前后端结构数据去重方案，保持前端手写数据为真源。
 
 ## 已知风险
 

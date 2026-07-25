@@ -8,39 +8,11 @@
 
 ## 进行中
 
-### T-000 AI 协作规范交付收口
-
-- **优先级**：高
-- **状态**：进行中（工作区文档已建立，但交付未完整）
-- **背景**：`AGENTS.md`、PROJECT_STATUS / TASKS / HANDOFF 已建立并经过独立事实校正；`CLAUDE.md` 与 `docs/DECISIONS.md` 当前仍未跟踪，不能把“工作区存在”写成“已交付”。
-- **验收标准**：
-  - [ ] `CLAUDE.md` 第一行仍为 `@AGENTS.md`，且只包含 Claude 专用规则。
-  - [ ] PROJECT_STATUS / TASKS / DECISIONS / HANDOFF 全部被 Git 跟踪。
-  - [ ] 文档中的数量、命令、环境变量和 Git 状态与实际仓库一致。
-  - [ ] 不把业务代码、npm 缓存或无关 lockfile 改写混入治理文档提交。
-  - [ ] `git diff --check` 通过。
+（暂无。）
 
 ---
 
 ## 待办（按优先级）
-
-### T-001 已知有机分子全量回归测试
-
-- **优先级**：高
-- **状态**：待办
-- **背景**：现有 `organic-builder.logic.spec.ts` 已有 23 项、约 902 行测试，覆盖大量系统命名规则，但没有对 `knownOrganicMolecules` 做全量表驱动回归。数组当前为 **17 个**，数量未来可能变化，不应在测试中另写固定数字。
-- **范围**：
-  - 新建 `frontend/tests/logic/organic-builder-known-molecules.logic.spec.ts`。
-  - 直接遍历 `knownOrganicMolecules`，验证每个候选结构能被 `findKnownMolecule` 识别为自己的 `id` / `nameZh`。
-  - 对会进入系统命名器的结构，补充期望中文名；先盘点并复用已有测试，不重复已有支链、环烷烃、苯取代和酰胺用例。
-  - 新增至少 5 个现有测试未覆盖的边界用例，优先考虑词典分子数组重排不变性、同分异构体区分、编号方向冲突和官能团优先级。
-- **验收标准**：
-  - [ ] 测试从 `knownOrganicMolecules` 动态取得全量集合；新增/删除词典条目时测试数量自动同步。
-  - [ ] 当前 17 个已知分子全部有精确 `id` 和中文名断言。
-  - [ ] 至少 5 个新增边界用例不与现有 23 项测试重复。
-  - [ ] 期望名称已按 `ORGANIC_BUILDER_NAMING_SCOPE.md` 复核；不确定的化学命名不得凭现有引擎输出反向生成测试期望。
-  - [ ] 不修改命名引擎逻辑；若发现真实 bug，先记录最小失败用例，再单独说明修复范围。
-  - [ ] `npm run test:logic`、`npm run build`、`npm run lint`、`git diff --check` 全部通过。
 
 ### T-002 拆解 ModuleDetailPage 状态
 
@@ -108,6 +80,31 @@
 ---
 
 ## 已完成
+
+### T-001 已知有机分子全量回归测试
+
+- **完成**：2026-07-25（Codex，commit `e15d592`）
+- **内容**：
+  - 新建 `frontend/tests/logic/organic-builder-known-molecules.logic.spec.ts`，直接遍历 `knownOrganicMolecules` 动态生成全量精确识别用例。
+  - 独立维护中文名期望表，并校验期望表 ID 与生产词典一一对应；当前全部词典结构均断言精确 `id` / `nameZh`。
+  - 新增 5 个图同构不变性边界：词典顺序、原子/键数组顺序、图 ID、空间坐标和键端点顺序。
+  - 新增 5 个命名边界：丙炔/丙二烯同分异构、4-甲基己-2-烯编号、3-羟基丁酸官能团优先级、甲氧基乙烷母体选择、2-溴丁烷最低位次。
+- **验证**：
+  - [x] 新文件定向测试 28 / 28 通过。
+  - [x] 完整 `npm run test:logic` 51 / 51 通过。
+  - [x] `npm run build`、`npm run lint`、`git diff --check` 通过。
+  - [x] 未修改命名引擎、业务代码、lockfile 或 npm 缓存。
+
+### T-000 AI 协作规范交付收口
+
+- **完成**：2026-07-25（Codex，commit `6a5361e`）
+- **内容**：
+  - `CLAUDE.md` 第一行保留 `@AGENTS.md`，只承载 Claude Code 专用补充。
+  - `docs/DECISIONS.md` 纳入版本控制，并追加 ViewerErrorBoundary 的真实重试与故障边界决策。
+  - 治理提交未混入业务代码、lockfile 或 npm 缓存。
+- **验证**：
+  - [x] 两份目标文件已由 Git 跟踪。
+  - [x] `git diff --check` 通过。
 
 ### T-ERR ViewerErrorBoundary 收口与行为验收
 

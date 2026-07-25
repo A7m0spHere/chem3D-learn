@@ -10,80 +10,62 @@
 - **Agent**：Codex
 - **日期**：2026-07-25
 - **分支**：`main`
-- **任务**：T-ERR ViewerErrorBoundary 收口与行为验收
-- **业务提交**：`bade1aa fix: make 3d viewer error recovery reliable`
+- **任务**：T-001 已知有机分子全量回归测试
+- **测试提交**：`e15d592 test: cover all known organic molecules`
 
-### 本次业务改动
+### 本次改动
 
-只处理两个业务文件：
+只新增一个测试文件：`frontend/tests/logic/organic-builder-known-molecules.logic.spec.ts`。
 
-1. `frontend/src/components/common/ViewerErrorBoundary.tsx`
-   - 新增 class Error Boundary；React 目前仍只通过 class 生命周期提供错误边界能力。
-   - 捕获后代组件渲染/生命周期错误，显示浅色课堂风 fallback，并保留控制台错误线索。
-   - fallback 增加 `role="alert"`，按钮可通过键盘聚焦和 Enter 触发。
-   - 将无效的“清 state 重试”改为 `window.location.reload()`，按钮改名“重新加载页面”。
-   - 原因：`React.lazy` 会缓存拒绝的加载 Promise，只清 Error Boundary state 会立即再次抛错；整页刷新会创建新的模块加载上下文。
-2. `frontend/src/pages/ModuleDetailPage.tsx`
-   - 导入 `ViewerErrorBoundary`。
-   - 用 `<ViewerErrorBoundary resetKey={id}>` 包裹原有 3D viewer `Suspense`。
-   - 模块 ID 变化时清除当前边界错误态，使目标 Viewer 可以重新渲染。
+- 直接遍历 `knownOrganicMolecules` 动态生成每个候选的精确识别用例；词典条目增删时测试数量会自动同步。
+- 独立维护当前中文名期望表，并校验其 ID 集合与生产词典一一对应，避免用生产值断言生产值。
+- 对全部词典结构验证原子/键数组重排、图 ID 改名、坐标变化和键端点反转不影响识别。
+- 在 `try/finally` 中临时反转词典数组并恢复，验证 `findKnownMolecule` 不依赖词典顺序。
+- 新增五个原测试未覆盖的命名边界：
+  - 丙炔与丙二烯同分异构区分，丙二烯期望 `丙-1,2-二烯`。
+  - 多键位次优先，期望 `4-甲基己-2-烯`。
+  - 羧酸优先于羟基，期望 `3-羟基丁酸`。
+  - 不对称简单醚选择较长母体，期望 `甲氧基乙烷`。
+  - 卤素从较近端编号，期望 `2-溴丁烷`。
 
-没有修改或提交 `frontend/package-lock.json`、`.tmp-npm-cache/`、`CLAUDE.md`、`docs/DECISIONS.md`。
+没有修改 `organicBuilderChemistry.ts`、`organicBuilderNomenclature.ts` 或其他业务代码。
 
-### 行为验证
+### 验证结果
 
-使用一次性网络拦截中断 `MoleculeViewer.tsx` 的首次 Vite lazy 请求：
-
-1. **正常路径**
-   - `/module/tetrahedral-ch4`：Canvas 1、fallback 0。
-2. **故障边界**
-   - lazy 请求被中断后：出现 `role="alert"` fallback。
-   - 浏览器控制台包含 `[ViewerErrorBoundary]` 错误记录。
-3. **真实重试**
-   - “重新加载页面”按钮可以获得焦点并由 Enter 激活。
-   - 重新加载同一路由后：Canvas 1、fallback 0。
-4. **路由复位**
-   - 在错误态下通过 History API 触发 SPA 切换到 `/module/nacl-crystal`。
-   - 切换后：Canvas 1、fallback 0，证明 `resetKey` 生效。
-5. **视觉**
-   - 1280×720 Viewer 截图已人工检查：提示卡居中、文字清晰、未遮挡 Viewer 外操作区，符合浅色教育风。
-
-`webapp-testing` 技能要求 Python Playwright，但当前 Python 环境没有 `playwright` 包。为避免安装依赖和改动 lockfile，改用项目现有 Node Playwright + 系统 Chrome；服务器生命周期仍由该技能的 `with_server.py` 管理。
-
-### 命令与结果
-
-- `npm run build`：通过，2313 个模块；保留既有 three chunk 体积警告。
-- `npm run lint`：通过。
-- 自定义 Node Playwright 故障注入：全部断言通过。
+- 新文件定向：28 / 28 通过。
+- 完整 `npm run test:logic`：51 / 51 通过。
+- `npm run build`：通过，2313 个模块；保留既有 three chunk 大于 500 KB 警告。
+- `npm run lint`：通过，最终无 warning。
 - `git diff --check`：通过。
-- 完整视觉回归未运行，也未更新快照；当前只有 Darwin 基线。
-
-### 明确的故障边界
-
-React Error Boundary 不捕获：
-
-- 事件处理函数中的错误。
-- 普通异步回调（如 `setTimeout`、未被 React 接管的 Promise）。
-- 服务端渲染错误。
-- Error Boundary 自身抛出的错误。
-- 所有可能发生在 R3F 动画帧/底层 WebGL 驱动中的错误。
-
-因此交付能力是“防止后代 Viewer 的渲染错误和 lazy 分包拒绝直接造成整页白屏”，不是“捕获所有 WebGL 故障”。
+- 未运行 visual 测试；本任务只涉及纯逻辑测试，且当前只有 Darwin 截图基线。
 
 ### 当前仍未收口的前序改动
 
-- `frontend/package-lock.json`：39 行 npm 平台 `libc` 元数据删除。
-- `.tmp-npm-cache/`：未跟踪、约 10.8 MB、未被当前 `.gitignore` 覆盖。
-- `CLAUDE.md`：未跟踪。
-- `docs/DECISIONS.md`：未跟踪。
+- `frontend/package-lock.json`：39 行 npm 平台 `libc` 元数据删除，未暂存、未提交。
+- `.tmp-npm-cache/`：未跟踪、未被当前 `.gitignore` 覆盖，未暂存、未提交。
 
 ### 给下一个 Agent 的唯一建议
 
-领取 `T-000 AI 协作规范交付收口`：只确认并交付 `CLAUDE.md` / `docs/DECISIONS.md` 的治理范围，不要混入 lockfile 或 npm 缓存。
+领取 T-002：拆解 `ModuleDetailPage` 的专题状态，并先补跨模块 SPA 切换后的状态复位回归。
 
 ---
 
 ## 往期
+
+### 2026-07-25 Codex：Windows 开发环境治理
+
+- 为 AGENTS / CLAUDE 补充原生 Windows、PowerShell、Git Bash、npm 缓存与测试矩阵说明。
+- 提交：`0bd9b58 docs: add Windows development guidance`。
+
+### 2026-07-25 Codex：T-000 AI 协作规范交付
+
+- 交付并跟踪 CLAUDE / DECISIONS，不混入 lockfile 或 npm 缓存。
+- 提交：`6a5361e docs: deliver AI collaboration governance`。
+
+### 2026-07-25 Codex：T-ERR ViewerErrorBoundary 收口
+
+- 修复真实重试语义，验证路由复位、键盘操作和错误边界。
+- 提交：`bade1aa fix: make 3d viewer error recovery reliable`。
 
 ### 2026-07-25 Codex：独立复核与文档事实校正
 
@@ -93,7 +75,5 @@ React Error Boundary 不捕获：
 
 ### 2026-07-25 Claude Code
 
-- 在工作区初步新增 `ViewerErrorBoundary.tsx`，并在 `ModuleDetailPage.tsx` 包裹 3D viewer 的 `Suspense`。
-- 初始化/扩充 AGENTS、CLAUDE、PROJECT_STATUS、TASKS、DECISIONS、HANDOFF。
+- 初步实现 ViewerErrorBoundary 并初始化共享治理文档。
 - 安装 `frontend/node_modules`，记录 build 与 lint 通过。
-- 遗留：ErrorBoundary 未做真实故障视觉验收；lockfile、npm 缓存和多份治理文件未收口。
