@@ -3,3 +3,6 @@ dist
 .DS_Store
 .env
 .env.local
+
+# 带 --cache 安装依赖时使用的临时 npm 缓存目录（见 AGENTS.md），绝不提交
+.tmp-npm-cache/
