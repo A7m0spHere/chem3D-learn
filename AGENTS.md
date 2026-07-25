@@ -151,6 +151,16 @@ Before coding:
 - Read `docs/UI_SPEC.md`
 - Read `docs/MOLECULE_DATA_SCHEMA.md` if data is involved
 
+GitHub sync and delivery:
+- The remote repository is `https://github.com/A7m0spHere/chem3D-learn.git`.
+- Before every development task, run `git fetch origin`, identify the current branch and its upstream branch, and compare their state.
+- If the upstream branch is ahead and the local branch can be fast-forwarded, run `git pull --ff-only`; if there are no remote updates, continue development.
+- If the branches have diverged, conflicts exist, or uncommitted changes prevent a safe sync, stop and report the situation. Do not automatically stash, reset, overwrite files, or force-push.
+- After development and validation, review the diff, stage only files that belong to the current task, and create a clear commit.
+- Run `git fetch origin` again before pushing. If the upstream advanced during development, safely rebase the task commit onto the updated upstream only with a clean worktree; if conflicts occur, stop and report them.
+- Push the current branch to its upstream branch. If the branch has no upstream, use `git push -u origin <current-branch>`.
+- Never use `--force` or `--force-with-lease`. If a normal push is rejected, fetch and safely integrate the remote updates before retrying.
+
 During coding:
 - Make one focused change per task
 - Do not rewrite unrelated files
