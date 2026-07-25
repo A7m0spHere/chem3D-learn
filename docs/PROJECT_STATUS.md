@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-25（Claude Code，T-002 拆解 ModuleDetailPage 状态）
+> 最后更新：2026-07-25（Claude Code，T-008 ModuleDetailPage 路由级 lazy 主包瘦身）
 
 ## 一句话定位
 
@@ -35,7 +35,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 独立验证结果（2026-07-25）
 
-- `frontend npm run build`：**通过**；Vite 转换 2313 个模块。
+- `frontend npm run build`：**通过**；Vite 转换 2313 个模块。T-008 后 `/module/:id` 改为路由级 lazy，`index` 主包由约 496 KB 降至约 209 KB（gzip 137 KB → 67 KB），页面与 23 个 JSON 移入独立 `ModuleDetailPage` chunk（约 286 KB）。
 - `frontend npm run lint`：**通过**。
 - `frontend npm run test:logic`：**51 / 51 通过**；其中 T-001 新文件 28 项，原有文件 23 项。
 - `backend npm test`：**15 / 15 通过**（原 5 项纯函数 + T-BE-001 新增 10 项真实 HTTP 集成）。
@@ -52,7 +52,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 完整视觉回归：**未运行**，因为当前只有 macOS 基线。
 - `video/`：`node_modules` 未安装，本轮未运行 lint、构建或渲染。
 
-构建虽通过，但存在 Vite 非阻断警告：`three` chunk 约 688 KB，超过默认 500 KB 提示阈值。其在课堂弱网/旧设备上的实际影响为**待确认**。
+T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（gzip 137 KB → 67 KB）；`ModuleDetailPage` 连同 23 个 JSON 移入约 286 KB 的独立页面 chunk，仅访问 `/module/:id` 时下载。构建仍存在 Vite 非阻断警告：`three` chunk 约 688 KB，超过默认 500 KB 提示阈值。其在课堂弱网/旧设备上的实际影响为**待确认**。
 
 ## 正在进行
 
@@ -60,6 +60,10 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 最近完成
 
+- **T-008 ModuleDetailPage 及 23 个 JSON 移出首屏主包**（2026-07-25）
+  - `router.tsx` 把 `/module/:id` 从静态 `element` 改为 React Router 数据路由的 `lazy` 属性（与 `OrganicBuilderPage` 同款），删除静态 `import`。
+  - `ModuleDetailPage` 连同它唯一消费的 `mockMolecules.ts` 与 23 个手写 JSON 从 `index` 主包移入独立页面 chunk：首屏主包 496 KB → 209 KB，页面 chunk 约 286 KB，仅访问 `/module/:id` 时下载。
+  - 构建产物核对：`index` 已不含 JSON 教学文案（如「甲烷以碳原子为中心」「钙钛矿」），页面 chunk 承载它们。数据消费逻辑、viewer 分发与教学文案零变化；reset 回归在 chrome 通道仍 5 / 5 通过。
 - **T-002 拆解 ModuleDetailPage 专题状态**（2026-07-25）
   - 新增 `useCrystalControls` / `useOrganicPlanarControls` / `useBondingControls` 三个 typed hook，各自持有专题状态、setter、派生 handler 与 `useEffect([moduleId])` 切模块重置。
   - `ModuleDetailPage` 不再逐项维护全部专题状态的长重置列表；两处 id 依赖初始值（ren3 → `pressure`、`getDefaultBondingBasicsMode`）随 hook 迁移。`deriveViewerKind` / `viewerRegistry` 分发语义与教学文案零变化。

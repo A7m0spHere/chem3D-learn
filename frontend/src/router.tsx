@@ -4,7 +4,6 @@ import { AboutPage } from "@/pages/AboutPage";
 import { ExamPage } from "@/pages/ExamPage";
 import { ExamTopicDetailPage } from "@/pages/ExamTopicDetailPage";
 import { HomePage } from "@/pages/HomePage";
-import { ModuleDetailPage } from "@/pages/ModuleDetailPage";
 import { ModulesPage } from "@/pages/ModulesPage";
 import { PathsPage } from "@/pages/PathsPage";
 
@@ -16,7 +15,13 @@ export const appRouter = createBrowserRouter([
       { path: "/", element: <HomePage /> },
       { path: "/modules", element: <ModulesPage /> },
       { path: "/paths", element: <PathsPage /> },
-      { path: "/module/:id", element: <ModuleDetailPage /> },
+      {
+        path: "/module/:id",
+        lazy: async () => {
+          const { ModuleDetailPage } = await import("@/pages/ModuleDetailPage");
+          return { Component: ModuleDetailPage };
+        },
+      },
       {
         path: "/lab/organic-builder/:seedId",
         lazy: async () => {

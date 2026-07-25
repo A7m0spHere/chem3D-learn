@@ -10,49 +10,45 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-25
 - **分支**：`main`
-- **任务**：T-002 拆解 `ModuleDetailPage` 专题状态到 typed hook
+- **任务**：T-008 把 `ModuleDetailPage` 及其 23 个分子 JSON 移出首屏主包（路由级 lazy）
 - **提交**：尚未提交（等待用户确认后再 commit）
 
 ### 本次改动
 
-改动集中在 `frontend/`，未触碰后端、lockfile、npm 缓存或任何 Darwin 快照。
+只改一个源码文件 `frontend/src/router.tsx`，未触碰后端、lockfile、npm 缓存或任何 Darwin 快照。
 
-**新增 3 个 typed hook（`frontend/src/hooks/`）**
+**`router.tsx`（唯一代码改动）**
 
-- `useCrystalControls(moduleId)`：晶体控制组（`crystalViewMode`/`crystalModelStyle`/`voidStage`/`showCrystalLabels` + `handleCrystalModeChange`）。含 ren3 `pressure` 默认特判。
-- `useOrganicPlanarControls(moduleId)`：有机平面 / 直线专题（共面 / 乙烯 / 苯 / 乙炔）的 mode 与视角状态。
-- `useBondingControls(moduleId)`：σ / π / 杂化 / 极性专题状态。含 `bondingBasicsMode` 按 `getDefaultBondingBasicsMode` 的模块特判。
-- 每个 hook 用一个 `useEffect([moduleId])` 自管「切模块复位回该模块默认值」，默认值只此一处真源。
+- 删除顶部 `import { ModuleDetailPage } from "@/pages/ModuleDetailPage"` 静态导入。
+- `/module/:id` 路由从 `element: <ModuleDetailPage />` 改为 React Router 数据路由的 `lazy: async () => { const { ModuleDetailPage } = await import("@/pages/ModuleDetailPage"); return { Component: ModuleDetailPage }; }`，与既有 `OrganicBuilderPage` 逐字同款。加载态复用已有 `hydrateFallbackElement`（`RouteHydrateFallback`），未新增 UI。
 
-**改 `ModuleDetailPage.tsx`**
-
-- 用三个 hook 调用替换对应 `useState` 群（33 → 页面自留 9 个），删除页面内重复的 `handleCrystalModeChange`，精简超长 `useEffect([id])`：只保留页面自留状态（讲解步骤、VSEPR 开关、有机拼装过渡、`viewerLoading` 定时器）的重置，专题重置全部下沉到 hook。
-- `deriveViewerKind` / `viewerRegistry` 分发语义、JSX、教学文案零改动。刻意保留原行为：`autoRotate` 原本不在切模块重置列表中，维持不重置。
-
-**新增 `frontend/tests/visual/module-state-reset.visual.spec.ts`（无截图）**
-
-用相关模块卡片的 `<Link to="/module/:id">` 做 SPA 跳转（页面保持挂载、只变路由参数，才真正触发复位 effect；`page.goto` 会整棵重挂而测不到），覆盖晶体 / 普通分子 VSEPR / 杂化 / 有机平面 / σ 键五类。只用 DOM/文本/aria 断言，不碰 Darwin 基线。
+**为什么是路由级 lazy 而非组件内 JSON 动态 import**：`ModuleDetailPage` 是全库唯一消费这 23 条数据（值）的地方，且原先被静态导入，数据才被并入 `index` 主包。把页面变 lazy 即让页面连同 23 个 JSON 一起移出主包，改动面仅一个文件、无首屏闪烁、无异步 plumbing。详见 D-011。`mockMolecules.ts` 与页面内同步 `useMemo` 数据消费保持不变。
 
 ### 验证结果
 
-- `frontend npm run build`：**通过**（tsc --noEmit + vite build；仅保留既有 three chunk 警告）。
+- `frontend npm run build`：**通过**。`index` 主包 **496 KB → 209 KB**（gzip 137 → 67 KB）；新增 285 KB `ModuleDetailPage` chunk。grep 确认 JSON 教学文案（「甲烷以碳原子为中心」「钙钛矿」）已从 `index` 移入页面 chunk。保留既有 three chunk 警告。
 - `frontend npm run lint`：**通过**，无 warning。
 - `frontend npm run test:logic`：**51 / 51 通过**（本任务未增删 logic 用例）。
-- 新增复位回归（`PLAYWRIGHT_CHANNEL=chrome`，仅跑该文件）：**5 / 5 通过**。
-- `git status --short`：仅本任务文件变动，无快照 / lockfile / 缓存改写。
+- 现有 `module-state-reset.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**5 / 5 通过**，证明页面变 lazy 后懒加载渲染与 SPA 切换行为无回归。
+- `git status --short`：仅 `router.tsx` + 4 份 docs 变动，无快照 / lockfile / 缓存改写。
 - 未运行完整 `test:visual`：只有 Darwin 基线，Windows 不得更新。
 
 ### 当前仍未收口的前序改动（非本任务引入）
 
-- `frontend/package-lock.json` 的 39 行 `libc` 元数据删除与 `.tmp-npm-cache/`：均已在前一批 Git 收尾中处理（lockfile 已还原、`.tmp-npm-cache/` 已加入 `.gitignore`）。开工时工作区应为干净。
+- `frontend/package-lock.json` 的 `libc` 元数据与 `.tmp-npm-cache/`：均已在更早的 Git 收尾中处理（lockfile 已还原、`.tmp-npm-cache/` 已进 `.gitignore`）。开工时工作区应为干净。
 
 ### 给下一个 Agent 的建议
 
-提交本次前端重构（建议信息 `refactor: extract ModuleDetailPage topic state into typed hooks`，只暂存 3 个 hook + 页面 + 新 spec + 4 份 docs，勿混入 lockfile/缓存）。之后可领取 review 中记录的下一批高优先级项：前端 23 个 JSON 移出主包（改善模块详情 chunk 体积）、移动端导航缺失，或 T-004/T-006 等搁置项。
+提交本次改动（建议信息 `perf: lazy-load module detail route to shrink main bundle`，只暂存 `router.tsx` + 4 份 docs，勿混入 lockfile/缓存）。之后可考虑 T-006（模块卡片按意图预取，把新的 `ModuleDetailPage` chunk 一并预取以抵消首访加载态）；或「进入模块只下载当前 1 个 JSON」的组件内数据动态化（属 D-011 边界外的独立优化，需另立任务并权衡首屏闪烁）。
 
 ---
 
 ## 往期
+
+### 2026-07-25 Claude Code：T-002 拆解 ModuleDetailPage 专题状态到 typed hook
+
+- 新增 `useCrystalControls` / `useOrganicPlanarControls` / `useBondingControls`，各自 `useEffect([moduleId])` 自管切模块复位；页面 `useState` 从 33 降到自留 9 个，`deriveViewerKind`/`viewerRegistry` 与教学文案零改动。新增无截图 `module-state-reset.visual.spec.ts`（5/5）。
+- 提交：`cf121d3 refactor: split ModuleDetailPage topic state into typed hooks`。
 
 ### 2026-07-25 Claude Code：T-003 后端两个 P0 修复 + 真实 HTTP 集成测试
 

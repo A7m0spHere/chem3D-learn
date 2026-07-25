@@ -65,6 +65,19 @@
 
 ## 已完成
 
+### T-008 把 ModuleDetailPage 及其 23 个分子 JSON 移出首屏主包
+
+- **完成**：2026-07-25（Claude Code）
+- **背景**：`router.tsx` 静态导入 `ModuleDetailPage`，导致它唯一消费的 `mockMolecules.ts` 与 23 个手写 JSON（约 224 KB 源码）被并入 `index` 主包。首页、Modules、Paths、Exam、About 首屏都在下载这 23 条结构数据。
+- **内容**：
+  - 只改 `router.tsx`：`/module/:id` 从静态 `element: <ModuleDetailPage />` 改为 React Router 数据路由的 `lazy: async () => ...` 属性，与现有 `OrganicBuilderPage` 同款；删除静态 `import`。复用现有 `hydrateFallbackElement` 承接加载态，未新增 UI。
+  - 未改 `mockMolecules.ts`、数据消费逻辑、`deriveViewerKind`/`viewerRegistry`、`vite.config.ts` 或教学文案。
+- **验证**：
+  - [x] 构建后 `index` 主包 **496 KB → 209 KB**（gzip 137 → 67 KB）；新增 `ModuleDetailPage` chunk（285 KB）承载页面 + 23 个 JSON。grep 确认 `甲烷以碳原子为中心` / `钙钛矿` 等文案已从 `index` 移入页面 chunk。
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（51/51）通过。
+  - [x] 系统 Chrome 通道无截图冒烟：`module-state-reset.visual.spec.ts` 5/5 通过，`/module/:id` 懒加载渲染与 SPA 切换均无回归。
+  - [x] 未改数据消费/viewer 分发/文案；未动 lockfile、缓存或 Darwin 快照。
+
 ### T-002 拆解 ModuleDetailPage 状态
 
 - **完成**：2026-07-25（Claude Code）
