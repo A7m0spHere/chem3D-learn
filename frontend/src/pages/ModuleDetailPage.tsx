@@ -91,6 +91,7 @@ import { MolecularPolarityPanel } from "@/components/learning/MolecularPolarityP
 import { MolecularPolarityToolbar } from "@/components/learning/MolecularPolarityToolbar";
 import { ExplorerPanel } from "@/components/learning/ExplorerPanel";
 import { FloatingToolbar } from "@/components/learning/FloatingToolbar";
+import { ViewerErrorBoundary } from "@/components/common/ViewerErrorBoundary";
 
 import { getModuleById } from "@/data/learningModules";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -1034,7 +1035,9 @@ export function ModuleDetailPage() {
                 ? ({ viewTransitionName: "organic-builder-stage" } as CSSProperties)
                 : undefined}
             >
-              <Suspense fallback={<ViewerChunkFallback />}>{spec.viewer()}</Suspense>
+              <ViewerErrorBoundary resetKey={id}>
+                <Suspense fallback={<ViewerChunkFallback />}>{spec.viewer()}</Suspense>
+              </ViewerErrorBoundary>
             </div>
 
             {/* 独立操作台 (Control Console) */}
