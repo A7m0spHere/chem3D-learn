@@ -38,7 +38,13 @@ npm run dev
 npm test
 ```
 
-默认端口为 `4000`，可通过 `PORT` 环境变量覆盖。
+默认端口为 `4000`，可通过 `PORT` 环境变量覆盖。跨域来源默认 `*`，可通过 `CORS_ORIGIN` 环境变量覆盖 API 响应的 `Access-Control-Allow-Origin`。
+
+## Error Handling
+
+- 畸形请求地址（如 `/%`、`/%zz` 会让 `decodeURIComponent` 抛错，`//`、`///` 会让 `new URL` 抛错）统一返回 `400 MALFORMED_REQUEST_URL`，不会终止进程。
+- 非 `GET`/`OPTIONS` 方法返回 `405 METHOD_NOT_ALLOWED`。
+- 监听失败（如端口被占用）会打印明确信息并以非零退出码结束，而不是抛未捕获异常。
 
 ## API
 

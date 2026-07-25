@@ -7,50 +7,50 @@
 
 ## 最近一次交接
 
-- **Agent**：Codex
+- **Agent**：Claude Code
 - **日期**：2026-07-25
 - **分支**：`main`
-- **任务**：T-001 已知有机分子全量回归测试
-- **测试提交**：`e15d592 test: cover all known organic molecules`
+- **任务**：T-003 修复后端两个 P0 并补真实 HTTP 集成测试
+- **提交**：尚未提交（等待用户确认后再 commit）
 
 ### 本次改动
 
-只新增一个测试文件：`frontend/tests/logic/organic-builder-known-molecules.logic.spec.ts`。
+改动集中在 `backend/`，未触碰前端、lockfile 或 npm 缓存。
 
-- 直接遍历 `knownOrganicMolecules` 动态生成每个候选的精确识别用例；词典条目增删时测试数量会自动同步。
-- 独立维护当前中文名期望表，并校验其 ID 集合与生产词典一一对应，避免用生产值断言生产值。
-- 对全部词典结构验证原子/键数组重排、图 ID 改名、坐标变化和键端点反转不影响识别。
-- 在 `try/finally` 中临时反转词典数组并恢复，验证 `findKnownMolecule` 不依赖词典顺序。
-- 新增五个原测试未覆盖的命名边界：
-  - 丙炔与丙二烯同分异构区分，丙二烯期望 `丙-1,2-二烯`。
-  - 多键位次优先，期望 `4-甲基己-2-烯`。
-  - 羧酸优先于羟基，期望 `3-羟基丁酸`。
-  - 不对称简单醚选择较长母体，期望 `甲氧基乙烷`。
-  - 卤素从较近端编号，期望 `2-溴丁烷`。
+**`backend/src/server.js`（修复 + 加固）**
 
-没有修改 `organicBuilderChemistry.ts`、`organicBuilderNomenclature.ts` 或其他业务代码。
+1. **启动守卫**（P0-1）：`import.meta.url === \`file://${process.argv[1]}\`` 改为 `import.meta.url === pathToFileURL(process.argv[1]).href`。原写法在 Windows 上 `argv[1]` 是 `D:\...\server.js`，拼出的 `file://D:\...` 与 `import.meta.url` 的 `file:///D:/...` 永不相等，`npm start` 从不监听端口。路径含空格/中文时同样失配。
+2. **URL 解析收敛**（P0-2）：抽出 `parseRequestPathname(requestUrl)`，用 try/catch 同时兜住两类客户端可触发的异常 —— `decodeURIComponent` 对 `/%`、`/%zz` 抛 `URIError`，`new URL` 对 `//`、`///` 抛 `TypeError`。任一异常返回 `{ malformed: true }`，`handleRequest` 据此回 400 `MALFORMED_REQUEST_URL`，不再冒泡成未捕获异常终止进程。
+3. **监听错误兜底**：`server.on("error", ...)` 打印明确信息并置 `process.exitCode = 1`，端口占用等不再抛未捕获异常。
+
+**`backend/test/server.integration.test.js`（新增）**
+
+用 `createServer()` 起真实 HTTP 服务器 + `fetch` 覆盖原纯函数测试完全没碰的启动/解码/CORS/写出四层：真实监听、结构列表与详情、三类畸形 URL 各返回 400、连发畸形请求后进程仍存活、CORS 响应头、OPTIONS 预检 204、非 GET 405。
 
 ### 验证结果
 
-- 新文件定向：28 / 28 通过。
-- 完整 `npm run test:logic`：51 / 51 通过。
-- `npm run build`：通过，2313 个模块；保留既有 three chunk 大于 500 KB 警告。
-- `npm run lint`：通过，最终无 warning。
+- `cd backend && npm test`：**15 / 15 通过**（原 5 条纯函数 + 新 10 条真实 HTTP）。
+- 独立端到端脚本实测：`npm start` 现在真实监听并返回 `/health` 200；连发 `/%`、`//` 各返回 400 后进程仍存活、`/health` 仍 200。
+- 未运行前端 build/lint/测试：本任务未改动任何前端代码。
 - `git diff --check`：通过。
-- 未运行 visual 测试；本任务只涉及纯逻辑测试，且当前只有 Darwin 截图基线。
 
-### 当前仍未收口的前序改动
+### 当前仍未收口的前序改动（沿用上一次交接，非本任务引入）
 
 - `frontend/package-lock.json`：39 行 npm 平台 `libc` 元数据删除，未暂存、未提交。
 - `.tmp-npm-cache/`：未跟踪、未被当前 `.gitignore` 覆盖，未暂存、未提交。
 
-### 给下一个 Agent 的唯一建议
+### 给下一个 Agent 的建议
 
-领取 T-002：拆解 `ModuleDetailPage` 的专题状态，并先补跨模块 SPA 切换后的状态复位回归。
+提交本次后端修复（建议信息 `fix: make backend actually start and survive malformed urls`，只暂存 `backend/` 与相关 docs，勿混入 lockfile/缓存）。之后可领取 review 中记录的下一批高优先级项：前端 23 个 JSON 移出主包、移动端导航缺失、或 T-002 拆解 `ModuleDetailPage` 状态。
 
 ---
 
 ## 往期
+
+### 2026-07-25 Codex：T-001 已知有机分子全量回归测试
+
+- 新增 `frontend/tests/logic/organic-builder-known-molecules.logic.spec.ts`，表驱动遍历 `knownOrganicMolecules` 并补 5 个命名边界。
+- 提交：`e15d592 test: cover all known organic molecules`。
 
 ### 2026-07-25 Codex：Windows 开发环境治理
 

@@ -81,6 +81,21 @@
 
 ## 已完成
 
+### T-003 修复后端两个 P0 缺陷并补集成测试
+
+- **完成**：2026-07-25（Claude Code）
+- **背景**：`backend/src/server.js` 有两类"当前功能实际不可用"的缺陷，且 5/5 单测因只调用纯函数 `resolveApiRequest` 完全没有覆盖到。
+- **内容**：
+  - **P0-1 启动守卫**：`import.meta.url === \`file://${process.argv[1]}\`` 在 Windows 永不相等（`file://D:\...` vs `file:///D:/...`），`npm start` 从不监听端口。改用 `import.meta.url === pathToFileURL(process.argv[1]).href`，由 Node 统一处理盘符、分隔符和百分号编码；含空格/中文路径同样可靠。
+  - **P0-2 畸形 URL 崩溃**：`decodeURIComponent(url.pathname)` 对 `/%`、`/%zz` 抛 `URIError`，`new URL(requestUrl, base)` 对 `//`、`///` 抛 `TypeError`；两者都无人捕获，一条请求即可终止进程。新增纯函数 `parseRequestPathname`，把三类异常收敛为 `{ malformed: true }`，`handleRequest` 返回 400 `MALFORMED_REQUEST_URL`。
+  - **启动错误处理**：为直接执行分支补 `server.on("error")`，端口占用等失败给出明确信息并以非零码退出，而非抛未捕获异常。
+  - **集成测试**：新增 `backend/test/server.integration.test.js`，用 `createServer()` 起真实 HTTP 服务并经真实请求断言：启动即监听 `/health`、三类畸形 URL 各返 400 且进程存活、连发畸形请求后仍正常服务、CORS 响应头与 OPTIONS 204 预检、非 GET 返 405。
+- **验证**：
+  - [x] `backend npm test`：15 / 15 通过（原 5 条纯函数 + 新 10 条真实 HTTP）。
+  - [x] 实跑 `npm start`：进程监听端口，`/health` 返 200。
+  - [x] 实跑发送 `/%`、`//`：各返 400，之后 `/health` 仍返 200（进程未崩溃）。
+  - [x] 未改动前端、lockfile 或 npm 缓存。
+
 ### T-001 已知有机分子全量回归测试
 
 - **完成**：2026-07-25（Codex，commit `e15d592`）
