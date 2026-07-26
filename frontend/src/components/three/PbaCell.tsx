@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
@@ -346,9 +347,10 @@ function OctahedralGuide() {
           start={start}
         />
       ))}
-      <Html center distanceFactor={7.4} pointerEvents="none" position={[0, 0.74, 0]}>
+      {/* 锚点落在八面体中心（配位辐射源，原点），标签外推到上方留白 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[0.4, 0.9, 0]}>
         <span className={htmlOverlaySubtleWideLabelClass}>六配位方向</span>
-      </Html>
+      </CalloutLabel>
     </>
   );
 }
@@ -388,9 +390,10 @@ function VacancyMarker({ voidStage }: { voidStage: CrystalVoidStage }) {
         <sphereGeometry args={[0.085, 24, 24]} />
         <meshBasicMaterial color="#FFFFFF" opacity={0.18} transparent />
       </mesh>
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[0, 0.24, 0]}>
+      {/* 锚点落在空位中心（本 group 局部原点），标签外推到上方留白 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[0.3, 0.7, 0]}>
         <span className={htmlOverlayAmberLabelClass}>{label}</span>
-      </Html>
+      </CalloutLabel>
     </group>
   );
 }
