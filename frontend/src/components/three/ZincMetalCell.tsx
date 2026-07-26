@@ -10,6 +10,20 @@ import {
   htmlOverlayLabelClass,
 } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import {
+  cellEdges,
+  cellHalfHeight,
+  coordinationCluster,
+  electronPoints,
+  hcpLayerPatch,
+  hexRadius,
+  packingLayerGap,
+  packingRadius,
+  unitCellAtoms,
+  type HcpPackingAtom,
+  type ZnSiteKind,
+  type ZnVisualAtom,
+} from "@/components/three/zincMetalGeometry";
 import type { CrystalModelStyle, CrystalViewMode, MoleculeRecord } from "@/types/molecule";
 
 type ZincMetalCellProps = {
@@ -20,237 +34,11 @@ type ZincMetalCellProps = {
   loading?: boolean;
 };
 
-type ZnSiteKind =
-  | "corner"
-  | "face"
-  | "internal"
-  | "center"
-  | "same-neighbor"
-  | "upper-neighbor"
-  | "lower-neighbor";
-
-type ZnVisualAtom = {
-  id: string;
-  label: string;
-  position: [number, number, number];
-  radius: number;
-  kind: ZnSiteKind;
-  layer?: "A-top" | "B" | "A-bottom";
-};
-
-type HcpLayer = "A" | "B";
-
-type HcpPackingAtom = {
-  id: string;
-  position: [number, number, number];
-  layer: HcpLayer;
-};
-
 const zincBaseColor = "#94A3B8";
 const zincHighlight = "#2A9D8F";
 const sameLayerHighlight = "#F4A261";
 const upperLayerHighlight = "#D6A33A";
 const lowerLayerHighlight = "#3E9C91";
-
-const hexRadius = 0.95;
-const cellHalfHeight = 0.75;
-const hexAngles = [0, 60, 120, 180, 240, 300].map((degree) => (degree * Math.PI) / 180);
-const packingNearest = 0.52;
-const packingRadius = 0.24;
-const packingLayerGap = 0.62;
-const packingBasisA: [number, number] = [packingNearest, 0];
-const packingBasisB: [number, number] = [packingNearest / 2, (Math.sqrt(3) * packingNearest) / 2];
-const packingBOffset: [number, number] = [
-  (packingBasisA[0] + packingBasisB[0]) / 3,
-  (packingBasisA[1] + packingBasisB[1]) / 3,
-];
-
-const bottomCorners = hexAngles.map((angle, index): ZnVisualAtom => ({
-  id: `unit-bottom-corner-${index + 1}`,
-  label: "顶角 Zn",
-  position: [hexRadius * Math.cos(angle), -cellHalfHeight, hexRadius * Math.sin(angle)],
-  radius: 0.105,
-  kind: "corner",
-  layer: "A-bottom",
-}));
-
-const topCorners = hexAngles.map((angle, index): ZnVisualAtom => ({
-  id: `unit-top-corner-${index + 1}`,
-  label: "顶角 Zn",
-  position: [hexRadius * Math.cos(angle), cellHalfHeight, hexRadius * Math.sin(angle)],
-  radius: 0.105,
-  kind: "corner",
-  layer: "A-top",
-}));
-
-const unitCellAtoms: ZnVisualAtom[] = [
-  ...bottomCorners,
-  ...topCorners,
-  {
-    id: "unit-bottom-face",
-    label: "面心 Zn",
-    position: [0, -cellHalfHeight, 0],
-    radius: 0.12,
-    kind: "face",
-    layer: "A-bottom",
-  },
-  {
-    id: "unit-top-face",
-    label: "面心 Zn",
-    position: [0, cellHalfHeight, 0],
-    radius: 0.12,
-    kind: "face",
-    layer: "A-top",
-  },
-  {
-    id: "unit-inner-1",
-    label: "内部 Zn",
-    position: [0.475, 0, 0.274],
-    radius: 0.12,
-    kind: "internal",
-    layer: "B",
-  },
-  {
-    id: "unit-inner-2",
-    label: "内部 Zn",
-    position: [-0.475, 0, 0.274],
-    radius: 0.12,
-    kind: "internal",
-    layer: "B",
-  },
-  {
-    id: "unit-inner-3",
-    label: "内部 Zn",
-    position: [0, 0, -0.548],
-    radius: 0.12,
-    kind: "internal",
-    layer: "B",
-  },
-];
-
-const sameLayerNeighbors = hexAngles.map((angle, index): ZnVisualAtom => ({
-  id: `cluster-same-${index + 1}`,
-  label: "同层最近邻",
-  position: [0.82 * Math.cos(angle), 0, 0.82 * Math.sin(angle)],
-  radius: 0.115,
-  kind: "same-neighbor",
-}));
-
-const coordinationCluster: ZnVisualAtom[] = [
-  {
-    id: "cluster-center",
-    label: "中心 Zn",
-    position: [0, 0, 0],
-    radius: 0.13,
-    kind: "center",
-  },
-  ...sameLayerNeighbors,
-  {
-    id: "cluster-upper-1",
-    label: "上层最近邻",
-    position: [0.41, 0.67, 0.237],
-    radius: 0.115,
-    kind: "upper-neighbor",
-  },
-  {
-    id: "cluster-upper-2",
-    label: "上层最近邻",
-    position: [-0.41, 0.67, 0.237],
-    radius: 0.115,
-    kind: "upper-neighbor",
-  },
-  {
-    id: "cluster-upper-3",
-    label: "上层最近邻",
-    position: [0, 0.67, -0.474],
-    radius: 0.115,
-    kind: "upper-neighbor",
-  },
-  {
-    id: "cluster-lower-1",
-    label: "下层最近邻",
-    position: [0.41, -0.67, -0.237],
-    radius: 0.115,
-    kind: "lower-neighbor",
-  },
-  {
-    id: "cluster-lower-2",
-    label: "下层最近邻",
-    position: [-0.41, -0.67, -0.237],
-    radius: 0.115,
-    kind: "lower-neighbor",
-  },
-  {
-    id: "cluster-lower-3",
-    label: "下层最近邻",
-    position: [0, -0.67, 0.474],
-    radius: 0.115,
-    kind: "lower-neighbor",
-  },
-];
-
-const cellEdges: Array<[[number, number, number], [number, number, number]]> = [
-  ...hexAngles.map((_, index): [[number, number, number], [number, number, number]] => {
-    const nextIndex = (index + 1) % hexAngles.length;
-    return [bottomCorners[index].position, bottomCorners[nextIndex].position];
-  }),
-  ...hexAngles.map((_, index): [[number, number, number], [number, number, number]] => {
-    const nextIndex = (index + 1) % hexAngles.length;
-    return [topCorners[index].position, topCorners[nextIndex].position];
-  }),
-  ...hexAngles.map((_, index): [[number, number, number], [number, number, number]] => [
-    bottomCorners[index].position,
-    topCorners[index].position,
-  ]),
-];
-
-const electronPoints: [number, number, number][] = [
-  [-0.6, -0.42, -0.26],
-  [-0.34, 0.24, 0.36],
-  [0.1, -0.24, 0.58],
-  [0.52, 0.18, -0.34],
-  [-0.66, 0.46, 0.02],
-  [0.62, -0.5, 0.12],
-  [0.0, 0.5, -0.58],
-  [-0.18, -0.54, -0.5],
-  [0.34, 0.38, 0.48],
-  [-0.44, -0.28, 0.46],
-  [0.68, 0.42, -0.04],
-  [-0.52, 0.04, -0.52],
-];
-
-function generateHexLayer(
-  radius: number,
-  y: number,
-  offset: [number, number] = [0, 0],
-  layer: HcpLayer,
-): HcpPackingAtom[] {
-  const atoms: HcpPackingAtom[] = [];
-
-  for (let q = -radius; q <= radius; q += 1) {
-    const rMin = Math.max(-radius, -q - radius);
-    const rMax = Math.min(radius, -q + radius);
-
-    for (let r = rMin; r <= rMax; r += 1) {
-      const x = q * packingBasisA[0] + r * packingBasisB[0] + offset[0];
-      const z = q * packingBasisA[1] + r * packingBasisB[1] + offset[1];
-
-      atoms.push({
-        id: `packing-${layer}-${y}-${q}-${r}`,
-        layer,
-        position: [x, y, z],
-      });
-    }
-  }
-
-  return atoms;
-}
-
-const hcpLayerPatch: HcpPackingAtom[] = [
-  ...generateHexLayer(2, -packingLayerGap, [0, 0], "A"),
-  ...generateHexLayer(2, 0, packingBOffset, "B"),
-  ...generateHexLayer(2, packingLayerGap, [0, 0], "A"),
-];
 
 export function ZincMetalCell({
   molecule,

@@ -15,6 +15,12 @@ import {
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { StickCylinder, type Vec3 } from "@/components/three/StickCylinder";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import {
+  createCubeEdges,
+  createWurtziteCellEdges,
+  tetrahedronEdgeIndices,
+  tetrahedronNeighborPositions,
+} from "@/components/three/znsPolytypeGeometry";
 import type {
   Atom,
   CrystalViewMode,
@@ -53,20 +59,6 @@ const interstitialPatch = generateHexPatch(1);
 
 const cubeEdges = createCubeEdges(0.5);
 const wurtziteCellEdges = createWurtziteCellEdges();
-const tetrahedronNeighborPositions: Vec3[] = [
-  [0.52, 0.52, 0.52],
-  [0.52, -0.52, -0.52],
-  [-0.52, 0.52, -0.52],
-  [-0.52, -0.52, 0.52],
-];
-const tetrahedronEdgeIndices: Array<[number, number]> = [
-  [0, 1],
-  [0, 2],
-  [0, 3],
-  [1, 2],
-  [1, 3],
-  [2, 3],
-];
 
 export function ZnSPolytypeCell({
   molecule,
@@ -751,38 +743,6 @@ function LegendItem({ color, label }: { color: string; label: string }) {
       {label}
     </span>
   );
-}
-
-function createCubeEdges(half: number): Array<[Vec3, Vec3]> {
-  const edges: Array<[Vec3, Vec3]> = [];
-  const signs = [-half, half];
-  for (const y of signs) {
-    for (const z of signs) edges.push([[-half, y, z], [half, y, z]]);
-  }
-  for (const x of signs) {
-    for (const z of signs) edges.push([[x, -half, z], [x, half, z]]);
-  }
-  for (const x of signs) {
-    for (const y of signs) edges.push([[x, y, -half], [x, y, half]]);
-  }
-  return edges;
-}
-
-function createWurtziteCellEdges(): Array<[Vec3, Vec3]> {
-  const halfHeight = Math.sqrt(8 / 3) / 2;
-  const bottom: Vec3[] = [
-    [-0.25, -halfHeight, -Math.sqrt(3) / 4],
-    [0.75, -halfHeight, -Math.sqrt(3) / 4],
-    [0.25, -halfHeight, Math.sqrt(3) / 4],
-    [-0.75, -halfHeight, Math.sqrt(3) / 4],
-  ];
-  const top = bottom.map(([x, , z]): Vec3 => [x, halfHeight, z]);
-  const edges: Array<[Vec3, Vec3]> = [];
-  for (let index = 0; index < bottom.length; index += 1) {
-    const next = (index + 1) % bottom.length;
-    edges.push([bottom[index], bottom[next]], [top[index], top[next]], [bottom[index], top[index]]);
-  }
-  return edges;
 }
 
 function getVoidStageBadge(stage: CrystalVoidStage) {
