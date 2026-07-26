@@ -44,6 +44,23 @@
 
 ## 已完成
 
+### T-015 用 CalloutLabel 扩展 PBA viewer 的引线标签（第二批，扩展第 4 个）
+
+- **完成**：2026-07-26（Claude Code）
+- **提交**：`f3f4984 feat(crystal): leader-line callouts for PBA scene labels`
+- **背景**：延续分步扩展的下一个 viewer。PBA（普鲁士蓝类似物，双金属氰基桥联框架）。恒显场景标签用裸 `<Html distanceFactor>`，与 MOF-5 同型。
+- **内容**：
+  - `PbaCell.tsx` 把 2 处**指向具体结构**的恒显 `<Html>` 换为 `CalloutLabel`，每处均有中文锚点/偏移说明注释：
+    - `coordination`（配位骨架）1：`六配位方向`（锚点落 `OctahedralGuide` 八面体中心原点 `[0,0,0]`，即六配位辐射源，外推到上方留白）。
+    - `voids`（空位水合）1：空位标记 `□ 空位`/`空位/水合`（锚点落 `VacancyMarker` group 局部原点 `[0,0,0]`，即空位中心，外推到上方留白）。
+  - **保留** `<Html>` 不加引线：`节点-桥-节点`（comparison 视图 `FrameworkComparisonGuide`，描述整个「节点-桥-节点」连接概念的总结、非单一锚点结构，且已在晶胞底面下方，与 MOF-5 保留「两类构筑单元周期连接 → 开放框架」同判据）；`PbaAtom` 的 `showLabels` 门控原子标签（走原逻辑）。
+  - 教学文案文字零变化，未引新依赖，未改几何/相机/`showLabels` 系统。
+- **验证**：
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+  - [x] 新增 `tests/visual/pba-callout.visual.spec.ts`（chrome 通道 2/2）：coordination/voids 两个 viewMode 下 2 处转换标签仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15（voids 需先切到「六氰空位」阶段才渲染空位标记）。
+  - [x] 未动几何、门控标签系统、教学文案；`git status` 确认只改 `PbaCell.tsx` + 新增 spec。
+- **已知限制**：完整 Darwin 视觉回归未跑（Windows 无基线，只跑无截图冒烟）。其余 4 个 viewer（Graphite/ZnS/ZincMetal/BaTiO3 计数徽章）待后续分 viewer 扩展。
+
 ### T-014 用 CalloutLabel 扩展金属密堆积 viewer 的徽章标签（第二批，扩展第 3 个）
 
 - **完成**：2026-07-26（Claude Code）

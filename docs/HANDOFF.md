@@ -10,39 +10,36 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-26
 - **分支**：`main`
-- **任务**：T-014 用 `CalloutLabel` 扩展金属密堆积 viewer 的恒显徽章（引线标签第二批，扩展第 3 个 viewer）
-- **提交**：`547482b feat(crystal): leader-line callouts for metal close-packing badges`（代码已提交；文档改动待随本次一起提交）
+- **任务**：T-015 用 `CalloutLabel` 扩展 PBA viewer 的恒显场景标签（引线标签第二批，扩展第 4 个 viewer）
+- **提交**：`f3f4984 feat(crystal): leader-line callouts for PBA scene labels`（代码 + 测试已提交；本轮 docs 改动待随后单独提交）
 
-> ℹ️ 本会话按用户要求连续处理：收尾未提交的 MXene 半成品（T-012 → `2c5615a`）+ 补文档（`2cc67f4`），扩展 ReN₃（T-013 → `9e3e464`）+ 补文档（`8d54576`），再扩展金属密堆积（T-014 → `547482b`）。工作区当前只余本轮 docs 改动待提交。
+> ℹ️ 本会话按 `/goal「一个一个完成，直到把任务做完」`连续处理：先把上一会话遗留的 T-014 docs 单独提交（`f6195d2`），再收尾工作区里已有的 PBA 半成品（`PbaCell.tsx` 已转 2 处标签、缺测试/文档）为 T-015 → `f3f4984`。
 
-### 本次改动（T-014）
+### 本次改动（T-015）
 
-改 `MetalClosePackingCell.tsx` + 新增 1 个无截图测试，未新增组件（复用 `CalloutLabel`），未改后端、`package.json`、数据 JSON 或 Darwin 快照。
+改 `PbaCell.tsx` + 新增 1 个无截图测试，未新增组件（复用 `CalloutLabel`），未改后端、`package.json`、数据 JSON 或 Darwin 快照。
 
-> ⚠️ 关键差异：这个 viewer 的标签**不是**前三个的裸 `<Html distanceFactor>`，而是一套**专门设计的彩色徽章 `LayerBadge`**（5 种 tone 配色，颜色刻意呼应层色 A 青/B 橙/C 灰，固定屏幕字号无 `distanceFactor`）。徽章是这个 viewer 教学语言的一部分，且很多已经放在结构旁边、不遮挡。用户明确选择「只转真正指向结构的少数几个」，不盲目全转。
+**`PbaCell.tsx`：只转 2 处「指向具体结构且压在结构上」的恒显 `<Html>`**
 
-**`MetalClosePackingCell.tsx`：只转 2 个 viewMode 里真正压在结构上、指向单一结构的 4 个徽章**
-
-- `layer`（单层密排）1：`A 层｜同层 6 个最近邻`，原 `[0,0.54,-1.36]`（xz 距原点 1.36 < 层半径 1.62，压在层平面上）→ 锚点落层中心原点 `[0,0,0]`、外推到后上方。
-- `coordination`（12 配位）3：`同层 6`/`上层 3`/`下层 3`，原本各自贴在对应原子组里（混在配位簇中）→ 锚点各引用真实代表原子 `sameLayer[0]`/`upperLayer[0]`/`lowerLayer[0]`、外推到外围。
-- **保留**为徽章（`LayerBadge`）不加引线：所有标题（`FCC｜4 个 M`/`HCP｜6 个 M`/`HCP｜ABAB`/`FCC｜ABCABC`）、所有总结（`合计配位数 12`/`共同：配位数 12｜η ≈ 74%`）、以及 StackingScene 的 `A/B/C 层`（在 `[-1.55,y,-0.88]`，xz 距原点 ≈1.78 > 层半径 1.58，**已在层外侧、不遮挡**）；`showLabels` 门控的 `FocusLabel` 走原逻辑。
-- **保留 tone 配色**：把徽章 span 抽成共享 `BadgeSpan({label,tone})` 组件，`LayerBadge`（原 `<Html>` 徽章）与转换后的 `CalloutLabel` children 共用，配色不丢。教学文案文字零变化，未引新依赖。
+- `coordination`（配位骨架）1：`六配位方向`（`OctahedralGuide`）——原 `<Html position={[0,0.74,0]}>` 浮在八面体正上方 → 锚点落八面体中心原点 `[0,0,0]`（配位辐射源）、`offset=[0.4,0.9,0]` 外推到右上方。
+- `voids`（空位水合）1：空位标记 `□ 空位`/`空位/水合`（`VacancyMarker`，label 随 voidStage 变）——原 `<Html position={[0,0.24,0]}>` 贴在空位标记上方 → 锚点落空位中心本 group 局部原点 `[0,0,0]`、`offset=[0.3,0.7,0]`。
+- **保留**为原 `<Html>`：`comparison` 的 `节点-桥-节点`（`FrameworkComparisonGuide` 里描述整个「节点-桥-节点」框架连接概念的总结说明，无单一锚点结构可指、且已在晶胞底面下方 `[0,-0.78,0]` 不遮挡——与 MOF-5 保留的「周期连接 → 开放框架」总结同判据）；`PbaAtom` 的 `showLabels` 门控原子标签走原逻辑。
 
 **新增测试（无截图）**
 
-- `tests/visual/metal-close-packing-callout.visual.spec.ts`（chrome 通道 2 项）：layer / coordination 两个 viewMode 下 4 处转换徽章仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15。
+- `tests/visual/pba-callout.visual.spec.ts`（chrome 通道 2 项）：coordination（`六配位方向`）/ voids（切「空位水合」模式 + 点「六氰空位」阶段后 `□ 空位`）两个场景下引线标签文案仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15。
 
-### 验证结果（T-014）
+### 验证结果（T-015）
 
 - `frontend npm run build`：**通过**。保留既有 `three` chunk ~688 KB 的非阻断警告。
 - `frontend npm run lint`：**通过**，无 warning。
 - `frontend npm run test:logic`：**56 / 56 通过**（本任务未增删 logic 用例）。
-- 新增 `metal-close-packing-callout.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**2 / 2 通过**。
-- `git status`：提交前工作区只含 `MetalClosePackingCell.tsx` + 新 spec，无 lockfile / 缓存 / Darwin 快照被改写。
+- 新增 `pba-callout.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**2 / 2 通过**。
+- `git status`：提交前工作区只含 `PbaCell.tsx` + 新 spec，无 lockfile / 缓存 / Darwin 快照被改写。
 
 ### 范围说明（分步策略）
 
-引线标签扩展按 viewer 逐个提交。已完成 MOF-5（T-011）+ MXene（T-012）+ ReN₃（T-013）+ 金属密堆积（T-014）。**剩余 4 个 viewer**（Pba / Graphite / ZnSPolytype / ZincMetal + BaTiO3 计数徽章）待续，同一 `CalloutLabel`、各自单独提交、各自配无截图冒烟。
+引线标签扩展按 viewer 逐个提交。已完成 MOF-5（T-011）+ MXene（T-012）+ ReN₃（T-013）+ 金属密堆积（T-014）+ PBA（T-015）。**剩余 3 个 viewer**（Graphite / ZnSPolytype / ZincMetal + BaTiO3 计数徽章）待续，同一 `CalloutLabel`、各自单独提交、各自配无截图冒烟。
 
 ### 已知限制
 
@@ -51,13 +48,18 @@
 
 ### 给下一个 Agent 的建议
 
-- 本轮 docs 改动（DECISIONS/TASKS/PROJECT_STATUS/HANDOFF）建议作为一个单独的 docs commit 提交（代码 `547482b` 已先行提交）。
-- 下一个 viewer 建议按剩余标签数从多到少推进：Pba → Graphite → ZnSPolytype → ZincMetal → BaTiO3。每个 viewer 先核对哪些标签「指向具体结构且压在结构上」（转 `CalloutLabel`）、哪些是「全局说明/标题/门控/已在外围」（保留原样），再配一个 chrome 通道无截图冒烟，单独提交。
-- 参考已落地的 MOF-5 / MXene / ReN₃ / 金属密堆积 范式：锚点用真实几何坐标（能引用几何常量或从几何推算就别硬编码近似），offset 朝远离场景中心方向；对有外层 `scale` 的子 group 记得补偿。**若 viewer 用的是彩色徽章一类的专门标签系统（如金属密堆积的 `LayerBadge`），转换时把内容 span 抽成共享组件保留配色，并且只转真正压在结构上的少数几个——很多徽章本就在外围留白、不需要动。别被粗估标签数带跑，按标准逐条判定。**
+- 本轮 docs 改动（DECISIONS/TASKS/PROJECT_STATUS/HANDOFF）建议作为一个单独的 docs commit 提交（代码 `f3f4984` 已先行提交）。
+- 下一个 viewer 建议按剩余标签数从多到少推进：Graphite → ZnSPolytype → ZincMetal → BaTiO3。每个 viewer 先核对哪些标签「指向具体结构且压在结构上」（转 `CalloutLabel`）、哪些是「全局说明/标题/门控/已在外围」（保留原样），再配一个 chrome 通道无截图冒烟，单独提交。
+- 参考已落地的 MOF-5 / MXene / ReN₃ / 金属密堆积 / PBA 范式：锚点用真实几何坐标（能引用几何常量或从几何推算就别硬编码近似），offset 朝远离场景中心方向；对有外层 `scale` 的子 group 记得补偿。**若 viewer 用的是彩色徽章一类的专门标签系统（如金属密堆积的 `LayerBadge`），转换时把内容 span 抽成共享组件保留配色，并且只转真正压在结构上的少数几个——很多徽章本就在外围留白、不需要动。别被粗估标签数带跑，按标准逐条判定。**
 
 ---
 
 ## 往期
+
+### 2026-07-26 Claude Code：T-014 用 `CalloutLabel` 扩展金属密堆积 viewer 的恒显徽章（引线标签第二批，扩展第 3 个 viewer）
+
+- 与前三个 viewer 不同，`MetalClosePackingCell.tsx` 的标签是彩色徽章 `LayerBadge`（5 种 tone 配色呼应层色、固定屏幕字号、多数已在结构旁）。按用户「只转真正指向结构的少数几个」，只转 2 个 viewMode 里压在结构上的 4 个徽章：layer 1（`A 层｜同层 6 个最近邻` 锚点落层中心原点）、coordination 3（`同层 6`/`上层 3`/`下层 3` 锚点各落 `sameLayer[0]`/`upperLayer[0]`/`lowerLayer[0]`）。徽章 span 抽成共享 `BadgeSpan` 保留 tone 配色。保留所有标题/总结/已在层外侧的 `A/B/C 层` 徽章与门控 `FocusLabel`。新增无截图 `metal-close-packing-callout.visual.spec.ts`（chrome 通道 2/2）。详见 D-016 扩展记录。
+- 提交：`547482b feat(crystal): leader-line callouts for metal close-packing badges`；配套文档提交 `f6195d2 docs: record T-014 metal close-packing callout extension`。
 
 ### 2026-07-26 Claude Code：T-013 用 `CalloutLabel` 扩展 ReN₃ viewer 的恒显引线标签（引线标签第二批，扩展第 2 个 viewer）
 
