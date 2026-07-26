@@ -1,5 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
+import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { CameraRig } from "@/components/three/CameraRig";
 import {
   htmlOverlayAmberCompactLabelClass,
@@ -131,12 +132,15 @@ function MaxToMxeneScene() {
         <TerminationMarkers sites={compactTerminations} />
       </group>
 
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[-1.2, 1.34, 0]}>
+      {/* 锚点落在左侧 MAX 块中心，标签外推到左上留白 */}
+      <CalloutLabel anchor={[-1.2, 0.4, 0]} offset={[-0.5, 1.0, 0]}>
         <span className={htmlOverlayAmberStrongLabelClass}>MAX 前驱体｜Ti₃AlC₂</span>
-      </Html>
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[1.2, 1.34, 0]}>
+      </CalloutLabel>
+      {/* 锚点落在右侧 MXene 片层中心，标签外推到右上留白 */}
+      <CalloutLabel anchor={[1.2, 0.3, 0]} offset={[0.5, 1.06, 0]}>
         <span className={htmlOverlayLabelClass}>二维片层｜Ti₃C₂Tₓ</span>
-      </Html>
+      </CalloutLabel>
+      {/* 全局工艺说明，不指向单一结构：保持 <Html> */}
       <Html center distanceFactor={7.2} pointerEvents="none" position={[0, -1.78, 0]}>
         <span className={htmlOverlayAmberCompactLabelClass}>选择性移除 Al + 剥离 →</span>
       </Html>
@@ -163,9 +167,11 @@ function MaxPrecursorBlock() {
           radius={0.105}
         />
       ))}
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[0.84, 0, 0]}>
+      {/* 锚点落在 Al 插层中心（y=0），标签往左上外推——本块在场景左侧，
+          必须朝远离场景中心的方向推，才能真正推到外围留白（本组 scale=0.72，偏移已放大补偿）。 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[-1.15, 0.4, 0]}>
         <span className={htmlOverlayAmberStrongLabelClass}>Al 层</span>
-      </Html>
+      </CalloutLabel>
     </>
   );
 }
@@ -214,12 +220,15 @@ function CarbonCoordinationScene() {
           start={OCTAHEDRAL_TI_POSITIONS[first]}
         />
       ))}
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[0, 0.86, 0]}>
+      {/* 锚点落在中心 C 原子 [0,0,0]，标签外推到上方留白 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[-0.5, 0.9, 0]}>
         <span className={htmlOverlayLabelClass}>C 中心｜6 个 Ti 最近邻</span>
-      </Html>
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[1.08, -0.34, 0.14]}>
+      </CalloutLabel>
+      {/* 锚点引用真实 Ti 顶点（八面体一角），标签外推到右下留白 */}
+      <CalloutLabel anchor={OCTAHEDRAL_TI_POSITIONS[5]} offset={[0.72, -0.34, 0]}>
         <span className={htmlOverlayCompactLabelClass}>Ti₆ 八面体轮廓</span>
-      </Html>
+      </CalloutLabel>
+      {/* 全局说明，不指向单一结构，保持 Html */}
       <Html center distanceFactor={6.8} pointerEvents="none" position={[0, -0.84, 0]}>
         <span className={htmlOverlaySubtleWideLabelClass}>辅助线表示局部配位，不增加新的化学键</span>
       </Html>
@@ -232,9 +241,11 @@ function TerminationScene({ showLabels }: { showLabels: boolean }) {
     <>
       <MxenePatchModel patch={fullPatch} showBonds />
       <TerminationMarkers annotate sites={fullTerminations} />
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 1.12, 0]}>
+      {/* 锚点落在顶层端基原子（顶层 Ti y=0.56 + 端基偏移 0.27），标签外推到上方留白 */}
+      <CalloutLabel anchor={[0, 0.83, 0]} offset={[0.5, 0.5, 0]}>
         <span className={htmlOverlayLabelClass}>O / OH / F 混合端基示意</span>
-      </Html>
+      </CalloutLabel>
+      {/* 全局说明，不指向单一结构，保持 Html */}
       <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.1, 0]}>
         <span className={htmlOverlaySubtleWideLabelClass}>端基位于片层两侧的外层 Ti 表面</span>
       </Html>
@@ -267,12 +278,14 @@ function RestackingScene() {
       <WaterMolecule position={[0.56, 0.42, 0.2]} />
       <WaterMolecule position={[-0.46, -0.42, -0.18]} />
       <AtomSphere color="#60A5FA" position={[0.02, 0.42, -0.42]} radius={0.075} />
+      {/* 描述整场景朝向的标题，不指向单一结构，保持 Html */}
       <Html center distanceFactor={7} pointerEvents="none" position={[0, 1.42, 0]}>
         <span className={htmlOverlayLabelClass}>端基化片层重新堆叠</span>
       </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0.92, 0.43, 0.2]}>
+      {/* 锚点落在层间水分子，标签往右外推更远，真正推到结构外围留白 */}
+      <CalloutLabel anchor={[0.56, 0.42, 0.2]} offset={[1.05, 0.5, 0]}>
         <span className={htmlOverlayCompactLabelClass}>层间水 / 离子（示意）</span>
-      </Html>
+      </CalloutLabel>
       <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.4, 0]}>
         <span className={htmlOverlaySubtleWideLabelClass}>层间距受端基、含水状态和插层物种影响</span>
       </Html>
