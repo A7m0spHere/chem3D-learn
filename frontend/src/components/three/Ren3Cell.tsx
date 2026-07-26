@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import { BufferGeometry, DoubleSide, Float32BufferAttribute } from "three";
+import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { CameraRig } from "@/components/three/CameraRig";
 import {
   htmlOverlayAmberCompactLabelClass,
@@ -212,12 +213,18 @@ function TriNitrogenScene({ showLabels }: { showLabels: boolean }) {
         </group>
       ))}
       <AtomSphere color={NITROGEN_COLOR} position={[0, 0, 0]} radius={0.2} />
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[0, 1.1, 0]}>
+      {/* 锚点落在 N₃ 折线单元中心（中央 N2 在原点），标签外推到左上留白 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[-0.55, 1.0, 0]}>
         <span className={htmlOverlayLabelClass}>N₃ 单元｜N1–N2–N1</span>
-      </Html>
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[0, -1.08, 0]}>
+      </CalloutLabel>
+      {/* 锚点落在一条 N–N 键中点（原点到端基 N1 的中点），标签外推到右下留白 */}
+      <CalloutLabel
+        anchor={[triNitrogenPoints[0][0] * 0.5, triNitrogenPoints[0][1] * 0.5, triNitrogenPoints[0][2] * 0.5]}
+        offset={[0.55, -1.0, 0]}
+      >
         <span className={htmlOverlayAmberStrongLabelClass}>两条短 N–N 距离 ≈ 1.36 Å</span>
-      </Html>
+      </CalloutLabel>
+      {/* 全局说明，不指向单一结构，保持 Html */}
       <Html center distanceFactor={6.8} pointerEvents="none" position={[0, -1.5, 0]}>
         <span className={htmlOverlaySubtleWideLabelClass}>晶体网络中的折线形连接单元，不是自由小分子</span>
       </Html>
@@ -261,9 +268,11 @@ function ReSevenCoordinationScene({ showLabels }: { showLabels: boolean }) {
         </group>
       ))}
       <AtomSphere color={RE_COLOR} metal position={[0, 0, 0]} radius={0.2} />
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[0, 1.42, 0]}>
+      {/* 锚点落在中心 Re 原子 [0,0,0]，标签外推到上方留白 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[-0.5, 1.3, 0]}>
         <span className={htmlOverlayLabelClass}>Re 中心｜7 个 N 最近邻</span>
-      </Html>
+      </CalloutLabel>
+      {/* 全局说明，不指向单一结构，保持 Html */}
       <Html center distanceFactor={6.8} pointerEvents="none" position={[0, -1.38, 0]}>
         <span className={htmlOverlayAmberCompactLabelClass}>ReN₇ 是局部七配位，不是化学式</span>
       </Html>
