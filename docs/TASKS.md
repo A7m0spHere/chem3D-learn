@@ -44,6 +44,34 @@
 
 ## 已完成
 
+### T-011 晶体 viewer 恒显场景标签改为「引线 + 外围标签」（第一批 MOF-5）
+
+- **完成**：2026-07-26（Claude Code）
+- **背景**：MOF-5 等「示意/分解类」晶体 viewer 有大量恒显场景说明标签（`<Html distanceFactor>` 透视缩放、硬编码 3D 坐标、位置多在结构中央上/下方），模型一旋转就压到晶体结构上遮挡视野。全仓库这类恒显标签合计 70+ 处、跨 9 个 viewer。目标是抽共享「引线标签」组件，把标签外推到结构外围、用引线指回锚点，先做 MOF-5 一个 viewer 作样板，验证满意后再用同一组件扩展其余 viewer。
+- **内容**：
+  - 新增共享组件 `components/three/CalloutLabel.tsx`：入参 `anchor`（结构上的锚点，世界坐标）、`offset`（把标签外推到结构外的偏移）、`children`、`lineColor`、`distanceFactor`。内部渲染一条 drei `<Line points={[anchor, lineEnd]}>` 引线（终点回退 12% 留白，不戳进文字）+ 一个 `<Html center position={anchor+offset}>` 标签。引线两端均为 3D 坐标，随相机旋转/缩放每帧自动重投影——与 `AngleArc` 同款范式，无需引新依赖。
+  - 把 `Mof5Cell.tsx` 15 处**指向具体结构**的恒显 `<Html>` 场景标签替换为 `CalloutLabel`：`comparison` 视图 2、`coordination`（Zn₄O 节点）3、`covalentNetwork`（BDC）3、`cell`/`voids` 拓扑（周期扩展）2、`counting` 计数 2、TopologyLinker/TopologyNode 各 1、PoreVolume 1、GuestMolecules 1。每处 anchor 取原标签指向对象的中心坐标，offset 取结构外围留白方向。
+  - 明确**保留**为 `<Html>` 不加引线的 4 处：对比图总结（「两类构筑单元周期连接 → 开放框架」）、`Zn₄O(BDC)₃` 化学式、`Fm-3m 常规晶胞：Z = 8`（均为不指向单一结构的全局说明）与 `TopologyNode` 的 `showLabels` 门控原子标签（走原逻辑）。viewMode 分场景显示逻辑与教学文案文字零变化。
+- **验证**：
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+  - [x] 新增 `tests/visual/mof5-callout.visual.spec.ts`（chrome 通道 6/6）：各 viewMode 下标签文案仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15（证明已外推到结构外围、不再压在正中）；孔隙/客体阶段引线标签在场。
+  - [x] 未改原子级 `showLabels` 标签系统、未改图例、未改教学文案文字，未引新依赖，未动 `vite.config`、lockfile、缓存或 Darwin 快照。
+- **已知限制**：完整 Darwin 视觉回归未跑（Windows 无基线，本轮只跑无截图 DOM/文本冒烟）；引线极端角度可能穿过结构，本轮不追求完美避让。其余 8 个 viewer（Mxene/Ren3/MetalClosePacking/Pba/Graphite/ZnS/ZincMetal/BaTiO3）待本样板验证满意后用同一 `CalloutLabel` 分 viewer 扩展、各自单独提交。
+
+### T-010 晶体 viewer 共享「原子球对照图例」（第一批 4 个核心晶体）
+
+- **完成**：2026-07-25（Claude Code）
+- **背景**：晶体 3D 里贴在原子上的浮动标签（O²⁻/Ti⁴⁺/Ba²⁺ 等）会遮挡视图；且 6 个 viewer 各自私有定义 `AtomLegend`/`LegendItem`（重复实现、等大色点、不体现真实球大小）。目标是抽共享组件、按真实相对大小+颜色做常驻脚注图例，先铺 4 个数据驱动核心晶体，验证后再扩展。
+- **内容**：
+  - 新增共享组件 `components/three/CrystalAtomLegend.tsx`：从 `molecule.atoms` 按元素去重，取代表 `label`/`color`/`radius`（同元素多半径取最大），把半径线性映射到 10–20px 圆点直径，渲染「按真实相对大小+颜色的球 + 名称」，挂 `ThreeViewerFrame` 的 `footerMeta`，带 `aria-label="原子对照图例"`。
+  - 铺到 4 个数据驱动核心晶体：`NaClCell` / `CsClCell` / `CaF2Cell`（原无图例，新增 footerMeta）与 `BaTiO3Cell`（替换旧的私有 `AtomLegend`/`LegendItem`）。
+  - 浮动标签维持 `showCrystalLabels` 默认关闭（`useCrystalControls` 既有行为），图例常驻，二者互补；未改标签开关逻辑、viewer 分发或教学文案。
+- **验证**：
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+  - [x] 新增 `tests/visual/crystal-atom-legend.visual.spec.ts`（chrome 通道 4/4）：4 个 viewer 图例常驻可见、列出正确离子名称、项数=元素种类数。
+  - [x] 未改数据、未动 lockfile/缓存/Darwin 快照。
+- **待扩展**：其余 11 个晶体 viewer（含 Mof5/Mxene/Ren3/ZnS 等几何生成型，颜色/半径为组件常量而非 `molecule.atoms`）待本批验证后再铺。
+
 ### T-009 有机拼装实验室「常用基团」片段库扩充
 
 - **完成**：2026-07-25（Claude Code）

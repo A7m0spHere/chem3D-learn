@@ -124,3 +124,32 @@
   - 只选落在现有 8 元素中性价模型内的基团。**明确排除**硝基、磺酸基等需形式电荷的基团——它们会触发 over-valence，超出引擎能力。实施前用一次性探针脚本验证候选，剔除引擎处理不了的。
   - 氰基 `–C≡N` 价态完整、可正常拼装，但命名引擎把 C≡N 归入「复杂含氮」返回 `unsupported`——这是**既有引擎边界，非本次回归引入**。InfoPanel 已能如实显示「无法命名 + 原因」。乙烯基/乙炔基/甲氧基补氢后分别命中丙烯（词典已知）/丙-1-炔/甲氧基甲烷。
 - **验证**：新增 `tests/logic/organic-builder-fragments.logic.spec.ts`（5 项：注册自洽 + 4 片段的价态/补氢/命名，含氰基 unsupported 断言）与 `tests/visual/organic-builder-fragments.visual.spec.ts`（chrome 通道 2/2：按钮出现且可拼接、氰基价态完整）。`npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+
+## D-015 晶体 viewer 共享「原子球对照图例」，先铺 4 个数据驱动核心晶体
+
+- **日期**：2026-07-25（Claude Code，T-010）
+- **决定**：
+  - 新增共享组件 `src/components/three/CrystalAtomLegend.tsx`：从 `molecule.atoms` 按元素去重，取每种元素的代表颜色（`atom.color`）与代表半径（同元素多位点取最大 `radius`），渲染成「按真实相对大小 + 颜色缩放的球 + 离子名称」，挂在 `ThreeViewerFrame` 的 `footerMeta` 槽位常驻显示。
+  - 先接入 4 个**数据驱动**核心晶体：NaCl、CsCl、BaTiO₃、CaF₂（均基于 manual JSON 的 `atom.color`/`radius`）。BaTiO₃ 原有的私有 `AtomLegend`/`LegendItem`（等大色点）被共享组件替换并删除。
+  - 浮动原子标签保持 `showCrystalLabels` 默认 `false`（默认关），图例常驻——达成「默认关闭浮动标签 + 图例常驻」而不改标签开关逻辑。
+- **理由**：原先贴在 3D 原子上的浮动标签会遮挡视图；6 个 viewer 各自私有定义的图例是重复代码且都用等大色点、不体现真实球大小。共享组件把「元素→颜色/相对大小/名称」收敛为单一真源，圆点按 JSON 真实 radius 线性映射到 10–20px，与画布观感一致。
+- **边界**：本批只覆盖 4 个数据驱动 viewer；几何生成型（Mof5/MetalClosePacking/Ren3/Mxene/ZnS 等）的颜色/半径来自组件常量而非 `molecule.atoms`，需单独适配，留待用户验证首批效果后再扩展。counting/polyhedron 等模式专属教学标注不属浮动位点标签，保持不动。
+- **验证**：新增 `tests/visual/crystal-atom-legend.visual.spec.ts`（无截图，chrome 通道）：4 个 viewer 的 `footerMeta` 图例常驻可见、列出全部离子名称、图例项数=元素种类数，4/4 通过。`npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+
+## D-016 晶体 viewer 恒显场景标签改为「3D 引线 + 外围标签」，先做 MOF-5 样板
+
+- **日期**：2026-07-26（Claude Code，T-011）
+- **决定**：
+  - 新增共享组件 `src/components/three/CalloutLabel.tsx`：`<Line points={[anchor, lineEnd]}>` 引线 + `<Html center position={anchor+offset}>` 标签。把恒显标签从「锚点上直接浮 `<Html>`」改为「锚点在结构上、标签沿 `offset` 外推到结构外围、引线连接二者」。引线终点从标签中心回退 12%（或 0.12，取较小）留白，不戳进文字。
+  - 先把 `Mof5Cell.tsx` 15 处**指向具体结构**的恒显 `<Html>` 场景标签替换为 `CalloutLabel`，作为样板。保留 4 处不指向单一结构的全局说明（对比图总结、化学式、`Fm-3m` 计数说明）与 `showLabels` 门控原子标签为原 `<Html>`。
+  - 采用「3D 外推锚点」而非「屏幕边缘绝对固定 + 每帧手动投影」：引线两端都是 3D 世界坐标，R3F 每帧自动重投影，与现有 `demand` frameloop 天然兼容，旋转时端点自洽，无需额外逐帧 JS 投影代码。代价是标签随视角变化而非死锁屏幕边缘——对课堂展示足够。
+- **理由**：这些恒显标签硬编码 3D 坐标、多落在结构中央，模型一旋转就压住晶胞遮挡视野。drei `<Line>` 已在 `AngleArc`/`MolecularPolarity` 多处使用（`AngleArc` 就是现成的 `<Line>` + `<Html>` 引线范式），复用它零新依赖。先做 MOF-5 一个样板、diff 可控可回退，与 D-015「先 4 个核心晶体图例、验证后扩展」的分步策略一致。
+- **边界**：本批只改 MOF-5；其余 8 个 viewer（Mxene/Ren3/MetalClosePacking/Pba/Graphite/ZnS/ZincMetal/BaTiO3）待验证满意后用同一组件分别扩展、各自单独提交。不改原子级 `showLabels` 系统、不改图例、不改教学文案文字。引线极端角度可能穿过结构，本轮不追求完美避让。
+- **验证**：新增 `tests/visual/mof5-callout.visual.spec.ts`（无截图，chrome 通道）：各 viewMode 标签文案仍可见、标签中心相对 stage 中心归一化偏移 > 0.15、孔隙/客体阶段引线标签在场，6/6 通过。`npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+- **锚点精修（2026-07-26，同会话，用户反馈标签指向不明/有误后）**：首版有几处 anchor 落在空气或指错对象，经三个只读 subagent 分组审计 + 主 Agent 几何脚本独立核对后修正 5 处（教学文案文字均未改）：
+  - `cell` 视图 `pcu｜每个节点沿 ±x/±y/±z 六方向连接`：anchor `[0,-0.62,0]`（晶胞内空气、无节点）→ 真实角节点 `[0.88,0.88,0.88]`，六条连接臂正从此 pcu 节点辐射。
+  - `cell` 视图 `虚线末端｜跨晶胞继续连接`：anchor `[0.5,0.86,0]`（悬空）→ 该角节点 +y 周期虚线的真实末端 `[0.88,1.20,0.88]`。
+  - `covalentNetwork` 视图 `BDC²⁻｜线性二连接体`：anchor `[0,0.36,0]`（误落苯环上沿、与「苯环刚性间隔」语义重叠）→ 连接体几何中心 `[0,0,0]`（两端 node 连线对称轴），引线沿主轴外推体现整体线性跨度。
+  - `covalentNetwork` 视图 `羧酸根接入节点`：anchor `[-0.79,0,0]`（仅在羧酸氧上、未触节点）→ 羧酸氧 `[-0.79]` 与节点 `[-1.04]` 连线中点 `[-0.91,0,0]`，正压在 O→node 半透明衔接键上。
+  - `coordination` 视图 `整个 SBU：六连接方向`：anchor `[0,-0.76,0]`（仅 −y 单一连接末端、不足以代表六方向）→ 近核连接臂 `[0,-0.30,0]`，引线由辐射源附近出发暗示六方向。
+  - 其余锚点（`金属簇节点`/`有机连接体`/`Zn₄O 核心`/`单个 Zn：O 四配位`/`苯环刚性间隔`/`孔隙体积`/`客体分子`/`counting` 两处）经审计确认已准确落在文案所述对象上，保持不变。build/lint/冒烟 6/6 复跑通过。

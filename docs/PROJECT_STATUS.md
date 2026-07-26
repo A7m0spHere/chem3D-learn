@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-25（Claude Code，T-009 有机拼装实验室常用片段库扩充）
+> 最后更新：2026-07-26（Claude Code，T-011 MOF-5 恒显场景标签改为引线 + 外围标签）
 
 ## 一句话定位
 
@@ -60,6 +60,15 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 最近完成
 
+- **T-011 晶体 viewer 恒显场景标签改为「引线 + 外围标签」（第一批 MOF-5）**（2026-07-26）
+  - 新增共享组件 `components/three/CalloutLabel.tsx`：从锚点 `anchor` 沿 `offset` 外推出标签位置，用 drei `<Line>` 从锚点连一条 3D 引线到标签（与 `AngleArc` 同范式，端点随相机每帧重投影，不引新依赖），标签用 `<Html center distanceFactor>` 承载，引线末端留白避免戳进文字。
+  - `Mof5Cell.tsx` 的 15 处指向具体结构的恒显 `<Html>` 标签改为 `CalloutLabel`（锚点落在其原本指向的结构中心，标签外推到结构外围留白），不再压在晶胞正中；保留 4 处「不指向单一结构的总结/化学式说明」与 1 处 `showLabels` 门控原子标签走原 `<Html>`。viewMode 分场景显示与教学文案文字零变化。
+  - 附带修复：T-010 的 `NaClCell` 只落地了 `<CrystalAtomLegend>` 使用、漏了 import（Edit 伪影），build 在合并工作树里实际不通过；本轮补齐 import 后 build 恢复通过。
+  - 新增无截图回归 `tests/visual/mof5-callout.visual.spec.ts`（chrome 通道 6 / 6）：各 viewMode 下引线标签文案仍可见，且标签中心相对 stage 中心明显偏移（验证「外推到外围」）；孔隙/客体逐阶段标签在场。详见 D-016。
+  - **待扩展**：其余 8 个恒显标签密集的 viewer（Mxene/Ren3/MetalClosePacking/Pba/Graphite/ZnS/ZincMetal/BaTiO3 counting 徽章，合计 ~55 处）待 MOF-5 样板验证满意后用同一组件分 viewer 扩展、各自单独提交。
+- **T-010 晶体 viewer 共享「原子球对照图例」（第一批 4 个核心晶体）**（2026-07-25）
+  - 新增共享组件 `components/three/CrystalAtomLegend.tsx`：从 `molecule.atoms` 按元素去重取代表 label/颜色/半径，按真实相对大小 + 颜色渲染常驻脚注图例，挂 `ThreeViewerFrame` 的 `footerMeta`。铺到 `NaClCell`/`CsClCell`/`CaF2Cell`（新增）与 `BaTiO3Cell`（替换旧私有等大色点图例）。
+  - 浮动原子标签维持 `showCrystalLabels` 默认关，图例常驻，二者互补。新增 `tests/visual/crystal-atom-legend.visual.spec.ts`（chrome 通道 4 / 4）。详见 D-015。
 - **T-007 依赖安全与 lockfile 评估**（2026-07-25）
   - 联网复核 `npm audit`：4 个漏洞（1 moderate + 3 high）经非 `--force` 的 `npm audit fix` 降至 2 个 high。升级 `brace-expansion`/`nanoid`/`postcss`/`react-router`(dom)，全在 caret range 内、不 breaking、不跨 React 18/19。
   - lockfile 精修：保留 5 处版本升级，手工还原 npm 在 Windows 上剥离的 13 处 rollup linux 平台 `libc` 元数据，最终 diff 只含版本变化、零平台元数据噪声；`package.json` 未改动。
@@ -96,9 +105,9 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-1. 拆解 `ModuleDetailPage` 的 33 个状态，并补跨模块切换的状态重置回归测试。
-2. 评估 `ZnSPolytypeCell.tsx` / `ZincMetalCell.tsx` 的纯几何计算下沉。
-3. 设计前后端结构数据去重方案，保持前端手写数据为真源。
+1. 用户验证 MOF-5 引线标签效果后，用同一 `CalloutLabel` 把其余 8 个 viewer（Mxene/Ren3/MetalClosePacking/Pba/Graphite/ZnS/ZincMetal/BaTiO3 的 counting 徽章等 70+ 处恒显标签）分 viewer 扩展，各自单独提交。
+2. 评估 `ZnSPolytypeCell.tsx` / `ZincMetalCell.tsx` 的纯几何计算下沉（T-004，搁置）。
+3. 设计前后端结构数据去重方案，保持前端手写数据为真源（T-005，搁置）。
 
 ## 已知风险
 

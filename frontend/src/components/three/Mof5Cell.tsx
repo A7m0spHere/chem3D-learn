@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { CameraRig } from "@/components/three/CameraRig";
+import { CalloutLabel } from "@/components/three/CalloutLabel";
 import {
   htmlOverlayAmberCompactLabelClass,
   htmlOverlayAmberStrongLabelClass,
@@ -9,7 +10,6 @@ import {
   htmlOverlaySubtleWideLabelClass,
 } from "@/components/three/htmlOverlayStyles";
 import {
-  add,
   createPcuGeometry,
   lerp,
   midpoint,
@@ -201,13 +201,16 @@ function BuildingUnitOverview() {
       <group position={[0.92, 0.01, 0]} scale={0.62}>
         <DetailedBdc showAnnotations={false} />
       </group>
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[-0.92, 0.84, 0]}>
+      {/* 左侧金属簇：锚点落在簇上沿，标签外推到左上留白。 */}
+      <CalloutLabel anchor={[-0.92, 0.34, 0]} offset={[-0.52, 0.72, 0]}>
         <span className={htmlOverlayLabelClass}>金属簇节点｜Zn₄O SBU</span>
-      </Html>
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[0.92, 0.84, 0]}>
+      </CalloutLabel>
+      {/* 右侧连接体：锚点落在苯环上沿，标签外推到右上留白。 */}
+      <CalloutLabel anchor={[0.92, 0.24, 0]} offset={[0.52, 0.78, 0]}>
         <span className={htmlOverlayAmberStrongLabelClass}>有机连接体｜BDC</span>
-      </Html>
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[0, -0.82, 0]}>
+      </CalloutLabel>
+      {/* 这条是整幅对比图的总结，不指向单一结构，保持底部留白处的普通标签。 */}
+      <Html center pointerEvents="none" position={[0, -0.92, 0]}>
         <span className={htmlOverlaySubtleWideLabelClass}>两类构筑单元周期连接 → 开放框架</span>
       </Html>
     </>
@@ -269,15 +272,19 @@ function DetailedNode({ showAnnotations }: { showAnnotations: boolean }) {
 
       {showAnnotations ? (
         <>
-          <Html center distanceFactor={7} pointerEvents="none" position={[0, 0.76, 0]}>
+          {/* 锚点落在中心 μ₄-O 上，标签外推到左上；原位置 [0,0.76,0] 正好压在 +y 连接点上。 */}
+          <CalloutLabel anchor={[0, 0, 0]} offset={[-0.58, 0.98, 0]}>
             <span className={htmlOverlayLabelClass}>Zn₄O 核心｜4 个 Zn</span>
-          </Html>
-          <Html center distanceFactor={4.2} pointerEvents="none" position={[1.2, 0.08, 0]}>
+          </CalloutLabel>
+          {/* 锚点落在其中一个 Zn 上，标签外推到右上；coordination 视图放大明显，需要更大偏移才能真正推到外围。 */}
+          <CalloutLabel anchor={znPositions[0]} offset={[1.45, 0.72, 0]}>
             <span className={htmlOverlaySubtleWideLabelClass}>单个 Zn：O 四配位</span>
-          </Html>
-          <Html center distanceFactor={7} pointerEvents="none" position={[0, -0.76, 0]}>
+          </CalloutLabel>
+          {/* 锚点落在近核的 −y 连接臂上（而非最外单一末端），引线从辐射源附近沿连接臂
+              延伸，暗示 SBU 向 ±x/±y/±z 六方向辐射；标签外推到左下，不与核心标签重叠。 */}
+          <CalloutLabel anchor={[0, -0.3, 0]} offset={[-0.62, -0.5, 0]}>
             <span className={htmlOverlayAmberCompactLabelClass}>整个 SBU：六连接方向</span>
-          </Html>
+          </CalloutLabel>
         </>
       ) : null}
     </group>
@@ -322,15 +329,20 @@ function DetailedBdc({ showAnnotations }: { showAnnotations: boolean }) {
 
       {showAnnotations ? (
         <>
-          <Html center distanceFactor={7} pointerEvents="none" position={[0, 0.62, 0]}>
+          {/* 锚点落在整条连接体的几何中心（两端 node 连线的对称轴上），
+              引线沿主轴向上外推，才表达"线性二连接体"的整体跨度，而非只指苯环。 */}
+          <CalloutLabel anchor={[0, 0, 0]} offset={[0.5, 0.92, 0]}>
             <span className={htmlOverlayLabelClass}>BDC²⁻｜线性二连接体</span>
-          </Html>
-          <Html center distanceFactor={7} pointerEvents="none" position={[0, -0.58, 0]}>
+          </CalloutLabel>
+          {/* 锚点落在苯环下沿键上，明确指向中央苯环，标签外推到右下。 */}
+          <CalloutLabel anchor={[0, -0.36, 0]} offset={[0.7, -0.6, 0]}>
             <span className={htmlOverlayCompactLabelClass}>苯环提供刚性间隔</span>
-          </Html>
-          <Html center distanceFactor={8.5} pointerEvents="none" position={[-0.92, -0.36, 0]}>
+          </CalloutLabel>
+          {/* 锚点落在左侧羧酸氧 [-0.79] 与节点 [-1.04] 连线中点，正压在 O→node
+              的半透明衔接键上，既贴节点又体现"羧酸根接入节点"。 */}
+          <CalloutLabel anchor={[-0.91, 0, 0]} offset={[-0.4, -0.66, 0]}>
             <span className={htmlOverlayAmberCompactLabelClass}>羧酸根接入节点</span>
-          </Html>
+          </CalloutLabel>
         </>
       ) : null}
     </group>
@@ -379,12 +391,17 @@ function TopologyFramework({
 
       {showPeriodicExtension ? (
         <>
-          <Html center distanceFactor={7.5} pointerEvents="none" position={[0, -1.12, 0]}>
+          {/* 锚点落在左侧角节点 [-0.88,0.88,0.88]——六条连接臂正是从这个 pcu 节点沿
+              ±x/±y/±z 辐射；文案是"每个节点"，锚任意真实节点都成立。锚到左侧节点并推向
+              左上，与右上的"虚线末端"标签分居两端，避免二者投影后重叠。 */}
+          <CalloutLabel anchor={[-0.88, 0.88, 0.88]} offset={[-0.9, 0.72, 0]}>
             <span className={htmlOverlaySubtleWideLabelClass}>pcu｜每个节点沿 ±x、±y、±z 六方向连接</span>
-          </Html>
-          <Html center distanceFactor={8.2} pointerEvents="none" position={[0, 1.18, 0]}>
+          </CalloutLabel>
+          {/* 锚点落在右侧角节点 [0.88,0.88,0.88] 的 +y 周期虚线真实末端 [0.88,1.20,0.88]，
+              引线指向那根往晶胞外延伸的虚线端。推向右上，与左侧的 pcu 标签分居两端。 */}
+          <CalloutLabel anchor={[0.88, 1.2, 0.88]} offset={[0.7, 0.42, 0]}>
             <span className={htmlOverlayCompactLabelClass}>虚线末端｜跨晶胞继续连接</span>
-          </Html>
+          </CalloutLabel>
         </>
       ) : null}
 
@@ -443,9 +460,12 @@ function TopologyLinker({ linker, showLabel }: { linker: PcuLinker; showLabel: b
         </group>
       ))}
       {showLabel ? (
-        <Html center distanceFactor={7.8} pointerEvents="none" position={add(midpoint(linker.start, linker.end), [0, 0.24, 0])}>
+        <CalloutLabel
+          anchor={midpoint(linker.start, linker.end)}
+          offset={[0, 0.42, 0]}
+        >
           <span className={htmlOverlayAmberCompactLabelClass}>BDC 拓扑边</span>
-        </Html>
+        </CalloutLabel>
       ) : null}
     </group>
   );
@@ -463,7 +483,7 @@ function TopologyNode({ position, showLabel = false }: { position: Vec3; showLab
         <meshStandardMaterial color={OXYGEN_COLOR} roughness={0.38} />
       </mesh>
       {showLabel ? (
-        <Html center distanceFactor={7.8} pointerEvents="none" position={[0, 0.25, 0]}>
+        <Html center pointerEvents="none" position={[0, 0.25, 0]}>
           <span className={htmlOverlayLabelClass}>Zn₄O SBU 节点</span>
         </Html>
       ) : null}
@@ -488,9 +508,10 @@ function PoreVolume() {
         <boxGeometry args={[1.36, 1.36, 1.36]} />
         <meshBasicMaterial color={PORE_COLOR} opacity={0.18} transparent wireframe />
       </mesh>
-      <Html center distanceFactor={7.4} pointerEvents="none" position={[0, 0.9, 0]}>
+      {/* 锚点在孔隙立方体顶面中心，标签外推到右上方，避免压在孔隙与框架上。 */}
+      <CalloutLabel anchor={[0, 0.68, 0]} offset={[1.02, 0.62, 0]}>
         <span className={htmlOverlayAmberStrongLabelClass}>孔隙体积（教学示意）</span>
-      </Html>
+      </CalloutLabel>
     </group>
   );
 }
@@ -521,9 +542,10 @@ function GuestMolecules() {
           </mesh>
         </group>
       ))}
-      <Html center distanceFactor={7.4} pointerEvents="none" position={[0, -0.72, 0]}>
+      {/* 锚点落在中间那个客体小球上，标签外推到左下方。 */}
+      <CalloutLabel anchor={[0.24, -0.22, -0.16]} offset={[-0.86, -0.84, 0]}>
         <span className={htmlOverlayAmberStrongLabelClass}>客体分子（示意）</span>
-      </Html>
+      </CalloutLabel>
     </group>
   );
 }
@@ -531,16 +553,18 @@ function GuestMolecules() {
 function CountingLabels() {
   return (
     <>
-      <Html center distanceFactor={5.5} pointerEvents="none" position={[-1.5, 0.08, 0]}>
+      {/* 顶点计数：锚点指向左上前顶角节点本身，标签外推到左侧空白。 */}
+      <CalloutLabel anchor={[-0.88, 0.88, 0.88]} offset={[-0.62, -0.5, 0]}>
         <span className={htmlOverlayLabelClass}>8×1/8 = 1 SBU</span>
-      </Html>
-      <Html center distanceFactor={6} pointerEvents="none" position={[1.3, -0.08, 0]}>
+      </CalloutLabel>
+      {/* 棱计数：锚点指向右前竖棱（y 向连接体）中点，标签外推到右侧空白。 */}
+      <CalloutLabel anchor={[0.88, 0, 0.88]} offset={[0.5, -0.12, 0]}>
         <span className={htmlOverlayAmberStrongLabelClass}>12×1/4 = 3 BDC</span>
-      </Html>
-      <Html center distanceFactor={6} pointerEvents="none" position={[-1.02, -1.22, 0]}>
+      </CalloutLabel>
+      <Html center pointerEvents="none" position={[-1.02, -1.22, 0]}>
         <span className={htmlOverlayLabelClass}>Zn₄O(BDC)₃</span>
       </Html>
-      <Html center distanceFactor={5.8} pointerEvents="none" position={[0, 1.28, 0]}>
+      <Html center pointerEvents="none" position={[0, 1.28, 0]}>
         <span className={htmlOverlayCompactLabelClass}>Fm-3m 常规晶胞：Z = 8</span>
       </Html>
     </>
