@@ -44,6 +44,22 @@
 
 ## 已完成
 
+### T-016～T-019 引线标签扩展收尾（Graphite / ZnS / ZincMetal / BaTiO3）
+
+- **完成**：2026-07-26（Claude Code）
+- **提交**：`cac0e90 feat(crystal): leader-line callout for zinc-metal internal counting badge`（T-018）、`a52cf62 feat(crystal): leader-line callouts for BaTiO3 scene labels`（T-019）；T-016 / T-017 无代码改动。
+- **背景**：`CalloutLabel` 分 viewer 扩展的最后一批。按 MOF-5 以来「只转真正压在结构上、指向单一结构的恒显标签；标题 / 总结 / 门控 / 已在外围的一律保留」的既定标准，逐个 viewer 核对几何坐标，不被粗估标签数带跑。
+- **逐 viewer 判定**：
+  - **T-016 Graphite（无改动）**：`GraphiteCell.tsx` 唯一的 `<Html>` 是 `showLabels` 门控的原子标签（`shouldShowLabel = showLabel && ...`），其余说明都在不遮挡 3D 的 DOM 图例 `LayeredHexLegend`。无恒显、压结构的场景标签，按标准无需转换。
+  - **T-017 ZnS（无改动）**：`ZnSPolytypeCell.tsx` 全部恒显 `LayerBadge` 均为场景标题（结构上方 y≈1.2~1.36，晶胞/四面体半高仅 ≈0.5）、底部总结（y≈-1.1~-1.5）或 `A/B/C 层`（在 `[-1.5,y,-0.9]`、xz 距原点 ≈1.75 > 层半径 1.58，已在层外侧）；指向结构的 `FocusLabel` 全部 `showLabels` 门控。与 MetalClosePacking 保留的徽章判据一致，无需转换。
+  - **T-018 ZincMetal（转 1 处）**：`ZincMetalCell.tsx` 的 `CountingLabels` 4 个恒显徽章中，`顶角`（`[1.18,0.78,0]` 外侧）、`面心`（`[0.2,1.02,0.42]` 上方）、`合计：6`（`[0,-1.05,0]` 底部总结）均不遮挡；唯 `内部：3 × 1 = 3` 原在 `[0.12,0.2,-0.82]`（xz 距原点 0.83 < 六方半径 0.95、y 在半高 0.75 内）压在 3 个内部 B 层 Zn 上 → 锚点落真实内部原子 `unit-inner-3` `[0,0,-0.548]`、沿 −z 上方外推。徽章 span 抽成共享 `BadgeSpan`（`LayerBadge` 与 `CalloutLabel` 共用）保留 tone 配色。层平面标签（`LayerPlane` / `CoordinationCluster` 的 `同层6`/`上层3`/`下层3`）本就画在平面边缘 `[radius+0.12,…]`、门控原子标签走原逻辑，均保留。
+  - **T-019 BaTiO3（转 2 处）**：`BaTiO3Cell.tsx` 2 处恒显场景导引 `<Html>` 压在结构上 → `polyhedron` 的 `O—O 轮廓 · 非化学键`（`OctahedronGuide`，锚点落八面体中心原点、即 O—O 轮廓辐射源）、`aSiteCoordination` 的 `Ba²⁺ · 中心`（`BaCoordinationCluster`，锚点落中心 Ba 原点）。保留 `12 个最近邻 O²⁻`（配位簇底部总结）、`originShift` 的原点平移说明（全局注释）、`showLabels`/counting 门控的代表原子标签（原子标签机制，走原逻辑）。
+- **验证**：
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+  - [x] 新增 `tests/visual/zinc-metal-callout.visual.spec.ts`（chrome 通道 1/1）、`tests/visual/batio3-callout.visual.spec.ts`（chrome 通道 2/2）：转换标签仍可见且相对 stage 中心归一化偏移 > 0.15。
+  - [x] 未动几何、tone 配色、门控标签系统、教学文案；`git status` 确认只改两个 viewer + 两个新 spec。
+- **已知限制**：完整 Darwin 视觉回归未跑（Windows 无基线）。`CalloutLabel` 分 viewer 扩展系列（MOF-5 T-011 起）到此全部收尾：9 个 viewer 中 6 个有转换、Graphite/ZnS 按标准无需转换。
+
 ### T-015 用 CalloutLabel 扩展 PBA viewer 的引线标签（第二批，扩展第 4 个）
 
 - **完成**：2026-07-26（Claude Code）

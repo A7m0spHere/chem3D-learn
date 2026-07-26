@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-26（Claude Code，T-015 用 CalloutLabel 扩展 PBA viewer 引线标签）
+> 最后更新：2026-07-26（Claude Code，T-016~T-019 完成引线标签系列收尾：Graphite/ZnS 评估无需改、ZincMetal/BaTiO3 扩展）
 
 ## 一句话定位
 
@@ -26,7 +26,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
-- 工作区干净，与 `origin/main` 同步。引线标签扩展逐 viewer 提交：T-011 MOF-5（`fb6ceec`）、T-012 MXene（`2c5615a`）、T-013 ReN₃（`9e3e464`）、T-014 金属密堆积（`547482b`）、T-015 PBA（`f3f4984`）；T-010 原子图例（`d18b785`）亦已提交。此前 HANDOFF/STATUS 记录的「T-010/T-011 尚未提交、等用户确认」已过时，实际已按当时建议分 commit 落地。
+- 工作区干净，与 `origin/main` 同步。**引线标签扩展系列已收尾**：转换类 T-011 MOF-5（`fb6ceec`）、T-012 MXene（`2c5615a`）、T-013 ReN₃（`9e3e464`）、T-014 金属密堆积（`547482b`）、T-015 PBA（`f3f4984`）、T-018 ZincMetal（`cac0e90`）、T-019 BaTiO3（`a52cf62`）；评估类 T-016 Graphite / T-017 ZnS 逐 scene 核对后判定**无需改动**（全部恒显标签均为标题/总结/门控/已在外围，无压在结构上的指向型恒显标签，见 D-016）。T-010 原子图例（`d18b785`）亦已提交。此前 HANDOFF/STATUS 记录的「T-010/T-011 尚未提交、等用户确认」已过时，实际已按当时建议分 commit 落地。
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
@@ -61,6 +61,11 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 最近完成
 
+- **引线标签系列收官：Graphite/ZnS 评估无需改动，ZincMetal/BaTiO3 完成扩展**（2026-07-26）
+  - **T-016 Graphite（无需改动）**：`GraphiteCell.tsx` 唯一的 3D `<Html>` 是 `showLabels` 门控原子标签（按既定标准保留），全部说明在不遮挡 3D 的 DOM 图例 `LayeredHexLegend`；没有恒显、压在结构上的场景标签。按标准逐条判定，无可转对象，不产生代码改动。
+  - **T-017 ZnS（无需改动）**：`ZnSPolytypeCell.tsx` 所有恒显 `LayerBadge` 均为场景标题（结构上方 y≈1.2）、总结（下方 y≈-1.3）或 `${layer} 层`（在 `[-1.5,y,-0.9]`、xz≈1.75 > 层半径 1.58，已在层外侧），与金属密堆积保留的 A/B/C 层徽章同判据；指向结构的 `FocusLabel` 均受 `showLabels` 门控。无压在结构上的恒显场景标签，不产生代码改动。
+  - **T-018 ZincMetal（commit `cac0e90`）**：`ZincMetalCell.tsx` 的 `CountingLabels` 4 个徽章中，只有 `内部：3×1=3`（原 `[0.12,0.2,-0.82]`，xz 距原点 0.83 < 六方半径 0.95、y 在半高 0.75 内，压在 3 个内部 B 层 Zn 上）改为 `CalloutLabel`，锚点落真实内部原子 `unit-inner-3 [0,0,-0.548]`。顶角/面心（上方外侧）、合计（底部总结）及 `LayerPlane` 边缘标签保持徽章。徽章 span 抽成共享 `BadgeSpan` 保留 tone 配色。新增 `tests/visual/zinc-metal-callout.visual.spec.ts`（chrome 通道 1/1）。
+  - **T-019 BaTiO3（commit `a52cf62`）**：`BaTiO3Cell.tsx` 2 处压在结构上的恒显场景导引 `<Html>` 改为 `CalloutLabel`——`O—O 轮廓·非化学键`（`OctahedronGuide`，锚点落八面体中心原点，即 O—O 轮廓辐射源）、`Ba²⁺·中心`（`BaCoordinationCluster`，锚点落中心 Ba 原点）。保留 `12 个最近邻 O²⁻`（配位簇下方总结）、`OriginShiftGuide` 原点平移说明（全局注解）与 `CrystalAtom` 门控/计数原子标签为原 `<Html>`。新增 `tests/visual/batio3-callout.visual.spec.ts`（chrome 通道 2/2）。build/lint/test:logic(56/56) 通过。**至此 9 个 viewer 的引线标签系列全部处理完毕。**
 - **T-015 用 `CalloutLabel` 扩展 PBA viewer 引线标签（第二批，扩展第 4 个）**（2026-07-26，commit `f3f4984`）
   - 沿用同一 `CalloutLabel` 组件，把 `PbaCell.tsx` 中 2 处「指向具体结构且压在结构上」的恒显 `<Html>` 标签改为引线 + 外围标签：coordination（`六配位方向`，`OctahedralGuide` 锚点落八面体中心原点、外推到上方）1、voids（`□ 空位`/`空位/水合`，`VacancyMarker` 锚点落空位中心局部原点）1。
   - 保留 comparison 的 `节点-桥-节点`（`FrameworkComparisonGuide` 里描述整个框架连接概念的总结说明，无单一锚点结构、且已在晶胞底面下方，与 MOF-5 保留的「周期连接 → 开放框架」同判据）与 `showLabels` 门控原子标签为原 `<Html>`。未改几何、图例、相机、教学文案文字，未引新依赖。
@@ -126,7 +131,7 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-1. 用同一 `CalloutLabel` 把其余 3 个 viewer（Graphite/ZnS/ZincMetal + BaTiO3 counting 徽章）分 viewer 扩展，各自单独提交。（MOF-5 = T-011、MXene = T-012、Ren3 = T-013、MetalClosePacking = T-014、PBA = T-015 已完成。）
+1. 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**（Graphite 只有 `showLabels` 门控原子标签 + DOM 图例；ZnS 的恒显 `LayerBadge` 全是标题/总结/已在层外侧的 `A/B/C 层`，指向结构的 `FocusLabel` 均受门控）。
 2. 评估 `ZnSPolytypeCell.tsx` / `ZincMetalCell.tsx` 的纯几何计算下沉（T-004，搁置）。
 3. 设计前后端结构数据去重方案，保持前端手写数据为真源（T-005，搁置）。
 

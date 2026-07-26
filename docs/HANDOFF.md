@@ -10,36 +10,45 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-26
 - **分支**：`main`
-- **任务**：T-015 用 `CalloutLabel` 扩展 PBA viewer 的恒显场景标签（引线标签第二批，扩展第 4 个 viewer）
-- **提交**：`f3f4984 feat(crystal): leader-line callouts for PBA scene labels`（代码 + 测试已提交；本轮 docs 改动待随后单独提交）
+- **任务**：引线标签扩展**收官**——评估 Graphite / ZnSPolytype（结论：无需改），扩展 ZincMetal（T-018）与 BaTiO3（T-019）。至此「下一步 #1」引线标签扩展系列全部完成。
+- **提交**：`cac0e90 feat(crystal): leader-line callout for zinc-metal internal counting badge`（T-018）、`a52cf62 feat(crystal): leader-line callouts for BaTiO3 scene labels`（T-019）；本轮 docs 改动待随后单独提交。
 
-> ℹ️ 本会话按 `/goal「一个一个完成，直到把任务做完」`连续处理：先把上一会话遗留的 T-014 docs 单独提交（`f6195d2`），再收尾工作区里已有的 PBA 半成品（`PbaCell.tsx` 已转 2 处标签、缺测试/文档）为 T-015 → `f3f4984`。
+> ℹ️ 本会话按 `/goal「一个一个完成，直到把任务做完」`连续处理：T-014 docs（`f6195d2`）→ T-015 PBA 代码+测试（`f3f4984`）+ docs（`318ee17`）→ 逐个核对剩余 4 个 viewer → T-018 ZincMetal（`cac0e90`）、T-019 BaTiO3（`a52cf62`）。
 
-### 本次改动（T-015）
+### 本次改动（T-016~T-019）
 
-改 `PbaCell.tsx` + 新增 1 个无截图测试，未新增组件（复用 `CalloutLabel`），未改后端、`package.json`、数据 JSON 或 Darwin 快照。
+按既定标准「只转指向单一结构、且当前压在结构上的恒显标签；标题/总结/门控/已在外围的保留」**逐 viewer 核对几何**后：
 
-**`PbaCell.tsx`：只转 2 处「指向具体结构且压在结构上」的恒显 `<Html>`**
+**T-016 Graphite：无需改动（no-change）**
+- `GraphiteCell.tsx` 的唯一 3D `<Html>` 是 `showLabels` 门控的原子标签（`shouldShowLabel = showLabel && ...`），按标准保留；所有说明文字在 `LayeredHexLegend` DOM 图例里（不遮挡 3D）。无恒显、压结构的场景标签，故不改。
 
-- `coordination`（配位骨架）1：`六配位方向`（`OctahedralGuide`）——原 `<Html position={[0,0.74,0]}>` 浮在八面体正上方 → 锚点落八面体中心原点 `[0,0,0]`（配位辐射源）、`offset=[0.4,0.9,0]` 外推到右上方。
-- `voids`（空位水合）1：空位标记 `□ 空位`/`空位/水合`（`VacancyMarker`，label 随 voidStage 变）——原 `<Html position={[0,0.24,0]}>` 贴在空位标记上方 → 锚点落空位中心本 group 局部原点 `[0,0,0]`、`offset=[0.3,0.7,0]`。
-- **保留**为原 `<Html>`：`comparison` 的 `节点-桥-节点`（`FrameworkComparisonGuide` 里描述整个「节点-桥-节点」框架连接概念的总结说明，无单一锚点结构可指、且已在晶胞底面下方 `[0,-0.78,0]` 不遮挡——与 MOF-5 保留的「周期连接 → 开放框架」总结同判据）；`PbaAtom` 的 `showLabels` 门控原子标签走原逻辑。
+**T-017 ZnSPolytype：无需改动（no-change）**
+- `ZnSPolytypeCell.tsx` 用彩色徽章 `LayerBadge`，但逐 scene 核对后其恒显徽章全部是：标题（`闪锌矿｜ABC` 等，在 `[0,+1.2~1.36,0]` 结构上方）、总结（`共同：Zn 4 配位` 等，在 `[0,-1.26~-1.52,0]` 下方）、或 `${layer} 层`（在 `[-1.5,y,-0.9]`，xz 距原点 ≈1.75 > 层半径 1.58，已在外侧）——与金属密堆积 T-014 保留的那批同判据。指向结构的 `FocusLabel` 全是 `showLabels` 门控。故不改。
+
+**T-018 ZincMetal：转 1 个徽章**（`ZincMetalCell.tsx`）
+- `CountingLabels` 的 4 个计数徽章里，`顶角：12×1/6=2`（`[1.18,0.78,0]` 外侧）、`面心：2×1/2=1`（`[0.2,1.02,0.42]` 上方）、`合计：6`（`[0,-1.05,0]` 底部总结）都不遮挡，保留徽章。只有 `内部：3×1=3` 原在 `[0.12,0.2,-0.82]`：xz 距原点 0.83 < 六方半径 0.95、y 0.2 在半高 0.75 内，**正压在 3 个内部 B 层 Zn 上** → 转 `CalloutLabel`，锚点落真实内部原子 `unit-inner-3` `[0,0,-0.548]`、`offset=[0.3,0.9,-0.72]` 沿 −z 上方外推。
+- 徽章 span 抽成共享 `BadgeSpan`（`LayerBadge` 与转换后的 `CalloutLabel` children 共用），**保留 tone 配色**——与 T-014 同款做法。`LayerPlane` 的层标签本就放在平面边缘 `[radius+0.12,...]`（外围）、`CoordinationCluster` 的同层/上层/下层标签同理，均不动。
+
+**T-019 BaTiO3：转 2 处场景引导标签**（`BaTiO3Cell.tsx`）
+- `polyhedron` 视图 `OctahedronGuide` 的 `O—O 轮廓·非化学键`：原 `[0.42,-0.46,0.34]` 落在八面体内 → 锚点落八面体中心原点 `[0,0,0]`（O—O 轮廓辐射源）、`offset=[0.6,-0.72,0.5]` 外推到外侧下方。
+- `aSiteCoordination` 视图 `BaCoordinationCluster` 的 `Ba²⁺·中心`：原 `[0,0.21,0]` 贴在中心 Ba 球上 → 锚点落中心原点 `[0,0,0]`、`offset=[-0.7,0.85,0]` 外推过配位壳层（近邻在 ±0.5）。
+- **保留**为原 `<Html>`：`12 个最近邻 O²⁻`（cluster 底部 `[0.42,-0.58,0.42]` 总结）、origin-shift 说明（全局注记）、counting 模式的 3 个代表原子标签（走 `CrystalAtom` 的 `showLabels`/counting 门控原子标签系统，与既定「门控原子标签保留」一致）、`O²⁻·周期延展`（门控）。
 
 **新增测试（无截图）**
+- `tests/visual/zinc-metal-callout.visual.spec.ts`（chrome 通道 1 项）：counting 模式下 `内部：3×1=3` 引线标签可见且偏离 stage 中心 > 0.15。
+- `tests/visual/batio3-callout.visual.spec.ts`（chrome 通道 2 项）：polyhedron / aSiteCoordination 下 2 处引线标签可见且偏离中心 > 0.15。
 
-- `tests/visual/pba-callout.visual.spec.ts`（chrome 通道 2 项）：coordination（`六配位方向`）/ voids（切「空位水合」模式 + 点「六氰空位」阶段后 `□ 空位`）两个场景下引线标签文案仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15。
+### 验证结果
 
-### 验证结果（T-015）
-
-- `frontend npm run build`：**通过**。保留既有 `three` chunk ~688 KB 的非阻断警告。
+- `frontend npm run build`：**通过**（保留既有 `three` chunk ~688 KB 非阻断警告）。
 - `frontend npm run lint`：**通过**，无 warning。
-- `frontend npm run test:logic`：**56 / 56 通过**（本任务未增删 logic 用例）。
-- 新增 `pba-callout.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**2 / 2 通过**。
-- `git status`：提交前工作区只含 `PbaCell.tsx` + 新 spec，无 lockfile / 缓存 / Darwin 快照被改写。
+- `frontend npm run test:logic`：**56 / 56 通过**（本批未增删 logic 用例）。
+- `zinc-metal-callout` + `batio3-callout`（`PLAYWRIGHT_CHANNEL=chrome`）：**3 / 3 通过**。
+- `git status`：提交前工作区仅含 `ZincMetalCell.tsx` / `BaTiO3Cell.tsx` + 2 个新 spec，无 lockfile / 缓存 / Darwin 快照被改写。
 
-### 范围说明（分步策略）
+### 范围说明（引线标签系列收官）
 
-引线标签扩展按 viewer 逐个提交。已完成 MOF-5（T-011）+ MXene（T-012）+ ReN₃（T-013）+ 金属密堆积（T-014）+ PBA（T-015）。**剩余 3 个 viewer**（Graphite / ZnSPolytype / ZincMetal + BaTiO3 计数徽章）待续，同一 `CalloutLabel`、各自单独提交、各自配无截图冒烟。
+引线标签扩展系列（PROJECT_STATUS「下一步 #1」）**全部完成**：MOF-5（T-011）、MXene（T-012）、ReN₃（T-013）、金属密堆积（T-014）、PBA（T-015）已转；Graphite（T-016）、ZnSPolytype（T-017）逐 scene 核对后判定**无恒显遮挡标签、无需改**；ZincMetal（T-018）、BaTiO3（T-019）已转。9 个 viewer 全部核对完毕。
 
 ### 已知限制
 
@@ -48,13 +57,18 @@
 
 ### 给下一个 Agent 的建议
 
-- 本轮 docs 改动（DECISIONS/TASKS/PROJECT_STATUS/HANDOFF）建议作为一个单独的 docs commit 提交（代码 `f3f4984` 已先行提交）。
-- 下一个 viewer 建议按剩余标签数从多到少推进：Graphite → ZnSPolytype → ZincMetal → BaTiO3。每个 viewer 先核对哪些标签「指向具体结构且压在结构上」（转 `CalloutLabel`）、哪些是「全局说明/标题/门控/已在外围」（保留原样），再配一个 chrome 通道无截图冒烟，单独提交。
-- 参考已落地的 MOF-5 / MXene / ReN₃ / 金属密堆积 / PBA 范式：锚点用真实几何坐标（能引用几何常量或从几何推算就别硬编码近似），offset 朝远离场景中心方向；对有外层 `scale` 的子 group 记得补偿。**若 viewer 用的是彩色徽章一类的专门标签系统（如金属密堆积的 `LayerBadge`），转换时把内容 span 抽成共享组件保留配色，并且只转真正压在结构上的少数几个——很多徽章本就在外围留白、不需要动。别被粗估标签数带跑，按标准逐条判定。**
+- 本轮 docs 改动（DECISIONS/TASKS/PROJECT_STATUS/HANDOFF）建议作为一个单独的 docs commit 提交（代码 `cac0e90`/`a52cf62` 已先行提交）。
+- 引线标签系列已收官，下一步转入 **T-004（大晶胞几何计算下沉，`ZnSPolytypeCell`/`ZincMetalCell`）** 或 **T-005（前后端结构数据去重方案，先设计）**，两者原为「搁置」，需与用户确认是否启动。
+- 经验留存：彩色徽章类 viewer（`LayerBadge`）转换时把 span 抽成共享组件保留 tone 配色，且**只转真正压在结构上的少数几个**——很多徽章（标题/总结/已在外围）不需要动。判定要按几何逐条算（xz 距原点 vs 层/胞半径、y vs 半高），别被粗估标签数带跑。Graphite/ZnS 就是核对后确认无需改的例子。
 
 ---
 
 ## 往期
+
+### 2026-07-26 Claude Code：T-015 用 `CalloutLabel` 扩展 PBA viewer 的恒显场景标签（引线标签第二批，扩展第 4 个 viewer）
+
+- 复用 `CalloutLabel`，把 `PbaCell.tsx` 2 处**指向具体结构且压在结构上**的恒显 `<Html>` 改为引线 + 外围标签：coordination 1（`六配位方向`，`OctahedralGuide` 锚点落八面体中心原点 `[0,0,0]`、`offset=[0.4,0.9,0]`）、voids 1（`□ 空位`/`空位/水合`，`VacancyMarker` 锚点落空位中心局部原点 `[0,0,0]`、`offset=[0.3,0.7,0]`）。保留 comparison 的 `节点-桥-节点`（`FrameworkComparisonGuide` 总结说明、已在晶胞底面下方，与 MOF-5「周期连接 → 开放框架」同判据）与 `showLabels` 门控原子标签为 `<Html>`。新增无截图 `pba-callout.visual.spec.ts`（chrome 通道 2/2；voids 需切「六氰空位」阶段）。详见 D-016 扩展记录。
+- 提交：`f3f4984 feat(crystal): leader-line callouts for PBA scene labels`；配套文档提交 `318ee17 docs: record T-015 PBA callout extension`。
 
 ### 2026-07-26 Claude Code：T-014 用 `CalloutLabel` 扩展金属密堆积 viewer 的恒显徽章（引线标签第二批，扩展第 3 个 viewer）
 
