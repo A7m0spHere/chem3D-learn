@@ -174,3 +174,12 @@
 - **理由**：把可单测的坐标/边/位点生成与渲染分离，降低两个大 viewer 的体积，并给几何逻辑加回归护栏。是「大晶胞几何计算下沉」搁置项的落地，不改任何 JSX、交互或相机行为。
 - **验证**：新增 `tests/logic/crystal-geometry.logic.spec.ts` 8 项（棱数/端点/对称/位点计数/层错位等，输入输出类型明确）；`npm run test:logic` 由 56 → **64** 通过；build / lint 通过；ZincMetal 浏览器冒烟（chrome 通道）仍 1/1，证明渲染行为不变。
 - **约束/后续**：本次只搬「纯几何」，未动 viewer 结构与教学语义。若后续要进一步瘦身，可考虑把 `SulfurPackingLayer` 等仍在 viewer 内的几何辅助也下沉，但需同样保持零 React 副作用。
+
+## D-018 前后端结构数据去重：先立防漂移契约，锁结构核心、保留教学文案各自演进（T-005）
+
+- **日期**：2026-07-26（Claude Code，commit `fd67aca`）
+- **决定**：不引入数据库、构建期代码生成或运行时读取，先落地**最低风险的防漂移契约测试**（方案 A），并写设计文档 `docs/BACKEND_DATA_SYNC.md` 记录真源边界与后续方案。前端 23 个手写 JSON 仍是唯一真源，后端 `molecules.js` 只读映射其中 6 条。
+- **调研依据**：逐字段比对确认，5 个 VSEPR 分子（ch4/nh3/h2o/co2/bf3）的结构核心 `id/kind/formula/names/nameZh/category/atoms/bonds/lonePairs` 前后端**逐字一致**，仅教学文案（`summaryZh`/`lessonSteps`/`keyAngles`/`rendering`）漂移；`nacl` 是**有意的教学简化**（后端 15 原子简化胞、无 `crystalTeaching`；前端 27 原子完整胞）。
+- **契约范围**：`data-parity.test.js` 在测试期用 `readFileSync` 相对读取前端 JSON（方向单一：后端测试读前端，前端不依赖后端），逐字断言 5 个分子的结构核心；nacl 只断言「双方都存在且为 crystal」，注释说明其为有意简化、不参与相等契约。教学文案**不**纳入契约——允许后端文案与前端各自演进。
+- **理由**：符合 AGENTS.md「后端保持简单只读、先设计后实现」；用可执行护栏把「结构漂移」变成会红的测试，而不改动任何已服务的数据、不加依赖、不牵动前端构建。
+- **后续**：若将来要彻底单源，按 `docs/BACKEND_DATA_SYNC.md` 的方案 B（构建期从前端 JSON 生成后端数据）推进；本条只锁结构核心不动文案。

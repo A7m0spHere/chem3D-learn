@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-26（Claude Code，T-004 ZnS/ZincMetal viewer 纯几何计算下沉）
+> 最后更新：2026-07-26（Claude Code，T-005 前后端结构数据防漂移契约 + 设计文档；backlog 全部收口）
 
 ## 一句话定位
 
@@ -61,7 +61,10 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 最近完成
 
-- **T-004 ZnS / ZincMetal viewer 纯几何计算下沉**（2026-07-26，commit `4f5d707`）
+- **T-004 ZnS / ZincMetal viewer 纯几何计算下沉**（2026-07-26，commit `fd67aca`）
+  - 逐字段比对确认：5 个 VSEPR 分子（ch4/nh3/h2o/co2/bf3）的结构核心 `id/kind/formula/names/nameZh/category/atoms/bonds/lonePairs` 在前后端**逐字一致**，只有教学文案漂移；`nacl` 是**有意的教学简化**（后端 15 原子、无 `crystalTeaching`，前端 27 原子完整胞）。
+  - 新增设计文档 `docs/BACKEND_DATA_SYNC.md` + 防漂移测试 `backend/test/data-parity.test.js`（测试期读前端 JSON 逐字断言结构核心，nacl 只断言存在且为 crystal）。`backend npm test` 15 → **22 通过**；前端零改动、不依赖后端。详见 D-018。**至此 backlog 全部收口。**
+- **T-004 ZnS / ZincMetal viewer 纯几何计算下沉到 `*Geometry.ts`**（2026-07-26，commit `4f5d707`）
   - 沿用 `closePackingGeometry.ts` / `mof5Geometry.ts` 范式，新增 `znsPolytypeGeometry.ts`（`createCubeEdges` / `createWurtziteCellEdges` / 四面体近邻与棱索引）与 `zincMetalGeometry.ts`（Zn 位点类型、六方晶胞与堆积常量、`unitCellAtoms` / `coordinationCluster` / `cellEdges` / `generateHexLayer` / `hcpLayerPatch` 等），把两个大 viewer（816 / 744 行）里无 React/R3F 副作用的纯几何计算搬出。颜色、相机预设、教学文案、标签/高亮逻辑仍留 viewer。
   - 新增 `tests/logic/crystal-geometry.logic.spec.ts` 8 项（棱数/端点/对称/位点计数/层错位），`test:logic` 由 56 → **64** 通过；build/lint 通过；ZincMetal 浏览器冒烟仍 1/1，渲染行为不变。详见 D-017。
 - **引线标签系列收官：Graphite/ZnS 评估无需改动，ZincMetal/BaTiO3 完成扩展**（2026-07-26）
@@ -134,18 +137,23 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-1. 设计并实现前后端结构数据去重方案，保持前端手写数据为真源（T-005，搁置中，为当前 backlog 唯一剩余任务）。
+`docs/TASKS.md` 的既有 backlog（T-004、T-005 及引线标签系列 T-011~T-019）**已全部收口**，当前无待办任务。后续方向候选（均未立项，动手前先与用户确认）：
+
+1. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
+2. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
+3. 正式部署配置（SPA history fallback）、根 README、Node `engines` 声明等待确认项。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
 - ZnS / ZincMetal 纯几何计算下沉（T-004）**已完成**（commit `4f5d707`）：新增 `znsPolytypeGeometry.ts` / `zincMetalGeometry.ts` + 8 项 logic 测试。
+- 前后端数据去重（T-005）**已完成**（commit `fd67aca`）：设计文档 `docs/BACKEND_DATA_SYNC.md` + 防漂移契约测试，backend 22/22 通过。
 
 ## 已知风险
 
 - `ViewerErrorBoundary` 的重试会重新加载整个页面，而不是只重建 3D Canvas；这是为绕开 `React.lazy` 缓存拒绝 Promise 的可靠最小方案。
 - React Error Boundary 只能捕获后代组件的渲染、构造和生命周期错误；不能覆盖事件处理、普通异步回调、服务端渲染、边界自身错误，以及所有 R3F 动画帧故障。
 - 23 个 JSON 通过 `as unknown as MoleculeRecord` 接入，绕过了静态结构核验，当前没有运行时 schema / 引用完整性测试。
-- `backend/src/molecules.js` 与前端 6 个核心 JSON 重复，存在数据漂移风险。
+- `backend/src/molecules.js` 与前端 6 个核心 JSON 重复。T-005（commit `fd67aca`）已加防漂移契约测试：5 个 VSEPR 分子的结构核心逐字锁定，漂移即测试变红；教学文案与 nacl 简化胞的差异是**有意保留**的（见 `docs/BACKEND_DATA_SYNC.md`），未做构建期单源生成。
 - `createBrowserRouter` 的生产静态托管需要 SPA history fallback；当前仓库没有正式部署配置。
 - 当前有两处显式化学待核实项：
   - `mockMolecules.ts` 的 BF₃ 缺电子表述。
