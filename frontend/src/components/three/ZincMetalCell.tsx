@@ -2,6 +2,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, Instance, Instances, OrbitControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import { Group, Quaternion, Vector3 } from "three";
+import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
@@ -596,11 +597,33 @@ function getHighlightColor(kind: ZnSiteKind) {
 function CountingLabels() {
   return (
     <>
+      {/* 顶角 / 面心 徽章本就在晶胞上方或外侧，合计是底部总结，均不遮挡结构，保持徽章。 */}
       <LayerBadge label="顶角：12 × 1/6 = 2" position={[1.18, 0.78, 0]} tone="same" />
       <LayerBadge label="面心：2 × 1/2 = 1" position={[0.2, 1.02, 0.42]} tone="upper" />
-      <LayerBadge label="内部：3 × 1 = 3" position={[0.12, 0.2, -0.82]} tone="lower" />
+      {/* 「内部」原来落在 [0.12,0.2,-0.82]：xz 距原点 0.83 < 六方半径 0.95、y 0.2 在半高 0.75 内，
+          正压在 3 个内部 B 层 Zn 上。锚点落到真实内部原子 unit-inner-3 [0,0,-0.548]，
+          沿 −z 上方外推到晶胞外，引线指回内部原子群。 */}
+      <CalloutLabel anchor={[0, 0, -0.548]} offset={[0.3, 0.9, -0.72]}>
+        <BadgeSpan label="内部：3 × 1 = 3" tone="lower" />
+      </CalloutLabel>
       <LayerBadge label="合计：6" position={[0, -1.05, 0]} tone="center" />
     </>
+  );
+}
+
+// 徽章文本 span 抽成共享组件：原 <Html> 徽章 LayerBadge 与转成引线标签的
+// CalloutLabel children 共用，确保引线标签保留原 tone 配色（本 viewer 的教学语言）。
+function BadgeSpan({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "same" | "upper" | "lower" | "center" | "note";
+}) {
+  return (
+    <span className={`whitespace-nowrap rounded-full border px-2 py-1 text-xs font-bold ${crystalOverlayBadgeToneClasses[tone]}`}>
+      {label}
+    </span>
   );
 }
 
@@ -615,9 +638,7 @@ function LayerBadge({
 }) {
   return (
     <Html center distanceFactor={7.2} pointerEvents="none" position={position}>
-      <span className={`whitespace-nowrap rounded-full border px-2 py-1 text-xs font-bold ${crystalOverlayBadgeToneClasses[tone]}`}>
-        {label}
-      </span>
+      <BadgeSpan label={label} tone={tone} />
     </Html>
   );
 }
