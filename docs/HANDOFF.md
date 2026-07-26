@@ -10,47 +10,39 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-26
 - **分支**：`main`
-- **任务**：T-013 用 `CalloutLabel` 扩展 ReN₃ viewer 的恒显引线标签（引线标签第二批，扩展第 2 个 viewer）
-- **提交**：`9e3e464 feat(crystal): leader-line callouts for ReN3 scene labels`（代码已提交；文档改动待随本次一起提交）
+- **任务**：T-014 用 `CalloutLabel` 扩展金属密堆积 viewer 的恒显徽章（引线标签第二批，扩展第 3 个 viewer）
+- **提交**：`547482b feat(crystal): leader-line callouts for metal close-packing badges`（代码已提交；文档改动待随本次一起提交）
 
-> ℹ️ 本会话按用户要求连续处理：先收尾未提交的 MXene 半成品（T-012 → `2c5615a`）+ 补文档（`2cc67f4`），再扩展 ReN₃（T-013 → `9e3e464`）。工作区当前只余本轮 docs 改动待提交。
+> ℹ️ 本会话按用户要求连续处理：收尾未提交的 MXene 半成品（T-012 → `2c5615a`）+ 补文档（`2cc67f4`），扩展 ReN₃（T-013 → `9e3e464`）+ 补文档（`8d54576`），再扩展金属密堆积（T-014 → `547482b`）。工作区当前只余本轮 docs 改动待提交。
 
-### 本次改动（T-013）
+### 本次改动（T-014）
 
-改 `Ren3Cell.tsx` + 新增 1 个无截图测试，未新增组件（复用 `CalloutLabel`），未改后端、`package.json`、数据 JSON 或 Darwin 快照。
+改 `MetalClosePackingCell.tsx` + 新增 1 个无截图测试，未新增组件（复用 `CalloutLabel`），未改后端、`package.json`、数据 JSON 或 Darwin 快照。
 
-**`Ren3Cell.tsx`：3 处**指向具体结构**的恒显 `<Html>` → `CalloutLabel`**
+> ⚠️ 关键差异：这个 viewer 的标签**不是**前三个的裸 `<Html distanceFactor>`，而是一套**专门设计的彩色徽章 `LayerBadge`**（5 种 tone 配色，颜色刻意呼应层色 A 青/B 橙/C 灰，固定屏幕字号无 `distanceFactor`）。徽章是这个 viewer 教学语言的一部分，且很多已经放在结构旁边、不遮挡。用户明确选择「只转真正指向结构的少数几个」，不盲目全转。
 
-- `covalentNetwork`（N₃ 单元）2：
-  - `N₃ 单元｜N1–N2–N1`：锚点落在折线单元中心（中央 N2 在原点 `[0,0,0]`）。
-  - `两条短 N–N 距离 ≈ 1.36 Å`：锚点落在一条真实 N–N 键中点（原点到端基 N1 的中点，`triNitrogenPoints[0] * 0.5`）。
-- `coordination`（Re 七配位）1：`Re 中心｜7 个 N 最近邻`，锚点落在中心 Re 原子 `[0,0,0]`（与 MXene 的 `C 中心` 完全同类）。
-- **保留** `<Html>` 不加引线的均为「不指向单一结构」的全局说明/标题/门控标签：
-  - `pressure`：`Imm2-ReN₃` 标题、压力窗口 widget、「预测稳定 ≠ 已实验确认」免责。
-  - `cell`：`Imm2 常规晶胞`标题、晶格参数、a/b/c 轴标签（`CellAxisLabels` 本就在晶胞边缘）、`showLabels` 门控的 `RepresentativeSiteLabels`。
-  - `covalentNetwork`：折线单元免责、门控 `SiteLabel`。
-  - `coordination`：`ReN₇ 是局部七配位` 澄清、门控 `N1×6｜N2×1` 计数。
-  - `polyhedron`：`ReN₇ 多面体｜三维周期延展`场景标题、`→ 延展网络`总结、门控色注。
-  - `counting`（`CountingAndPropertyScene`）：计数 widget、化学式单位标题、力学总结、Wyckoff 免责——整块不动。
-- 教学文案文字零变化，未引新依赖，未改几何/图例/相机/`showLabels` 系统。
+**`MetalClosePackingCell.tsx`：只转 2 个 viewMode 里真正压在结构上、指向单一结构的 4 个徽章**
 
-> 📌 关于「~14 处」：PROJECT_STATUS 曾把 Ren3 粗估为 ~14 个恒显标签，那是把全局说明 + 门控标签全算进去。按 MOF-5/MXene「只转指向具体结构的恒显标签」标准，Ren3 里真正符合的只有这 3 处；其余都是标题/全局说明/`showLabels` 门控，按既定标准保留。
+- `layer`（单层密排）1：`A 层｜同层 6 个最近邻`，原 `[0,0.54,-1.36]`（xz 距原点 1.36 < 层半径 1.62，压在层平面上）→ 锚点落层中心原点 `[0,0,0]`、外推到后上方。
+- `coordination`（12 配位）3：`同层 6`/`上层 3`/`下层 3`，原本各自贴在对应原子组里（混在配位簇中）→ 锚点各引用真实代表原子 `sameLayer[0]`/`upperLayer[0]`/`lowerLayer[0]`、外推到外围。
+- **保留**为徽章（`LayerBadge`）不加引线：所有标题（`FCC｜4 个 M`/`HCP｜6 个 M`/`HCP｜ABAB`/`FCC｜ABCABC`）、所有总结（`合计配位数 12`/`共同：配位数 12｜η ≈ 74%`）、以及 StackingScene 的 `A/B/C 层`（在 `[-1.55,y,-0.88]`，xz 距原点 ≈1.78 > 层半径 1.58，**已在层外侧、不遮挡**）；`showLabels` 门控的 `FocusLabel` 走原逻辑。
+- **保留 tone 配色**：把徽章 span 抽成共享 `BadgeSpan({label,tone})` 组件，`LayerBadge`（原 `<Html>` 徽章）与转换后的 `CalloutLabel` children 共用，配色不丢。教学文案文字零变化，未引新依赖。
 
 **新增测试（无截图）**
 
-- `tests/visual/ren3-callout.visual.spec.ts`（chrome 通道 2 项）：covalentNetwork / coordination 两个 viewMode 下 3 处转换标签仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15。
+- `tests/visual/metal-close-packing-callout.visual.spec.ts`（chrome 通道 2 项）：layer / coordination 两个 viewMode 下 4 处转换徽章仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15。
 
-### 验证结果（T-013）
+### 验证结果（T-014）
 
 - `frontend npm run build`：**通过**。保留既有 `three` chunk ~688 KB 的非阻断警告。
 - `frontend npm run lint`：**通过**，无 warning。
 - `frontend npm run test:logic`：**56 / 56 通过**（本任务未增删 logic 用例）。
-- 新增 `ren3-callout.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**2 / 2 通过**。
-- `git status`：提交前工作区只含 `Ren3Cell.tsx` + 新 spec，无 lockfile / 缓存 / Darwin 快照被改写。
+- 新增 `metal-close-packing-callout.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**2 / 2 通过**。
+- `git status`：提交前工作区只含 `MetalClosePackingCell.tsx` + 新 spec，无 lockfile / 缓存 / Darwin 快照被改写。
 
 ### 范围说明（分步策略）
 
-引线标签扩展按 viewer 逐个提交。已完成 MOF-5（T-011）+ MXene（T-012）+ ReN₃（T-013）。**剩余 5 个 viewer**（MetalClosePacking / Pba / Graphite / ZnSPolytype / ZincMetal + BaTiO3 计数徽章）待续，同一 `CalloutLabel`、各自单独提交、各自配无截图冒烟。
+引线标签扩展按 viewer 逐个提交。已完成 MOF-5（T-011）+ MXene（T-012）+ ReN₃（T-013）+ 金属密堆积（T-014）。**剩余 4 个 viewer**（Pba / Graphite / ZnSPolytype / ZincMetal + BaTiO3 计数徽章）待续，同一 `CalloutLabel`、各自单独提交、各自配无截图冒烟。
 
 ### 已知限制
 
@@ -59,13 +51,18 @@
 
 ### 给下一个 Agent 的建议
 
-- 本轮 docs 改动（DECISIONS/TASKS/PROJECT_STATUS/HANDOFF）建议作为一个单独的 docs commit 提交（代码 `9e3e464` 已先行提交）。
-- 下一个 viewer 建议按剩余标签数从多到少推进：MetalClosePacking → Pba → Graphite → ZnSPolytype → ZincMetal → BaTiO3。每个 viewer 先核对哪些标签「指向具体结构」（转 `CalloutLabel`）、哪些是「全局说明/标题/门控」（保留 `<Html>`），再配一个 chrome 通道无截图冒烟，单独提交。
-- 参考已落地的 MOF-5 / MXene / ReN₃ 范式：锚点用真实几何坐标（能引用几何常量或从几何推算就别硬编码近似），offset 朝远离场景中心方向；对有外层 `scale` 的子 group 记得补偿。像 Ren3 这样「粗估标签数」远大于「真正指向具体结构的标签数」是常态——别被粗估数字带跑，按标准逐条判定。
+- 本轮 docs 改动（DECISIONS/TASKS/PROJECT_STATUS/HANDOFF）建议作为一个单独的 docs commit 提交（代码 `547482b` 已先行提交）。
+- 下一个 viewer 建议按剩余标签数从多到少推进：Pba → Graphite → ZnSPolytype → ZincMetal → BaTiO3。每个 viewer 先核对哪些标签「指向具体结构且压在结构上」（转 `CalloutLabel`）、哪些是「全局说明/标题/门控/已在外围」（保留原样），再配一个 chrome 通道无截图冒烟，单独提交。
+- 参考已落地的 MOF-5 / MXene / ReN₃ / 金属密堆积 范式：锚点用真实几何坐标（能引用几何常量或从几何推算就别硬编码近似），offset 朝远离场景中心方向；对有外层 `scale` 的子 group 记得补偿。**若 viewer 用的是彩色徽章一类的专门标签系统（如金属密堆积的 `LayerBadge`），转换时把内容 span 抽成共享组件保留配色，并且只转真正压在结构上的少数几个——很多徽章本就在外围留白、不需要动。别被粗估标签数带跑，按标准逐条判定。**
 
 ---
 
 ## 往期
+
+### 2026-07-26 Claude Code：T-013 用 `CalloutLabel` 扩展 ReN₃ viewer 的恒显引线标签（引线标签第二批，扩展第 2 个 viewer）
+
+- 复用 `CalloutLabel`，把 `Ren3Cell.tsx` 3 处**指向具体结构**的恒显 `<Html>` 改为引线 + 外围标签：covalentNetwork 2（`N₃ 单元｜N1–N2–N1` 锚点落折线中心原点、`两条短 N–N 距离 ≈ 1.36 Å` 锚点落原点→端基 N1 的真实键中点）、coordination 1（`Re 中心｜7 个 N 最近邻` 锚点落中心 Re 原点）。其余标签逐 scene 核对均为全局说明/场景标题/门控（pressure/cell/polyhedron/counting 的标题·参数·免责·widget、covalentNetwork 折线免责、coordination 七配位澄清、`showLabels` 门控位点），按既定标准保留 `<Html>`。PROJECT_STATUS 曾粗估「~14」把门控/全局全算进去；按标准实际只有 3 处。新增无截图 `ren3-callout.visual.spec.ts`（chrome 通道 2/2）。详见 D-016 扩展记录。
+- 提交：`9e3e464 feat(crystal): leader-line callouts for ReN3 scene labels`；配套文档提交 `8d54576 docs: record T-013 ReN3 callout extension`。
 
 ### 2026-07-26 Claude Code：T-012 用 `CalloutLabel` 扩展 MXene viewer 的恒显引线标签（引线标签第二批，扩展第 1 个 viewer）
 

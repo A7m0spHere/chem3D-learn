@@ -44,6 +44,23 @@
 
 ## 已完成
 
+### T-014 用 CalloutLabel 扩展金属密堆积 viewer 的徽章标签（第二批，扩展第 3 个）
+
+- **完成**：2026-07-26（Claude Code）
+- **提交**：`547482b feat(crystal): leader-line callouts for metal close-packing badges`
+- **背景**：延续分步扩展的下一个 viewer。与前两个不同，`MetalClosePackingCell.tsx` 的恒显标签是一套**带 tone 配色的彩色徽章 `LayerBadge`**（`same`/`upper`/`lower`/`note`/`center` 五色呼应层色），固定屏幕字号（无 `distanceFactor`），且不少徽章已放在结构旁不遮挡——不是前两个 viewer 那种「裸 `<Html distanceFactor>` 浮在正中」的问题。经与用户确认，采用**「只转真正指向结构的少数几个」**策略，保留徽章配色作为教学语言。
+- **内容**：
+  - 把徽章文本 span 抽成可复用的 `BadgeSpan`（`LayerBadge` 与 `CalloutLabel` 共用），确保引线标签保留原 tone 配色。
+  - 只转 2 个 viewMode 里真正压在结构上的 4 个徽章：
+    - `layer`（单层密排）1：`A 层｜同层 6 个最近邻`（原 `[0,0.54,-1.36]` 落在层平面内，xz 距原点 1.36 < 层半径 1.62）→ 锚点落层中心原点、外推到后上方。
+    - `coordination`（12 配位）3：`同层 6` / `上层 3` / `下层 3`，各自锚点引用对应配位原子组的代表位置（`sameLayer[0]`/`upperLayer[0]`/`lowerLayer[0]`），外推到外围。
+  - **保留**徽章的：所有场景标题（`FCC｜4个M`/`HCP｜6个M`/`HCP｜ABAB`/`FCC｜ABCABC`）、总结（`合计配位数 12`/`共同：配位数 12｜η≈74%`）、以及 StackingScene 的 `A/B/C 层`（在 `[-1.55,y,-0.88]`、xz 距原点 ≈1.78 > 层半径 1.58，已在层外侧不遮挡）；`FocusLabel` 门控标签走原逻辑。
+- **验证**：
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+  - [x] 新增 `tests/visual/metal-close-packing-callout.visual.spec.ts`（chrome 通道 2/2）：layer/coordination 两个 viewMode 下 4 个转换徽章仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15。
+  - [x] 未动几何、tone 配色、门控标签系统、教学文案；`git status` 确认只改 `MetalClosePackingCell.tsx` + 新增 spec。
+- **已知限制**：完整 Darwin 视觉回归未跑（Windows 无基线，只跑无截图冒烟）。其余 5 个 viewer（Pba/Graphite/ZnS/ZincMetal/BaTiO3 计数徽章）待后续分 viewer 扩展。
+
 ### T-013 用 CalloutLabel 扩展 ReN₃ viewer 的引线标签（第二批，扩展第 2 个）
 
 - **完成**：2026-07-26（Claude Code）
