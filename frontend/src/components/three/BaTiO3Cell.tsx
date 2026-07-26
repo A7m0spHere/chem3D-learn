@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CameraRig } from "@/components/three/CameraRig";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { StickCylinder, type Vec3 } from "@/components/three/StickCylinder";
+import { CalloutLabel } from "@/components/three/CalloutLabel";
 import {
   htmlOverlayAmberCompactLabelClass,
   htmlOverlayCompactLabelClass,
@@ -261,9 +262,11 @@ function OctahedronGuide() {
           start={octahedronVertices[startIndex]}
         />
       ))}
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[0.42, -0.46, 0.34]}>
+      {/* 锚点落在八面体中心（O—O 棱线轮廓的几何中心，即体心 Ti 原点），
+          标签沿右下前方外推到八面体外，引线指回轮廓中心。 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[0.72, -0.7, 0.5]} lineColor="#F4A261">
         <span className={htmlOverlayAmberCompactLabelClass}>O—O 轮廓 · 非化学键</span>
-      </Html>
+      </CalloutLabel>
     </group>
   );
 }
@@ -328,9 +331,10 @@ function BaCoordinationCluster({ showLabels }: { showLabels: boolean }) {
         <sphereGeometry args={[0.115, 36, 36]} />
         <meshStandardMaterial color="#2A9D8F" emissive="#2A9D8F" emissiveIntensity={0.2} roughness={0.24} />
       </mesh>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 0.21, 0]}>
+      {/* 锚点落在中心 Ba²⁺ 原点，标签沿左上方外推到 12 配位壳层外，引线指回中心原子。 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[-0.7, 0.72, 0]}>
         <span className={htmlOverlayLabelClass}>Ba²⁺ · 中心</span>
-      </Html>
+      </CalloutLabel>
       {baNeighborPositions.map((position, index) => (
         <group key={position.join("-")}>
           <StickCylinder
