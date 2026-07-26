@@ -163,3 +163,14 @@
   - **ZincMetal（T-018，2026-07-26，commit `cac0e90`）**：`ZincMetalCell.tsx` 亦为 `LayerBadge` 系统。逐条核对 `CountingLabels` 4 个恒显计数徽章：`顶角：12×1/6=2`（`[1.18,0.78,0]` 六方半径 0.95 外）、`面心：2×1/2=1`（`[0.2,1.02,0.42]` 半高 0.75 上方）、`合计：6`（`[0,-1.05,0]` 底部总结）均不遮挡，保留徽章；只有 `内部：3×1=3`（原 `[0.12,0.2,-0.82]`：xz 距原点 0.83 < 六方半径 0.95、y 0.2 在半高 0.75 内）正压在 3 个内部 B 层 Zn 上——换为 `CalloutLabel`，锚点落真实内部原子 `unit-inner-3 [0,0,-0.548]`、沿 −z 上方外推。徽章 span 抽成共享 `BadgeSpan`（`LayerBadge` 与引线标签共用）保留 tone 配色。`CoordinationCluster`/`LayerPlane` 的层标签本就放在平面边缘 `[radius+0.12,...]`（外围）、`HcpPackingPatch` 的 A/B 层标签在 `[1.x,...]`（外围）、原子标签受 `showLabels` 门控，均保留。新增 `tests/visual/zinc-metal-callout.visual.spec.ts`（chrome 通道 1/1）。build/lint/test:logic(56/56) 通过。
   - **BaTiO3（T-019，2026-07-26，commit `a52cf62`）**：`BaTiO3Cell.tsx` 用裸 `<Html distanceFactor>`。逐 scene 核对，把 2 处**指向具体结构、压在结构上**的恒显场景导引标签换为 `CalloutLabel`：`polyhedron` 视图的 `O—O 轮廓·非化学键`（`OctahedronGuide`，原 `[0.42,-0.46,0.34]` 落在八面体内，顶点 ±0.5；锚点落八面体中心原点、外推到右下前方）、`aSiteCoordination` 视图的 `Ba²⁺·中心`（`BaCoordinationCluster`，原 `[0,0.21,0]` 正压在中心 Ba 球上，radius 0.115；锚点落中心原点、外推到左上方越过 ±0.5 的近邻壳）。保留为 `<Html>`：`12 个最近邻 O²⁻`（cluster 底部 `[0.42,-0.58,0.42]` 的总结）、`originShift` 的原点平移全局说明、以及受 `(showLabels || counting)` 门控的代表原子标签（`CrystalAtom` 的原子标签系统，走原逻辑）。新增 `tests/visual/batio3-callout.visual.spec.ts`（chrome 通道 2/2，覆盖 polyhedron/aSiteCoordination 各 1 处）。build/lint/test:logic(56/56) 通过。
   - **全部 9 个 viewer 处理完毕**：转换 6 个（MOF-5/MXene/ReN₃/MetalClosePacking/Pba/ZincMetal 各转部分标签、BaTiO3 转 2 处），评估无需转换 2 个（Graphite/ZnS——标签本就受门控或已在结构外围）。引线标签系列收口。
+
+## D-017 ZnS / ZincMetal viewer 纯几何计算下沉到 `*Geometry.ts`（T-004）
+
+- **日期**：2026-07-26（Claude Code，commit `4f5d707`）
+- **决定**：沿用 `closePackingGeometry.ts` / `mof5Geometry.ts` 的既定范式，把 `ZnSPolytypeCell.tsx`（816 行）与 `ZincMetalCell.tsx`（744 行）里**无 React / R3F 副作用**的纯几何计算抽到两个新模块：
+  - `znsPolytypeGeometry.ts`：`createCubeEdges(half)`（立方晶胞 12 棱）、`createWurtziteCellEdges()`（纤锌矿六方胞 12 棱）、`tetrahedronNeighborPositions`（四面体 4 近邻）、`tetrahedronEdgeIndices`（6 棱索引对）。
+  - `zincMetalGeometry.ts`：`ZnSiteKind` / `ZnVisualAtom` / `HcpLayer` / `HcpPackingAtom` 类型，六方晶胞尺寸与堆积基矢常量，`bottomCorners`/`topCorners`/`unitCellAtoms`（17 个 Zn 位点）、`sameLayerNeighbors`/`coordinationCluster`（1 中心 + 12 近邻）、`cellEdges`（六方棱柱 18 棱）、`electronPoints`、`generateHexLayer()`、`hcpLayerPatch`（ABAB 三层）。
+- **留在 viewer 的**：颜色常量、相机预设（`getCameraPreset`）、教学文案（`getDisplaySummary`/`getVoidStageBadge`）、标签/高亮逻辑（`getAtomLabel`/`getHighlightColor`）——这些是表现层，不属于几何。
+- **理由**：把可单测的坐标/边/位点生成与渲染分离，降低两个大 viewer 的体积，并给几何逻辑加回归护栏。是「大晶胞几何计算下沉」搁置项的落地，不改任何 JSX、交互或相机行为。
+- **验证**：新增 `tests/logic/crystal-geometry.logic.spec.ts` 8 项（棱数/端点/对称/位点计数/层错位等，输入输出类型明确）；`npm run test:logic` 由 56 → **64** 通过；build / lint 通过；ZincMetal 浏览器冒烟（chrome 通道）仍 1/1，证明渲染行为不变。
+- **约束/后续**：本次只搬「纯几何」，未动 viewer 结构与教学语义。若后续要进一步瘦身，可考虑把 `SulfurPackingLayer` 等仍在 viewer 内的几何辅助也下沉，但需同样保持零 React 副作用。

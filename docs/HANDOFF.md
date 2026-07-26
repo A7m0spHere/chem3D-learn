@@ -10,12 +10,54 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-26
 - **分支**：`main`
-- **任务**：引线标签扩展**收官**——评估 Graphite / ZnSPolytype（结论：无需改），扩展 ZincMetal（T-018）与 BaTiO3（T-019）。至此「下一步 #1」引线标签扩展系列全部完成。
-- **提交**：`cac0e90 feat(crystal): leader-line callout for zinc-metal internal counting badge`（T-018）、`a52cf62 feat(crystal): leader-line callouts for BaTiO3 scene labels`（T-019）；本轮 docs 改动待随后单独提交。
+- **任务**：T-004 大晶胞几何计算下沉——把 `ZnSPolytypeCell.tsx` / `ZincMetalCell.tsx` 的纯几何计算抽到 `*Geometry.ts`，配代表性单测。
+- **提交**：`4f5d707 refactor(crystal): extract pure geometry from ZnS/ZincMetal viewers`（代码 + 测试已提交；本轮 docs 改动待随后单独提交）。
 
-> ℹ️ 本会话按 `/goal「一个一个完成，直到把任务做完」`连续处理：T-014 docs（`f6195d2`）→ T-015 PBA 代码+测试（`f3f4984`）+ docs（`318ee17`）→ 逐个核对剩余 4 个 viewer → T-018 ZincMetal（`cac0e90`）、T-019 BaTiO3（`a52cf62`）。
+> ℹ️ 本会话按 `/goal「一个一个完成，直到把任务做完」`连续清空 backlog：T-014 docs（`f6195d2`）→ T-015 PBA（`f3f4984`/`318ee17`）→ 引线标签收官 T-016~T-019（`cac0e90`/`a52cf62`/`9f90aa7`）→ T-004 几何下沉（`4f5d707`）。当前只余 T-005（前后端数据去重）这一搁置低优先级项。
 
-### 本次改动（T-016~T-019）
+### 本次改动（T-004）
+
+沿用 `closePackingGeometry.ts` / `mof5Geometry.ts` 范式，把两个大 viewer 里**无 React / R3F 副作用**的纯几何计算抽到新模块，viewer 只保留渲染、交互、相机、教学文案。
+
+**新增 `znsPolytypeGeometry.ts`**（从 `ZnSPolytypeCell.tsx` 下沉）
+- `createCubeEdges(half)`（立方晶胞 12 棱）、`createWurtziteCellEdges()`（纤锌矿六方胞 12 棱）、`tetrahedronNeighborPositions`（四面体 4 近邻）、`tetrahedronEdgeIndices`（6 棱索引对）。
+- 留在 viewer：颜色常量、`getCameraPreset`、`getDisplaySummary`/`getVoidStageBadge` 教学文案。
+
+**新增 `zincMetalGeometry.ts`**（从 `ZincMetalCell.tsx` 下沉）
+- 类型 `ZnSiteKind`/`ZnVisualAtom`/`HcpLayer`/`HcpPackingAtom`；六方晶胞尺寸 + 堆积基矢常量；`bottomCorners`/`topCorners`/`unitCellAtoms`（17 位点）、`sameLayerNeighbors`/`coordinationCluster`（1+12）、`cellEdges`（18 棱）、`electronPoints`、`generateHexLayer()`、`hcpLayerPatch`（ABAB 三层）。
+- 留在 viewer：颜色常量、`getAtomLabel`/`getHighlightColor` 标签与高亮逻辑。
+
+**新增测试**
+- `tests/logic/crystal-geometry.logic.spec.ts`（8 项）：棱数/端点/对称/位点计数/`coordinationCluster` 1+12 分层/`generateHexLayer` 半径 2 得 19 原子/`hcpLayerPatch` A/B/A 57 原子且 A 层零错位 B 层 `packingBOffset` 等，输入输出类型明确。
+
+### 验证结果（T-004）
+
+- `frontend npm run build`：**通过**（保留既有 `three` chunk ~688 KB 非阻断警告）。
+- `frontend npm run lint`：**通过**，无 warning。
+- `frontend npm run test:logic`：**56 → 64 通过**（新增 8 项几何单测）。
+- `zinc-metal-callout`（`PLAYWRIGHT_CHANNEL=chrome`）：**1 / 1 通过**，证明下沉后 viewer 渲染行为不变。
+- `git status`：提交前工作区仅含两个 viewer + 两个新 `*Geometry.ts` + 一个新 logic spec，无 lockfile / 缓存 / Darwin 快照被改写。
+
+### 已知限制（T-004）
+
+- 只搬「纯几何」；`SulfurPackingLayer` 等仍在 viewer 内的几何辅助未下沉（保持本次范围最小）。
+- 完整 Darwin 视觉回归**未跑**（Windows 无基线）；只跑了 ZincMetal 无截图冒烟确认渲染不变。
+
+### 给下一个 Agent 的建议
+
+- 本轮 docs 改动（DECISIONS D-017 / TASKS / PROJECT_STATUS / HANDOFF）建议作为一个单独的 docs commit 提交（代码 `4f5d707` 已先行提交）。
+- backlog 只剩 **T-005 前后端结构数据去重**（搁置、低优先级，需先设计后实现）。这是「先设计」类任务、且涉及后端发布边界，动手前先与用户确认范围与是否现在做。
+- 若后续继续几何下沉，`ZnSPolytypeCell` 的 `SulfurPackingLayer` 布点、`ZincMetalCell` 其余布点可按同款零副作用标准继续抽，但每次都要保 viewer JSX / 相机 / 交互不变，并补单测。
+
+---
+
+## 往期
+
+### 2026-07-26 Claude Code：T-016~T-019 引线标签系列收官（转 ZincMetal/BaTiO3，评估 Graphite/ZnS 无需改）
+
+- 提交：T-018 `cac0e90`、T-019 `a52cf62`、docs `9f90aa7`；T-016/T-017 无代码改动。
+
+#### 本次改动（T-016~T-019）
 
 按既定标准「只转指向单一结构、且当前压在结构上的恒显标签；标题/总结/门控/已在外围的保留」**逐 viewer 核对几何**后：
 

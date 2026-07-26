@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-26（Claude Code，T-016~T-019 完成引线标签系列收尾：Graphite/ZnS 评估无需改、ZincMetal/BaTiO3 扩展）
+> 最后更新：2026-07-26（Claude Code，T-004 ZnS/ZincMetal viewer 纯几何计算下沉）
 
 ## 一句话定位
 
@@ -61,6 +61,9 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 最近完成
 
+- **T-004 ZnS / ZincMetal viewer 纯几何计算下沉**（2026-07-26，commit `4f5d707`）
+  - 沿用 `closePackingGeometry.ts` / `mof5Geometry.ts` 范式，新增 `znsPolytypeGeometry.ts`（`createCubeEdges` / `createWurtziteCellEdges` / 四面体近邻与棱索引）与 `zincMetalGeometry.ts`（Zn 位点类型、六方晶胞与堆积常量、`unitCellAtoms` / `coordinationCluster` / `cellEdges` / `generateHexLayer` / `hcpLayerPatch` 等），把两个大 viewer（816 / 744 行）里无 React/R3F 副作用的纯几何计算搬出。颜色、相机预设、教学文案、标签/高亮逻辑仍留 viewer。
+  - 新增 `tests/logic/crystal-geometry.logic.spec.ts` 8 项（棱数/端点/对称/位点计数/层错位），`test:logic` 由 56 → **64** 通过；build/lint 通过；ZincMetal 浏览器冒烟仍 1/1，渲染行为不变。详见 D-017。
 - **引线标签系列收官：Graphite/ZnS 评估无需改动，ZincMetal/BaTiO3 完成扩展**（2026-07-26）
   - **T-016 Graphite（无需改动）**：`GraphiteCell.tsx` 唯一的 3D `<Html>` 是 `showLabels` 门控原子标签（按既定标准保留），全部说明在不遮挡 3D 的 DOM 图例 `LayeredHexLegend`；没有恒显、压在结构上的场景标签。按标准逐条判定，无可转对象，不产生代码改动。
   - **T-017 ZnS（无需改动）**：`ZnSPolytypeCell.tsx` 所有恒显 `LayerBadge` 均为场景标题（结构上方 y≈1.2）、总结（下方 y≈-1.3）或 `${layer} 层`（在 `[-1.5,y,-0.9]`、xz≈1.75 > 层半径 1.58，已在层外侧），与金属密堆积保留的 A/B/C 层徽章同判据；指向结构的 `FocusLabel` 均受 `showLabels` 门控。无压在结构上的恒显场景标签，不产生代码改动。
@@ -131,9 +134,11 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-1. 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**（Graphite 只有 `showLabels` 门控原子标签 + DOM 图例；ZnS 的恒显 `LayerBadge` 全是标题/总结/已在层外侧的 `A/B/C 层`，指向结构的 `FocusLabel` 均受门控）。
-2. 评估 `ZnSPolytypeCell.tsx` / `ZincMetalCell.tsx` 的纯几何计算下沉（T-004，搁置）。
-3. 设计前后端结构数据去重方案，保持前端手写数据为真源（T-005，搁置）。
+1. 设计并实现前后端结构数据去重方案，保持前端手写数据为真源（T-005，搁置中，为当前 backlog 唯一剩余任务）。
+
+已收口的历史优先项（仅供追溯）：
+- 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
+- ZnS / ZincMetal 纯几何计算下沉（T-004）**已完成**（commit `4f5d707`）：新增 `znsPolytypeGeometry.ts` / `zincMetalGeometry.ts` + 8 项 logic 测试。
 
 ## 已知风险
 

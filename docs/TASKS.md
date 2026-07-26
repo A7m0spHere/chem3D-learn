@@ -20,16 +20,6 @@
 
 ## 搁置 / 低优先级
 
-### T-004 大晶胞几何计算下沉
-
-- **优先级**：低
-- **状态**：搁置
-- **范围**：优先处理 `ZnSPolytypeCell.tsx`（816 行）和 `ZincMetalCell.tsx`（723 行），沿用 `closePackingGeometry.ts` / `mof5Geometry.ts` 模式，只抽离无 React/R3F 副作用的纯几何计算。
-- **验收标准**：
-  - [ ] 新 `*Geometry.ts` 函数有明确输入输出类型和代表性单测。
-  - [ ] Viewer JSX、交互和相机行为不变。
-  - [ ] build、lint、logic 测试通过，相关浏览器布局断言无回归。
-
 ### T-005 前后端结构数据去重方案
 
 - **优先级**：低
@@ -43,6 +33,22 @@
 ---
 
 ## 已完成
+
+### T-004 大晶胞几何计算下沉（ZnS / ZincMetal）
+
+- **完成**：2026-07-26（Claude Code）
+- **提交**：`4f5d707 refactor(crystal): extract pure geometry from ZnS/ZincMetal viewers`
+- **背景**：`ZnSPolytypeCell.tsx`（816 行）和 `ZincMetalCell.tsx`（744 行）把纯坐标 / 棱 / 位点构造和渲染逻辑混在一个大文件里。沿用 `closePackingGeometry.ts` / `mof5Geometry.ts` 模式，只抽无 React/R3F 副作用的纯几何。
+- **内容**：
+  - 新增 `znsPolytypeGeometry.ts`：`createCubeEdges(half)`、`createWurtziteCellEdges()`、`tetrahedronNeighborPositions`、`tetrahedronEdgeIndices`。
+  - 新增 `zincMetalGeometry.ts`：`ZnSiteKind` / `ZnVisualAtom` / `HcpLayer` / `HcpPackingAtom` 类型，晶胞与堆积常量（`hexRadius`/`cellHalfHeight`/`hexAngles`/`packing*`），位点数组（`bottomCorners`/`topCorners`/`unitCellAtoms`/`sameLayerNeighbors`/`coordinationCluster`），`cellEdges`、`electronPoints`、`generateHexLayer(...)`、`hcpLayerPatch`。
+  - 两个 viewer 改为从各自 `*Geometry.ts` 导入；颜色、相机预设、教学文案、标签文案、视图分场景逻辑仍留在 viewer。JSX、交互、相机行为零变化。
+- **验证**：
+  - [x] `npm run build`、`npm run lint` 通过。
+  - [x] `npm run test:logic`：**64 / 64 通过**（原 56 + 新增 `crystal-geometry.logic.spec.ts` 8 项，覆盖两个模块的边数、端点、位点数量与层错位等代表性断言）。
+  - [x] `zinc-metal-callout` 冒烟（chrome 通道 1/1）通过，确认 ZincMetal viewer 抽离后仍正常渲染。
+  - [x] `git status` 确认只改两个 viewer + 两个新几何模块 + 一个新 logic spec，无 lockfile / 缓存 / Darwin 快照改写。
+- **已知限制**：完整 Darwin 视觉回归未跑（Windows 无基线）。ZnS viewer 未单独配冒烟（其几何抽离与 ZincMetal 同款，logic 单测已覆盖纯函数）。
 
 ### T-016～T-019 引线标签扩展收尾（Graphite / ZnS / ZincMetal / BaTiO3）
 
