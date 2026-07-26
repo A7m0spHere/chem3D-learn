@@ -8,6 +8,7 @@ import {
   htmlOverlayLabelClass,
 } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import { CrystalAtomLegend } from "@/components/three/CrystalAtomLegend";
 import type {
   Atom,
   Bond,
@@ -95,6 +96,7 @@ export function NaClCell({
 
   return (
     <ThreeViewerFrame
+      footerMeta={<CrystalAtomLegend atoms={molecule.atoms} />}
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}

@@ -11,6 +11,7 @@ import {
   htmlOverlayLabelClass,
 } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import { CrystalAtomLegend } from "@/components/three/CrystalAtomLegend";
 import type { Atom, CrystalViewMode, MoleculeRecord } from "@/types/molecule";
 
 type BaTiO3CellProps = {
@@ -91,7 +92,7 @@ export function BaTiO3Cell({
 
   return (
     <ThreeViewerFrame
-      footerMeta={<AtomLegend />}
+      footerMeta={<CrystalAtomLegend atoms={molecule.atoms} />}
       loading={loading}
       meta={
         isOriginMode ? (
@@ -212,25 +213,6 @@ function OriginConventionToggle({
         Ti 顶点画法
       </Button>
     </div>
-  );
-}
-
-function AtomLegend() {
-  return (
-    <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs">
-      <LegendItem color="#2A9D8F" label="Ba²⁺" />
-      <LegendItem color="#334155" label="Ti⁴⁺" />
-      <LegendItem color="#DC2626" label="O²⁻" />
-    </div>
-  );
-}
-
-function LegendItem({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-      <span className="h-2.5 w-2.5 rounded-full ring-1 ring-black/10" style={{ backgroundColor: color }} />
-      {label}
-    </span>
   );
 }
 

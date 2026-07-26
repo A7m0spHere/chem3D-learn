@@ -5,6 +5,7 @@ import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { htmlOverlayLabelClass } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import { CrystalAtomLegend } from "@/components/three/CrystalAtomLegend";
 import type {
   Atom,
   CoordinationLink,
@@ -61,6 +62,7 @@ export function CsClCell({
 
   return (
     <ThreeViewerFrame
+      footerMeta={<CrystalAtomLegend atoms={molecule.atoms} />}
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}

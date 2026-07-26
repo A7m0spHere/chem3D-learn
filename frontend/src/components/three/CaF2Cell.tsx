@@ -8,6 +8,7 @@ import {
   htmlOverlayCompactLabelClass,
 } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import { CrystalAtomLegend } from "@/components/three/CrystalAtomLegend";
 import type {
   Atom,
   CrystalModelStyle,
@@ -141,6 +142,7 @@ export function CaF2Cell({
 
   return (
     <ThreeViewerFrame
+      footerMeta={<CrystalAtomLegend atoms={molecule.atoms} />}
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}
