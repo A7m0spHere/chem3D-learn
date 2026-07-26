@@ -44,6 +44,23 @@
 
 ## 已完成
 
+### T-013 用 CalloutLabel 扩展 ReN₃ viewer 的引线标签（第二批，扩展第 2 个）
+
+- **完成**：2026-07-26（Claude Code）
+- **提交**：`9e3e464 feat(crystal): leader-line callouts for ReN3 scene labels`
+- **背景**：延续 T-012 的分步扩展，按剩余标签数从多到少推进的下一个 viewer。ReN₃（`Imm2` 理论预测相）。
+- **内容**：
+  - `Ren3Cell.tsx` 把 3 处**指向具体结构**的恒显 `<Html>` 场景标签替换为 `CalloutLabel`，每处均有中文锚点/偏移说明注释：
+    - `covalentNetwork`（N₃ 单元）2 处：`N₃ 单元｜N1–N2–N1`（锚点落在折线单元中心，即中央 N2 原点）、`两条短 N–N 距离 ≈ 1.36 Å`（锚点落在原点到端基 N1 的真实键中点）。
+    - `coordination`（Re 七配位）1 处：`Re 中心｜7 个 N 最近邻`（锚点落在中心 Re 原点）。
+  - **保留** `<Html>` 不加引线的均为「不指向单一结构」的标题 / 全局说明 / 门控标签：`pressure` 视图的相名标题、压力窗口 widget 与免责；`cell` 视图的晶胞标题、晶格参数、a/b/c 轴标签（本就在晶胞外缘）、`showLabels` 门控位点标签；`covalentNetwork` 的折线单元免责与门控位点标签；`coordination` 的七配位澄清与门控计数；整个 `polyhedron`（多面体标题 + 网络总结 + 门控色注）与整个 `counting`（计数 widget + 化学式单位标题 + 力学总结 + Wyckoff 免责）。
+  - 教学文案文字零变化，未引新依赖，未改几何/图例/相机/`showLabels` 系统。
+- **验证**：
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+  - [x] 新增 `tests/visual/ren3-callout.visual.spec.ts`（chrome 通道 2/2）：covalentNetwork / coordination 两个 viewMode 下 3 处转换标签仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15。
+  - [x] 未动 lockfile、缓存或 Darwin 快照；`git status` 确认只改 `Ren3Cell.tsx` + 新增 spec。
+- **已知限制**：完整 Darwin 视觉回归未跑（Windows 无基线）；引线极端角度可能穿过结构。「~14」的旧粗估把门控/全局标签也算进去了；按 MOF-5/MXene「只转指向具体结构的恒显标签」标准，Ren3 里符合的实为 3 处。其余 6 个 viewer（MetalClosePacking/Pba/Graphite/ZnS/ZincMetal/BaTiO3 计数徽章）待续。
+
 ### T-012 用 CalloutLabel 扩展 MXene viewer 的引线标签（第二批，扩展第 1 个）
 
 - **完成**：2026-07-26（Claude Code）
