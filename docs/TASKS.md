@@ -44,6 +44,25 @@
 
 ## 已完成
 
+### T-012 用 CalloutLabel 扩展 MXene viewer 的引线标签（第二批，扩展第 1 个）
+
+- **完成**：2026-07-26（Claude Code）
+- **提交**：`2c5615a feat(crystal): leader-line callouts for MXene scene labels`
+- **背景**：T-011 在 MOF-5 上验证了 `CalloutLabel`「引线 + 外围标签」样板满意后，按 PROJECT_STATUS「下一步第 1 条」的分步策略，用同一组件扩展其余 8 个恒显标签密集的 viewer，各自单独提交。MXene（`Ti₃C₂Tₓ`）是扩展的第 1 个。
+- **内容**：
+  - `MxeneCell.tsx` 把 7 处**指向具体结构**的恒显 `<Html>` 场景标签替换为 `CalloutLabel`，锚点落在其所指结构、标签沿 `offset` 外推到结构外围、引线连接二者，每处均有中文锚点/偏移说明注释：
+    - `comparison`（MAX → MXene）3 处：`MAX 前驱体｜Ti₃AlC₂`、`二维片层｜Ti₃C₂Tₓ`、`Al 层`。
+    - `coordination`（C 六配位）2 处：`C 中心｜6 个 Ti 最近邻`（锚点中心 C）、`Ti₆ 八面体轮廓`（锚点引用真实 `OCTAHEDRAL_TI_POSITIONS[5]` 顶点）。
+    - `covalentNetwork`（表面端基）1 处：`O / OH / F 混合端基示意`。
+    - `interlayerForce`（重新堆叠）1 处：`层间水 / 离子（示意）`。
+  - **保留** `<Html>` 不加引线的均为「不指向单一结构」的全局说明：工艺流程（`选择性移除 Al + 剥离 →`）、厚度方向标注、辅助线免责说明、堆叠标题、剖面推导，以及整个 `counting`（`FormulaScene`）的化学式推导链与通式；`showLabels` 门控标签与 `TerminationMarkers` 的端基 `kind` 原子标签走原逻辑，未改。
+  - 教学文案文字零变化，未引新依赖，未改几何/图例/相机/`showLabels` 系统。
+- **验证**：
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。
+  - [x] 新增 `tests/visual/mxene-callout.visual.spec.ts`（chrome 通道 4/4）：comparison/coordination/covalentNetwork/interlayerForce 四个 viewMode 下 7 处转换标签仍可见，且标签中心相对 stage 中心归一化偏移 > 0.15（证明已外推到外围）。
+  - [x] 未动 lockfile、缓存或 Darwin 快照；`git status` 确认只改 `MxeneCell.tsx` + 新增 spec。
+- **已知限制**：完整 Darwin 视觉回归未跑（Windows 无基线，只跑无截图 DOM/文本/位置冒烟）；引线极端旋转角度可能穿过结构，本批不追求完美避让。其余 7 个 viewer（Ren3/MetalClosePacking/Pba/Graphite/ZnS/ZincMetal/BaTiO3 计数徽章）待后续分 viewer 扩展、各自单独提交。
+
 ### T-011 晶体 viewer 恒显场景标签改为「引线 + 外围标签」（第一批 MOF-5）
 
 - **完成**：2026-07-26（Claude Code）

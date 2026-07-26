@@ -153,3 +153,6 @@
   - `covalentNetwork` 视图 `羧酸根接入节点`：anchor `[-0.79,0,0]`（仅在羧酸氧上、未触节点）→ 羧酸氧 `[-0.79]` 与节点 `[-1.04]` 连线中点 `[-0.91,0,0]`，正压在 O→node 半透明衔接键上。
   - `coordination` 视图 `整个 SBU：六连接方向`：anchor `[0,-0.76,0]`（仅 −y 单一连接末端、不足以代表六方向）→ 近核连接臂 `[0,-0.30,0]`，引线由辐射源附近出发暗示六方向。
   - 其余锚点（`金属簇节点`/`有机连接体`/`Zn₄O 核心`/`单个 Zn：O 四配位`/`苯环刚性间隔`/`孔隙体积`/`客体分子`/`counting` 两处）经审计确认已准确落在文案所述对象上，保持不变。build/lint/冒烟 6/6 复跑通过。
+- **扩展进度**：
+  - **Mxene（T-012，2026-07-26，commit `2c5615a`）**：`MxeneCell.tsx` 7 处**指向具体结构**的恒显 `<Html>` 换为 `CalloutLabel`——comparison 视图 3（MAX 前驱体 / 二维片层 / Al 层）、coordination 2（C 中心 / Ti₆ 八面体）、covalentNetwork 1（混合端基）、interlayerForce 1（层间水）。保留 5 处不指向单一结构的全局说明（工艺流程「选择性移除 Al + 剥离」、辅助线说明、堆叠标题、剖面推导、通式）与整个 `counting`（`FormulaScene` 全是化学式推导）为原 `<Html>`。`Al 层` 因所在块在场景左侧且 `scale=0.72`，`offset` 朝远离场景中心方向放大补偿。新增 `tests/visual/mxene-callout.visual.spec.ts`（chrome 通道 4/4，覆盖上述 4 个 viewMode 的 7 处标签）。build/lint/test:logic(56/56) 通过。
+  - **剩余 7 个 viewer**（Ren3/MetalClosePacking/Pba/Graphite/ZnS/ZincMetal/BaTiO3 counting 徽章）待续，同一组件、各自单独提交。
