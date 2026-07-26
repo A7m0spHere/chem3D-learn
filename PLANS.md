@@ -45,5 +45,5 @@ Concrete completion criteria, including changed files, validation result, and kn
 - Keep backend plans aligned with frontend needs; backend can be introduced or adjusted later as a minimal support layer.
 - Do not create login, user accounts, database-backed state, payment, AI chat, Gemini API, dynamic SMILES, or RDKit runtime features unless explicitly approved in a later plan.
 - If Gemini UI draft material is involved, treat it as reference only and plan how Codex will adapt it into Vite + React + TypeScript.
-- If chemistry facts are uncertain, plan to mark them with \`TODO-CHEM-VERIFY\`.
+- If chemistry facts are uncertain, plan to mark them with `TODO-CHEM-VERIFY`.
 - For documentation-only tasks, plan not to run frontend build unless requested.
