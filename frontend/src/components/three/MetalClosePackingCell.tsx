@@ -1,5 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, Instance, Instances, OrbitControls } from "@react-three/drei";
+import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { CameraRig } from "@/components/three/CameraRig";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { StickCylinder } from "@/components/three/StickCylinder";
@@ -133,7 +134,10 @@ function SingleLayerScene({ showLabels }: { showLabels: boolean }) {
         radius={sphereRadius}
         y={0}
       />
-      <LayerBadge label="A 层｜同层 6 个最近邻" position={[0, 0.54, -1.36]} tone="same" />
+      {/* 锚点落在 A 层中心原子（六邻环的中心，y=0 层面），标签外推到后上方留白 */}
+      <CalloutLabel anchor={[0, 0, 0]} offset={[0, 0.9, -1.3]}>
+        <BadgeSpan label="A 层｜同层 6 个最近邻" tone="same" />
+      </CalloutLabel>
       {showLabels ? (
         <FocusLabel label="中心 M" position={[0, 0.38, 0]} />
       ) : null}
@@ -224,9 +228,17 @@ function CoordinationScene({ showLabels }: { showLabels: boolean }) {
           </group>
         )),
       )}
-      <LayerBadge label="同层 6" position={[1.02, 0.12, 0.56]} tone="same" />
-      <LayerBadge label="上层 3" position={[0.66, verticalGap + 0.12, -0.24]} tone="upper" />
-      <LayerBadge label="下层 3" position={[-0.66, -verticalGap - 0.05, 0.28]} tone="lower" />
+      {/* 三组配位原子各自的引线标签：锚点取该组一个代表原子，标签外推到簇外围留白 */}
+      <CalloutLabel anchor={sameLayer[0]} offset={[0.5, 0.3, 0.5]}>
+        <BadgeSpan label="同层 6" tone="same" />
+      </CalloutLabel>
+      <CalloutLabel anchor={upperLayer[0]} offset={[0.4, 0.45, -0.5]}>
+        <BadgeSpan label="上层 3" tone="upper" />
+      </CalloutLabel>
+      <CalloutLabel anchor={lowerLayer[0]} offset={[-0.6, -0.4, 0.5]}>
+        <BadgeSpan label="下层 3" tone="lower" />
+      </CalloutLabel>
+      {/* 总结，不指向单一结构，保持徽章 */}
       <LayerBadge label="合计配位数 12" position={[0, -1.2, -0.1]} tone="center" />
       {showLabels ? <FocusLabel label="中心 M" position={[0, 0.42, 0]} /> : null}
     </>
@@ -453,12 +465,25 @@ function LayerBadge({
 }) {
   return (
     <Html center position={position} zIndexRange={[12, 0]}>
-      <span
-        className={`whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-bold sm:text-xs ${crystalOverlayBadgeToneClasses[tone]}`}
-      >
-        {label}
-      </span>
+      <BadgeSpan label={label} tone={tone} />
     </Html>
+  );
+}
+
+// 徽章文本 span，供恒显 <Html> 徽章与 CalloutLabel 引线标签共用，保留 tone 配色。
+function BadgeSpan({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: keyof typeof crystalOverlayBadgeToneClasses;
+}) {
+  return (
+    <span
+      className={`whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-bold sm:text-xs ${crystalOverlayBadgeToneClasses[tone]}`}
+    >
+      {label}
+    </span>
   );
 }
 
