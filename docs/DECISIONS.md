@@ -101,3 +101,26 @@
 - **理由**：T-008 把 `/module/:id` 改为路由级 lazy 后，页面连同 23 个 JSON 成了独立 chunk。原预取只预热 three/r3f，点击卡片后仍要等页面 chunk 下载才能渲染，预取意图不完整。补上页面 chunk 预取后，hover/focus/idle 已把「进入模块所需的全部按需资源」预热到位。
 - **边界**：仍由 `warmed` 守卫保证首页/列表初始渲染不触发任何预取，触屏设备的普通渲染不会自动下载 3D chunk；只在用户表现出进入意图（hover/focus）或列表页空闲时预取一次。
 - **验证**：新增 `tests/visual/prefetch-viewer-chunks.visual.spec.ts`（无截图，chrome 通道）：首页初始加载不请求 three/r3f 或页面 chunk；hover 首页模块卡后 `ModuleDetailPage` 与 `MoleculeViewer` chunk 均被请求；预取后点击卡片仍正常进入模块并渲染 viewer。3/3 通过。`npm run build`、`npm run lint`、`npm run test:logic`（51/51）通过。
+
+## D-013 依赖漏洞按 `audit fix`（非 force）修复，剩余 react-router CVE 评估为不适用
+
+- **日期**：2026-07-25（Claude Code，T-007）
+- **决定**：
+  - 用 `npm audit fix`（**不带 `--force`**）修复 4 个漏洞中的 3 类：`brace-expansion` 5.0.7→5.0.8、`nanoid` 3.3.12→3.3.16、`postcss` 8.5.15→8.5.23、`react-router`/`react-router-dom` 7.17.0→7.18.1，全部在现有 caret range 内，`package.json` 未改动。
+  - 手动还原 npm 在 Windows 上剥离的 13 处 rollup linux 平台包 `libc` 元数据，使 `frontend/package-lock.json` 只保留明确批准的版本升级，无平台元数据改写。
+  - 剩余 2 个 react-router 高危 **不修**：其完整修复只能靠 `--force` 降级到 7.11.0（SemVer 倒退且破坏 `^7.17.0` caret），当前无更高稳定版可修。
+- **理由**：剩余 CVE（deserializeErrors 构造注入、RSCErrorHandler XSS、RSC CSRF、SSR 相关）前提是 SSR / RSC / 服务端 hydration；本应用用 `createBrowserRouter` 纯客户端 SPA、无 SSR/RSC，不触及这些路径。盲目 `--force` 降级既不修漏洞又引入 breaking，违背 T-007 验收。
+- **边界**：本次只处理 `frontend/`，不跨 React 18/19 升级到 `video/`。剩余 2 个高危保持记录待上游发布干净修复版本后再评估。`three-mesh-bvh@0.7.8` 弃用警告本轮未复现（当前依赖树未见该包直接依赖）。
+- **验证**：`npm audit` 从 4 个（1 moderate + 3 high）降到 2 个（2 high，均为不适用的 react-router SSR/RSC CVE）。`npm run build`、`npm run lint`、`npm run test:logic`（51/51）通过；`module-state-reset` 与 `prefetch-viewer-chunks`（chrome 通道 8/8）确认 react-router minor 升级不破坏路由。lockfile diff 仅 5 处版本升级，零 libc / 零格式噪声。
+
+## D-014 有机拼装实验室「常用片段」库扩充（乙烯基/乙炔基/甲氧基/氰基）
+
+- **日期**：2026-07-25（Claude Code，T-009）
+- **决定**：
+  - 在 `builderFragmentTemplates`（`organicBuilderChemistry.ts`）原有 6 个片段（甲基/羟基/氨基/醛基/羰基/羧基）之外，新增 4 个高中常见基团：乙烯基 `–CH=CH₂`、乙炔基 `–C≡CH`、甲氧基 `–OCH₃`、氰基 `–C≡N`；`BuilderFragmentId` 联合类型同步扩为 10 个。
+  - 工具箱 `OrganicBuilderToolbox` 遍历 `builderFragmentTemplates` 渲染按钮，新片段自动出现，UI 无需改动。
+- **理由**：拼装模块已成熟（无 TODO/占位），合理的完善是低风险增量。扩充片段库直接提升课堂拼装能力，且是纯数据/引擎层改动，不碰 3D 拖拽数学、命名引擎或 UI 结构，可被 logic 测试完整覆盖。
+- **边界**：
+  - 只选落在现有 8 元素中性价模型内的基团。**明确排除**硝基、磺酸基等需形式电荷的基团——它们会触发 over-valence，超出引擎能力。实施前用一次性探针脚本验证候选，剔除引擎处理不了的。
+  - 氰基 `–C≡N` 价态完整、可正常拼装，但命名引擎把 C≡N 归入「复杂含氮」返回 `unsupported`——这是**既有引擎边界，非本次回归引入**。InfoPanel 已能如实显示「无法命名 + 原因」。乙烯基/乙炔基/甲氧基补氢后分别命中丙烯（词典已知）/丙-1-炔/甲氧基甲烷。
+- **验证**：新增 `tests/logic/organic-builder-fragments.logic.spec.ts`（5 项：注册自洽 + 4 片段的价态/补氢/命名，含氰基 unsupported 断言）与 `tests/visual/organic-builder-fragments.visual.spec.ts`（chrome 通道 2/2：按钮出现且可拼接、氰基价态完整）。`npm run build`、`npm run lint`、`npm run test:logic`（56/56）通过。

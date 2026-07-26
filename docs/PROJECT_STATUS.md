@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-25（Claude Code，T-006 模块卡片按意图预取 3D 资源）
+> 最后更新：2026-07-25（Claude Code，T-009 有机拼装实验室常用片段库扩充）
 
 ## 一句话定位
 
@@ -26,20 +26,19 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
-2026-07-25 T-001 测试提交 `e15d592` 完成后，工作区仍有以下前序改动没有收口：
-
-- `frontend/package-lock.json` 有 39 行 npm 平台元数据删除，是否保留为**待确认**。
-- `.tmp-npm-cache/` 未跟踪、约 10.8 MB，且当前未被 `.gitignore` 覆盖；不得提交。
-
-`CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。T-001 没有混入 lockfile、缓存或业务引擎改动。
+- `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
+- `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
+- `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
 
 ## 独立验证结果（2026-07-25）
 
 - `frontend npm run build`：**通过**；Vite 转换 2313 个模块。T-008 后 `/module/:id` 改为路由级 lazy，`index` 主包由约 496 KB 降至约 209 KB（gzip 137 KB → 67 KB），页面与 23 个 JSON 移入独立 `ModuleDetailPage` chunk（约 286 KB）。
 - `frontend npm run lint`：**通过**。
-- `frontend npm run test:logic`：**51 / 51 通过**；其中 T-001 新文件 28 项，原有文件 23 项。
+- `frontend npm run test:logic`：**56 / 56 通过**；含 T-009 新增有机片段测试 5 项（`organic-builder-fragments.logic.spec.ts`）。
 - `backend npm test`：**15 / 15 通过**（原 5 项纯函数 + T-BE-001 新增 10 项真实 HTTP 集成）。
-- `frontend npm run test:visual -- --list`：发现 **16 个文件、117 个用例**（含 T-002 无截图复位回归 5 项、T-006 无截图预取回归 `prefetch-viewer-chunks.visual.spec.ts` 3 项）。
+- `frontend npm audit`（T-007，联网复核）：修复前 **4 个漏洞**（1 moderate + 3 high）；非 `--force` 的 `npm audit fix` 后降至 **2 个 high**。已修：`brace-expansion` 5.0.7→5.0.8、`nanoid` 3.3.12→3.3.16、`postcss` 8.5.15→8.5.23、`react-router`(dom) 7.17.0→7.18.1，全在现有 caret range 内、不 breaking、不跨 React 18/19。剩余 2 个 react-router high 均为 SSR/RSC/CSRF 场景，本应用用 `createBrowserRouter`（纯客户端 SPA）不适用，且无更高稳定版可修（`--force` 只会降级到 7.11.0，倒退且破坏 caret，故不采用）。
+- `frontend npm run test:visual -- --list`：发现多个文件（含 T-002 无截图复位回归 5 项、T-006 无截图预取回归 3 项、T-009 无截图片段冒烟 `organic-builder-fragments.visual.spec.ts` 2 项）。
+- T-009 有机片段冒烟（系统 Chrome 通道，无截图）：**2 / 2 通过**，覆盖新片段按钮出现在工具箱、乙烯基拼接补氢成丙烯、氰基拼接价态完整。
 - T-002 复位回归（系统 Chrome 通道，无截图）：**5 / 5 通过**，覆盖晶体 / 普通分子 VSEPR / 杂化 / 有机平面 / σ 键。
 - T-006 预取回归（系统 Chrome 通道，无截图）：**3 / 3 通过**，覆盖首页初始不下载 3D chunk、hover 卡片后预取页面与 viewer chunk、预取后点击仍正常进入并渲染。
 - 视觉基线：共 **80 张，全部为 `*-darwin.png`**；Windows/Linux 基线为 0。
@@ -61,6 +60,10 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 最近完成
 
+- **T-007 依赖安全与 lockfile 评估**（2026-07-25）
+  - 联网复核 `npm audit`：4 个漏洞（1 moderate + 3 high）经非 `--force` 的 `npm audit fix` 降至 2 个 high。升级 `brace-expansion`/`nanoid`/`postcss`/`react-router`(dom)，全在 caret range 内、不 breaking、不跨 React 18/19。
+  - lockfile 精修：保留 5 处版本升级，手工还原 npm 在 Windows 上剥离的 13 处 rollup linux 平台 `libc` 元数据，最终 diff 只含版本变化、零平台元数据噪声；`package.json` 未改动。
+  - 剩余 2 个 react-router high 为 SSR/RSC/CSRF 场景，本应用纯客户端 SPA 不适用，无干净修复版本；不用 `--force`（只会降级到 7.11.0）。build/lint/logic(51/51)、SPA 路由与预取回归(8/8) 均通过。
 - **T-006 模块卡片按意图预取 3D 资源**（2026-07-25）
   - `lib/prefetch.ts` 的 `prefetchViewerChunks` 在原有 `MoleculeViewer`（three/r3f）预热外，新增 `import("@/pages/ModuleDetailPage")`，与 T-008 lazy 路由指向同一页面 chunk；保留 `warmed` 单次守卫，未改 `ModuleCard`（hover/focus）与 `ModulesPage`（idle）调用点。
   - 补齐 T-008 后「hover 只预热 three/r3f、页面 chunk 仍等点击」的预取缺口：hover/focus/idle 现在把进入模块所需的全部按需资源一次预热到位。

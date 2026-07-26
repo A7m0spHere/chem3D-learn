@@ -40,20 +40,44 @@
   - [ ] 前端无需依赖后端即可构建和运行。
   - [ ] 后端 API 响应兼容现有 5 项测试，并增加防漂移断言。
 
-### T-007 依赖安全与 lockfile 评估
-
-- **优先级**：低
-- **状态**：搁置
-- **背景**：前序 npm 安装记录称有 4 个漏洞和 `three-mesh-bvh@0.7.8` 弃用警告，但本轮未联网复核；`frontend/package-lock.json` 另有 39 行 npm 平台元数据删除。
-- **验收标准**：
-  - [ ] 重新运行并保存 `npm audit` / 依赖树证据，区分生产与开发依赖、直接与传递依赖。
-  - [ ] 不使用盲目的 `npm audit fix --force`，不跨 React 18/19 子项目升级。
-  - [ ] lockfile 只包含明确批准的依赖变化，不混入无关平台元数据改写。
-  - [ ] 升级后执行对应子项目的完整 build、lint 和测试。
-
 ---
 
 ## 已完成
+
+### T-009 有机拼装实验室「常用基团」片段库扩充
+
+- **完成**：2026-07-25（Claude Code）
+- **背景**：3D 有机分子自由拼接实验室是成熟模块（拖拽拆装、撤销/重做、实时命名/式量/官能团/键角），但工具箱「常用片段」只有 6 个（甲基/羟基/氨基/醛基/羰基/羧基），缺高中常见基团，课堂拼装能力受限。此前未在 TASKS.md 立项。
+- **内容**：
+  - `types/organicBuilder.ts` 的 `BuilderFragmentId` 联合类型扩充 4 个 id：`vinyl` / `ethynyl` / `methoxy` / `cyano`。
+  - `lib/organicBuilderChemistry.ts` 的 `builderFragmentTemplates` 新增 4 个模板：乙烯基 –CH=CH₂、乙炔基 –C≡CH、甲氧基 –OCH₃、氰基 –C≡N。均在现有 8 元素中性价模型内自洽，附教学坐标。
+  - 工具箱按钮遍历 `builderFragmentTemplates` 渲染，新片段自动出现，未改任何 UI 组件。
+  - 实施前用一次性探针脚本（跑完即删）验证 4 个候选的引擎行为，剔除需形式电荷、会触发 over-valence 的基团（硝基、磺酸基）——它们超出现有价态模型，不硬塞。
+- **验证**：
+  - [x] `npm run build`（tsc --noEmit + vite build）、`npm run lint`（无 warning）通过。
+  - [x] `npm run test:logic`：**56 / 56 通过**（原 51 + 新增 `organic-builder-fragments.logic.spec.ts` 5 项：4 个片段接碳后价态完整/补氢/命名或官能团预期，含氰基 unsupported 的既有引擎边界断言）。
+  - [x] 系统 Chrome 通道浏览器冒烟 `tests/visual/organic-builder-fragments.visual.spec.ts`：**2 / 2 通过**（新片段按钮出现在工具箱、乙烯基拼接补氢成丙烯、氰基拼接价态完整）。
+  - [x] 未改命名/几何引擎、未改 UI 组件、未改 seed 或 3D 拖拽逻辑；未动 lockfile、缓存或 Darwin 快照。
+- **已知边界**：氰基 –C≡N 的 C≡N 被现有命名引擎归入「复杂含氮」而返回 `unsupported`（InfoPanel 如实显示「无法命名 + 原因」）——这是既有引擎边界，非本次回归引入。扩充命名引擎以支持腈类属另一独立任务。
+
+### T-007 依赖安全与 lockfile 评估
+
+- **完成**：2026-07-25（Claude Code）
+- **背景**：前序记录称有 4 个漏洞，本轮联网用 `npm audit` 复核并处理；`frontend/package-lock.json` 另有历史平台元数据删除隐患需一并防范。
+- **联网 audit 证据（升级前）**：`npm audit` 报 **4 个漏洞（1 moderate + 3 high）**：
+  - `postcss` <=8.5.17（**直接 devDep**，high，Path Traversal in source-map auto-loading）。
+  - `react-router` 6.0.0–8.2.0（**传递依赖**，经直接 dep `react-router-dom`，high，5 条 advisory：开放重定向、RSC XSS、deserializeErrors 构造注入、路由匹配 DoS、RSC CSRF）。
+  - `react-router-dom` 6.0.0-alpha.0–7.17.0（**直接 dep**，moderate，因依赖上面的 react-router）。
+  - `brace-expansion` <=5.0.7 与 `nanoid`（均 **传递依赖 devDep**，high/附带，DoS）。
+- **处理**：运行**非 `--force`** 的 `npm audit fix`，仅在现有 caret range 内做 patch/minor 升级：
+  - `postcss` 8.5.15→8.5.23、`brace-expansion` 5.0.7→5.0.8、`nanoid` 3.3.12→3.3.16、`react-router(-dom)` 7.17.0→**7.18.1**（仍 7.x，**未跨 React 18/19**）。
+  - `package.json` 未改动（升级都在 `^` range 内）；`audit fix` 顺带把 13 处 rollup linux 平台包的 `libc` 元数据剥离，已**逐条精确还原**（gnu→glibc、musl→musl，保持键顺序），最终 lockfile diff **只含 5 个包的版本升级、零 libc、零格式噪声**。
+- **剩余 2 个 high 的处置**：升级后 `npm audit` 仍报 2 个 react-router high。经核实：(1) 该 advisory 无更高稳定修复版（范围覆盖到 8.2.0），`--force` 实际会**降级到 7.11.0**，既倒退又破坏 `^7.17.0` caret 并改写 package.json——属验收禁止的盲目 force，故不采纳；(2) 剩余 CVE 全部限 SSR / RSC / `deserializeErrors` / RSC-CSRF 场景，本应用用 `createBrowserRouter` 纯客户端 SPA，**不触发**这些路径。判定为**可接受的暂缓**，待上游发布干净版本再跟进。
+- **验证**：
+  - [x] 联网 `npm audit` 证据已保存于本条目：4 → 2 漏洞，区分了直接/传递、生产/开发依赖。
+  - [x] 未使用 `npm audit fix --force`，未跨 React 18/19 子项目升级。
+  - [x] lockfile 只含 5 处明确批准的版本升级，无 `libc` 平台元数据改写（13 处已还原）。
+  - [x] `npm run build`、`npm run lint`、`npm run test:logic`（51/51）通过；`module-state-reset` + `prefetch-viewer-chunks`（chrome 通道）**8/8** 通过，确认 react-router 7.18.1 不破坏路由与预取。
 
 ### T-006 模块卡片按意图预取 3D 资源
 

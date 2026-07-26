@@ -10,44 +10,52 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-25
 - **分支**：`main`
-- **任务**：T-006 模块卡片按意图预取 3D 资源（把 T-008 拆出的 `ModuleDetailPage` chunk 一并预取）
-- **提交**：尚未提交（等待用户确认后再 commit）
+- **任务**：T-009 有机拼装实验室「常用基团」片段库扩充
+- **提交**：`e2e...`（T-009，见本次；T-007 已先行提交 `e9b3c32`）
 
 ### 本次改动
 
-只改一个源码文件 `frontend/src/lib/prefetch.ts` + 新增一个无截图测试，未触碰后端、lockfile、npm 缓存或任何 Darwin 快照。
+改 2 个源码文件 + 2 个新测试 + 5 份 docs，未改后端、`package.json` 或 Darwin 快照。
 
-**`lib/prefetch.ts`（唯一代码改动）**
+**`src/types/organicBuilder.ts` + `src/lib/organicBuilderChemistry.ts`**
 
-- `prefetchViewerChunks` 在原有 `import("@/components/three/MoleculeViewer")`（预热 three/r3f 共享 vendor）之外，新增 `import("@/pages/ModuleDetailPage")`，与 `router.tsx` lazy 路由的 import 指向同一 chunk。
-- 保留原 `warmed` 单次守卫；**未改** `ModuleCard`（hover/focus）与 `ModulesPage`（idle）的既有调用点——它们已在调用 `prefetchViewerChunks`，新增的页面 chunk 预取自动随现有触发点生效。
+- `BuilderFragmentId` 联合类型新增 `vinyl` / `ethynyl` / `methoxy` / `cyano` 四个 id。
+- `builderFragmentTemplates` 在原 6 个片段后新增 4 个模板：乙烯基 `–CH=CH₂`、乙炔基 `–C≡CH`、甲氧基 `–OCH₃`、氰基 `–C≡N`，均在现有 8 元素中性价模型内。
+- **未改** `OrganicBuilderToolbox`——它遍历 `builderFragmentTemplates` 渲染按钮，新片段自动出现;也未改 3D 拖拽、命名引擎或页面结构。详见 D-014。
 
-**为什么这样改**：T-008 把 `/module/:id` 改为路由级 lazy 后，页面连同 23 个 JSON 成了独立 chunk。原预取只预热 three/r3f，点击卡片后仍要等页面 chunk 下载才能渲染。补上页面 chunk 预取后，hover/focus/idle 已把「进入模块所需的全部按需资源」预热到位。详见 D-012。
+**新增测试（均无截图）**
 
-**`tests/visual/prefetch-viewer-chunks.visual.spec.ts`（新增，无截图）**
-
-用网络请求监听断言预取时机：首页初始加载不请求 three/r3f（`.vite/deps/@react-three_*` 或产物 `three-*`/`r3f-*`）或页面 chunk；hover 首页模块卡后 `ModuleDetailPage` 与 `MoleculeViewer` chunk 均被请求；预取后点击卡片仍正常进入模块并渲染 viewer。注意：hover 用例放在**首页**（`/modules` 的 idle 预取会在 hover 前触发 `warmed` 守卫，掩盖 hover 行为）。
+- `tests/logic/organic-builder-fragments.logic.spec.ts`（5 项）：4 个片段接碳后价态完整、补氢正常、命名/官能团符合预期；氰基 C≡N 命名返回 `unsupported` 属既有引擎边界，测试如实断言。
+- `tests/visual/organic-builder-fragments.visual.spec.ts`（chrome 通道 2 项）：新片段按钮在工具箱可见、可拼接（乙烯基→丙烯）、氰基价态完整。
 
 ### 验证结果
 
-- `frontend npm run build`：**通过**（保留既有 three chunk 警告）。
+- `frontend npm run build`：**通过**。
 - `frontend npm run lint`：**通过**，无 warning。
-- `frontend npm run test:logic`：**51 / 51 通过**（本任务未增删 logic 用例）。
-- 新增 `prefetch-viewer-chunks.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**3 / 3 通过**。
-- `git status --short`：仅 `prefetch.ts` + 新 spec + 4 份 docs 变动，无快照 / lockfile / 缓存改写。
-- 未运行完整 `test:visual`：只有 Darwin 基线，Windows 不得更新。
+- `frontend npm run test:logic`：**56 / 56 通过**（原 51 + T-009 新增 5）。
+- 新增 `organic-builder-fragments.visual.spec.ts`（`PLAYWRIGHT_CHANNEL=chrome`）：**2 / 2 通过**。
 
-### 当前仍未收口的前序改动（非本任务引入）
+### 事故记录（本会话工具输出伪影）
 
-- `frontend/package-lock.json` 的 `libc` 元数据与 `.tmp-npm-cache/`：均已在更早的 Git 收尾中处理（lockfile 已还原、`.tmp-npm-cache/` 已进 `.gitignore`）。开工时工作区应为干净。
+本会话多次出现工具输出/文件读取伪影（损坏的 Read 返回占位 `return null`、以及一条**虚假的 T-007 提交哈希 `8f9c9d5`**）。核查发现 T-007 **实际从未提交**，真实 HEAD 曾停在 `36024af`(T-006)。已用真实提交 `e9b3c32` 补上 T-007（仅 lockfile）。下一个 Agent 若见文档引用 `8f9c9d5`，那是伪影，以 `e9b3c32` 为准。
 
 ### 给下一个 Agent 的建议
 
-提交本次改动（建议信息 `perf: prefetch module detail chunk on card intent`，只暂存 `prefetch.ts` + 新 spec + 4 份 docs，勿混入 lockfile/缓存）。本会话授权序列的下一项是 T-007（依赖安全与 lockfile 评估）。
+本会话 `/goal` 授权的 T-006 → T-007 → T-009 已全部完成并分别提交（未推送远程，遵从「不上传库」）。剩余 2 个 react-router high 待上游干净修复版本；氰基命名的 `unsupported` 若要转为 generated 需扩命名引擎（腈类），属独立任务。
 
 ---
 
 ## 往期
+
+### 2026-07-25 Claude Code：T-007 依赖安全与 lockfile 评估
+
+- 联网 `npm audit` 复核，非 `--force` 升级 5 个包（brace-expansion/nanoid/postcss/react-router(dom)），漏洞 4→2；剩余 2 个 react-router high 为 SSR/RSC 场景不适用纯客户端 SPA。手动还原 13 处 rollup `libc` 元数据，lockfile 只含版本升级。详见 D-013。
+- 提交：`e9b3c32 fix(deps): patch 2 of 4 audit findings without breaking changes`。
+
+### 2026-07-25 Claude Code：T-006 模块卡片按意图预取 ModuleDetailPage chunk
+
+- `lib/prefetch.ts` 的 `prefetchViewerChunks` 新增 `import("@/pages/ModuleDetailPage")`，与 lazy 路由指向同一 chunk；保留 `warmed` 守卫，未改 ModuleCard/ModulesPage 调用点。新增无截图 `prefetch-viewer-chunks.visual.spec.ts`（3/3）。详见 D-012。
+- 提交：`36024af perf: prefetch module detail page chunk on card intent`。
 
 ### 2026-07-25 Claude Code：T-008 ModuleDetailPage 路由级 lazy 主包瘦身
 

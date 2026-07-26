@@ -71,7 +71,17 @@ export type KnownMolecule = {
   molecule: BuilderMolecule;
 };
 
-export type BuilderFragmentId = "methyl" | "hydroxyl" | "amino" | "aldehyde" | "carbonyl" | "carboxyl";
+export type BuilderFragmentId =
+  | "methyl"
+  | "hydroxyl"
+  | "amino"
+  | "aldehyde"
+  | "carbonyl"
+  | "carboxyl"
+  | "vinyl"
+  | "ethynyl"
+  | "methoxy"
+  | "cyano";
 
 export type BuilderFragmentTemplate = {
   id: BuilderFragmentId;

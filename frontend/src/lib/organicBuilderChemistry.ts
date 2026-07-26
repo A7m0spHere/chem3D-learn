@@ -113,6 +113,44 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     ],
     bonds: [fragmentBond("c", "o1", 2), fragmentBond("c", "o2"), fragmentBond("o2", "h")],
   },
+  {
+    // 氰基 –C≡N：碳氮三键。价态在中性模型内完整（C 四键、N 三键）。
+    // 注意：本地命名引擎目前把 C≡N 的 N 归入"复杂含氮"而返回 unsupported，
+    // 这是既有引擎边界，InfoPanel 会如实显示"无法命名 + 原因"，不是回归。
+    id: "cyano",
+    label: "–C≡N",
+    nameZh: "氰基",
+    attachmentAtomId: "c",
+    atoms: [templateAtom("c", "C", [0, 0, 0]), templateAtom("n", "N", [0.9, 0, 0])],
+    bonds: [fragmentBond("c", "n", 3)],
+  },
+  {
+    // 乙烯基 –CH=CH₂：末端碳碳双键，接上后可命名为丙-1-烯等。
+    id: "vinyl",
+    label: "–CH=CH₂",
+    nameZh: "乙烯基",
+    attachmentAtomId: "c1",
+    atoms: [templateAtom("c1", "C", [0, 0, 0]), templateAtom("c2", "C", [0.9, 0.5, 0])],
+    bonds: [fragmentBond("c1", "c2", 2)],
+  },
+  {
+    // 乙炔基 –C≡CH：末端碳碳三键，接上后可命名为丙-1-炔等。
+    id: "ethynyl",
+    label: "–C≡CH",
+    nameZh: "乙炔基",
+    attachmentAtomId: "c1",
+    atoms: [templateAtom("c1", "C", [0, 0, 0]), templateAtom("c2", "C", [0.95, 0, 0])],
+    bonds: [fragmentBond("c1", "c2", 3)],
+  },
+  {
+    // 甲氧基 –OCH₃：醚氧连一个甲基，接上后按醚命名（如甲氧基甲烷）。
+    id: "methoxy",
+    label: "–OCH₃",
+    nameZh: "甲氧基",
+    attachmentAtomId: "o",
+    atoms: [templateAtom("o", "O", [0, 0, 0]), templateAtom("c", "C", [0.85, 0.5, 0])],
+    bonds: [fragmentBond("o", "c")],
+  },
 ];
 
 export const knownOrganicMolecules: KnownMolecule[] = [
