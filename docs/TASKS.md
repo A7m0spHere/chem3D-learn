@@ -26,6 +26,23 @@
 
 ## 已完成
 
+### T-020 对接 Claude Code 全站滚动滑入动画并修复 Modules 分类间距
+
+- **完成**：2026-07-27（Claude Code + Codex）
+- **提交**：`5f66b7a feat(ui): 全站页面滚动平滑滑入动画`、`55c3dfc fix(ui): preserve module section spacing with scroll reveal`
+- **背景**：Claude Code 已把 Home / Modules / Paths / Exam / About / ExamTopicDetail 的页面进入动效统一为 `ScrollReveal`，并为首页 Hero 增加 48px / 1.1s 的分层错峰滑入；但共享交接文档尚未记录这笔最新提交，需要独立审查与对接验证。
+- **内容**：
+  - 确认 `main` 与 `origin/main` 在对接前完全同步、工作区干净，最新动画提交已完整推送；ModuleDetailPage 的 3D Canvas 未纳入动画包装。
+  - 浏览器实测发现 `ModulesPage` 的分类 `section` 新增 `ScrollReveal` wrapper 后，原 `mb-14 last:mb-0` 的 `last:` 会在每个 wrapper 内都命中，导致四个分类的计算下边距全部变为 0。
+  - 将分类间距职责移到 `ScrollReveal` 外层，并使用当前 `visibleSections` 索引判断末项；搜索或分类筛选后仍不会产生多余尾部空白。
+  - 新增 `tests/visual/scroll-reveal-layout.visual.spec.ts`，逐个滚动触发分类动画后，用真实 DOM 几何断言相邻分类间距至少 55px；测试不含截图，不触碰 Darwin 基线。
+- **验证**：
+  - [x] `npm run build`、`npm run lint` 通过。
+  - [x] `npm run test:logic`：**64 / 64 通过**。
+  - [x] `PLAYWRIGHT_CHANNEL=chrome` 定向布局回归：**1 / 1 通过**。
+  - [x] `git diff --check` 通过；未改 lockfile、缓存或视觉快照。
+- **已知限制**：完整 Darwin 视觉回归未运行。当前 `motion.css` 按产品主人既有选择，在系统开启“减少动态效果”时仍播放 Hero / ScrollReveal 的 1100ms 过渡；本次只记录，不改变该产品取舍。
+
 ### T-005 前后端结构数据去重方案（先设计 + 防漂移契约）
 
 - **完成**：2026-07-26（Claude Code）

@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-26（Claude Code，T-005 前后端结构数据防漂移契约 + 设计文档；backlog 全部收口）
+> 最后更新：2026-07-27（Codex，对接 Claude Code 全站滚动滑入动画并修复 Modules 分类间距回归）
 
 ## 一句话定位
 
@@ -26,10 +26,20 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
+- `main` 已包含 Claude Code 的全站滚动滑入动画（`5f66b7a`）与 Codex 对接修复（`55c3dfc`）：Home / Modules / Paths / Exam / About / ExamTopicDetail 使用统一 `ScrollReveal`，ModuleDetailPage 的 3D Canvas 保持不动；Modules 分类区块间距已移到动画 wrapper，避免子 `section` 的 `last:` 因包装层变化而把每个区块都误判为末项。
 - 工作区干净，与 `origin/main` 同步。**引线标签扩展系列已收尾**：转换类 T-011 MOF-5（`fb6ceec`）、T-012 MXene（`2c5615a`）、T-013 ReN₃（`9e3e464`）、T-014 金属密堆积（`547482b`）、T-015 PBA（`f3f4984`）、T-018 ZincMetal（`cac0e90`）、T-019 BaTiO3（`a52cf62`）；评估类 T-016 Graphite / T-017 ZnS 逐 scene 核对后判定**无需改动**（全部恒显标签均为标题/总结/门控/已在外围，无压在结构上的指向型恒显标签，见 D-016）。T-010 原子图例（`d18b785`）亦已提交。此前 HANDOFF/STATUS 记录的「T-010/T-011 尚未提交、等用户确认」已过时，实际已按当时建议分 commit 落地。
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-27）
+
+- `frontend npm run build`：**通过**；Vite 转换 2322 个模块，保留既有 `three` chunk 约 688 KB 非阻断警告。
+- `frontend npm run lint`：**通过**。
+- `frontend npm run test:logic`：**64 / 64 通过**。
+- `PLAYWRIGHT_CHANNEL=chrome` 定向运行 `scroll-reveal-layout.visual.spec.ts`：**1 / 1 通过**；逐个滚动触发 Modules 分类区块后，所有相邻分类仍保留至少 55px（设计值 56px）间距。
+- 对接前浏览器探针确认回归事实：动画 wrapper 引入后四个分类 `section` 的计算下边距均为 `0px`，滚动完成后的中间区块间距为 0；修复后由新增回归用例锁定。
+- 完整 Darwin 视觉回归未运行；Windows 仍不得更新现有 macOS 快照。
 
 ## 独立验证结果（2026-07-25）
 
@@ -61,7 +71,11 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 最近完成
 
-- **T-004 ZnS / ZincMetal viewer 纯几何计算下沉**（2026-07-26，commit `fd67aca`）
+- **T-020 对接 Claude Code 全站滚动滑入动画并修复 Modules 分类间距**（2026-07-27，commits `5f66b7a` + `55c3dfc`）
+  - Claude Code 将 Home / Modules / Paths / Exam / About / ExamTopicDetail 的整页进入动效统一为 `ScrollReveal`，首页 Hero 使用分层错峰滑入；ModuleDetailPage 的 3D Canvas 未包入动画，避免影响 R3F 布局。
+  - Codex 独立审查与系统 Chrome 实测发现：`ModulesPage` 新增 wrapper 后，原 `section` 上的 `last:mb-0` 会对每个 wrapper 内唯一子元素都生效，导致分类间距归零。现将间距放到 `ScrollReveal` 外层，并根据 `visibleSections` 判断末项，筛选后同样正确。
+  - 新增无截图回归 `tests/visual/scroll-reveal-layout.visual.spec.ts`；build / lint / logic 64 / 64 / Chrome 1 / 1 均通过。
+- **T-005 前后端结构数据去重方案（先设计 + 防漂移契约）**（2026-07-26，commit `fd67aca`）
   - 逐字段比对确认：5 个 VSEPR 分子（ch4/nh3/h2o/co2/bf3）的结构核心 `id/kind/formula/names/nameZh/category/atoms/bonds/lonePairs` 在前后端**逐字一致**，只有教学文案漂移；`nacl` 是**有意的教学简化**（后端 15 原子、无 `crystalTeaching`，前端 27 原子完整胞）。
   - 新增设计文档 `docs/BACKEND_DATA_SYNC.md` + 防漂移测试 `backend/test/data-parity.test.js`（测试期读前端 JSON 逐字断言结构核心，nacl 只断言存在且为 crystal）。`backend npm test` 15 → **22 通过**；前端零改动、不依赖后端。详见 D-018。**至此 backlog 全部收口。**
 - **T-004 ZnS / ZincMetal viewer 纯几何计算下沉到 `*Geometry.ts`**（2026-07-26，commit `4f5d707`）
@@ -150,6 +164,7 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 已知风险
 
+- `motion.css` 当前按产品主人既有选择，在 `prefers-reduced-motion: reduce` 下仍让首页 Hero 与 `ScrollReveal` 播放 1100ms 过渡。这与常规“减少动态效果”预期不同，属于已知可访问性取舍；未经确认不要擅自改回全局禁用。
 - `ViewerErrorBoundary` 的重试会重新加载整个页面，而不是只重建 3D Canvas；这是为绕开 `React.lazy` 缓存拒绝 Promise 的可靠最小方案。
 - React Error Boundary 只能捕获后代组件的渲染、构造和生命周期错误；不能覆盖事件处理、普通异步回调、服务端渲染、边界自身错误，以及所有 R3F 动画帧故障。
 - 23 个 JSON 通过 `as unknown as MoleculeRecord` 接入，绕过了静态结构核验，当前没有运行时 schema / 引用完整性测试。

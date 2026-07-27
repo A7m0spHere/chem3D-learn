@@ -7,47 +7,45 @@
 
 ## 最近一次交接
 
-- **Agent**：Claude Code
-- **日期**：2026-07-26
+- **Agent**：Codex
+- **日期**：2026-07-27
 - **分支**：`main`
-- **任务**：T-005 前后端结构数据去重（先设计 + 防漂移契约）——backlog 最后一项。
-- **提交**：`fd67aca test(backend): anti-drift parity contract for shared molecule data (T-005)`（设计文档 + 测试已提交；本轮 docs 改动待随后单独提交）。
+- **任务**：T-020 对接 Claude Code 全站滚动滑入动画，并修复 Modules 分类间距回归。
+- **提交**：Claude Code `5f66b7a feat(ui): 全站页面滚动平滑滑入动画`；Codex `55c3dfc fix(ui): preserve module section spacing with scroll reveal`。
 
-> ℹ️ 本会话按 `/goal「一个一个完成，直到把任务做完」`把 backlog 清空：T-014 docs（`f6195d2`）→ T-015 PBA（`f3f4984`/`318ee17`）→ 引线标签收官 T-016~T-019（`cac0e90`/`a52cf62`/`9f90aa7`）→ T-004 几何下沉（`4f5d707`/`8d1ac7b`）→ T-005 数据去重（`fd67aca`）。**至此 TASKS.md backlog 全部收口。**
+### 本次对接
 
-### 本次改动（T-005）
+- 对接前执行 `git fetch origin`，确认 `main` 与 `origin/main` 为 `0 / 0`、工作区干净；Claude 的动画提交已在远端，无需 pull 或合并。
+- `5f66b7a` 将 Home / Modules / Paths / Exam / About / ExamTopicDetail 统一接入 `ScrollReveal`，首页 Hero 使用逐层错峰滑入；ModuleDetailPage 的 3D Canvas 保持不动。
+- 独立审查发现 `ModulesPage` 的包装层改变了 CSS 结构语义：原 `section` 是每个 `ScrollReveal` 的唯一子元素，所以 `last:mb-0` 对每个分类都命中。系统 Chrome 探针确认四个分类下边距全为 `0px`，滚动完成后的中间分类间距为 0。
+- `55c3dfc` 把 `mb-14` 移到动画 wrapper，并按 `visibleSections` 判断末项；这保留原 56px 分类间距，同时保证筛选后最后一项没有多余尾部空白。
+- 新增 `scroll-reveal-layout.visual.spec.ts`：逐个触发分类进入视口，等待 opacity 完成，再断言所有相邻分类的真实几何间距至少 55px。无截图，不会更新 Darwin 基线。
 
-任务要求「先设计后实现」、前端 JSON 保持真源、后端只读、不引数据库或大依赖。逐字段比对后按最低风险落地。
+### 验证结果
 
-**关键调研发现**
-- 5 个 VSEPR 分子（ch4/nh3/h2o/co2/bf3）的**结构核心** `id/kind/formula/names/nameZh/category/atoms/bonds/lonePairs` 在前后端**逐字一致**；只有教学文案（`summaryZh`/`lessonSteps`/`keyAngles`/`rendering`）已各自演进、漂移。
-- `nacl` 是**有意的教学简化**：后端 15 原子简化胞、无 `crystalTeaching`；前端 27 原子完整胞 + `crystalTeaching`。**不能**对 nacl 做全等断言。
+- `frontend npm run build`：通过；2322 个模块，保留既有 `three` chunk ~688 KB 非阻断警告。
+- `frontend npm run lint`：通过。
+- `frontend npm run test:logic`：64 / 64 通过。
+- `PLAYWRIGHT_CHANNEL=chrome` 定向运行 `scroll-reveal-layout.visual.spec.ts`：1 / 1 通过。
+- `git diff --check`：通过；无 lockfile、缓存、临时探针或 Darwin 快照改动。
 
-**新增设计文档 `docs/BACKEND_DATA_SYNC.md`**
-- 明确真源边界（前端 JSON 为真源、后端只读映射）、Node 安全读取方式（测试期 `readFileSync` 相对读取，方向单一，前端不依赖后端）、发布边界，以及三个候选方案（A 防漂移契约测试[本次采纳]、B 构建期生成、C 运行时读取）的权衡。
+### 已知限制
 
-**新增防漂移测试 `backend/test/data-parity.test.js`**
-- 测试期读取前端 5 个 JSON，逐字断言结构核心与后端一致；nacl 只断言「双方都存在且为 crystal」并注释其为有意简化、不参与相等契约。教学文案不纳入契约。
-
-### 验证结果（T-005）
-
-- `backend npm test`：**22 / 22 通过**（原 15 + 新增 7 项防漂移）；现有 5 纯函数 + 10 HTTP 集成全兼容。
-- 前端零改动、可独立构建运行（测试是后端读前端，方向单一）。
-- `backend/` 仍零运行时依赖，未引数据库或大依赖。
-
-### 已知限制（T-005）
-
-- 本次是「先设计 + 最低风险实现（防漂移护栏）」，未做构建期代码生成彻底单源（方案 B）。教学文案的前后端分叉是刻意保留的，契约只锁结构核心。
-- 若未来要彻底单源，按 `docs/BACKEND_DATA_SYNC.md` 方案 B 推进。
+- 完整 Darwin 视觉回归未运行，Windows 不更新 macOS 基线。
+- `motion.css` 当前按产品主人既有选择，在 `prefers-reduced-motion: reduce` 下仍让 Hero / ScrollReveal 播放 1100ms 过渡；本次保留并记录这一可访问性取舍。
+- `webapp-testing` 技能建议的 Python Playwright 入口在本机默认 Python 与 Codex bundled Python 中均缺少 `playwright` 包；本次改用项目已有 `@playwright/test` Node 入口完成等价系统 Chrome 探针，未安装新依赖。
 
 ### 给下一个 Agent 的建议
 
-- 本轮 docs 改动（DECISIONS D-018 / TASKS / PROJECT_STATUS / HANDOFF）建议作为一个单独的 docs commit 提交（代码 `fd67aca` 已先行提交）。
-- **TASKS.md backlog 已全部收口**，当前无待办。下一步建议与用户确认新方向：可选项包括 PROJECT_STATUS「其他待确认」里的根 README、部署/SPA fallback、Node engines 声明，或两处化学待核实项（BF₃ 缺电子表述、CaF₂ 晶胞参数）。动手前先与用户确认要做哪一个。
+- 在 macOS 环境运行一次完整视觉回归，重点检查新增动画 wrapper 是否让现有 80 张 Darwin 基线产生非预期布局漂移；不要在 Windows 更新快照。
 
 ---
 
 ## 往期
+
+### 2026-07-26 Claude Code：T-005 前后端结构数据防漂移契约
+
+- 设计文档 `docs/BACKEND_DATA_SYNC.md` + `backend/test/data-parity.test.js` 已由 `fd67aca` 交付；5 个 VSEPR 分子锁结构核心，NaCl 保留有意简化差异，backend 22 / 22 通过。详见 D-018 与 TASKS T-005。
 
 ### 2026-07-26 Claude Code：T-004 大晶胞几何计算下沉（ZnS / ZincMetal）
 
