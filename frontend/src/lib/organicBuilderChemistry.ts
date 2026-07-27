@@ -41,22 +41,28 @@ const PYRAMIDAL_DIRECTIONS: BuilderVec3[] = [
   [-0.47, 0.814, -0.34],
   [-0.47, -0.814, -0.34],
 ];
+// 两方向夹角 ≈104.7°（cos ≈ 0.61² − 0.79² < 0），对应水/醇/醚氧的 V 形教学键角。
 const BENT_DIRECTIONS: BuilderVec3[] = [
-  [0.79, 0.61, 0],
-  [0.79, -0.61, 0],
+  [0.61, 0.79, 0],
+  [0.61, -0.79, 0],
 ];
 
+// 所有模板约定：attachment 原子位于原点，母体位于 anchorDirection = [-1, 0, 0] 方向；
+// 拼接时 addFragment 会把该方向旋转对齐到真实母体方向，因此模板内部键角即最终键角。
+// 键长采用与 getStylizedBondLength 一致的样式化标尺（含 H 0.92，重原子间 1.08）。
 export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
   {
     id: "methyl",
     label: "–CH₃",
     nameZh: "甲基",
     attachmentAtomId: "c",
+    anchorDirection: [-1, 0, 0],
     atoms: [
       templateAtom("c", "C", [0, 0, 0]),
-      templateAtom("h1", "H", [0.72, 0.58, 0.45]),
-      templateAtom("h2", "H", [0.72, -0.58, 0.45]),
-      templateAtom("h3", "H", [0.72, 0, -0.68]),
+      // 四面体方向：与母体键均成 ≈109.5°。
+      templateAtom("h1", "H", [0.307, 0.867, 0]),
+      templateAtom("h2", "H", [0.307, -0.434, 0.751]),
+      templateAtom("h3", "H", [0.307, -0.434, -0.751]),
     ],
     bonds: [fragmentBond("c", "h1"), fragmentBond("c", "h2"), fragmentBond("c", "h3")],
   },
@@ -65,7 +71,8 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–OH",
     nameZh: "羟基",
     attachmentAtomId: "o",
-    atoms: [templateAtom("o", "O", [0, 0, 0]), templateAtom("h", "H", [0.75, 0.48, 0])],
+    anchorDirection: [-1, 0, 0],
+    atoms: [templateAtom("o", "O", [0, 0, 0]), templateAtom("h", "H", [0.307, 0.867, 0])],
     bonds: [fragmentBond("o", "h")],
   },
   {
@@ -73,10 +80,12 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–NH₂",
     nameZh: "氨基",
     attachmentAtomId: "n",
+    anchorDirection: [-1, 0, 0],
     atoms: [
       templateAtom("n", "N", [0, 0, 0]),
-      templateAtom("h1", "H", [0.72, 0.56, 0.22]),
-      templateAtom("h2", "H", [0.72, -0.56, 0.22]),
+      // 三角锥：两个 N–H 与母体键彼此均约 107°。
+      templateAtom("h1", "H", [0.269, 0.739, -0.477]),
+      templateAtom("h2", "H", [0.269, -0.739, -0.477]),
     ],
     bonds: [fragmentBond("n", "h1"), fragmentBond("n", "h2")],
   },
@@ -85,10 +94,12 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–CHO",
     nameZh: "醛基",
     attachmentAtomId: "c",
+    anchorDirection: [-1, 0, 0],
     atoms: [
       templateAtom("c", "C", [0, 0, 0]),
-      templateAtom("o", "O", [0.78, 0.62, 0]),
-      templateAtom("h", "H", [0.78, -0.62, 0]),
+      // sp² 平面：O=C 与 C–H 相对母体键各成 ≈120°。
+      templateAtom("o", "O", [0.54, 0.935, 0]),
+      templateAtom("h", "H", [0.46, -0.797, 0]),
     ],
     bonds: [fragmentBond("c", "o", 2), fragmentBond("c", "h")],
   },
@@ -97,7 +108,8 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–C(=O)–",
     nameZh: "羰基片段",
     attachmentAtomId: "c",
-    atoms: [templateAtom("c", "C", [0, 0, 0]), templateAtom("o", "O", [0.82, 0.56, 0])],
+    anchorDirection: [-1, 0, 0],
+    atoms: [templateAtom("c", "C", [0, 0, 0]), templateAtom("o", "O", [0.54, 0.935, 0])],
     bonds: [fragmentBond("c", "o", 2)],
   },
   {
@@ -105,11 +117,13 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–COOH",
     nameZh: "羧基",
     attachmentAtomId: "c",
+    anchorDirection: [-1, 0, 0],
     atoms: [
       templateAtom("c", "C", [0, 0, 0]),
-      templateAtom("o1", "O", [0.82, 0.6, 0]),
-      templateAtom("o2", "O", [0.82, -0.6, 0]),
-      templateAtom("h", "H", [1.55, -0.84, 0]),
+      templateAtom("o1", "O", [0.54, 0.935, 0]),
+      templateAtom("o2", "O", [0.54, -0.935, 0]),
+      // O–H 相对 O–C 键成 ≈109.5°，避免羟基氢倒向羰基一侧。
+      templateAtom("h", "H", [1.444, -0.768, 0]),
     ],
     bonds: [fragmentBond("c", "o1", 2), fragmentBond("c", "o2"), fragmentBond("o2", "h")],
   },
@@ -121,7 +135,8 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–C≡N",
     nameZh: "氰基",
     attachmentAtomId: "c",
-    atoms: [templateAtom("c", "C", [0, 0, 0]), templateAtom("n", "N", [0.9, 0, 0])],
+    anchorDirection: [-1, 0, 0],
+    atoms: [templateAtom("c", "C", [0, 0, 0]), templateAtom("n", "N", [1.08, 0, 0])],
     bonds: [fragmentBond("c", "n", 3)],
   },
   {
@@ -130,7 +145,8 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–CH=CH₂",
     nameZh: "乙烯基",
     attachmentAtomId: "c1",
-    atoms: [templateAtom("c1", "C", [0, 0, 0]), templateAtom("c2", "C", [0.9, 0.5, 0])],
+    anchorDirection: [-1, 0, 0],
+    atoms: [templateAtom("c1", "C", [0, 0, 0]), templateAtom("c2", "C", [0.54, 0.935, 0])],
     bonds: [fragmentBond("c1", "c2", 2)],
   },
   {
@@ -139,7 +155,8 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–C≡CH",
     nameZh: "乙炔基",
     attachmentAtomId: "c1",
-    atoms: [templateAtom("c1", "C", [0, 0, 0]), templateAtom("c2", "C", [0.95, 0, 0])],
+    anchorDirection: [-1, 0, 0],
+    atoms: [templateAtom("c1", "C", [0, 0, 0]), templateAtom("c2", "C", [1.08, 0, 0])],
     bonds: [fragmentBond("c1", "c2", 3)],
   },
   {
@@ -148,7 +165,8 @@ export const builderFragmentTemplates: BuilderFragmentTemplate[] = [
     label: "–OCH₃",
     nameZh: "甲氧基",
     attachmentAtomId: "o",
-    atoms: [templateAtom("o", "O", [0, 0, 0]), templateAtom("c", "C", [0.85, 0.5, 0])],
+    anchorDirection: [-1, 0, 0],
+    atoms: [templateAtom("o", "O", [0, 0, 0]), templateAtom("c", "C", [0.27, 1.045, 0])],
     bonds: [fragmentBond("o", "c")],
   },
 ];
@@ -169,6 +187,15 @@ export const knownOrganicMolecules: KnownMolecule[] = [
     "六个碳形成平面环；交替单双键只是离域结构的一种教学表示。",
     ["C", "C", "C", "C", "C", "C"],
     [[0, 1, 2], [1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 2], [5, 0, 1]],
+  ),
+  known(
+    "toluene",
+    "甲苯",
+    "Toluene",
+    "芳香烃",
+    "苯的同系物，苯环上连有一个甲基。",
+    ["C", "C", "C", "C", "C", "C", "C"],
+    [[0, 1, 2], [1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 2], [5, 0, 1], [0, 6, 1]],
   ),
   known("methanol", "甲醇", "Methanol", "醇", "最简单的醇，含一个羟基。", ["C", "O"], [[0, 1, 1]]),
   known("ethanol", "乙醇", "Ethanol", "醇", "含两个碳和一个羟基。", ["C", "C", "O"], [[0, 1, 1], [1, 2, 1]]),
@@ -267,9 +294,13 @@ export function getFormula(molecule: BuilderMolecule): string {
   const counts = new Map<BuilderElement, number>();
   molecule.atoms.forEach((candidate) => counts.set(candidate.element, (counts.get(candidate.element) ?? 0) + 1));
   const remaining = [...counts.keys()].filter((element) => element !== "C" && element !== "H").sort();
+  // 有碳按 Hill 规则（C、H、其余字母序）；无碳按高中教学惯例写 NH3、HCl、H2O，
+  // 而不是严格字母序的 H3N、ClH。
   const order: BuilderElement[] = counts.has("C")
     ? (["C", "H", ...remaining] as BuilderElement[])
-    : ([...counts.keys()].sort() as BuilderElement[]);
+    : counts.has("N")
+      ? (["N", "H", ...remaining.filter((element) => element !== "N")] as BuilderElement[])
+      : (["H", ...remaining] as BuilderElement[]);
   return order
     .filter((element) => counts.has(element))
     .map((element) => `${element}${(counts.get(element) ?? 0) > 1 ? counts.get(element) : ""}`)
@@ -293,55 +324,160 @@ export function findKnownMolecule(molecule: BuilderMolecule): KnownMolecule | un
 export function detectFunctionalGroups(molecule: BuilderMolecule): string[] {
   const groups = new Set<string>();
   const neighbors = buildNeighborMap(molecule);
+
+  // 凯库勒式六元碳环按"苯环"整体报告，并抑制环内键的"碳碳双键"：
+  // "苯不含真正碳碳双键（不能因加成使溴水褪色）"是核心考点，拆散报告会强化错误概念。
+  const aromaticBondKeys = findKekuleBenzeneBondKeys(molecule, neighbors);
+  if (aromaticBondKeys.size > 0) groups.add("苯环（芳香环）");
+
+  // 第一遍：按优先级识别含羰基的完整官能团（羧基 > 酰胺 > 酯 > 醛），
+  // 并"认领"成员原子，避免第二遍把羧基拆报成"羰基 + 羟基"、把乙醛重复报"羰基 + 醛基"。
+  const claimedCarbonylCarbonIds = new Set<string>();
+  const claimedOxygenIds = new Set<string>();
   const amideNitrogenIds = new Set<string>();
   molecule.atoms.filter((candidate) => candidate.element === "C").forEach((carbon) => {
     const adjacent = neighbors.get(carbon.id) ?? [];
-    if (!adjacent.some((entry) => entry.atom.element === "O" && entry.order === 2)) return;
-    adjacent
-      .filter((entry) => entry.atom.element === "N" && entry.order === 1)
-      .forEach((entry) => amideNitrogenIds.add(entry.atom.id));
+    const carbonylOxygen = adjacent.find((entry) => entry.atom.element === "O" && entry.order === 2);
+    if (!carbonylOxygen) return;
+    const hydroxylOxygen = adjacent.find((entry) =>
+      entry.atom.element === "O"
+      && entry.order === 1
+      && (neighbors.get(entry.atom.id) ?? []).some((second) => second.atom.element === "H"),
+    );
+    if (hydroxylOxygen) {
+      groups.add("羧基");
+      claimedCarbonylCarbonIds.add(carbon.id);
+      claimedOxygenIds.add(hydroxylOxygen.atom.id);
+      return;
+    }
+    const amideNitrogen = adjacent.find((entry) => entry.atom.element === "N" && entry.order === 1);
+    if (amideNitrogen) {
+      groups.add("酰胺基");
+      claimedCarbonylCarbonIds.add(carbon.id);
+      amideNitrogenIds.add(amideNitrogen.atom.id);
+      return;
+    }
+    const esterOxygen = adjacent.find((entry) =>
+      entry.atom.element === "O"
+      && entry.order === 1
+      && (neighbors.get(entry.atom.id) ?? []).some((second) =>
+        second.atom.element === "C" && second.atom.id !== carbon.id,
+      ),
+    );
+    if (esterOxygen) {
+      groups.add("酯基");
+      claimedCarbonylCarbonIds.add(carbon.id);
+      claimedOxygenIds.add(esterOxygen.atom.id);
+      return;
+    }
+    if (adjacent.some((entry) => entry.atom.element === "H")) {
+      groups.add("醛基");
+      claimedCarbonylCarbonIds.add(carbon.id);
+    }
   });
+
+  // 第二遍：逐键识别基础片段，跳过已被高层官能团认领的键和原子。
   molecule.bonds.forEach((candidate) => {
     const first = molecule.atoms.find((atomCandidate) => atomCandidate.id === candidate.atomIds[0]);
     const second = molecule.atoms.find((atomCandidate) => atomCandidate.id === candidate.atomIds[1]);
     if (!first || !second) return;
     const elements = [first.element, second.element].sort().join("-");
-    if (elements === "C-C" && candidate.order === 2) groups.add("碳碳双键");
+    if (elements === "C-C" && candidate.order === 2 && !aromaticBondKeys.has(bondPairKey(candidate.atomIds))) {
+      groups.add("碳碳双键");
+    }
     if (elements === "C-C" && candidate.order === 3) groups.add("碳碳三键");
-    if (elements === "C-O" && candidate.order === 2) groups.add("羰基");
-    if (elements === "C-N" && candidate.order === 1) {
+    if (elements === "C-N" && candidate.order === 3) groups.add("氰基");
+    if (elements === "C-O" && candidate.order === 2) {
       const carbon = first.element === "C" ? first : second;
+      if (!claimedCarbonylCarbonIds.has(carbon.id)) groups.add("羰基");
+    }
+    if (elements === "C-N" && candidate.order === 1) {
       const nitrogen = first.element === "N" ? first : second;
-      const isAmideBond = amideNitrogenIds.has(nitrogen.id)
-        || (neighbors.get(carbon.id) ?? []).some((entry) =>
-          entry.atom.element === "O" && entry.order === 2,
-        );
-      groups.add(isAmideBond ? "酰胺基" : "氨基/胺键片段");
+      groups.add(amideNitrogenIds.has(nitrogen.id) ? "酰胺基" : "氨基/胺键片段");
     }
-    if ([first.element, second.element].some((element) => ["F", "Cl", "Br", "I"].includes(element))) {
-      groups.add("卤代结构");
-    }
+    // 卤代结构要求卤素直接连在碳上：HCl、HF 等无机氢化物不属于卤代烃片段。
+    const halogenAtom = [first, second].find((atom) => ["F", "Cl", "Br", "I"].includes(atom.element));
+    const otherAtom = halogenAtom === first ? second : first;
+    if (halogenAtom && otherAtom.element === "C") groups.add("卤代结构");
   });
 
+  // 羟基 / 醚键：跳过已被羧基、酯基认领的氧原子。
   molecule.atoms.filter((candidate) => candidate.element === "O").forEach((oxygen) => {
+    if (claimedOxygenIds.has(oxygen.id)) return;
     const adjacent = neighbors.get(oxygen.id) ?? [];
-    if (adjacent.some((entry) => entry.atom.element === "H") && adjacent.some((entry) => entry.atom.element === "C")) {
-      groups.add("羟基");
-    }
-  });
-
-  molecule.atoms.filter((candidate) => candidate.element === "C").forEach((carbon) => {
-    const adjacent = neighbors.get(carbon.id) ?? [];
-    const hasCarbonyl = adjacent.some((entry) => entry.atom.element === "O" && entry.order === 2);
-    const hasHydroxylO = adjacent.some((entry) => {
-      if (entry.atom.element !== "O" || entry.order !== 1) return false;
-      return (neighbors.get(entry.atom.id) ?? []).some((secondNeighbor) => secondNeighbor.atom.element === "H");
-    });
     const hasHydrogen = adjacent.some((entry) => entry.atom.element === "H");
-    if (hasCarbonyl && hasHydroxylO) groups.add("羧基");
-    else if (hasCarbonyl && hasHydrogen) groups.add("醛基");
+    const singleBondCarbons = adjacent.filter((entry) => entry.atom.element === "C" && entry.order === 1);
+    if (hasHydrogen && singleBondCarbons.length > 0) groups.add("羟基");
+    if (!hasHydrogen && singleBondCarbons.length === 2) groups.add("醚键");
   });
   return [...groups];
+}
+
+function bondPairKey(atomIds: [string, string]): string {
+  return [...atomIds].sort().join("|");
+}
+
+// 识别"六元全碳环 + 环内交替单双键"（凯库勒式苯环），返回六条环键的无序键 key。
+// 保守策略：迭代剥离度小于 2 的碳得到环核，只认恰为孤立六元交替环的连通分量；
+// 稠环、桥环等复杂环核不识别为苯环，环内 C=C 仍按普通碳碳双键报告。
+function findKekuleBenzeneBondKeys(
+  molecule: BuilderMolecule,
+  neighbors: ReturnType<typeof buildNeighborMap>,
+): Set<string> {
+  const keys = new Set<string>();
+  const carbonAdjacency = new Map<string, Array<{ id: string; order: BuilderBondOrder }>>();
+  const degrees = new Map<string, number>();
+  for (const atom of molecule.atoms) {
+    if (atom.element !== "C") continue;
+    const carbonNeighbors = (neighbors.get(atom.id) ?? [])
+      .filter((entry) => entry.atom.element === "C")
+      .map((entry) => ({ id: entry.atom.id, order: entry.order }));
+    carbonAdjacency.set(atom.id, carbonNeighbors);
+    degrees.set(atom.id, carbonNeighbors.length);
+  }
+  const removed = new Set<string>();
+  const pruneQueue = [...degrees.keys()].filter((id) => (degrees.get(id) ?? 0) < 2);
+  while (pruneQueue.length > 0) {
+    const current = pruneQueue.shift()!;
+    if (removed.has(current)) continue;
+    removed.add(current);
+    for (const neighbor of carbonAdjacency.get(current) ?? []) {
+      if (removed.has(neighbor.id)) continue;
+      const nextDegree = (degrees.get(neighbor.id) ?? 0) - 1;
+      degrees.set(neighbor.id, nextDegree);
+      if (nextDegree < 2) pruneQueue.push(neighbor.id);
+    }
+  }
+
+  const visited = new Set<string>();
+  for (const startId of degrees.keys()) {
+    if (removed.has(startId) || visited.has(startId)) continue;
+    const component: string[] = [];
+    const stack = [startId];
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      if (visited.has(current)) continue;
+      visited.add(current);
+      component.push(current);
+      for (const neighbor of carbonAdjacency.get(current) ?? []) {
+        if (!removed.has(neighbor.id) && !visited.has(neighbor.id)) stack.push(neighbor.id);
+      }
+    }
+    if (component.length !== 6) continue;
+    const componentSet = new Set(component);
+    const isKekuleRing = component.every((id) => {
+      const ringBonds = (carbonAdjacency.get(id) ?? []).filter((neighbor) => componentSet.has(neighbor.id));
+      const orders = ringBonds.map((neighbor) => neighbor.order).sort();
+      return ringBonds.length === 2 && orders[0] === 1 && orders[1] === 2;
+    });
+    if (!isKekuleRing) continue;
+    for (const id of component) {
+      for (const neighbor of carbonAdjacency.get(id) ?? []) {
+        if (componentSet.has(neighbor.id)) keys.add([id, neighbor.id].sort().join("|"));
+      }
+    }
+  }
+  return keys;
 }
 
 export function autoFillHydrogens(molecule: BuilderMolecule): BuilderMolecule {
@@ -376,11 +512,14 @@ export function getSuggestedPosition(
       return molecule.atoms.find((atomCandidate) => atomCandidate.id === neighborId);
     })
     .filter((candidate): candidate is BuilderAtom => Boolean(candidate));
-  const hasTriple = molecule.bonds.some((candidate) => candidate.atomIds.includes(centerAtomId) && candidate.order === 3) || order === 3;
-  const hasDouble = molecule.bonds.some((candidate) => candidate.atomIds.includes(centerAtomId) && candidate.order === 2) || order === 2;
-  const directions = hasTriple
+  const centerBonds = molecule.bonds.filter((candidate) => candidate.atomIds.includes(centerAtomId));
+  const hasTriple = centerBonds.some((candidate) => candidate.order === 3) || order === 3;
+  // 双键要按"个数"判断：两个双键的碳（O=C=O、丙二烯）是 sp 直线形，不能落进 sp² 平面方向集。
+  const doubleBondCount = centerBonds.filter((candidate) => candidate.order === 2).length
+    + (order === 2 ? 1 : 0);
+  const directions = hasTriple || doubleBondCount >= 2
     ? LINEAR_DIRECTIONS
-    : hasDouble
+    : doubleBondCount === 1
       ? PLANAR_DIRECTIONS
       : center.element === "O"
         ? BENT_DIRECTIONS
@@ -429,13 +568,23 @@ export function findBondBetween(
 }
 
 export function nextBuilderId(molecule: BuilderMolecule, prefix: string): string {
-  const used = new Set([...molecule.atoms.map((candidate) => candidate.id), ...molecule.bonds.map((candidate) => candidate.id)]);
+  const ids = [
+    ...molecule.atoms.map((candidate) => candidate.id),
+    ...molecule.bonds.map((candidate) => candidate.id),
+  ];
+  // 片段原子以 `${prefix}-${index}-<templateId>` 派生 id 而不入库 `${prefix}-${index}` 本身，
+  // 因此除精确占用外还要跳过派生占用，否则第二个片段会复用同一 suffix 造成原子 id 冲突。
+  const isTaken = (candidate: string) =>
+    ids.some((id) => id === candidate || id.startsWith(`${candidate}-`));
   let index = 1;
-  while (used.has(`${prefix}-${index}`)) index += 1;
+  while (isTaken(`${prefix}-${index}`)) index += 1;
   return `${prefix}-${index}`;
 }
 
 export function areBuilderMoleculesEqual(first: BuilderMolecule, second: BuilderMolecule): boolean {
+  // 快速通道：id 逐一对应且元素/键/坐标一致时直接判等，跳过昂贵的图同构回溯。
+  // "present 与 initial 尚未修改"这个最常见场景恰是同构搜索最贵的路径（必须找到完整映射）。
+  if (quickStructuralEqual(first, second)) return true;
   if (!areMolecularGraphsEqual(first, second)) return false;
   const firstPositions = [...first.atoms]
     .sort((a, b) => a.id.localeCompare(b.id))
@@ -444,6 +593,19 @@ export function areBuilderMoleculesEqual(first: BuilderMolecule, second: Builder
     .sort((a, b) => a.id.localeCompare(b.id))
     .map((candidate) => [candidate.id, ...candidate.position.map((value) => Number(value.toFixed(4)))]);
   return JSON.stringify(firstPositions) === JSON.stringify(secondPositions);
+}
+
+function quickStructuralEqual(first: BuilderMolecule, second: BuilderMolecule): boolean {
+  if (first.atoms.length !== second.atoms.length || first.bonds.length !== second.bonds.length) return false;
+  const serializeAtoms = (molecule: BuilderMolecule) => [...molecule.atoms]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((candidate) => `${candidate.id}|${candidate.element}|${candidate.position.map((value) => value.toFixed(4)).join(",")}`)
+    .join(";");
+  const serializeBonds = (molecule: BuilderMolecule) => molecule.bonds
+    .map((candidate) => `${[...candidate.atomIds].sort().join("~")}|${candidate.order}`)
+    .sort()
+    .join(";");
+  return serializeAtoms(first) === serializeAtoms(second) && serializeBonds(first) === serializeBonds(second);
 }
 
 export function countFragments(molecule: BuilderMolecule): number {
@@ -585,6 +747,44 @@ function getStylizedBondLength(first: BuilderElement, second: BuilderElement): n
 
 function add(first: BuilderVec3, second: BuilderVec3): BuilderVec3 {
   return [first[0] + second[0], first[1] + second[1], first[2] + second[2]];
+}
+
+// 求把 from 方向转到 to 方向的最小旋转，并应用于 value（罗德里格斯公式，避免引入 three 依赖）。
+// 用于片段拼接：把模板的 anchorDirection 对齐到真实母体方向，使模板键角在任意接入方向下保持不变。
+export function rotateVectorBetween(value: BuilderVec3, from: BuilderVec3, to: BuilderVec3): BuilderVec3 {
+  const source = normalize(from);
+  const target = normalize(to);
+  const cosine = dot(source, target);
+  if (cosine > 0.9999) return [...value] as BuilderVec3;
+  if (cosine < -0.9999) {
+    // 反向特例：绕任意与 source 垂直的轴旋转 180°（v' = 2(axis·v)axis − v）。
+    const helper: BuilderVec3 = Math.abs(source[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0];
+    const axis = normalize(cross(source, helper));
+    const projection = dot(axis, value);
+    return [
+      2 * projection * axis[0] - value[0],
+      2 * projection * axis[1] - value[1],
+      2 * projection * axis[2] - value[2],
+    ];
+  }
+  // 未归一化轴（|axis| = sinθ）下的等价展开：v' = v·cosθ + axis×v + axis(axis·v)/(1+cosθ)。
+  const axis = cross(source, target);
+  const scaleFactor = 1 / (1 + cosine);
+  const axisCrossValue = cross(axis, value);
+  const axisDotValue = dot(axis, value);
+  return [
+    value[0] * cosine + axisCrossValue[0] + axis[0] * axisDotValue * scaleFactor,
+    value[1] * cosine + axisCrossValue[1] + axis[1] * axisDotValue * scaleFactor,
+    value[2] * cosine + axisCrossValue[2] + axis[2] * axisDotValue * scaleFactor,
+  ];
+}
+
+function cross(first: BuilderVec3, second: BuilderVec3): BuilderVec3 {
+  return [
+    first[1] * second[2] - first[2] * second[1],
+    first[2] * second[0] - first[0] * second[2],
+    first[0] * second[1] - first[1] * second[0],
+  ];
 }
 
 function sub(first: BuilderVec3, second: BuilderVec3): BuilderVec3 {

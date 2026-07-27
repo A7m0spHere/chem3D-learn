@@ -171,6 +171,9 @@ function createOrganicCoplanarSeed(): BuilderSeed {
 
   const vinylDirection = radial(1);
   const vinylTangent = tangent(vinylDirection);
+  // TODO-CHEM-VERIFY：苯乙烯类分子因共轭，优势构象是乙烯基与苯环近共面；
+  // 此处刻意混入 45° z 分量展示"单键可旋转"的扭转构象，用于共面性教学时需要说明
+  // 这不是最低能量构象，避免误导"最多共面原子数"类考题的直觉。
   const vinylPlaneVector = normalize(add(scale(vinylTangent, Math.cos(Math.PI / 4)), [0, 0, Math.sin(Math.PI / 4)]));
   const vinylC1 = add(positions[1], scale(vinylDirection, 0.86));
   const vinylC2 = add(vinylC1, scale(vinylDirection, 0.78));

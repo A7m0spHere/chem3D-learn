@@ -90,4 +90,6 @@ export type BuilderFragmentTemplate = {
   atoms: Array<Omit<BuilderAtom, "id"> & { templateId: string }>;
   bonds: Array<{ atomIds: [string, string]; order: BuilderBondOrder }>;
   attachmentAtomId: string;
+  /** 模板坐标系中"母体应在的方向"（以 attachment 原子为原点），拼接时按它旋转对齐；缺省 [-1, 0, 0]。 */
+  anchorDirection?: BuilderVec3;
 };

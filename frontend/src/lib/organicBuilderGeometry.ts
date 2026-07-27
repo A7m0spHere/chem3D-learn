@@ -39,6 +39,9 @@ export function matchBuilderBondAngles(molecule: BuilderMolecule): BuilderBondAn
     const rule = matchLocalGeometry(center, neighbors, adjacency);
     const pair = chooseRepresentativeNeighborPair(neighbors);
     if (!rule || !pair) return [];
+    // 三/四元小环内的真实夹角（约 60°/90°）与杂化典型值差距过大：
+    // 宁可不标注，也不能在 60° 的弧上写"≈109.5°"自相矛盾。
+    if (isTightRingPair(pair, adjacency, center.id)) return [];
     return [{
       id: `builder-angle-${pair[0].atom.id}-${center.id}-${pair[1].atom.id}`,
       atomIds: [pair[0].atom.id, center.id, pair[1].atom.id],
@@ -47,6 +50,23 @@ export function matchBuilderBondAngles(molecule: BuilderMolecule): BuilderBondAn
       ...rule,
     }];
   });
+}
+
+// pair 两原子直接成键（三元环）或共享除中心外的邻居（四元环）时视为小环代表角。
+function isTightRingPair(
+  pair: [AdjacentAtom, AdjacentAtom],
+  adjacency: Map<string, AdjacentAtom[]>,
+  centerId: string,
+): boolean {
+  const [first, second] = pair;
+  const firstNeighbors = adjacency.get(first.atom.id) ?? [];
+  if (firstNeighbors.some((neighbor) => neighbor.atom.id === second.atom.id)) return true;
+  const secondNeighborIds = new Set(
+    (adjacency.get(second.atom.id) ?? []).map((neighbor) => neighbor.atom.id),
+  );
+  return firstNeighbors.some((neighbor) =>
+    neighbor.atom.id !== centerId && secondNeighborIds.has(neighbor.atom.id),
+  );
 }
 
 function matchLocalGeometry(
@@ -115,6 +135,16 @@ function matchLocalGeometry(
           descriptionZh: "酰胺氮的孤电子对与羰基共轭，局部按 sp² 近似平面结构匹配约 120°。",
         };
       }
+      // 直连不饱和碳（苯环、C=C）的氮因共轭明显平面化（如苯胺 H–N–H ≈113°），
+      // 既不是 107° 也不是 120°：宁可不标注，避免给出错误教学值。
+      const isConjugatedNitrogen = neighbors.some((neighbor) =>
+        neighbor.atom.element === "C"
+        && neighbor.bond.order === 1
+        && (adjacency.get(neighbor.atom.id) ?? []).some((secondNeighbor) =>
+          secondNeighbor.atom.element === "C" && secondNeighbor.bond.order === 2,
+        ),
+      );
+      if (isConjugatedNitrogen) return undefined;
       return {
         valueDeg: 107,
         label: "≈107°",
@@ -144,7 +174,7 @@ function matchLocalGeometry(
           label: "≈109.5°",
           geometryZh: "折线形",
           hybridization: "sp³",
-          descriptionZh: "醇或醚中的氧按 sp³ 电子域给出约 109.5° 的基础教学近似值。",
+          descriptionZh: "单键氧（醇、醚、羧基中的 –O– 等）按 sp³ 电子域给出约 109.5° 的基础教学近似值。",
         };
   }
 
