@@ -107,8 +107,12 @@ export function ModulesPage() {
           </div>
         )}
         {visibleSections.map(({ category, modules }, sectionIndex) => (
-          <ScrollReveal key={category.id} delay={sectionIndex === 0 ? 100 : 0}>
-            <section className="mb-14 last:mb-0" aria-labelledby={`${category.id}-title`}>
+          <ScrollReveal
+            className={sectionIndex < visibleSections.length - 1 ? "mb-14" : undefined}
+            delay={sectionIndex === 0 ? 100 : 0}
+            key={category.id}
+          >
+            <section aria-labelledby={`${category.id}-title`}>
               <div className="flex items-start justify-between gap-5 border-b border-border pb-4">
                 <div>
                   <p className="text-sm font-semibold text-primary">{category.subtitle}</p>
