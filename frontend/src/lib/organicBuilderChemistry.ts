@@ -536,8 +536,58 @@ export function getSuggestedPosition(
     },
     { direction: directions[0], score: -Infinity },
   ).direction;
-  const distance = getStylizedBondLength(center.element, newElement);
+  const distance = resolveBondLength(molecule, center, newElement, order);
   return add(center.position, scale(direction, distance));
+}
+
+// 决定新键长时优先沿用分子里同类键的现有长度，而不是无条件用样式化常数：
+// 种子分子各自有一套键长标尺（苯的 C–H 是 0.66、共面综合模型约 0.45），若把拔下的 H
+// 按常数 0.92 吸附回去，它会比同环上其余五个 H 明显长一截。
+// 取舍：先找同一中心原子上的同类键（最贴近局部标尺），再退回全分子同类键的中位数，
+// 都没有才用样式化常数——从零拼装时分子内所有键本就是常数长度，因此行为不变。
+function resolveBondLength(
+  molecule: BuilderMolecule,
+  center: BuilderAtom,
+  newElement: BuilderElement,
+  order: BuilderBondOrder,
+): number {
+  const stylized = getStylizedBondLength(center.element, newElement);
+  const sameCenter = sampleBondLengths(molecule, center.element, newElement, order, center.id);
+  const reference = sameCenter.length > 0
+    ? median(sameCenter)
+    : median(sampleBondLengths(molecule, center.element, newElement, order));
+  if (reference === undefined) return stylized;
+  // 防御退化值：极端情况下（例如手工构造的重叠原子）不接受近零或超长的参考键长。
+  return Math.min(Math.max(reference, 0.35), 2);
+}
+
+// 收集分子中「元素对与键级都相同」的键长；给出 centerId 时只看该原子参与的键。
+function sampleBondLengths(
+  molecule: BuilderMolecule,
+  centerElement: BuilderElement,
+  newElement: BuilderElement,
+  order: BuilderBondOrder,
+  centerId?: string,
+): number[] {
+  const wanted = [centerElement, newElement].sort().join("-");
+  const lengths: number[] = [];
+  for (const candidate of molecule.bonds) {
+    if (candidate.order !== order) continue;
+    if (centerId && !candidate.atomIds.includes(centerId)) continue;
+    const first = molecule.atoms.find((atom) => atom.id === candidate.atomIds[0]);
+    const second = molecule.atoms.find((atom) => atom.id === candidate.atomIds[1]);
+    if (!first || !second) continue;
+    if ([first.element, second.element].sort().join("-") !== wanted) continue;
+    lengths.push(Math.hypot(...sub(second.position, first.position)));
+  }
+  return lengths;
+}
+
+function median(values: number[]): number | undefined {
+  if (values.length === 0) return undefined;
+  const sorted = [...values].sort((first, second) => first - second);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 1 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
 export function cloneBuilderMolecule(molecule: BuilderMolecule): BuilderMolecule {

@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { ethyleneBuilderSeed } from "../../src/data/organicBuilderSeeds";
+import {
+  benzeneBuilderSeed,
+  ethyleneBuilderSeed,
+  organicCoplanarBuilderSeed,
+} from "../../src/data/organicBuilderSeeds";
 import { builderHistoryReducer, createBuilderHistory } from "../../src/hooks/useOrganicBuilder";
 import {
   autoFillHydrogens,
@@ -355,6 +359,60 @@ test("暂存区槽位避开残留原子，不再完全重叠", () => {
   const [remaining, added] = state.present.atoms;
   expect(distanceBetween(remaining.position, added.position)).toBeGreaterThan(0.3);
 });
+
+test("拔下的原子吸附回去沿用该分子的键长标尺，不再明显长一截", () => {
+  // 苯种子 C–H = 0.66，与样式化常数 0.92 不同；拔下再吸附回去必须与其余五个 H 等长。
+  let benzene = createBuilderHistory(benzeneBuilderSeed, "h1");
+  benzene = builderHistoryReducer(benzene, {
+    type: "drop-atom",
+    atomId: "h1",
+    position: bondPartnerPosition(benzene.present, "c1", 0.8),
+    connectToId: "c1",
+    order: 1,
+  });
+  expect(benzene.feedback?.tone).toBe("success");
+  const benzeneLengths = [1, 2, 3, 4, 5, 6].map((index) =>
+    measureBond(benzene.present, `c${index}`, `h${index}`),
+  );
+  const [reattached, ...untouched] = benzeneLengths;
+  untouched.forEach((length) => expect(Math.abs(reattached - length)).toBeLessThan(0.02));
+
+  // 共面综合模型的甲基 C–H 约 0.59，同样应沿用局部标尺而非常数。
+  let coplanar = createBuilderHistory(organicCoplanarBuilderSeed, "methylH1");
+  coplanar = builderHistoryReducer(coplanar, {
+    type: "drop-atom",
+    atomId: "methylH1",
+    position: bondPartnerPosition(coplanar.present, "methylC", 0.7),
+    connectToId: "methylC",
+    order: 1,
+  });
+  expect(coplanar.feedback?.tone).toBe("success");
+  const reattachedMethyl = measureBond(coplanar.present, "methylC", "methylH1");
+  const referenceMethyl = measureBond(coplanar.present, "methylC", "methylH2");
+  expect(Math.abs(reattachedMethyl - referenceMethyl)).toBeLessThan(0.02);
+});
+
+test("从零拼装时键长仍使用样式化标尺", () => {
+  // 分子内没有同类键可参照时必须回退到常数，否则空白画布拼装会失去统一尺度。
+  let state = createBuilderHistory();
+  state = builderHistoryReducer(state, { type: "add-atom", element: "C", order: 1 });
+  const carbonId = state.present.atoms[0].id;
+  state = builderHistoryReducer(state, { type: "add-atom", element: "H", order: 1, attachToId: carbonId });
+  const hydrogenId = state.present.atoms.find((atom) => atom.element === "H")!.id;
+  expect(measureBond(state.present, carbonId, hydrogenId)).toBeCloseTo(0.92, 2);
+});
+
+function measureBond(molecule: BuilderMolecule, firstId: string, secondId: string): number {
+  const first = molecule.atoms.find((atom) => atom.id === firstId)!;
+  const second = molecule.atoms.find((atom) => atom.id === secondId)!;
+  return distanceBetween(first.position, second.position);
+}
+
+// 取靠近目标原子的一个落点，模拟拖到吸附范围内松手。
+function bondPartnerPosition(molecule: BuilderMolecule, targetId: string, offset: number): BuilderVec3 {
+  const target = molecule.atoms.find((atom) => atom.id === targetId)!;
+  return [target.position[0] + offset, target.position[1], target.position[2]];
+}
 
 function completeHeavySkeleton(
   id: string,
