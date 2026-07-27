@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-27（Codex，对接 Claude Code 全站滚动滑入动画并修复 Modules 分类间距回归）
+> 最后更新：2026-07-28（Claude Code，T-021 按 D-019 分组拆成 4 个 commit 提交并推送）
 
 ## 一句话定位
 
@@ -26,13 +26,30 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
+- **T-021 已提交**（2026-07-28，按 D-019 分组拆成 4 个代码 commit + 1 个 docs commit）：
+  - `d6ea076 fix(builder): correct bond geometry and functional-group detection` —— 化学与几何层（`organicBuilderChemistry.ts`、`organicBuilderGeometry.ts`、`types/organicBuilder.ts`、`organicBuilderSeeds.ts`、`tailwind.config.ts`）
+  - `c940c33 fix(builder): keep chinese names consistent and refuse to guess` —— 命名层（`organicBuilderNomenclature.ts`）
+  - `45485b8 fix(builder): make fragment assembly and undo actually usable` —— 状态与交互（`useOrganicBuilder.ts`、`ModuleDetailPage.tsx`、新增 `tests/logic/organic-builder-fixes.logic.spec.ts`）
+  - `e8169cb fix(builder): surface live hints and tokenize overlay styles` —— 视觉与测试（`OrganicBuilderCanvas.tsx`、`OrganicBuilderPage.tsx`、Toolbox / InfoPanel、3 个测试文件）
+  - `git diff --check` 对 `tailwind.config.ts` 报的 "space before tab in indent" 是该文件既有风格（shadcn 生成，HEAD 中每行都是两空格+制表符），非本次引入。
+  - 提交过程中发现并修正了 TASKS.md 的一处事实错误：T-022 的前两项（模板坐标重写、旋转对齐）实际已在这批改动中落地，详见下方与 `docs/TASKS.md` T-022。
+
 - `main` 已包含 Claude Code 的全站滚动滑入动画（`5f66b7a`）与 Codex 对接修复（`55c3dfc`）：Home / Modules / Paths / Exam / About / ExamTopicDetail 使用统一 `ScrollReveal`，ModuleDetailPage 的 3D Canvas 保持不动；Modules 分类区块间距已移到动画 wrapper，避免子 `section` 的 `last:` 因包装层变化而把每个区块都误判为末项。
 - 工作区干净，与 `origin/main` 同步。**引线标签扩展系列已收尾**：转换类 T-011 MOF-5（`fb6ceec`）、T-012 MXene（`2c5615a`）、T-013 ReN₃（`9e3e464`）、T-014 金属密堆积（`547482b`）、T-015 PBA（`f3f4984`）、T-018 ZincMetal（`cac0e90`）、T-019 BaTiO3（`a52cf62`）；评估类 T-016 Graphite / T-017 ZnS 逐 scene 核对后判定**无需改动**（全部恒显标签均为标题/总结/门控/已在外围，无压在结构上的指向型恒显标签，见 D-016）。T-010 原子图例（`d18b785`）亦已提交。此前 HANDOFF/STATUS 记录的「T-010/T-011 尚未提交、等用户确认」已过时，实际已按当时建议分 commit 落地。
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
 
-## 独立验证结果（2026-07-27）
+## 独立验证结果（2026-07-27，T-021）
+
+- `frontend npm run build`：**通过**（含 `tsc --noEmit`）；保留既有 `three` chunk ~688 KB 非阻断警告。
+- `frontend npm run lint`：**通过**。
+- `frontend npm run test:logic`：**80 / 80 通过**（原 64 + 新增 `organic-builder-fixes.logic.spec.ts` 16 项）。
+- 过程记录：首次运行 logic 测试有 7 项失败，全部源于新增甲苯词典条目未同步 T-001 表驱动测试的独立中文名期望表（该表有"与词典 ID 一一对应"断言）；补上期望表后全绿。**新增或删除 `knownOrganicMolecules` 条目时必须同步那张表。**
+- 浏览器行为回归（`PLAYWRIGHT_CHANNEL=chrome`）：**未运行**。
+- Darwin 视觉回归：**未运行**（Windows 无基线，不得更新）。
+
+## 独立验证结果（2026-07-27，T-020）
 
 - `frontend npm run build`：**通过**；Vite 转换 2322 个模块，保留既有 `three` chunk 约 688 KB 非阻断警告。
 - `frontend npm run lint`：**通过**。
@@ -67,10 +84,18 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 正在进行
 
-（暂无。）
+（暂无。T-021 已提交完毕；剩余的 T-022 第 3 项与 T-023 见 `docs/TASKS.md` 待办。）
 
 ## 最近完成
 
+- **T-021 有机拼装实验室教学正确性与交互修复**（2026-07-27 完成，2026-07-28 提交 `d6ea076` / `c940c33` / `45485b8` / `e8169cb`）
+  - 三路只读审查（主 Agent 查 UI/交互/动画，两个子 Agent 查化学状态逻辑与命名键角逻辑），P0 结论全部逐行核对源码后才动手。
+  - 修掉 **7 项会向学生展示错误化学事实的硬伤**：O 中心弯折角实际 75° 却标注 104.5°（方向向量分量写反）；CO₂ 型双双键碳摆成 120° V 形却标 180° 直线形（只判断有无双键、不数个数）；不饱和醇/酮/胺的中文名丢失"烯/炔"（丙烯醇显示为"丙-1-醇"，即另一种真实分子，而英文正确）；不饱和多元醛中英文都命名为饱和二醛；最长链解析失败时静默降级给出违反"最长碳链"规则的名称；羧基同时误报"羰基+羟基"、苯（凯库勒式）误报"碳碳双键"；三/四元环中心键角标 109.5°（环丙烷真实约 60°）。
+  - 修掉**关键交互缺陷**：片段 ID 生成必然冲突（`nextBuilderId` 只查 `fragment-1`，实际入库 `fragment-1-c`），导致"用两个片段拼乙酸"这一最基本课堂流程直接不可用；吸附预览不做价键预检、失败时连拖动位移一起回弹；旋转视角松手误清空选中；沉浸模式下实时拖拽提示因传给不渲染的 `footerMeta` 而永不显示；Ctrl+Z 在按钮聚焦时被忽略；"恢复起点"清空撤销历史；seedId 变化不重置分子（`useReducer` 惰性初始化陷阱，改为路由层 `key` 重挂载）。
+  - 顺带：官能团补齐氰基/醚键/酯基（自带 –C≡N 片段此前接上后面板空白）、HCl 不再报"卤代结构"、甲苯进入教学词典、NH₃ 分子式不再显示 "H3N"、`isDirty` 加廉价短路避免每次渲染跑指数级图同构、`shadow-overlay`/`accent-dark` token 化并清理 3 个 CSS 中根本不存在的死类名。
+  - build / lint 通过；`test:logic` 由 64 → **80 通过**（新增 16 项针对本次每一条修复的回归）。浏览器行为回归与 Darwin 视觉回归**未运行**。
+  - 同批还落地了原 T-022 的前两项：10 个片段模板坐标按各自杂化重写并统一到 `getStylizedBondLength` 标尺（甲基 H–C–H 现为 109.5°，非此前记录的约 70°），`addFragment` 用新增的 `rotateVectorBetween` 把模板 `anchorDirection` 旋转对齐到真实母体方向，不再是纯平移。
+  - **未做**（已写入 TASKS）：T-022 仅剩苯种子 C–H 键长标尺统一（0.66 vs 0.92）；T-023 3D 补间动画、双键圆柱朝向相机、确认弹窗统一、分子式排版统一。
 - **T-020 对接 Claude Code 全站滚动滑入动画并修复 Modules 分类间距**（2026-07-27，commits `5f66b7a` + `55c3dfc`）
   - Claude Code 将 Home / Modules / Paths / Exam / About / ExamTopicDetail 的整页进入动效统一为 `ScrollReveal`，首页 Hero 使用分层错峰滑入；ModuleDetailPage 的 3D Canvas 未包入动画，避免影响 R3F 布局。
   - Codex 独立审查与系统 Chrome 实测发现：`ModulesPage` 新增 wrapper 后，原 `section` 上的 `last:mb-0` 会对每个 wrapper 内唯一子元素都生效，导致分类间距归零。现将间距放到 `ScrollReveal` 外层，并根据 `visibleSections` 判断末项，筛选后同样正确。
@@ -151,7 +176,12 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-`docs/TASKS.md` 的既有 backlog（T-004、T-005 及引线标签系列 T-011~T-019）**已全部收口**，当前无待办任务。后续方向候选（均未立项，动手前先与用户确认）：
+当前待办见 `docs/TASKS.md`，按优先级：
+
+1. **T-022 剩余项：统一样式化键长标尺**（苯种子 C–H = 0.66 与 `getStylizedBondLength` 的 0.92 不一致）。原 T-022 的模板键角重写与旋转对齐两项**已随 T-021 批次落地**（`d6ea076` / `45485b8`），TASKS 中的过时描述已修正。
+2. **T-023 3D 补间动画与视觉 token 收尾**（体验与一致性，不涉及教学正确性）。
+
+更早的 backlog（T-004、T-005 及引线标签系列 T-011~T-019）**已全部收口**。其他方向候选（均未立项，动手前先与用户确认）：
 
 1. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
 2. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
