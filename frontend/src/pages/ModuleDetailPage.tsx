@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import { ChevronRight, Home, LayoutList } from "lucide-react";
 
 // 3D viewers 按需懒加载：使 three.js / R3F 不进入首页、考试页等非 3D 页面的初始包。
@@ -321,6 +321,12 @@ export function ModuleDetailPage() {
   const [pullingBuilderAtomId, setPullingBuilderAtomId] = useState<string>();
   const [builderTransitionPhase, setBuilderTransitionPhase] = useState<"idle" | "pulling" | "expanding">("idle");
   const prefersReducedMotion = useReducedMotion();
+  const location = useLocation();
+  // 从拼装实验室返回时（返回按钮带 viewTransition），同样给 3D 舞台挂上共享元素名，
+  // 让"实验室 → 模块页"的反向过渡与进入动画对称。
+  const returnedFromBuilder = Boolean(
+    (location.state as { returnedFromBuilder?: boolean } | null)?.returnedFromBuilder,
+  );
 
   const handleBuilderAtomPull = (atomId: string) => {
     if (pullingBuilderAtomId) return;
@@ -1016,7 +1022,7 @@ export function ModuleDetailPage() {
                   : "xl:h-[calc(100vh-205px)] xl:min-h-[640px]"
               }`}
               data-testid="module-builder-transition-stage"
-              style={pullingBuilderAtomId && !prefersReducedMotion
+              style={(pullingBuilderAtomId || returnedFromBuilder) && !prefersReducedMotion
                 ? ({ viewTransitionName: "organic-builder-stage" } as CSSProperties)
                 : undefined}
             >
