@@ -133,6 +133,23 @@
   animation: motion-skeleton 1.2s ease-in-out infinite;
 }
 
+/* 首页 Hero 平滑滑入：放慢到 1.1s、位移 48px，让"慢慢滑入"的过程肉眼可见。
+   初始隐藏在下方，挂载后由 .is-entered 触发一次性平滑滑入。用 transition 而非 keyframe，
+   保证只跑一遍且可被全局 prefers-reduced-motion 兜底自动禁用。 */
+.motion-hero-item {
+  opacity: 0;
+  transform: translateY(48px);
+  transition:
+    opacity 1100ms var(--ease-out-soft),
+    transform 1100ms var(--ease-out-soft);
+  will-change: transform, opacity;
+}
+
+.motion-hero-item.is-entered {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* --- Organic builder shared-stage transition --- */
 
 .module-builder-transition::after {
@@ -255,5 +272,14 @@ html[data-organic-builder-transition="viewer-expand"]::view-transition-new(root)
 
   .organic-builder-transition-source {
     transform: none !important;
+  }
+
+  /* 首页滑入动画豁免：即使系统开启减少动画，首页 Hero / 滚动区仍播放过渡，
+     让教学演示能直观看到"内容慢慢滑入"的效果（产品主人选择）。
+     用更长的时长覆盖上面的 0.01ms 全局压缩。 */
+  .motion-hero-item,
+  .motion-hero-item.is-entered,
+  .motion-scroll-reveal {
+    transition-duration: 1100ms !important;
   }
 }

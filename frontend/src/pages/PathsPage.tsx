@@ -1,6 +1,7 @@
 import { ArrowRight, BookOpenCheck, ChevronRight, Home, Map, Route as RouteIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import {
   getModuleById,
   learningPaths,
@@ -25,46 +26,50 @@ const pathTeachingNotes: Record<string, { focus: string; selfStudy: string }> = 
 
 export function PathsPage() {
   return (
-    <main className="motion-page-enter min-h-screen bg-background pb-20">
-      <section className="border-b border-border bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <nav className="mb-6 flex items-center text-sm font-medium text-text-secondary">
-            <Link to="/" className="transition-colors hover:text-primary">
-              <Home className="h-4 w-4" />
-            </Link>
-            <ChevronRight className="mx-2 h-4 w-4" />
-            <span className="text-text-primary">参考顺序</span>
-          </nav>
+    <main className="min-h-screen bg-background pb-20">
+      <ScrollReveal direction="none">
+        <section className="border-b border-border bg-white">
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <nav className="mb-6 flex items-center text-sm font-medium text-text-secondary">
+              <Link to="/" className="transition-colors hover:text-primary">
+                <Home className="h-4 w-4" />
+              </Link>
+              <ChevronRight className="mx-2 h-4 w-4" />
+              <span className="text-text-primary">参考顺序</span>
+            </nav>
 
-          <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-semibold text-primary-dark">
-                <RouteIcon className="h-4 w-4" aria-hidden="true" />
-                自学参考顺序
+            <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-semibold text-primary-dark">
+                  <RouteIcon className="h-4 w-4" aria-hidden="true" />
+                  自学参考顺序
+                </div>
+                <h1 className="mt-5 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+                  不知道先看哪个？按理解顺序参考
+                </h1>
+                <p className="mt-4 max-w-3xl text-lg leading-8 text-text-secondary">
+                  这里把常一起对照的结构按课本递进排成几条参考路线。它们不是必须完成的课程——你随时可以跳到任何一步，或者直接回结构库搜自己需要的模型。
+                </p>
               </div>
-              <h1 className="mt-5 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-                不知道先看哪个？按理解顺序参考
-              </h1>
-              <p className="mt-4 max-w-3xl text-lg leading-8 text-text-secondary">
-                这里把常一起对照的结构按课本递进排成几条参考路线。它们不是必须完成的课程——你随时可以跳到任何一步，或者直接回结构库搜自己需要的模型。
-              </p>
-            </div>
-            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
-              <div className="flex items-center gap-3 text-primary-dark">
-                <BookOpenCheck className="h-5 w-5" aria-hidden="true" />
-                <h2 className="font-bold">自学建议</h2>
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+                <div className="flex items-center gap-3 text-primary-dark">
+                  <BookOpenCheck className="h-5 w-5" aria-hidden="true" />
+                  <h2 className="font-bold">自学建议</h2>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-text-secondary">
+                  结合手头的课本或题目使用：先自己观察结构、做出判断，再打开角度、标签或配位提示核对。卡在哪一步，就多转一会儿哪一步。
+                </p>
               </div>
-              <p className="mt-3 text-sm leading-6 text-text-secondary">
-                结合手头的课本或题目使用：先自己观察结构、做出判断，再打开角度、标签或配位提示核对。卡在哪一步，就多转一会儿哪一步。
-              </p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       <div className="mx-auto max-w-7xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
-        {learningPaths.map((path) => (
-          <LearningPathSection key={path.id} path={path} />
+        {learningPaths.map((path, index) => (
+          <ScrollReveal key={path.id} delay={index === 0 ? 100 : 0}>
+            <LearningPathSection path={path} />
+          </ScrollReveal>
         ))}
       </div>
     </main>
