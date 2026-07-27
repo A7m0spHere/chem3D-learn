@@ -14,9 +14,9 @@ test("新增片段按钮出现在工具箱且可拼接（乙烯基 → 丙-1-烯
   await page.goto("/lab/organic-builder/ethylene-planar");
   await expect(page.getByTestId("organic-builder-page")).toBeVisible();
 
-  // 新建空白，从单个碳开始。
-  page.once("dialog", (dialog) => dialog.accept());
+  // 新建空白，从单个碳开始（自定义确认弹窗替代了原生 confirm）。
   await page.getByRole("button", { name: "新建空白模型" }).click();
+  await page.getByRole("button", { name: "清空并新建" }).click();
   await page.getByTestId("builder-add-c").click();
 
   // 四个新片段按钮都应出现在工具箱。

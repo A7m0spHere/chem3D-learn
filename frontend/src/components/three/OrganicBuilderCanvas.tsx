@@ -1,10 +1,10 @@
-import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
-import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { Plane, Quaternion, Vector3 } from "three";
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { Plane, Quaternion, Vector3, type Group } from "three";
 import { AngleArc } from "@/components/three/AngleArc";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
-import { builderElementConfig } from "@/lib/organicBuilderChemistry";
+import { builderElementConfig, canSetBond, detachBuilderAtom } from "@/lib/organicBuilderChemistry";
 import type {
   BuilderAtom,
   BuilderBond,
@@ -96,13 +96,32 @@ export function OrganicBuilderCanvas({
   const shouldDetach = Boolean(drag?.wasConnected && dragDistance > DETACH_DISTANCE);
   const snapTarget = useMemo(() => {
     if (!drag || (drag.wasConnected && !shouldDetach)) return undefined;
+    // 预检与松手时 reducer 的实际校验保持一致：将拔下时按拔下后的键状态检查价键，
+    // 避免出现"绿色吸附预览承诺能连、松手却被拒绝"的矛盾。
+    const previewMolecule = shouldDetach ? detachBuilderAtom(molecule, drag.atomId) : molecule;
     return displayAtoms
       .filter((candidate) => candidate.id !== drag.atomId)
       .map((candidate) => ({ atom: candidate, distance: distance(candidate.position, drag.current) }))
       .filter((candidate) => candidate.distance < SNAP_DISTANCE)
+      .filter((candidate) => canSetBond(previewMolecule, drag.atomId, candidate.atom.id, selectedBondOrder).ok)
       .sort((a, b) => a.distance - b.distance)[0]?.atom;
-  }, [displayAtoms, drag, shouldDetach]);
+  }, [displayAtoms, drag, molecule, selectedBondOrder, shouldDetach]);
   const movingAtom = drag ? atomsById.get(drag.atomId) : undefined;
+  // 沉浸模式下 ThreeViewerFrame 不渲染 footer，拖拽状态提示改为画布内浮签展示。
+  const dragHint = drag
+    ? shouldDetach
+      ? "松开后整体拔下"
+      : snapTarget
+        ? `松开与 ${snapTarget.element} 形成${bondOrderName(selectedBondOrder)}`
+        : undefined
+    : undefined;
+  const lastDragHintRef = useRef<string>();
+  useEffect(() => {
+    if (dragHint) lastDragHintRef.current = dragHint;
+  }, [dragHint]);
+  // 拖转视角（pointerdown → move → up）在浏览器里同样产生 click，会触发 onPointerMissed；
+  // 记录按下位置，位移超过阈值时视为旋转视角，不清空当前选中。
+  const pointerMissGuard = useRef<{ x: number; y: number }>();
 
   const handlePointerDown = (atom: BuilderAtom, event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
@@ -162,13 +181,8 @@ export function OrganicBuilderCanvas({
   return (
     <ThreeViewerFrame
       className={immersive ? "" : "min-h-[520px] lg:min-h-[680px]"}
-      footerMeta={shouldDetach
-        ? "松开后整体拔下"
-        : snapTarget
-          ? `松开形成${bondOrderName(selectedBondOrder)}`
-          : bondAngles.length > 0
-            ? `已自动匹配 ${bondAngles.length} 个中心键角`
-            : undefined}
+      footerMeta={dragHint
+        ?? (bondAngles.length > 0 ? `已自动匹配 ${bondAngles.length} 个中心键角` : undefined)}
       immersive={immersive}
       meta="拖动原子拆装 · 拖动空白旋转 · 滚轮缩放"
       stageTestId="organic-builder-canvas"
@@ -181,6 +195,12 @@ export function OrganicBuilderCanvas({
       transitionName="organic-builder-stage"
       viewerTestId="organic-builder-viewer"
     >
+      <div
+        className="h-full w-full"
+        onPointerDownCapture={(event) => {
+          pointerMissGuard.current = { x: event.clientX, y: event.clientY };
+        }}
+      >
       <Canvas
         camera={{ position: [center[0] + 4.4, center[1] + 3.4, center[2] + 6.2], fov: 43 }}
         frameloop="demand"
@@ -189,7 +209,9 @@ export function OrganicBuilderCanvas({
           setSceneReady(true);
           onReady?.();
         }}
-        onPointerMissed={() => {
+        onPointerMissed={(event) => {
+          const guard = pointerMissGuard.current;
+          if (guard && Math.hypot(event.clientX - guard.x, event.clientY - guard.y) > 6) return;
           onSelectAtom(undefined);
           onSelectBond(undefined);
         }}
@@ -258,7 +280,7 @@ export function OrganicBuilderCanvas({
           <Html center pointerEvents="none" position={[0, 0, 0]}>
             <div className="w-64 rounded-2xl border border-border bg-white/90 px-5 py-4 text-center shadow-panel">
               <div className="font-semibold text-text-primary">这里还是空的</div>
-              <div className="mt-1 text-sm text-text-secondary">从左侧选择 C、H、O、N 或一个官能团。</div>
+              <div className="mt-1 text-sm text-text-secondary">打开模型盒，选择一个原子或常用片段开始拼装。</div>
             </div>
           </Html>
         ) : null}
@@ -273,9 +295,27 @@ export function OrganicBuilderCanvas({
           target={center}
         />
       </Canvas>
+      {immersive ? (
+        <div
+          aria-live="polite"
+          className={`pointer-events-none absolute bottom-20 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/80 bg-white/90 px-4 py-1.5 text-sm font-semibold text-primary-dark shadow-overlay backdrop-blur-xl transition-all duration-200 ease-out-soft ${dragHint ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+          data-testid="builder-drag-hint"
+        >
+          {dragHint ?? lastDragHintRef.current ?? ""}
+        </div>
+      ) : null}
+      </div>
     </ThreeViewerFrame>
   );
 }
+
+// useFrame 内复用的临时向量，避免每帧新建对象。
+const atomPositionTarget = new Vector3();
+const bondAxisTemp = new Vector3();
+const toCameraTemp = new Vector3();
+const offsetDesiredTemp = new Vector3();
+const bondLocalXTemp = new Vector3();
+const bondLocalZTemp = new Vector3();
 
 function BuilderAtomMesh({
   atom,
@@ -300,8 +340,40 @@ function BuilderAtomMesh({
 }) {
   const config = builderElementConfig[atom.element];
   const radius = atom.radius ?? config.radius;
+  const groupRef = useRef<Group>(null);
+  const invalidate = useThree((state) => state.invalidate);
+  const entranceInitialized = useRef(false);
+
+  // 轻量补间（frameloop="demand" 下通过 invalidate 续帧）：
+  // 新增原子从 0.45 缩放弹入；吸附/建议摆位的位置变化平滑过渡而不是瞬移；
+  // 拖拽中的原子跳过位置补间，保持与指针 1:1 跟手。
+  useFrame((_, delta) => {
+    const group = groupRef.current;
+    if (!group) return;
+    const target = atomPositionTarget.set(atom.position[0], atom.position[1], atom.position[2]);
+    let animating = false;
+    if (!entranceInitialized.current) {
+      entranceInitialized.current = true;
+      group.position.copy(target);
+      group.scale.setScalar(0.45);
+    }
+    if (isDragging || group.position.distanceTo(target) < 0.003) {
+      group.position.copy(target);
+    } else {
+      group.position.lerp(target, Math.min(1, delta * 11));
+      animating = true;
+    }
+    if (Math.abs(group.scale.x - 1) > 0.005) {
+      group.scale.setScalar(group.scale.x + (1 - group.scale.x) * Math.min(1, delta * 9));
+      animating = true;
+    } else if (group.scale.x !== 1) {
+      group.scale.setScalar(1);
+    }
+    if (animating) invalidate();
+  });
+
   return (
-    <group position={atom.position}>
+    <group ref={groupRef}>
       {isSelected || isDragging ? (
         <mesh>
           <sphereGeometry args={[radius * 1.34, 24, 24]} />
@@ -399,7 +471,7 @@ function BuilderAtomDragHandle({
     <Html center pointerEvents="auto" zIndexRange={[7, 0]}>
       <button
         aria-label={`拖动 ${atom.element} 原子`}
-        className="block h-11 w-11 cursor-grab rounded-full bg-transparent opacity-0 outline-none focus:opacity-100 focus:ring-2 focus:ring-primary/60 active:cursor-grabbing"
+        className="block h-8 w-8 cursor-grab rounded-full bg-transparent opacity-0 outline-none focus:opacity-100 focus:ring-2 focus:ring-primary/60 active:cursor-grabbing"
         data-testid={`builder-atom-handle-${atom.id}`}
         onPointerCancel={finishGesture}
         onPointerDown={handlePointerDown}
@@ -438,25 +510,44 @@ function BuilderBondMesh({
       quaternion: new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize()),
     };
   }, [atomsById, bond.atomIds]);
+  const offsetGroupRef = useRef<Group>(null);
+  // 双/三键的并排偏移面始终旋向相机（绕键轴转动内层 group），
+  // 避免某些视角下多根圆柱重叠成一条线、被学生误读为单键。
+  useFrame(({ camera }) => {
+    if (!geometry || bond.order === 1 || !offsetGroupRef.current) return;
+    bondAxisTemp.set(0, 1, 0).applyQuaternion(geometry.quaternion);
+    toCameraTemp.copy(camera.position).sub(geometry.midpoint);
+    offsetDesiredTemp.crossVectors(bondAxisTemp, toCameraTemp);
+    if (offsetDesiredTemp.lengthSq() < 1e-6) return;
+    offsetDesiredTemp.normalize();
+    bondLocalXTemp.set(1, 0, 0).applyQuaternion(geometry.quaternion);
+    bondLocalZTemp.set(0, 0, 1).applyQuaternion(geometry.quaternion);
+    offsetGroupRef.current.rotation.y = -Math.atan2(
+      offsetDesiredTemp.dot(bondLocalZTemp),
+      offsetDesiredTemp.dot(bondLocalXTemp),
+    );
+  });
   if (!geometry) return null;
   const radius = 0.04;
   const offset = 0.1;
   const offsets = bond.order === 1 ? [0] : bond.order === 2 ? [-offset, offset] : [-offset, 0, offset];
   return (
     <group position={geometry.midpoint} quaternion={geometry.quaternion}>
-      {offsets.map((position) => (
-        <mesh key={position} onClick={(event) => { event.stopPropagation(); onSelect(); }} position={[position, 0, 0]}>
-          <cylinderGeometry args={[radius, radius, geometry.length, 20]} />
-          <meshStandardMaterial
-            color={isDragging ? "#F4A261" : isSelected ? "#2A9D8F" : "#AFC2BD"}
-            emissive={isSelected ? "#2A9D8F" : "#000000"}
-            emissiveIntensity={isSelected ? 0.18 : 0}
-            roughness={0.44}
-          />
-        </mesh>
-      ))}
+      <group ref={offsetGroupRef}>
+        {offsets.map((position) => (
+          <mesh key={position} onClick={(event) => { event.stopPropagation(); onSelect(); }} position={[position, 0, 0]}>
+            <cylinderGeometry args={[radius, radius, geometry.length, 20]} />
+            <meshStandardMaterial
+              color={isDragging ? "#F4A261" : isSelected ? "#2A9D8F" : "#AFC2BD"}
+              emissive={isSelected ? "#2A9D8F" : "#000000"}
+              emissiveIntensity={isSelected ? 0.18 : 0}
+              roughness={0.44}
+            />
+          </mesh>
+        ))}
+      </group>
       <mesh onClick={(event) => { event.stopPropagation(); onSelect(); }}>
-        <cylinderGeometry args={[0.11, 0.11, geometry.length, 12]} />
+        <cylinderGeometry args={[0.14, 0.14, geometry.length, 12]} />
         <meshBasicMaterial opacity={0} transparent />
       </mesh>
     </group>

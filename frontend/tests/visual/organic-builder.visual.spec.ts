@@ -36,8 +36,8 @@ test("拼装实验室识别乙烯并支持从空白补成甲烷", async ({ page 
   await expect(page.getByTestId("organic-builder-info")).toBeVisible();
   await expect(page.getByTestId("organic-builder-viewer")).toHaveScreenshot("organic-builder-ethylene.png");
 
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "新建空白模型" }).click();
+  await page.getByRole("button", { name: "清空并新建" }).click();
   await page.getByTestId("builder-add-c").click();
   await expect(page.getByTestId("builder-bond-angle-matches")).toHaveCount(0);
   await page.getByRole("button", { name: "一键补氢" }).click();
@@ -49,8 +49,8 @@ test("拼装实验室识别乙烯并支持从空白补成甲烷", async ({ page 
 
 test("未收录的氯甲烷由本地规则生成双语系统名称", async ({ page }) => {
   await page.goto("/lab/organic-builder/ethylene-planar");
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "新建空白模型" }).click();
+  await page.getByRole("button", { name: "清空并新建" }).click();
   await page.getByTestId("builder-add-c").click();
   const carbonHandle = page.getByTestId("builder-atom-handle-c-1");
   await expect(carbonHandle).toBeAttached();
@@ -67,8 +67,8 @@ test("未收录的氯甲烷由本地规则生成双语系统名称", async ({ pa
 
 test("从空白模型拼出甲酰胺后同步显示名称、片段和酰胺氮几何", async ({ page }) => {
   await page.goto("/lab/organic-builder/ethylene-planar");
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "新建空白模型" }).click();
+  await page.getByRole("button", { name: "清空并新建" }).click();
   await page.getByTestId("builder-add-c").click();
 
   const carbonHandle = page.getByTestId("builder-atom-handle-c-1");

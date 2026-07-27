@@ -31,6 +31,7 @@ const expectedKnownNamesZh: Record<string, string> = {
   propane: "丙烷",
   propene: "丙烯",
   propyne: "丙炔",
+  toluene: "甲苯",
 };
 
 test("中文名期望表与已知分子词典 ID 一一对应", () => {

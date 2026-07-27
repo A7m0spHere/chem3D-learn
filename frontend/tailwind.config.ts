@@ -13,7 +13,10 @@ const config: Config = {
   				light: '#DDF3EF',
   				dark: '#1F6F68'
   			},
-  			accent: '#F4A261',
+  			accent: {
+  				DEFAULT: '#F4A261',
+  				dark: '#92400E'
+  			},
   			success: '#10B981',
   			danger: '#EF4444',
 			text: {
@@ -34,7 +37,9 @@ const config: Config = {
   			]
   		},
   		boxShadow: {
-  			panel: '0 14px 36px rgba(31, 41, 51, 0.08)'
+  			panel: '0 14px 36px rgba(31, 41, 51, 0.08)',
+  			overlay: '0 18px 55px rgba(31, 41, 51, 0.13)',
+  			'overlay-strong': '0 18px 55px rgba(31, 41, 51, 0.16)'
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',

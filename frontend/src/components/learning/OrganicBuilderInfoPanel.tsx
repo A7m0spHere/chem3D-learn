@@ -43,7 +43,7 @@ export function OrganicBuilderInfoPanel({
 
   return (
     <aside className="space-y-4" data-testid="organic-builder-info">
-      <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl">
+      <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-overlay backdrop-blur-xl">
         <div className="flex items-center gap-2 text-primary-dark">
           <FlaskConical className="h-5 w-5" />
           <h2 className="font-bold">结构信息</h2>
@@ -58,7 +58,7 @@ export function OrganicBuilderInfoPanel({
 
       {angleGroups.length > 0 ? (
         <section
-          className="rounded-2xl border border-accent/30 bg-white/92 p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl"
+          className="motion-fade-in rounded-2xl border border-accent/30 bg-white/92 p-5 shadow-overlay backdrop-blur-xl"
           data-testid="builder-bond-angle-matches"
         >
           <div className="flex items-center justify-between gap-3">
@@ -66,7 +66,7 @@ export function OrganicBuilderInfoPanel({
               <Network className="h-5 w-5" />
               <h2 className="font-bold">自动键角匹配</h2>
             </div>
-            <span className="rounded-full bg-accent/15 px-2.5 py-1 text-xs font-bold text-amber-800">结构完整</span>
+            <span className="rounded-full bg-accent/15 px-2.5 py-1 text-xs font-bold text-accent-dark">结构完整</span>
           </div>
           <div className="mt-4 space-y-2.5">
             {angleGroups.map((group) => (
@@ -90,7 +90,7 @@ export function OrganicBuilderInfoPanel({
         </section>
       ) : null}
 
-      <section className={`rounded-2xl border p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl ${hasResolvedName ? "border-primary/30 bg-primary/10" : "border-white/80 bg-white/90"}`}>
+      <section className={`rounded-2xl border p-5 shadow-overlay backdrop-blur-xl ${hasResolvedName ? "border-primary/30 bg-primary/10" : "border-white/80 bg-white/90"}`}>
         <div className="flex items-start gap-3">
           {knownMolecule ? (
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -163,13 +163,13 @@ export function OrganicBuilderInfoPanel({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl">
+      <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-overlay backdrop-blur-xl">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Network className="h-5 w-5 text-primary-dark" />
             <h2 className="font-bold text-text-primary">价态诊断</h2>
           </div>
-          <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${validation.isComplete ? "bg-primary/10 text-primary-dark" : "bg-accent/15 text-amber-800"}`}>
+          <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${validation.isComplete ? "bg-primary/10 text-primary-dark" : "bg-accent/15 text-accent-dark"}`}>
             {validation.isComplete ? "结构完整" : "仍在拼装"}
           </span>
         </div>
@@ -194,7 +194,7 @@ export function OrganicBuilderInfoPanel({
       </section>
 
       {functionalGroups.length > 0 ? (
-        <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(31,41,51,0.13)] backdrop-blur-xl">
+        <section className="motion-fade-in rounded-2xl border border-white/80 bg-white/90 p-5 shadow-overlay backdrop-blur-xl">
           <h2 className="font-bold text-text-primary">识别到的结构片段</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {functionalGroups.map((group) => (
