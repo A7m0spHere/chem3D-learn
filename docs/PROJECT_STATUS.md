@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-28（Claude Code，T-021 按 D-019 分组拆成 4 个 commit 提交并推送）
+> 最后更新：2026-07-28（Claude Code，T-022 收尾：拔下原子吸附回去沿用局部键长标尺，提交 `b06c653`）
 
 ## 一句话定位
 
@@ -84,7 +84,7 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 正在进行
 
-（暂无。T-021 已提交完毕；剩余的 T-022 第 3 项与 T-023 见 `docs/TASKS.md` 待办。）
+（暂无。T-021 与 T-022 均已提交完毕；剩余的 T-023 见 `docs/TASKS.md` 待办。）
 
 ## 最近完成
 
@@ -95,7 +95,12 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
   - 顺带：官能团补齐氰基/醚键/酯基（自带 –C≡N 片段此前接上后面板空白）、HCl 不再报"卤代结构"、甲苯进入教学词典、NH₃ 分子式不再显示 "H3N"、`isDirty` 加廉价短路避免每次渲染跑指数级图同构、`shadow-overlay`/`accent-dark` token 化并清理 3 个 CSS 中根本不存在的死类名。
   - build / lint 通过；`test:logic` 由 64 → **80 通过**（新增 16 项针对本次每一条修复的回归）。浏览器行为回归与 Darwin 视觉回归**未运行**。
   - 同批还落地了原 T-022 的前两项：10 个片段模板坐标按各自杂化重写并统一到 `getStylizedBondLength` 标尺（甲基 H–C–H 现为 109.5°，非此前记录的约 70°），`addFragment` 用新增的 `rotateVectorBetween` 把模板 `anchorDirection` 旋转对齐到真实母体方向，不再是纯平移。
-  - **未做**（已写入 TASKS）：T-022 仅剩苯种子 C–H 键长标尺统一（0.66 vs 0.92）；T-023 3D 补间动画、双键圆柱朝向相机、确认弹窗统一、分子式排版统一。
+  - **未做**（已写入 TASKS）：T-023 3D 补间动画、双键圆柱朝向相机、确认弹窗统一、分子式排版统一。
+- **T-022 有机拼装实验室键长标尺统一**（2026-07-28 完成，提交 `b06c653`）
+  - 原 T-022 的前两项（模板坐标重写、片段旋转对齐）已随 T-021 批次落地，本次收尾第 3 项：拔下的原子吸附回去时不再无条件用样式化常数 0.92，而是沿用该分子的局部键长标尺。
+  - 核对时发现范围比原记录（只提苯 C–H = 0.66）更广：四个种子的键长都各自偏离 `getStylizedBondLength` 标尺（乙烯 C–H = 1.09、乙炔 1.10、共面综合模型约 0.45），根因相同——拔下再吸附会明显长/短一截。
+  - 采用改 `getSuggestedPosition` 而非改种子坐标的方案：`resolveBondLength` 先取同一中心原子上的同类键长，退回全分子同类键中位数，都没有才用样式化常数。**关键取舍**：不改任何种子坐标，因此不触碰共享这些种子的模块 viewer（`BenzenePlanarCell` / `EthylenePlanarCell` / `AcetyleneLinearCell`）的 Darwin 快照——Windows 无基线、不得更新。从零拼装时分子内本就全是常数长度，行为不变。
+  - build / lint 通过；`test:logic` 由 80 → **82 通过**（新增 2 项：拔下原子沿用局部标尺、从零拼装仍用样式化标尺）；`PLAYWRIGHT_CHANNEL=chrome` 定向跑无截图的拼装页浏览器用例 9 + 1 通过（含拔下/撤销流程）。Darwin 视觉回归未运行（Windows 无基线）。
 - **T-020 对接 Claude Code 全站滚动滑入动画并修复 Modules 分类间距**（2026-07-27，commits `5f66b7a` + `55c3dfc`）
   - Claude Code 将 Home / Modules / Paths / Exam / About / ExamTopicDetail 的整页进入动效统一为 `ScrollReveal`，首页 Hero 使用分层错峰滑入；ModuleDetailPage 的 3D Canvas 未包入动画，避免影响 R3F 布局。
   - Codex 独立审查与系统 Chrome 实测发现：`ModulesPage` 新增 wrapper 后，原 `section` 上的 `last:mb-0` 会对每个 wrapper 内唯一子元素都生效，导致分类间距归零。现将间距放到 `ScrollReveal` 外层，并根据 `visibleSections` 判断末项，筛选后同样正确。
@@ -178,10 +183,9 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 当前待办见 `docs/TASKS.md`，按优先级：
 
-1. **T-022 剩余项：统一样式化键长标尺**（苯种子 C–H = 0.66 与 `getStylizedBondLength` 的 0.92 不一致）。原 T-022 的模板键角重写与旋转对齐两项**已随 T-021 批次落地**（`d6ea076` / `45485b8`），TASKS 中的过时描述已修正。
-2. **T-023 3D 补间动画与视觉 token 收尾**（体验与一致性，不涉及教学正确性）。
+1. **T-023 3D 补间动画与视觉 token 收尾**（体验与一致性，不涉及教学正确性）。
 
-更早的 backlog（T-004、T-005 及引线标签系列 T-011~T-019）**已全部收口**。其他方向候选（均未立项，动手前先与用户确认）：
+更早的 backlog（T-004、T-005、T-022 及引线标签系列 T-011~T-019）**已全部收口**。其他方向候选（均未立项，动手前先与用户确认）：
 
 1. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
 2. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。

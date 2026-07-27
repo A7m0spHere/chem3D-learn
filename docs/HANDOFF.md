@@ -10,86 +10,43 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-28
 - **分支**：`main`（已推送到 `origin/main`）
-- **任务**：提交上一轮 T-021 有机拼装实验室（`/lab/organic-builder/:seedId`）教学正确性与交互修复，并校正治理文档中与代码不符的记录。
-- **提交**：按 D-019 分组拆成 4 个代码 commit + 1 个 docs commit：
-
-```
-d6ea076 fix(builder): correct bond geometry and functional-group detection
-c940c33 fix(builder): keep chinese names consistent and refuse to guess
-45485b8 fix(builder): make fragment assembly and undo actually usable
-e8169cb fix(builder): surface live hints and tokenize overlay styles
-（本次 docs commit 见文件末尾 git log）
-```
+- **任务**：T-022 剩余项——统一有机拼装实验室的样式化键长标尺，修掉「把种子分子上的 H 拔下再吸附回去，键长会明显长一截」。
+- **提交**：`b06c653 fix(builder): reuse local bond-length scale when reattaching atoms`（配套 docs commit 见文件末尾 git log）。
 
 ### 本轮做的事
 
-1. 提交了上一轮留在工作区的 16 个文件（12 源码 + 4 测试）。提交前重跑 build / lint / test:logic 确认工作区状态仍然有效，未在提交前改动任何代码逻辑。
-2. **校正了 `docs/TASKS.md` 中 T-022 的过时描述**（见下节）——这是本轮唯一的实质性文档修改，不是格式整理。
-
-### 重要：T-022 的记录与代码不符，已修正
-
-上一轮的 TASKS 把 T-022 整条列为「待办」，并写明「模板键角严重压缩（甲基 H–C–H ≈ 69–78°）、`addFragment` 只做平移不做旋转对齐」。**核对代码后确认这两项实际已经在同一批工作区改动里完成了**，所以随 `d6ea076` / `45485b8` 一起提交：
-
-- 10 个模板坐标已按各自杂化重写，并统一到 `getStylizedBondLength` 标尺。逐项验算：甲基 C–H 相对母体方向 cos = −0.307/0.92 = −0.334 → **109.5°**（不是记录中的 69–78°），H–C–H 同为 109.5°；氨基 ≈107°；醛基/羰基/羧基/乙烯基 sp² 方向 ≈120°；氰基/乙炔基 180°。
-- `types/organicBuilder.ts` 新增 `anchorDirection`，`addFragment` 用 `rotateVectorBetween`（Rodrigues 展开 + 反向 180° 特例）把模板旋转对齐到真实母体方向，已不是纯平移。
-- 回归固化在 `tests/logic/organic-builder-fixes.logic.spec.ts:299`。
-
-**T-022 现在只剩第 3 项**：苯种子 C–H = 0.66（`organicBuilderSeeds.ts:64-65` 的 `hydrogenRadius 1.78` − `ringRadius 1.12`）与 `getStylizedBondLength` 的 0.92 不一致，把苯环上一个 H 拔下再吸附回去会明显长一截。优先级已从「高（教学正确性）」下调为「中（视觉一致性）」。
-
-教训：上一轮在同一批未提交改动里既做了 T-021 又顺手做了 T-022 的一部分，但 TASKS 只按原计划写，导致文档与代码脱节。**下次接手时，不要只读 TASKS 就认定某项未做，先用 grep 核对代码。**
-
-### 上一轮的改动内容（T-021，供追溯）
-
-起因是用户要求检查该页面的过渡动画、美观性和功能问题。三路只读审查：主 Agent 查 UI/交互/动画，两个子 Agent 分别查化学与状态逻辑、命名与键角逻辑。**所有 P0 结论都逐行核对源码确认后才动手**，并主动排除了一批疑似误报（乙醇/二甲醚靠图同构可正确区分、undo/redo 栈本身正确、元素常数与四个种子分子配平全部无误）。
-
-修掉 7 项会向学生展示**错误化学事实**的问题：
-
-1. `BENT_DIRECTIONS` 两个分量写反，O 中心实际摆成 75°（点积 +0.252），而键角标签写 ≈104.5° —— 同屏自相矛盾。
-2. `getSuggestedPosition` 只判断"有无双键"不数个数，CO₂ 型碳被摆成 120° V 形，几何侧却正确标 180° sp 直线形。
-3. `formatParentWithFunctionalGroup` 的醇/酮/胺中文分支只用 `rootZh`、丢掉不饱和词干：丙烯醇输出"丙-1-醇"（1-丙醇，另一个真实分子），英文 `prop-2-en-1-ol` 却正确。
-4. 同一函数的多元醛分支完全忽略不饱和位次，丁-2-烯二醛中英文都输出饱和二醛。
-5. `nameCarbonSkeleton` 在最长链解析失败时静默采用较短母链，给出违反"最长碳链"规则的名称（4-异丙基庚烷 → "2-甲基-3-丙基己烷"），违背 `ORGANIC_BUILDER_NAMING_SCOPE.md`「宁可拒绝也不猜名」的承诺 —— 改为返回 unsupported，注意以**过滤后**的路径集合为基准，避免误伤 2-丙基戊-1-醇这类主官能团优先的正确降链（测试 496–512 行已固化）。
-6. `detectFunctionalGroups` 整体重写为带优先级的单遍判定：羧基不再同时报"羰基+羟基"（"乙酸含羟基"是高考典型错误表述）、凯库勒式苯环报"苯环（芳香环）"并抑制环内 C=C、HCl 不再报"卤代结构"；补齐此前漏检的氰基/醚键/酯基。
-7. `matchBuilderBondAngles` 增加小环检测：3–5 元环上的中心跳过标注（环丙烷真实约 60°，此前标 109.5°）；苯胺型共轭氮同理跳过；氧的文案由"醇或醚"改为覆盖羧基 –O– 与过氧的表述。
-
-修掉的关键交互缺陷：
-
-- **片段 ID 必然冲突**：`nextBuilderId(next, "fragment")` 只检查 `fragment-1` 是否被占用，而实际入库的是 `fragment-1-c` 这种形式，所以第二次调用仍返回 `fragment-1`。凡两个模板 `templateId` 有交集（几乎所有组合）就重复 —— **"选中甲基的碳再接羧基"会报"不能与自身成键"，拼乙酸这个最基本流程直接不可用**。改为扫描"任意 id 以 `fragment-N-` 开头"。
-- 吸附预览只按距离筛选、不做价键预检，绿虚线承诺能连、松手被拒且连拖动位移一起回弹 → snapTarget 接入 `canSetBond` 预检，失败保位。
-- `onPointerMissed` 在旋转视角松手时也触发，误清空选中。
-- "松开形成单键"等实时提示传给了 immersive 模式下不渲染的 `footerMeta`，**永不显示** → 改为画布内浮层。
-- 快捷键处理排除 `BUTTON`，导致点完"添加原子"立刻 Ctrl+Z 无反应。
-- `reset` 清空 undo/redo 栈（与"新建空白可撤销"不一致，误点后十几步全丢）→ 改走 `commit` 保留历史。
-- seedId 变化不重挂载（`useReducer` 惰性初始化陷阱，`useMemo` 在此是无效代码）→ 路由层加 `key={seedId}`。
-- 暂存槽位按 `atoms.length` 计算，删除后新原子可与残留原子完全重叠（小原子藏进大原子里"看不见"）→ 改为避让已占用槽位。
-- `isDirty` 每次渲染跑指数级图同构回溯，且"结构相同"这一最常见分支恰是最贵路径 → 加廉价序列化短路。
-
-顺带：甲苯进教学词典（此前显示"甲基苯"）、无碳分子 H 优先（NH₃ 不再显示 "H3N"）、`shadow-overlay`/`shadow-overlay-strong`/`accent-dark` token 化、清理 `builder-overlay-enter` / `builder-floating-panel` / `organic-builder-immersive` 三个**在 CSS 中根本不存在**的死类名。
+1. **先核对，发现原记录范围偏窄**。TASKS 只说苯种子 C–H = 0.66 与标尺 0.92 不一致。实测四个种子后确认**没有一个种子的键长与标尺一致**——苯 C–H 0.66 / 重原子间 1.12；乙烯 1.09 / 1.34；乙炔 1.10 / 1.24；共面综合模型 C–H 约 0.45~0.59 / 重原子间 0.72~1.16。根因是同一个：`getSuggestedPosition` 无论分子本身用什么标尺，都用常数（含 H 0.92、重原子间 1.08）算新键长，所以从种子里拔下任意 H 再吸附回去都会跳变，苯只是最扎眼的一例。
+2. **选了不碰种子坐标的方案**。种子（`benzeneBuilderSeed` / `ethyleneBuilderSeed` / `acetyleneBuilderSeed`）同时喂给模块 viewer `BenzenePlanarCell` / `EthylenePlanarCell` / `AcetyleneLinearCell`，这些 viewer 有 Darwin 快照（`benzene-planar-*`、`acetylene-linear-*`、`organic-builder-ethylene` 等），Windows 上不能重算基线。所以**不改种子坐标**，改为让 `getSuggestedPosition` 沿用分子局部键长：新增 `resolveBondLength`，先取「同一中心原子上的同类键（元素对 + 键级都相同）」的中位数，退回「全分子同类键」的中位数，都没有才用样式化常数，并把参考值夹在 0.35~2 防退化。从零拼装时分子内本就全是常数长度，因此**行为不变**。
+3. 新增 2 项 logic 回归（`organic-builder-fixes.logic.spec.ts`）：一是拔下苯 H 再吸附回去，键长与其余五个 C–H 一致（0.66）；二是从零拼装 C–H 仍为样式化 0.92。
 
 ### 验证结果
 
 - `frontend npm run build`：**通过**（含 `tsc --noEmit`），保留既有 `three` chunk ~688 KB 非阻断警告。
 - `frontend npm run lint`：**通过**。
-- `frontend npm run test:logic`：**80 / 80 通过**（原 64 + 新增 16 项）。
-- **踩坑记录**：首轮 logic 有 7 项失败，全因新增甲苯词典条目未同步 `organic-builder-known-molecules.logic.spec.ts` 里那张独立的中文名期望表（它有"与词典 ID 一一对应"的断言）。**以后增删 `knownOrganicMolecules` 必须同步改那张表。**
-- `git diff --check`：`tailwind.config.ts` 报的 "space before tab in indent" 是该文件既有风格（shadcn 生成，HEAD 每行都是两空格+制表符），非本次引入。
+- `frontend npm run test:logic`：**82 / 82 通过**（原 80 + 新增 2 项）。
+- 浏览器行为回归（`PLAYWRIGHT_CHANNEL=chrome`，无截图用例）：`organic-builder-fragments` 1/1 + `organic-builder` 9 项无快照用例（含「拔下并撤销」流程）**全部通过**，共 10/10。
+- `git diff --check`：无换行噪声；`git status` 确认只改 `organicBuilderChemistry.ts` + `organic-builder-fixes.logic.spec.ts`，未触碰任何 Darwin 快照 / lockfile / 缓存。
 
 ### 已知限制
 
-- 浏览器行为回归（`PLAYWRIGHT_CHANNEL=chrome`）**未运行**；Darwin 视觉回归**未运行**（Windows 无基线、不得更新）。本次改了 3D 画布与浮层结构，`organic-builder-ethylene.png` / `organic-builder-mobile*.png` 等快照**很可能需要在 macOS 上重新审核**。
-- 视觉测试里 4 处依赖原生 `window.confirm` 的流程已改为兼容"原生对话框或自定义弹窗"两种实现，但只在代码层保证，未实机跑过。
-- 键角匹配仍是"按局部成键环境匹配教学典型值"，不是对当前坐标做量化计算 —— 这是既定设计，InfoPanel 有免责说明。
+- 只改了「新键摆位」的键长来源。种子坐标本身仍是各自的旧标尺（苯 0.66 等），这是有意为之——避免动到 viewer 的 Darwin 快照。若将来要让种子也统一到 0.92 标尺，必须在 macOS 上重算 `benzene-planar` / `acetylene-linear` / `organic-builder-ethylene` 等快照，Windows 不能做。
+- 完整 Darwin 视觉回归**未运行**（Windows 无基线、不得更新）。本轮只跑了无截图用例。
 
 ### 给下一个 Agent 的建议
 
-1. 在 macOS 跑一次完整视觉回归，重点看拼装页 3 张快照（`organic-builder-ethylene.png` / `organic-builder-mobile*.png`）—— 本批改了 3D 画布与浮层结构，快照很可能需要重新审核。Windows 上不得更新 Darwin 基线。
-2. **T-022 只剩第 3 项**（苯种子 C–H 键长标尺）。原条目记的「模板键角重写与旋转对齐未做」与代码实际不符，已在本轮核对后改写 —— 那两项其实随本批一起落地了（见上文"补充说明"）。剩下的是 `organicBuilderSeeds.ts:64-65` 的 `hydrogenRadius 1.78 − ringRadius 1.12 = 0.66` 与 `getStylizedBondLength` 的 0.92 不一致，把苯环上一个 H 拔下再吸附回去会明显长一截。
-3. 接手前先自查文档与代码是否一致。本轮就遇到一次：交接文档说 T-022 未动，实际 `anchorDirection` + `rotateVectorBetween` + 10 个模板坐标都已在工作区里，且 `organic-builder-fixes.logic.spec.ts:299` 已有对应回归。文档滞后于代码时，以代码为准并回头修文档。
-4. 教训留存：这个页面的三个核心库（chemistry / nomenclature / geometry）会**各自独立地**对同一分子给出几何、名称、键角，三者不共享判定逻辑。所以"渲染的角度"和"标注的角度"、"中文名"和"英文名"很容易背离 —— 本次 7 条 P0 里有 4 条属于这种自相矛盾。改任何一处判定时，务必检查另外两个库对同一情形的结论。
+1. **T-022 已收口**，backlog 只剩 T-023（3D 补间动画与视觉 token 收尾，纯体验、不涉及教学正确性）。
+2. 若接 T-023，注意其中「统一分子式排版」和「双键圆柱朝向相机」会改 `OrganicBuilderCanvas.tsx` 的 3D 渲染，同样牵动拼装页 Darwin 快照——Windows 上只能跑无截图用例，快照审核留给 macOS。
+3. 教训留存（沿用上一轮）：接手前别只读 TASKS 就认定范围，先 grep / 实测核对代码。本轮 TASKS 说「只有苯不一致」，实测是四个种子全不一致，范围比记录宽。
 
 ---
 
 ## 往期
+
+### 2026-07-28 Claude Code：T-021 提交 + 校正 T-022 记录
+
+- **提交**：`d6ea076` / `c940c33` / `45485b8` / `e8169cb`（代码）+ `e6d7584`（docs）。把上一轮留在工作区的 16 个文件按 D-019 分 4 组提交，并校正 TASKS 中 T-022 的过时描述。
+- **关键发现**：TASKS 把 T-022 整条列为待办（写「模板键角 ≈69–78°、`addFragment` 只做平移」），但核对代码后确认前两项已在那批工作区改动里完成——10 个模板坐标按各自杂化重写（甲基 109.5°、氨基 107°、sp² 120°、氰基/乙炔基 180°），`addFragment` 已用 `anchorDirection` + `rotateVectorBetween` 旋转对齐，回归固化在 `organic-builder-fixes.logic.spec.ts:299`。据此把 T-022 收窄为「只剩苯种子 C–H 键长标尺」，优先级下调为中。
+- **T-021 本身的改动内容**（供追溯）：三路只读审查后修掉 7 项教学正确性硬伤（`BENT_DIRECTIONS` 分量写反 O 摆成 75° 却标 104.5°；CO₂ 型碳摆 120° 却标 180°；不饱和醇/酮/胺中文名丢失烯/炔；不饱和多元醛中英文都错；最长链解析失败静默降级；羧基误报"羰基+羟基"、苯误报碳碳双键；三/四元环标 109.5°）+ 关键交互缺陷（片段 ID 必然冲突致「两片段拼乙酸」不可用；吸附失败连位移回弹；旋转误清选中；沉浸模式实时提示永不显示；Ctrl+Z 被按钮吞掉；`reset` 清空撤销栈；seedId 不重挂载）。`test:logic` 由 64 → 80。详见 D-019。
 
 ### 2026-07-27 Codex：T-020 全站滚动滑入动画对接与 Modules 间距修复
 

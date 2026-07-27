@@ -205,4 +205,17 @@
 **其他修复**：片段 ID 前缀唯一性（原 `nextBuilderId` 只查 `fragment-1` 是否被占用，但入库的是 `fragment-1-c`，导致第二个片段必然冲突、"两片段拼乙酸"直接不可用）、`reset` 保留撤销历史、seedId 变化时路由层 `key` 强制重挂载、暂存槽位避让已占用位置、无碳分子 H 优先（NH₃ 不再显示 "H3N"）、吸附预览接入 `canSetBond` 预检、旋转视角不再清空选中、`isDirty` 加廉价短路避免每次渲染跑指数级图同构。
 
 - **验证**：`npm run build` 通过（含 `tsc --noEmit`）；`npm run lint` 通过；`npm run test:logic` **80 / 80 通过**（原 64 + 新增 `organic-builder-fixes.logic.spec.ts` 16 项）。新增甲苯词典条目时同步更新了 T-001 表驱动测试的独立中文名期望表（该表有"与词典 ID 一一对应"的断言，漏改会红 7 项）。
-- **未做**：片段拼接的旋转对齐与模板内部键角重写、3D 场景补间动画、双键圆柱朝向相机、视觉 token 化收尾。见 TASKS T-022 / T-023。
+- **一并落地（原属 T-022）**：本批实际还完成了片段拼接的旋转对齐与模板内部键角重写——10 个模板坐标按各自杂化重写并统一到 `getStylizedBondLength` 标尺，`addFragment` 用新增的 `rotateVectorBetween`（`anchorDirection` → 真实母体方向）替代纯平移。此前本条与 TASKS 记为「未做」是文档滞后于代码，已于 2026-07-28 核对修正。详见 D-020。
+- **未做**：3D 场景补间动画、双键圆柱朝向相机、视觉 token 化收尾。见 TASKS T-023。
+
+## D-020 键长标尺统一：改摆位来源沿用局部键长，而非重写种子坐标（T-022 收尾）
+
+- **日期**：2026-07-28（Claude Code，commit `b06c653`）
+- **背景**：T-022 剩余项是「统一样式化键长标尺」。核实后发现问题范围比原记录（只提苯种子 C–H）更广：**四个种子分子的键长各自都偏离 `getStylizedBondLength` 标尺**——苯 C–H 0.66、乙烯 1.09、乙炔 1.10、共面综合模型约 0.45，重原子间键也各不相同。共同症状是把任一 H 拔下再吸附回去，`getSuggestedPosition` 按常数 0.92 摆放，它会比同分子其余同类键明显长/短一截。
+- **决定**：**不改任何种子坐标**，改在 `getSuggestedPosition` 的落点来源——新增 `resolveBondLength`，优先沿用分子里同类键（先看同一中心原子上的同类键，再退回全分子同类键的中位数）的现有长度，都没有才用样式化常数。
+- **取舍与理由**：
+  - 三个种子（苯 / 乙烯 / 乙炔）同时被模块 viewer（`BenzenePlanarCell` / `EthylenePlanarCell` / `AcetyleneLinearCell`）复用，改种子坐标会牵动 `benzene-planar-*` / `acetylene-linear-*` / `organic-builder-ethylene` 等 Darwin 快照。Windows 无基线、不得更新，改坐标属于「本机无法验证的破坏性改动」。改摆位来源则**零快照暴露**。
+  - 从零拼装（分子内无同类键）时 `resolveBondLength` 回退到样式化常数，行为与改动前完全一致；因此只影响「拔下再接」这一路径，不影响新建。
+  - 加了退化值防御：参考键长被夹在 `[0.35, 2]`，避免手工构造的重叠/超长原子把摆位带偏。
+- **验证**：新增 2 项 logic 回归（`organic-builder-fixes.logic.spec.ts`：拔下的 H 吸附回去沿用分子键长标尺、从零拼装仍用样式化标尺）；`test:logic` 80 → **82 通过**；build / lint 通过；浏览器行为回归（`PLAYWRIGHT_CHANNEL=chrome`）跑了拼装页 10 个无截图用例（含拔下 / 撤销流程）全绿，未触碰 3 个带快照的用例。
+- **约束**：这是「样式化教学标尺」下的一致性修复，不是真实键长（真实 C–H≈1.09 Å、C–C≈1.54 Å 的相对比例并未建模）。键长匹配仍服务于视觉一致，不代表定量正确。
