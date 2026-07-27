@@ -171,10 +171,13 @@ export function generateOrganicSystematicName(molecule: BuilderMolecule): Organi
   }
 
   const etherName = tryNameSimpleEther(graph);
-  if (etherName) return etherName;
+  if (etherName?.status === "generated") return etherName;
 
   const replacementName = tryNameSkeletalReplacement(graph);
   if (replacementName) return replacementName;
+
+  // 醚规则拒绝且骨架替代（oxa）也覆盖不了时，保留醚规则给出的具体原因。
+  if (etherName) return etherName;
 
   return nameCarbonSkeleton(graph);
 }
@@ -1032,12 +1035,19 @@ function tryNameSimpleEther(graph: BuilderGraph): OrganicSystematicNameResult | 
   }
 
   const validSides = sides as [NonNullable<(typeof sides)[number]>, NonNullable<(typeof sides)[number]>];
-  const parentIndex = validSides[1].length > validSides[0].length ? 1 : 0;
-  const parent = validSides[parentIndex];
-  const alkoxy = validSides[parentIndex === 0 ? 1 : 0];
-  if (alkoxy.oxygenLocant !== 1 || alkoxy.length > 4) {
+  // 母体取较长一侧；等长平局时优先能让另一侧构成合法端连烷氧基（O 位次为 1）的分配，
+  // 保证同一分子的命名结果与化学键数组顺序无关。
+  const chosen = [
+    { parent: validSides[0], alkoxy: validSides[1] },
+    { parent: validSides[1], alkoxy: validSides[0] },
+  ]
+    .filter((assignment) => assignment.parent.length >= assignment.alkoxy.length)
+    .filter((assignment) => assignment.alkoxy.oxygenLocant === 1 && assignment.alkoxy.length <= 4)
+    .sort((first, second) => second.parent.length - first.parent.length)[0];
+  if (!chosen) {
     return { status: "unsupported", reasonZh: "当前只支持由直链 C1–C4 烷基形成的简单烷氧基。" };
   }
+  const { parent, alkoxy } = chosen;
 
   const showParentLocant = parent.length > 2;
   const locantPrefix = showParentLocant ? `${parent.oxygenLocant}-` : "";
@@ -1182,9 +1192,33 @@ function nameCarbonSkeleton(graph: BuilderGraph): OrganicSystematicNameResult {
     .map((path) => analyzeCarbonPath(graph, carbonSet, groups, principalKind, path, amideNaming))
     .filter((candidate): candidate is NameCandidate => Boolean(candidate));
   if (candidates.length === 0) {
+    // 兜底原因分级：同类多主官能团与碳碳不饱和键并存（丁烯二酸、丁烯二醛）给出专门说明，
+    // 避免落入与实际结构不符的"复杂支链/杂原子/超 C10"通用文案。
+    const hasCarbonUnsaturation = graph.heavyAtoms.some((atom) =>
+      atom.element === "C"
+      && (graph.heavyNeighbors.get(atom.id) ?? []).some((neighbor) =>
+        neighbor.atom.element === "C" && neighbor.order > 1,
+      ),
+    );
+    if (principalGroups.length > 1 && hasCarbonUnsaturation) {
+      return {
+        status: "unsupported",
+        reasonZh: "同类多主官能团（二酸、二醛等）与碳碳双键/三键并存的位次组合暂不在本地基础规则内。",
+      };
+    }
     return { status: "unsupported", reasonZh: "当前结构含复杂支链、杂原子取代或超出 C1–C10 的母体。" };
   }
-  return candidates.sort(compareCandidates)[0];
+  const best = candidates.sort(compareCandidates)[0];
+  // 最长链守卫：若存在比已解析母链更长的候选路径（因复杂支链等原因全部解析失败），
+  // 按"选最长碳链作主链"规则宁可拒绝，也不静默降级为较短母链的名称。
+  const longestFilteredPath = Math.max(...paths.map((path) => path.length));
+  if (best.parentLength < longestFilteredPath) {
+    return {
+      status: "unsupported",
+      reasonZh: "存在比可命名母链更长的碳链（其支链或取代方式超出当前规则），按最长碳链规则暂无法可靠命名。",
+    };
+  }
+  return best;
 }
 
 function classifyFunctionalGroups(
@@ -1462,6 +1496,12 @@ function analyzeCarbonPath(
   }
 
   if (accounted.size !== graph.heavyAtoms.length) return undefined;
+  // 同类前缀的倍数词表只到"十/deca"；超出会拼出字面 undefined，直接判定该候选失败。
+  const substituentKeyCounts = new Map<string, number>();
+  for (const substituent of substituents) {
+    substituentKeyCounts.set(substituent.key, (substituentKeyCounts.get(substituent.key) ?? 0) + 1);
+  }
+  if ([...substituentKeyCounts.values()].some((count) => count > 10)) return undefined;
   const doubleLocants = bondLocants(graph, path, 2, "C");
   const tripleLocants = bondLocants(graph, path, 3, "C");
   const parent = formatParentWithFunctionalGroup(
@@ -1473,8 +1513,27 @@ function analyzeCarbonPath(
   );
   if (!parent) return undefined;
 
-  const prefixEn = formatCombinedSubstituents(substituents, amideNaming?.substituents ?? [], "en", path.length);
-  const prefixZh = formatCombinedSubstituents(substituents, amideNaming?.substituents ?? [], "zh", path.length);
+  // 饱和 C1–C2 母体上的单一取代基没有位次歧义，按教材习惯省略位次（氯乙烷而非 1-氯乙烷）。
+  const omitSubstituentLocant = path.length <= 2
+    && substituents.length === 1
+    && !principalKind
+    && doubleLocants.length === 0
+    && tripleLocants.length === 0
+    && (amideNaming?.substituents.length ?? 0) === 0;
+  const prefixEn = formatCombinedSubstituents(
+    substituents,
+    amideNaming?.substituents ?? [],
+    "en",
+    path.length,
+    omitSubstituentLocant,
+  );
+  const prefixZh = formatCombinedSubstituents(
+    substituents,
+    amideNaming?.substituents ?? [],
+    "zh",
+    path.length,
+    omitSubstituentLocant,
+  );
   const categoryZh = categoryFor(principalKind, doubleLocants, tripleLocants, substituents);
   const result = generated(
     `${prefixZh}${parent.zh}`,
@@ -1558,6 +1617,8 @@ function formatParentWithFunctionalGroup(
         en: hasUnsaturation ? `${trimTerminalE(unsaturated.en)}al` : `${rootEn}anal`,
       };
     }
+    // 多元醛与不饱和键并存的位次组合尚未验证，宁可拒绝也不给出丢失烯/炔的错误名称。
+    if (hasUnsaturation) return undefined;
     return {
       zh: `${rootZh}-${locantText}-${multiplierZh}醛`,
       en: `${rootEn}ane-${locantText}-${multiplierEn}al`,
@@ -1566,17 +1627,20 @@ function formatParentWithFunctionalGroup(
 
   const suffix = principalKind === "ketone" ? "one" : principalKind === "alcohol" ? "ol" : "amine";
   const suffixZh = principalKind === "ketone" ? "酮" : principalKind === "alcohol" ? "醇" : "胺";
+  // 中文词干必须与英文一致地携带不饱和信息（丙-2-烯-1-醇），否则丙烯醇会被误写成"丙-1-醇"。
+  const stemZh = hasUnsaturation ? unsaturated.zh : rootZh;
   if (count === 1) {
     const stemEn = hasUnsaturation ? trimTerminalE(unsaturated.en) : `${rootEn}an`;
     const showLocant = length > 2 || principalKind === "ketone";
     return {
-      zh: showLocant ? `${rootZh}-${locantText}-${suffixZh}` : `${rootZh}${suffixZh}`,
+      zh: showLocant ? `${stemZh}-${locantText}-${suffixZh}` : `${stemZh}${suffixZh}`,
       en: showLocant ? `${stemEn}-${locantText}-${suffix}` : `${stemEn}${suffix}`,
     };
   }
-  const stemEn = hasUnsaturation ? trimTerminalE(unsaturated.en) : `${rootEn}ane`;
+  // 复数后缀（diol/dione/diamine）以辅音开头，英文词尾 e 需保留：but-2-ene-1,4-diol。
+  const stemEn = hasUnsaturation ? unsaturated.en : `${rootEn}ane`;
   return {
-    zh: `${rootZh}-${locantText}-${multiplierZh}${suffixZh}`,
+    zh: `${stemZh}-${locantText}-${multiplierZh}${suffixZh}`,
     en: `${stemEn}-${locantText}-${multiplierEn}${suffix}`,
   };
 }
@@ -1629,6 +1693,7 @@ function formatCombinedSubstituents(
   amideSubstituents: AmideNSubstituent[],
   language: "zh" | "en",
   parentLength: number,
+  omitAllLocants = false,
 ): string {
   const tokens: Array<{ sortKey: string; zh: string; en: string }> = [];
   const grouped = new Map<string, Substituent[]>();
@@ -1639,7 +1704,7 @@ function formatCombinedSubstituents(
   }
   for (const group of grouped.values()) {
     const locants = group.map((item) => item.locant).sort((a, b) => a - b);
-    const omitLocant = parentLength === 1 && locants.every((locant) => locant === 1);
+    const omitLocant = omitAllLocants || (parentLength === 1 && locants.every((locant) => locant === 1));
     const locantPrefix = omitLocant ? "" : `${locants.join(",")}-`;
     tokens.push({
       sortKey: group[0].nameEn,
