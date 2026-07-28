@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>正在打开 Chem3D Learn…</title>
+  </head>
+  <body>
+    <p>正在打开 Chem3D Learn…</p>
+    <script>
+      (() => {
+        const repoBase = "/chem3D-learn";
+        const currentPath = window.location.pathname;
+        const route = currentPath.startsWith(repoBase)
+          ? currentPath.slice(repoBase.length) || "/"
+          : "/";
+        const requestedRoute = `${route}${window.location.search}${window.location.hash}`;
+        const destination = `${repoBase}/?__spa=${encodeURIComponent(requestedRoute)}`;
+
+        window.location.replace(destination);
+      })();
+    </script>
+  </body>
+</html>

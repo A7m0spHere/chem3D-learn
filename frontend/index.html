@@ -3,13 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="%BASE_URL%" />
     <meta
       name="description"
       content="面向中国高中生与化学教师的结构化学 3D 学习站，用可旋转模型理解分子构型、晶体结构、化学键与有机立体结构。"
     />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="zh_CN" />
-    <meta property="og:url" content="https://chem3d-learn.minty-joy-4521.chatgpt.site/" />
+    <meta property="og:url" content="https://a7m0sphere.github.io/chem3D-learn/" />
     <meta property="og:title" content="Chem3D Learn｜结构化学 3D 学习站" />
     <meta
       property="og:description"
@@ -17,7 +18,7 @@
     />
     <meta
       property="og:image"
-      content="https://chem3d-learn.minty-joy-4521.chatgpt.site/og.png"
+      content="https://a7m0sphere.github.io/chem3D-learn/og.png"
     />
     <meta property="og:image:width" content="1731" />
     <meta property="og:image:height" content="909" />
@@ -33,13 +34,25 @@
     />
     <meta
       name="twitter:image"
-      content="https://chem3d-learn.minty-joy-4521.chatgpt.site/og.png"
+      content="https://a7m0sphere.github.io/chem3D-learn/og.png"
     />
     <meta
       name="twitter:image:alt"
       content="Chem3D Learn 结构化学 3D 学习站：甲烷正四面体与晶体结构示意"
     />
-    <link rel="canonical" href="https://chem3d-learn.minty-joy-4521.chatgpt.site/" />
+    <link rel="canonical" href="https://a7m0sphere.github.io/chem3D-learn/" />
+    <script>
+      (() => {
+        const basePath = "%BASE_URL%".replace(/\/$/, "");
+        const redirectParam = "__spa";
+        const params = new URLSearchParams(window.location.search);
+        const restoredRoute = params.get(redirectParam);
+
+        if (restoredRoute?.startsWith("/")) {
+          window.history.replaceState(null, "", `${basePath}${restoredRoute}`);
+        }
+      })();
+    </script>
     <title>Chem3D Learn｜结构化学 3D 学习站</title>
   </head>
   <body>

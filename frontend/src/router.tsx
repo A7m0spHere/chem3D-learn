@@ -7,6 +7,8 @@ import { HomePage } from "@/pages/HomePage";
 import { ModulesPage } from "@/pages/ModulesPage";
 import { PathsPage } from "@/pages/PathsPage";
 
+const routerBaseName = new URL(document.baseURI).pathname.replace(/\/$/, "") || "/";
+
 export const appRouter = createBrowserRouter([
   {
     element: <App />,
@@ -35,7 +37,9 @@ export const appRouter = createBrowserRouter([
       { path: "*", element: <HomePage /> },
     ],
   },
-]);
+], {
+  basename: routerBaseName,
+});
 
 function RouteHydrateFallback() {
   return (
