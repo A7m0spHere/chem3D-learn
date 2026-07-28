@@ -376,3 +376,235 @@ export function getNaClCoordinationImages(
 
   return candidates;
 }
+
+// ---------------------------------------------------------------------------
+// 闭合显示实例（T-028B）
+//
+// canonical 位点集合不含正侧外边界的显示镜像（fractional 范围 [0,size)）。为了让
+// [0,N]³ 晶胞区域在正侧边界视觉闭合，为位于下边界（fractional 某轴 = 0）的 canonical
+// 位点生成向正侧平移一个完整超晶胞的显示副本。
+//
+// 关键区分：NaClDisplayInstance 只是显示用的镜像副本，**不是**新的 NaClPeriodicSite。
+// 边界显示副本不重复计入化学组成。27/125/343 是「画面中的显示实例数」，
+// 8/64/216 才是「周期独立离子位点数」。
+// ---------------------------------------------------------------------------
+
+/**
+ * 生成用于闭合 N×N×N 超晶胞正侧边界的显示副本。
+ *
+ * 规则：
+ * 1. 每个 canonical site 先生成一个 `periodicImageShift=[0,0,0]` 的本体副本；
+ * 2. 检查该 site 的原始 fractional 坐标中哪些轴等于 0；
+ * 3. 对这些零坐标轴的所有非空组合，生成向正侧平移一个完整超晶胞（shift=1）的显示副本。
+ *
+ * 显示位置使用重建公式：
+ *   `display.cartesian[axis] = canonical.cartesian[axis] + shift[axis] * size * a`
+ *
+ * - 不创建新的 NaClPeriodicSite。
+ * - 输出数量 = `(2*size+1)³`（N=1→27、N=2→125、N=3→343）。
+ * - id 稳定唯一：`${site.id}@${shift.join(",")}`。
+ * - 相同输入多次调用结果顺序与内容确定。
+ */
+export function generateNaClDisplayInstances(
+  sites: NaClPeriodicSite[],
+  size: number,
+): NaClDisplayInstance[] {
+  if (!Number.isInteger(size) || size < 1) {
+    throw new Error(`generateNaClDisplayInstances: size 必须是 >=1 的整数，收到 ${size}`);
+  }
+  if (sites.length !== 8 * size ** 3) {
+    throw new Error(
+      `generateNaClDisplayInstances: sites 数量 ${sites.length} 与 size=${size} 不匹配（应为 ${8 * size ** 3}）`,
+    );
+  }
+
+  const a = NACL_LATTICE_PARAMETER;
+  const instances: NaClDisplayInstance[] = [];
+
+  // 三轴零坐标的所有非空组合（1..7，共 7 种），每轴分量取 0 或 1。
+  const shiftCombinations: Vec3[] = [];
+  for (let mask = 0; mask < 8; mask += 1) {
+    const shift: Vec3 = [mask & 1 ? 1 : 0, mask & 2 ? 1 : 0, mask & 4 ? 1 : 0];
+    shiftCombinations.push(shift);
+  }
+
+  for (const site of sites) {
+    for (const shift of shiftCombinations) {
+      // 只有当 site 在该轴 fractional=0 时，该轴的 shift=1 才生成副本。
+      const valid = shift.every((s, axis) => s === 0 || Math.abs(site.fractional[axis]) < 1e-9);
+      if (!valid) continue;
+
+      const cartesian: Vec3 = [
+        site.cartesian[0] + shift[0] * size * a,
+        site.cartesian[1] + shift[1] * size * a,
+        site.cartesian[2] + shift[2] * size * a,
+      ];
+      instances.push({
+        id: `${site.id}@${shift.join(",")}`,
+        siteId: site.id,
+        periodicImageShift: shift,
+        cartesian,
+      });
+    }
+  }
+
+  // 顺序确定：按 site 在 sites 中的顺序，再按 shiftCombinations 的固定顺序。
+  // 上述遍历已是该顺序，无需额外排序，但显式保证稳定。
+  return instances;
+}
+
+// ---------------------------------------------------------------------------
+// 晶胞边框（T-028B）
+//
+// 在已居中笛卡尔空间（范围 [-N·a/2, +N·a/2]，即 [-N, +N]）生成晶胞边框线段。
+// hidden=0；outer=12（外立方体）；all=3·N·(N+1)²（每个常规晶胞网格，共享边去重）。
+// ---------------------------------------------------------------------------
+
+/** 晶胞边框显示模式。 */
+export type CrystalCellFrameMode = "outer" | "all" | "hidden";
+
+/** 一条晶胞边框线段。 */
+export type NaClCellFrameSegment = {
+  id: string;
+  start: Vec3;
+  end: Vec3;
+  /** outer=超晶胞外边框；internal=晶胞网格内部边。 */
+  kind: "outer" | "internal";
+};
+
+/** 把一对端点规范成稳定的无向键（较小端在前，分量 join），用于去重与 id。 */
+function segmentKey(start: Vec3, end: Vec3): string {
+  const a = start.map((c) => c.toFixed(6));
+  const b = end.map((c) => c.toFixed(6));
+  const [first, second] = a.join(",") < b.join(",") ? [a, b] : [b, a];
+  return `${first.join(",")}|${second.join(",")}`;
+}
+
+/**
+ * 生成 N×N×N 超晶胞的晶胞边框线段。
+ *
+ * - `hidden`：空数组。
+ * - `outer`：超晶胞外立方体的 12 条棱，坐标范围 `[-N, +N]`（a=2）。
+ * - `all`：每个常规晶胞的完整网格，相邻晶胞共享的边只生成一次；数量 = `3·N·(N+1)²`
+ *   （N=1→12、N=2→54、N=3→144）；每段长度 = a = 2。
+ *
+ * 坐标使用已居中的笛卡尔空间，与 generateNaClPeriodicSites 的 cartesian 一致。
+ * 不依赖 React/R3F/Three.js。
+ */
+export function generateNaClCellFrameSegments(
+  size: number,
+  mode: CrystalCellFrameMode,
+): NaClCellFrameSegment[] {
+  if (!Number.isInteger(size) || size < 1) {
+    throw new Error(`generateNaClCellFrameSegments: size 必须是 >=1 的整数，收到 ${size}`);
+  }
+
+  if (mode === "hidden") {
+    return [];
+  }
+
+  const a = NACL_LATTICE_PARAMETER;
+  const half = (size / 2) * a; // 居中后边界，等于 size（因 a=2，size/2 * 2 = size）。
+  // 边界坐标从 -half 到 +half，步长 a（一个常规晶胞边长）。
+  // 顶点坐标分量取值：-half, -half+a, ..., +half，共 size+1 个。
+  const linePoints: number[] = [];
+  for (let i = 0; i <= size; i += 1) {
+    linePoints.push(-half + i * a);
+  }
+
+  // 生成所有沿单轴、长度 a 的线段，用 segmentKey 去重。
+  const segments = new Map<string, NaClCellFrameSegment>();
+  const addSegment = (start: Vec3, end: Vec3) => {
+    const key = segmentKey(start, end);
+    if (segments.has(key)) return;
+    segments.set(key, { id: `frame-${key}`, start, end, kind: "internal" });
+  };
+
+  for (const x of linePoints) {
+    for (const y of linePoints) {
+      // 沿 z 轴的线段
+      for (let i = 0; i < size; i += 1) {
+        addSegment([x, y, linePoints[i]], [x, y, linePoints[i + 1]]);
+      }
+      // 沿 y 轴的线段（遍历 z）
+      // 已在上层循环固定 x、y，需遍历 z 才能生沿 y 的段；为避免三层嵌套混乱，
+      // 这里单独遍历。
+    }
+  }
+  // 沿 y 轴
+  for (const x of linePoints) {
+    for (const z of linePoints) {
+      for (let i = 0; i < size; i += 1) {
+        addSegment([x, linePoints[i], z], [x, linePoints[i + 1], z]);
+      }
+    }
+  }
+  // 沿 x 轴
+  for (const y of linePoints) {
+    for (const z of linePoints) {
+      for (let i = 0; i < size; i += 1) {
+        addSegment([linePoints[i], y, z], [linePoints[i + 1], y, z]);
+      }
+    }
+  }
+
+  if (mode === "all") {
+    // all 模式返回全部线段（含外框与内部），kind 区分：
+    // 外框线段 = 沿一个轴变化、另两个轴分量都位于 ±half 边界（即外立方体的棱）。
+    const isOuterEdge = (start: Vec3, end: Vec3) => {
+      let changingAxis = -1;
+      for (let axis = 0; axis < 3; axis += 1) {
+        if (Math.abs(start[axis] - end[axis]) > 1e-9) {
+          if (changingAxis !== -1) return false;
+          changingAxis = axis;
+        }
+      }
+      if (changingAxis === -1) return false;
+      const otherAxes = [0, 1, 2].filter((ax) => ax !== changingAxis);
+      return otherAxes.every(
+        (ax) =>
+          Math.abs(Math.abs(start[ax]) - half) < 1e-9 &&
+          Math.abs(Math.abs(end[ax]) - half) < 1e-9,
+      );
+    };
+    return Array.from(segments.values()).map((seg) =>
+      isOuterEdge(seg.start, seg.end) ? { ...seg, kind: "outer" as const } : seg,
+    );
+  }
+
+  // outer 模式：只返回超晶胞外立方体的 12 条完整棱（端点为外立方体顶点 ±half）。
+  // 不使用被切成 N 段的 grid 线段，保证恰好 12 条。
+  const outer: NaClCellFrameSegment[] = [];
+  const corners: Vec3[] = [];
+  for (const sx of [-half, half]) {
+    for (const sy of [-half, half]) {
+      for (const sz of [-half, half]) {
+        corners.push([sx, sy, sz]);
+      }
+    }
+  }
+  // 外立方体 12 条棱：顶点对之间恰有一个分量相同且另两分量在边界上、且沿一个轴跨 ±half。
+  for (let i = 0; i < corners.length; i += 1) {
+    for (let j = i + 1; j < corners.length; j += 1) {
+      const a0 = corners[i];
+      const a1 = corners[j];
+      let diffAxis = -1;
+      let shared = 0;
+      for (let axis = 0; axis < 3; axis += 1) {
+        if (Math.abs(a0[axis] - a1[axis]) > 1e-9) {
+          if (diffAxis !== -1) {
+            diffAxis = -2;
+            break;
+          }
+          diffAxis = axis;
+        } else {
+          shared += 1;
+        }
+      }
+      if (diffAxis >= 0 && shared === 2) {
+        outer.push({ id: `frame-${segmentKey(a0, a1)}`, start: a0, end: a1, kind: "outer" });
+      }
+    }
+  }
+  return outer;
+}

@@ -4,10 +4,13 @@ import {
   NACL_NEAREST_DISTANCE,
   centerFractional,
   fractionalToCartesian,
+  generateNaClCellFrameSegments,
+  generateNaClDisplayInstances,
   generateNaClPeriodicSites,
   getNaClCoordinationImages,
   naclConventionalBasis,
   wrapPeriodicFractional,
+  type CrystalCellFrameMode,
   type NaClPeriodicSite,
   type Vec3,
 } from "../../src/components/three/naclPeriodicGeometry";
@@ -563,4 +566,232 @@ test("getNaClCoordinationImages：相同输入结果顺序与内容确定", () =
 test("NACL_NEAREST_DISTANCE = a/2 = 1（a=2）", () => {
   expect(NACL_NEAREST_DISTANCE).toBe(1);
   expect(NACL_NEAREST_DISTANCE).toBe(NACL_LATTICE_PARAMETER / 2);
+});
+
+// === DisplayInstance（T-028B 新增）=====================================
+
+test("generateNaClDisplayInstances：N=1 → 27 个显示实例", () => {
+  const sites = generateNaClPeriodicSites(1);
+  const instances = generateNaClDisplayInstances(sites, 1);
+  expect(instances).toHaveLength(27);
+  expect(27).toBe((2 * 1 + 1) ** 3);
+});
+
+test("generateNaClDisplayInstances：N=2 → 125 个显示实例", () => {
+  const sites = generateNaClPeriodicSites(2);
+  const instances = generateNaClDisplayInstances(sites, 2);
+  expect(instances).toHaveLength(125);
+  expect(125).toBe((2 * 2 + 1) ** 3);
+});
+
+test("generateNaClDisplayInstances：N=3 → 343 个显示实例", () => {
+  const sites = generateNaClPeriodicSites(3);
+  const instances = generateNaClDisplayInstances(sites, 3);
+  expect(instances).toHaveLength(343);
+  expect(343).toBe((2 * 3 + 1) ** 3);
+});
+
+test("generateNaClDisplayInstances：每个 canonical site 至少有一个 shift=[0,0,0] 实例", () => {
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const instances = generateNaClDisplayInstances(sites, size);
+    const zeroShiftBySite = new Map<string, number>();
+    for (const inst of instances) {
+      if (inst.periodicImageShift.every((c) => c === 0)) {
+        zeroShiftBySite.set(inst.siteId, (zeroShiftBySite.get(inst.siteId) ?? 0) + 1);
+      }
+    }
+    // 每个 canonical site 都恰好有一个 shift=[0,0,0] 本体副本。
+    expect(zeroShiftBySite.size).toBe(sites.length);
+    for (const site of sites) {
+      expect(zeroShiftBySite.get(site.id)).toBe(1);
+    }
+  }
+});
+
+test("generateNaClDisplayInstances：所有 ID 唯一", () => {
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const instances = generateNaClDisplayInstances(sites, size);
+    const ids = new Set(instances.map((i) => i.id));
+    expect(ids.size).toBe(instances.length);
+  }
+});
+
+test("generateNaClDisplayInstances：所有 siteId 都存在于 canonical sites", () => {
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const siteIdSet = new Set(sites.map((s) => s.id));
+    const instances = generateNaClDisplayInstances(sites, size);
+    for (const inst of instances) {
+      expect(siteIdSet.has(inst.siteId)).toBe(true);
+    }
+  }
+});
+
+test("generateNaClDisplayInstances：periodicImageShift 每个分量只能为 0 或 1", () => {
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const instances = generateNaClDisplayInstances(sites, size);
+    for (const inst of instances) {
+      for (const c of inst.periodicImageShift) {
+        expect(c === 0 || c === 1).toBe(true);
+      }
+    }
+  }
+});
+
+test("generateNaClDisplayInstances：只有 fractional 下边界(=0)的轴才生成 +1 副本", () => {
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const siteById = new Map(sites.map((s) => [s.id, s]));
+    const instances = generateNaClDisplayInstances(sites, size);
+    for (const inst of instances) {
+      const canonical = siteById.get(inst.siteId)!;
+      for (let axis = 0; axis < 3; axis += 1) {
+        if (inst.periodicImageShift[axis] === 1) {
+          // 该轴必须是下边界（canonical fractional[axis] = 0）。
+          expect(Math.abs(canonical.fractional[axis])).toBeLessThan(1e-9);
+        }
+      }
+    }
+  }
+});
+
+test("generateNaClDisplayInstances：display cartesian 满足 canonical + shift 重建公式", () => {
+  const a = NACL_LATTICE_PARAMETER;
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const siteById = new Map(sites.map((s) => [s.id, s]));
+    const instances = generateNaClDisplayInstances(sites, size);
+    for (const inst of instances) {
+      const canonical = siteById.get(inst.siteId)!;
+      for (let axis = 0; axis < 3; axis += 1) {
+        const expected = canonical.cartesian[axis] + inst.periodicImageShift[axis] * size * a;
+        expect(inst.cartesian[axis]).toBeCloseTo(expected, 6);
+      }
+    }
+  }
+});
+
+test("generateNaClDisplayInstances：不创建新的 canonical site（实例数 > 位点数）", () => {
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const instances = generateNaClDisplayInstances(sites, size);
+    // 显示实例数 (2N+1)³ 必大于 canonical 位点数 8N³（含边界镜像副本）。
+    expect(instances.length).toBeGreaterThan(sites.length);
+  }
+});
+
+test("generateNaClDisplayInstances：相同输入结果顺序与内容确定", () => {
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const first = generateNaClDisplayInstances(sites, size);
+    const second = generateNaClDisplayInstances(sites, size);
+    expect(second.length).toBe(first.length);
+    for (let i = 0; i < first.length; i += 1) {
+      expect(second[i].id).toBe(first[i].id);
+      expect(second[i].siteId).toBe(first[i].siteId);
+      expect(second[i].periodicImageShift).toEqual(first[i].periodicImageShift);
+      expect(vec3Equal(second[i].cartesian, first[i].cartesian)).toBe(true);
+    }
+  }
+});
+
+test("generateNaClDisplayInstances：sites 数量与 size 不匹配时抛错", () => {
+  const size2Sites = generateNaClPeriodicSites(2);
+  expect(() => generateNaClDisplayInstances(size2Sites, 3)).toThrow();
+  expect(() => generateNaClDisplayInstances([], 1)).toThrow();
+});
+
+// === FrameSegments（T-028B 新增）=======================================
+
+test("generateNaClCellFrameSegments：hidden 返回 0 条", () => {
+  for (const size of [1, 2, 3]) {
+    expect(generateNaClCellFrameSegments(size, "hidden")).toHaveLength(0);
+  }
+});
+
+test("generateNaClCellFrameSegments：outer 恒为 12 条", () => {
+  for (const size of [1, 2, 3]) {
+    const outer = generateNaClCellFrameSegments(size, "outer");
+    expect(outer).toHaveLength(12);
+    // 全部 kind 为 outer。
+    expect(outer.every((s) => s.kind === "outer")).toBe(true);
+  }
+});
+
+test("generateNaClCellFrameSegments：all 数量 = 3·N·(N+1)²", () => {
+  expect(generateNaClCellFrameSegments(1, "all")).toHaveLength(3 * 1 * (1 + 1) ** 2); // 12
+  expect(generateNaClCellFrameSegments(2, "all")).toHaveLength(3 * 2 * (2 + 1) ** 2); // 54
+  expect(generateNaClCellFrameSegments(3, "all")).toHaveLength(3 * 3 * (3 + 1) ** 2); // 144
+});
+
+test("generateNaClCellFrameSegments：所有 ID 唯一", () => {
+  for (const mode of ["outer", "all"] as CrystalCellFrameMode[]) {
+    for (const size of [1, 2, 3]) {
+      const segs = generateNaClCellFrameSegments(size, mode);
+      const ids = new Set(segs.map((s) => s.id));
+      expect(ids.size).toBe(segs.length);
+    }
+  }
+});
+
+test("generateNaClCellFrameSegments：不存在方向相反但实际相同的重复线段", () => {
+  for (const mode of ["outer", "all"] as CrystalCellFrameMode[]) {
+    for (const size of [1, 2, 3]) {
+      const segs = generateNaClCellFrameSegments(size, mode);
+      const keys = new Set<string>();
+      for (const seg of segs) {
+        // 规范化无向键：两端点分量按字典序排列后 join。
+        const a = seg.start.map((c) => c.toFixed(6)).join(",");
+        const b = seg.end.map((c) => c.toFixed(6)).join(",");
+        const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+        expect(keys.has(key)).toBe(false);
+        keys.add(key);
+      }
+    }
+  }
+});
+
+test("generateNaClCellFrameSegments：坐标范围在 [-N, +N]（a=2，N=size）", () => {
+  for (const mode of ["outer", "all"] as CrystalCellFrameMode[]) {
+    for (const size of [1, 2, 3]) {
+      const bound = size; // a=2，居中后边界 = size。
+      const segs = generateNaClCellFrameSegments(size, mode);
+      for (const seg of segs) {
+        for (const v of [seg.start, seg.end]) {
+          for (const c of v) {
+            expect(c).toBeGreaterThanOrEqual(-bound - 1e-9);
+            expect(c).toBeLessThanOrEqual(bound + 1e-9);
+          }
+        }
+      }
+    }
+  }
+});
+
+test("generateNaClCellFrameSegments：outer 边界恰为 ±N", () => {
+  for (const size of [1, 2, 3]) {
+    const bound = size;
+    const outer = generateNaClCellFrameSegments(size, "outer");
+    // outer 线段的端点分量都应位于 ±bound。
+    for (const seg of outer) {
+      for (const v of [seg.start, seg.end]) {
+        for (const c of v) {
+          expect(Math.abs(Math.abs(c) - bound)).toBeLessThan(1e-9);
+        }
+      }
+    }
+  }
+});
+
+test("generateNaClCellFrameSegments：all 中每段长度等于 a=2", () => {
+  for (const size of [1, 2, 3]) {
+    const segs = generateNaClCellFrameSegments(size, "all");
+    for (const seg of segs) {
+      const len = distance(seg.start as Vec3Tuple, seg.end as Vec3Tuple);
+      expect(len).toBeCloseTo(NACL_LATTICE_PARAMETER, 6);
+    }
+  }
 });
