@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Codex，T-027 正式部署与 SPA history fallback）
+> 最后更新：2026-07-29（Claude Code，T-028A NaCl 周期几何内核）
 
 ## 一句话定位
 
@@ -141,9 +141,15 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 正在进行
 
-（暂无。T-021 ~ T-024 均已提交完毕；backlog 已全部收口。）
+- **Crystal Workspace / 晶体探索工作台（新方向，T-028 系列）**：面向初高中学生与化学爱好者的「数字化结构模型盒 + 科学探索工作台」，支持拆/扩/切/改/比。T-028A（NaCl 周期几何纯函数内核）已完成；T-028B（NaCl Viewer 周期扩展渲染）/ T-028C（粒子选择与配位环境）/ T-028D（UI、测试、治理收尾）待立项。
 
 ## 最近完成
+
+- **T-028A NaCl 周期几何纯函数内核 + 逻辑测试**（2026-07-29 完成，分支 `feat/t-028a-nacl-periodic-kernel`）
+  - 新增 `frontend/src/components/three/naclPeriodicGeometry.ts`：基于 NaCl **常规立方晶胞**（非原胞）的 4 Cl⁻ + 4 Na⁺ 分数坐标基元，生成 N×N×N 超晶胞的独立周期位点（8·N³ 个，Na⁺:Cl⁻=1:1）与六配位周期镜像计算。区分 `NaClPeriodicSite`（独立位点）与 `NaClDisplayInstance`（显示镜像副本，本轮只留类型边界）。不读 `nacl.json`、不接入旧 Viewer、不改教学模式。
+  - 新增 `frontend/tests/logic/nacl-periodic.logic.spec.ts` 26 项契约：位点计数（N=1/2/3 → 8/64/216）、id 与 (cell+basisIndex) 唯一、canonical fractional 去重、重心居中、配位六镜像（siteId+imageShift 唯一、距离 a/2、±x±y±z 全覆盖、N=1 允许同 siteId 不同 imageShift、边界完整六配位、不返回同号离子）。
+  - 居中策略：`centerOffset = 1/4 + (size-1)/2`，使全部位点 fractional 重心严格落在原点。配位用候选枚举法（中心 cell ±1 邻域内枚举异号子格子镜像，按距离 a/2 容差取最近邻），避免「晶胞内分数 0/½ 二分」在跨越 a/2 边界时把 ±x 误映射到同一基元位点。
+  - build / lint 通过；`test:logic` 由 83 → **109 通过**。未运行 Darwin 视觉回归（无 UI 改动）。详见 D-026。
 
 - **T-027 正式部署、SPA history fallback 与 README 在线入口**（2026-07-29 完成，提交 `6ada065` / `f31a6e3` / `67f5f94`）
   - GitHub Pages 作为正式公开托管；Actions 对 `main` 的前端变更自动执行 Pages 专用构建、产物契约测试与发布。
@@ -258,13 +264,18 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-当前 `docs/TASKS.md` 待办为空：T-004、T-005、T-022~T-024 及引线标签系列 T-011~T-019 **已全部收口**。其他方向候选（均未立项，动手前先与用户确认）：
+当前进行中方向为 **T-028 Crystal Workspace / 晶体探索工作台**。T-028A 已完成，后续子任务（均需用户确认后立项）：
 
-1. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。
-2. macOS 环境跑一次完整 Darwin 视觉回归：审核 T-023 预期内的 2 张拼装页快照漂移（`organic-builder-ethylene` / `organic-builder-mobile-info`，因分子式下标），并确认键圆柱单位长度化与全站动画 wrapper 无非预期布局漂移。
-3. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
-4. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
-5. 前端 / 视频 Node `engines` 声明仍待确认；正式部署与 SPA history fallback 已由 T-027 收口。
+1. **T-028B**：NaCl Viewer 周期扩展渲染。在 NaClCell.tsx 增 `supercellSize` prop，N=1 沿用 `nacl.json` 27 原子 + 现有渲染（零破坏现有测试），N≥2 用 `naclPeriodicGeometry.ts` 生成器数据走新渲染分支；cellFrame 三态（单晶胞/全部/隐藏）。必须遵守 T-028A 接口约束（见 HANDOFF）。
+2. **T-028C**：粒子选择与第一配位层提取。R3F `onClick` 选中粒子、高亮中心+六配位镜像、淡化其他、边界周期补齐幽灵粒子、退出恢复。新建 `useCrystalWorkspaceControls` hook 与 `CrystalContextInspector`。
+3. **T-028D**：工作台控件条 UI + 完整测试 + 治理收尾。
+
+其他方向候选（均未立项，动手前先与用户确认）：
+4. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。
+5. macOS 环境跑一次完整 Darwin 视觉回归：审核 T-023 预期内的 2 张拼装页快照漂移（`organic-builder-ethylene` / `organic-builder-mobile-info`，因分子式下标），并确认键圆柱单位长度化与全站动画 wrapper 无非预期布局漂移。
+6. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）；以及 T-028A 内核中 Na-Cl 最近邻距离 a/2、方向沿三轴 ± 的标注（标准 NaCl 结构结果，待复核）。
+7. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
+8. 前端 / 视频 Node `engines` 声明仍待确认；正式部署与 SPA history fallback 已由 T-027 收口。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。

@@ -7,38 +7,65 @@
 
 ## 最近一次交接
 
-- **Agent**：Codex
+- **Agent**：Claude Code
 - **日期**：2026-07-29
-- **分支**：`main`
-- **任务**：T-027 正式部署、SPA history fallback 与 README 在线入口。
-- **提交**：`6ada065 feat(deploy): add Sites hosting with SPA fallback`、`f31a6e3 docs(deploy): link production site`、`67f5f94 feat(deploy): publish frontend with GitHub Pages`
+- **分支**：`feat/t-028a-nacl-periodic-kernel`（由 `main` 切出）
+- **任务**：T-028A NaCl 周期几何纯函数内核 + 逻辑测试（Crystal Workspace 新方向第一阶段）。
+- **新增文件**：`frontend/src/components/three/naclPeriodicGeometry.ts`、`frontend/tests/logic/nacl-periodic.logic.spec.ts`
 
 ### 本轮做的事
 
-1. 新增 GitHub Pages Actions 发布流：Node 20 + `npm ci` + `npm run test:pages` + artifact deploy；首次 run `30400567495` 的 build / deploy 均成功。
-2. Pages 构建使用 `/chem3D-learn/` base；入口 `<base href="%BASE_URL%">` 与 `document.baseURI` 让 React Router 自动选择 `/` 或仓库子路径 basename。
-3. 新增 `public/404.html`：把直接访问的深层路径编码到 `__spa` 后跳到根页，入口脚本用 `history.replaceState` 恢复原始 URL。
-4. README 增加在线体验徽章、导航和正文入口；`index.html` 补 canonical、Open Graph / Twitter 大图；新增 `frontend/public/og.png`。
-5. Sites Worker / 构建整理 / 3 项 fallback 测试作为根路径部署兼容方案保留。Sites 版本 2 发布成功，但工作区禁止 public，故正式公开地址改用 GitHub Pages。
+1. 新增 `naclPeriodicGeometry.ts`：基于 NaCl **常规立方晶胞**（非原胞）的 4 Cl⁻ + 4 Na⁺ 分数坐标基元，生成 N×N×N 超晶胞独立周期位点（8·N³ 个，Na⁺:Cl⁻=1:1）与六配位周期镜像。区分 `NaClPeriodicSite`（独立位点）与 `NaClDisplayInstance`（显示镜像副本，只留类型边界）。
+2. 公开类型：`Vec3`、`NaClSublattice`、`NaClPeriodicSite`、`NaClPeriodicNeighbor`、`NaClDisplayInstance`；常量 `naclConventionalBasis`、`NACL_LATTICE_PARAMETER=2`、`NACL_NEAREST_DISTANCE=1`；函数 `centerFractional`、`fractionalToCartesian`、`wrapPeriodicFractional`、`generateNaClPeriodicSites(size)`、`getNaClCoordinationImages(centerSiteId, sites, size)`。
+3. 常规立方晶胞分数坐标基元：Cl⁻ 子格子（FCC）`(0,0,0)(0,½,½)(½,0,½)(½,½,0)`；Na⁺ 子格子 = Cl⁻ + (½,0,0) 平移 mod 1，得 `(½,0,0)(½,½,½)(0,0,½)(0,½,0)`。a=2。
+4. 最近邻：Na⁺-Cl⁻ 距离 = a/2 = 1，方向沿 ±x/±y/±z（标准 NaCl 结果，标注 `TODO-CHEM-VERIFY` 待复核）。
+5. 居中：`centerOffset = 1/4 + (size-1)/2`，使全部位点 fractional 重心严格过原点。
+6. 配位用候选枚举法（中心 cell ±1 邻域内枚举异号子格子镜像，按距离 a/2 容差取最近邻），六配位按 `siteId + imageShift` 判断唯一性。
+7. 新增 26 项 logic 测试覆盖全部契约。
 
 ### 验证结果
 
-- `npm run test:pages` **3 / 3**；`npm run test:sites` **3 / 3**；`npm run lint` 通过。
-- `npm run test:logic` **83 / 83**；系统 Chrome 下 `npm run test:production` **3 / 3**。
-- Actions run `30400567495` build / deploy 均成功。
-- 系统 Chrome 直接访问首页、Modules、NH₃、乙烯拼装和晶胞均摊考试专题，均保持深层 URL、H1 正确、无 `pageerror`。
-- 线上 `og.png` 返回 200 / `image/png` / 1,434,334 bytes。
+- `npm run build` **通过**（含 `tsc --noEmit`）；`npm run lint` **通过**（0 warning）。
+- `npm run test:logic`：83 → **109 通过**。
+- 未运行 Darwin 视觉回归（无 UI 改动）；未更新任何快照。
+- `git status` 确认无快照/lockfile/缓存改写。
+
+### 关键设计取舍与偏差（相对原计划）
+
+- **居中方式偏差**：原计划用 `frac - size/2`（盒子居中），实测基元重心偏 -0.5（常规晶胞 8 基元位点重心在 0.25，非原点）。改为 `centerOffset = 1/4 + (size-1)/2` 让重心严格过原点，满足「几何中心位于原点」契约。`centerFractional` 公共函数仍保持盒子居中语义（测试已锁定）。
+- **配位算法换思路**：首版用「方向位移 + 晶胞内分数 0/½ 二分推断 canonical site」，在跨越 a/2 边界时把 ±x 误映射到同一基元位点，导致 6 个 siteId+imageShift 全相同。按 CLAUDE.md「失败两次换思路」改用候选枚举法，直接按几何距离判定，无歧义。
+- **basisIndex 全局 0..7**：为满足「(cell+basisIndex) 唯一」契约，basisIndex 跨子格子全局编号（Cl 0..3、Na 4..7），同时保留 `sublattice` 字段。
+
+### T-028B 接入须知（接口约束）
+
+下一个 Agent 实施 T-028B（NaCl Viewer 周期扩展渲染）时**必须遵守**：
+
+1. **N=1 沿用旧数据**：现有 NaCl 教学模式继续完整使用 `nacl.json` 的 27 个边界展开位置，保持现有 ID、高亮逻辑、教学计数和视觉测试不变。**不采用「N=1 用旧数据、N≥2 用新数据」的永久混合语义**——未来「周期探索模式」内部 N=1/2/3 全部用新生成器。T-028B 需为 NaClCell 增设独立的「周期探索」入口，与现有教学模式并存。
+2. **不读 nacl.json**：`naclPeriodicGeometry.ts` 不依赖 `nacl.json`，T-028B 渲染 N≥2 时直接消费 `generateNaClPeriodicSites` 输出，不要把 `nacl.json` 的 siteType 等显示属性强加到周期位点。
+3. **居中已处理**：`cartesian` 已整体居中（重心过原点），Viewer 相机 `target=[0,0,0]` 即对准结构中心，无需再额外平移。
+4. **显示实例与位点区分**：补齐外边界幽灵粒子时用 `NaClDisplayInstance`（同一 siteId + imageShift 的镜像副本），不得把显示镜像当成新的 `NaClPeriodicSite`。本轮已留类型边界，T-028B 实现其填充。
+5. **配位引导线非共价键**：`getNaClCoordinationImages` 返回的邻居用虚线/`ionic-neighbor`/`visual-guide` kind，不得画成普通共价键。
+6. **性能**：N=2 → 64 位点、N=3 → 216 位点。评估是否用 Drei `Instances`（ZincMetalCell/MetalClosePackingCell 已有范式），但无性能证据前不提前复杂化；N=1 走旧渲染不涉及。
+7. **不破坏现有测试**：`crystal-viewer.visual.spec.ts` 的「NaCl 配位与计数结论位于 Viewer 外壳」「均摊法计数」断言必须继续通过；1×1×1 视觉与现有完全一致。
 
 ### 已知限制与建议
 
-- 正式公开地址：`https://a7m0sphere.github.io/chem3D-learn/`。
-- GitHub Pages 的深层路径首个原始 HTTP 响应仍是 404，JavaScript 随后跳转并恢复原路径；浏览器体验已验证可用。若将来要求服务端原生 200 rewrite / 更强 SEO，迁移到支持 rewrite 的公开托管。
-- 尚未配置自定义域名；完整 Darwin 视觉回归未运行、未更新任何快照。
-- `ThreeViewerFrame` 仍有 845.42 KB / gzip 227.97 KB 的既有非阻断警告。
+- T-028A 是纯内核，**无可见 UI 变化**；用户实际看到周期扩展效果需等 T-028B。
+- Na-Cl 最近邻距离 a/2、方向沿三轴 ± 标注 `TODO-CHEM-VERIFY`，属标准 NaCl 结构结果，待化学复核。
+- `naclPeriodicGeometry.ts` 当前只服务 NaCl；CsCl（简单立方基元）、金刚石（FCC+四基元）后续可参照同一范式另建，不要强行统一到未经验证的通用抽象。
 
 ---
 
 ## 往期
+
+### 2026-07-29 Codex：T-027 正式部署、SPA history fallback 与 README 在线入口
+
+- **提交**：`6ada065` / `f31a6e3` / `67f5f94`
+- 新增 GitHub Pages Actions 发布流（Node 20 + `npm ci` + `npm run test:pages` + artifact deploy），首次 run `30400567495` 成功。
+- Pages 构建用 `/chem3D-learn/` base；`<base href="%BASE_URL%">` + `document.baseURI` 让 React Router 自动选 basename；`public/404.html` 编码深层路径到 `__spa` 后跳根页恢复。
+- README 加在线体验入口；`index.html` 补 canonical、Open Graph / Twitter 大图与 `frontend/public/og.png`。
+- 验证：`test:pages` 3/3、`test:sites` 3/3、`test:logic` 83/83、Chrome `test:production` 3/3；Actions build/deploy 成功；线上 `og.png` 200。
+- 限制：GitHub Pages 深层 URL 首个 HTTP 响应仍 404（JS 随后恢复）；未配自定义域名；Darwin 视觉回归未运行；`ThreeViewerFrame` 845.42 KB 非阻断警告仍在。
 
 ### 2026-07-29 Codex：T-026 采用 MIT License 并同步 README
 

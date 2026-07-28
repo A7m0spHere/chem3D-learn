@@ -281,3 +281,21 @@
   - README 和分享元信息只指向可匿名访问的 GitHub Pages 地址。最初创建的 Sites 项目与 Worker 仍保留为根路径部署兼容方案，但工作区策略禁止公开 Sites，不能作为公开体验入口。
 - **理由**：公开仓库需要无需登录即可打开的体验地址。Sites 版本 2 已部署成功，但匿名请求被访问策略拦截为 401，且将站点切换为 public 时平台明确返回“Publishing Sites to the internet is not enabled for this workspace”。GitHub Pages 对公开仓库可用，并能通过官方 Actions artifact 流程持续发布；分开 base / basename / fallback 三层后，部署差异不会渗进教学页面。
 - **验证与边界**：Pages 产物测试 3 / 3、Sites fallback 3 / 3、logic 83 / 83、production prefetch 3 / 3、lint 通过；Actions run `30400567495` build / deploy 成功。真实 Chrome 直达首页、Modules、NH₃、乙烯拼装和考试专题深层路径均渲染正确且无页面错误。受 GitHub Pages 能力限制，深层 URL 的首个原始 HTTP 响应仍是 404，随后由 JavaScript 跳转并恢复路径；如需服务器原生 200 rewrite 或更强 SEO，应改用支持 rewrite 的公开托管。
+
+## D-026 Crystal Workspace 新方向立项；T-028A NaCl 周期几何内核使用常规立方晶胞、候选枚举法计算配位（T-028A）
+
+- **日期**：2026-07-29（Claude Code）
+- **分支**：`feat/t-028a-nacl-periodic-kernel`
+- **决定**：
+  - 立项新方向「Crystal Workspace / 晶体探索工作台」（T-028 系列），分 A/B/C/D 四阶段：A=纯几何内核，B=NaCl Viewer 周期渲染，C=粒子选择与配位环境，D=UI 与测试收尾。A 已完成。
+  - NaCl 周期内核使用**常规立方晶胞**（conventional cubic cell）的 4 Cl⁻ + 4 Na⁺ 分数坐标基元，**不使用原胞**（primitive cell）。原胞只含 1 个 NaCl 化学式单位且基矢非高中教材正交立方晶胞。命名用 `conventional` / `basis`，不用 `primitive` / `minimal`。
+  - 不给周期位点附加 `CrystalSiteType`（corner/face-center/edge-center/body-center 是相对单晶胞边界的显示与均摊属性，不是无限晶格离子的固有属性）。siteType 只服务于 `nacl.json` 单晶胞计数教学。
+  - 数据模型区分两类对象：`NaClPeriodicSite`（N×N×N 超晶胞独立离子位点，8·N³ 个）与 `NaClDisplayInstance`（为补齐外边界显示的镜像副本）。T-028A 只实现前者与配位镜像，后者留类型边界不填充。
+  - 配位用**候选枚举法**：在中心 cell 的 ±1 晶胞邻域内枚举异号子格子所有镜像，按距离 a/2 容差取最近邻。六配位唯一性按 `siteId + imageShift` 判断，而非只按 siteId（N=1 时同一 canonical site 会以不同 imageShift 出现多次）。
+  - 居中常量 `centerOffset = 1/4 + (size-1)/2`，使全部位点 fractional 重心严格落在原点（基元重心 0.25 + 晶胞平移均值 (size-1)/2）。
+- **理由**：
+  - 候选枚举法比「方向位移 + 晶胞内分数 0/½ 二分推断 canonical site」稳健——后者在跨越 a/2 边界时会把 ±x 方向误映射到同一基元位点（首次实现即因此产生 6 个全相同 siteId+imageShift 的 bug）。枚举法直接按几何距离判定，无歧义。
+  - 区分 PeriodicSite 与 DisplayInstance 是为后续 T-028B/C 补齐外边界幽灵粒子预留清晰边界；本轮不实现显示系统，避免过度设计。
+  - 重心居中保证未来 Viewer 接入时相机 target=[0,0,0] 即对准结构中心。
+  - Na-Cl 最近邻距离 a/2、方向沿三轴 ± 为标准 NaCl 结构结果，代码内标注 `TODO-CHEM-VERIFY` 待复核。
+- **验证**：`npm run build` 通过；`npm run lint` 通过（0 warning）；`npm run test:logic` 83 → 109 通过（新增 26 项 NaCl 周期契约）。无 UI 改动，未运行 Darwin 视觉回归。纯新增文件，零破坏现有测试。
