@@ -3,6 +3,7 @@
 </p>
 
 <p align="center">
+  <a href="https://chem3d-learn.minty-joy-4521.chatgpt.site/"><img alt="在线体验" src="https://img.shields.io/badge/%E5%9C%A8%E7%BA%BF%E4%BD%93%E9%AA%8C-%E6%89%93%E5%BC%80%E7%AB%99%E7%82%B9-2A9D8F?style=flat-square"></a>
   <img alt="Vite 6" src="https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white">
   <img alt="React 18" src="https://img.shields.io/badge/React-18-149ECA?style=flat-square&logo=react&logoColor=white">
   <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white">
@@ -12,6 +13,7 @@
 </p>
 
 <p align="center">
+  <a href="https://chem3d-learn.minty-joy-4521.chatgpt.site/">在线体验</a> ·
   <a href="#真实界面">真实界面</a> ·
   <a href="#核心能力">核心能力</a> ·
   <a href="#快速开始">快速开始</a> ·
@@ -22,6 +24,8 @@
 Chem3D Learn（结构化学 3D 学习站）是一个面向中国高中生和化学教师的中文结构化学学习网站。它用可旋转的三维模型、简洁的步骤讲解和课堂友好的控制，把分子构型、晶体结构、化学键与有机立体结构从平面图变成可以直接观察的空间关系。
 
 当前产品以前端实现为准；不需要启动后端，也能完整浏览主要学习体验。
+
+**[立即在线体验 →](https://chem3d-learn.minty-joy-4521.chatgpt.site/)**
 
 ## 真实界面
 
@@ -76,7 +80,7 @@ npm run build
 npm run preview
 ```
 
-> 项目使用 `createBrowserRouter`。部署到静态托管平台时，需要配置 SPA history fallback；仓库目前尚未绑定正式部署平台。
+> 正式站点已通过 OpenAI Sites 部署，并由边缘 Worker 为 `createBrowserRouter` 提供 SPA history fallback；直接访问 `/modules`、`/module/...` 等深层链接也会进入 React 应用。
 
 ## 技术栈
 
