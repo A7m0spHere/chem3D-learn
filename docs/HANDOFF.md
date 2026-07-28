@@ -7,6 +7,38 @@
 
 ## 最近一次交接
 
+- **Agent**：Codex
+- **日期**：2026-07-28
+- **分支**：`main`
+- **任务**：T-024 修复生产首页提前加载 3D 依赖，并补真实生产预览回归。
+- **提交**：`f151bfb fix(perf): keep 3d chunks off production homepage`
+
+### 本轮做的事
+
+1. **用生产构建证明问题不是无害警告**：旧对象式 `manualChunks` 把 React/JSX 共享运行时吸入 `r3f`，入口 `index` 因此静态导入 `r3f`，再导入 `three`。首页冷启动实际下载 `index + r3f + three`（1223.80 KB / gzip 349.10 KB）。
+2. **只删错误的对象式分包规则**：保留 `modulePreload: false`、路由 lazy、卡片 hover/focus 预取与 `/modules` idle 预取。自动分包后首页只请求 `index`（356.80 KB / gzip 114.66 KB），重型依赖移到按需 `ThreeViewerFrame`。
+3. **补生产回归入口**：新增 `playwright.production.config.ts` 与 `npm run test:production`，先 build、再用 `vite preview` 跑既有无截图预取用例。旧配置准确复现 1/3 失败，修复后 3/3 通过；断言同时识别当前 `ThreeViewerFrame-*` 和历史 `three-*` / `r3f-*`。
+
+### 效果与验证
+
+- gzip 首页 JS **349.10 → 114.66 KB（-67.2%）**。
+- 1.6 Mbps、150 ms、4× CPU、5 次冷启动：首页中位 **2825 → 1491 ms**；CH₄ 直达 Canvas **5124 → 4377 ms**；预取后点击到 Canvas 中位 **1300 ms**（比直达快 70.3%）；无 page/console error。
+- `npm run build`、`npm run lint` 通过；`npm run test:logic` **83 / 83**；开发态预取 **3 / 3**；生产预取 **3 / 3**。
+- 未改 UI、路由、Viewer、教学数据、lockfile 或 Darwin 快照。
+- `webapp-testing` 技能的 Python Playwright 在本机两套 Python 中均缺包，本轮继续使用项目已有 `@playwright/test` 与系统 Chrome，没有安装新依赖。
+
+### 已知限制与建议
+
+- `ThreeViewerFrame` 约 845.42 KB / gzip 227.97 KB，仍有 Vite large chunk 警告，但现在只在 3D 意图/路由下请求；不要为了消除警告恢复对象式 `manualChunks`。
+- 受限设备直达 CH₄ 中位仍约 4.38 秒，略高于 4 秒目标。下一任务应先评估最小加载反馈或预取时机，不直接扩大为 Viewer 解耦或新一轮 vendor 拆分。
+- Windows 没有 Darwin 基线；本任务无 UI 变化，未跑/未更新完整视觉快照。
+
+---
+
+## 往期
+
+### 2026-07-28 Claude Code：T-023 有机拼装实验室 3D 补间动画与视觉收尾
+
 - **Agent**：Claude Code
 - **日期**：2026-07-28
 - **分支**：`main`（已推送到 `origin/main`）
@@ -42,10 +74,6 @@
 1. **backlog 已清空**。候选方向见 PROJECT_STATUS「下一步」：macOS 视觉回归审核（含本轮 2 张预期漂移）、两处 `TODO-CHEM-VERIFY` 化学核实、后端单源方案 B、部署配置。动手前先与用户确认立项。
 2. 教训延续并升级：TASKS 范围描述连续两轮与代码漂移（T-022 记窄了、T-023 记反了）。接手任务先用 `git log -S <关键符号>` 核对每一子项的落地情况，再定范围；完成任务的同一批 docs 提交里，把"顺带做掉的"逐项写清。
 3. 若做 macOS 视觉回归：除 2 张预期漂移外，其余拼装页快照理论上不应变化（键渲染等价、面板在完整结构下首挂载即展开无动画）；若出现其他漂移，先查 `CollapsibleSection` 首挂载分支与 `AngleArc` 未传 opacity 的调用点。
-
----
-
-## 往期
 
 ### 2026-07-28 Claude Code：T-022 键长标尺统一收尾
 

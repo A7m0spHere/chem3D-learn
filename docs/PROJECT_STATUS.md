@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-28（Claude Code，T-023 收尾：3D 补间/退场残影/键跟随/信息面板过渡/分子式下标，提交 `f42f076` + `4d698ed`）
+> 最后更新：2026-07-28（Codex，T-024 修复生产首页提前加载 3D 依赖，提交 `f151bfb`）
 
 ## 一句话定位
 
@@ -26,6 +26,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
+- **T-024 已提交**（2026-07-28，`f151bfb`）：删除会吸收共享 React 运行时的对象式 `manualChunks`，生产首页不再静态下载 `r3f/three`；新增真实 `vite preview` 的无截图回归入口 `npm run test:production`。首页冷启动 gzip JS 349.10 → 114.66 KB，受限配置中位 2825 → 1491 ms。大 chunk 警告仍存在，但已移到按需的 `ThreeViewerFrame`，详见 D-022。
+
 - **T-023 已提交**（2026-07-28，2 个代码 commit + 1 个 docs commit）：
   - `f42f076 feat(builder): finish 3d tweens with exit ghosts and reduced motion` —— 画布补间收尾（`OrganicBuilderCanvas.tsx`、`AngleArc.tsx` 加默认 1 的可选 `opacity`）
   - `4d698ed feat(builder): animate info panel sections and unify formula subscripts` —— 信息面板高度过渡与分子式下标（`OrganicBuilderInfoPanel.tsx`、`organicBuilderChemistry.ts`、3 个测试文件）
@@ -44,6 +46,16 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-28，T-024）
+
+- `frontend npm run build`：**通过**（含 `tsc --noEmit`）；自动分包后 `index` 356.80 KB / gzip 114.66 KB，按需 `ThreeViewerFrame` 845.42 KB / gzip 227.97 KB，保留非阻断 large chunk 警告。
+- `frontend npm run lint`：**通过**。
+- `frontend npm run test:logic`：**83 / 83 通过**。
+- 生产回归（设置 `$env:PLAYWRIGHT_CHANNEL='chrome'` 后运行 `npm run test:production`）：旧配置 **1 / 3 失败**，修复后 **3 / 3 通过**；失败/修复项正是首页初始重型 3D 请求。
+- 开发态定向预取回归（系统 Chrome、无截图）：**3 / 3 通过**。
+- 受限配置 5 次冷启动：首页中位 2825 → 1491 ms；CH₄ 直达 Canvas 5124 → 4377 ms；预取后点击到 Canvas 1300 ms（比直达快 70.3%）；无 page/console error。
+- Darwin 视觉回归：**未运行**；本任务无 UI 改动、未更新任何快照。
 
 ## 独立验证结果（2026-07-28，T-023）
 
@@ -94,14 +106,18 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 完整视觉回归：**未运行**，因为当前只有 macOS 基线。
 - `video/`：`node_modules` 未安装，本轮未运行 lint、构建或渲染。
 
-T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（gzip 137 KB → 67 KB）；`ModuleDetailPage` 连同 23 个 JSON 移入约 286 KB 的独立页面 chunk，仅访问 `/module/:id` 时下载。构建仍存在 Vite 非阻断警告：`three` chunk 约 688 KB，超过默认 500 KB 提示阈值。其在课堂弱网/旧设备上的实际影响为**待确认**。
+T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象式 `manualChunks` 让首页静态下载 `r3f/three`。修复后首页只请求 `index`，3D 依赖图移到按需 `ThreeViewerFrame`。构建仍有 845 KB large chunk 警告，但它不再代表非 3D 页面会下载该资源；受限设备直达 CH₄ 仍需约 4.38 秒，属于下一阶段可评估的加载体验问题。
 
 ## 正在进行
 
-（暂无。T-021 ~ T-023 均已提交完毕；backlog 已全部收口。）
+（暂无。T-021 ~ T-024 均已提交完毕；backlog 已全部收口。）
 
 ## 最近完成
 
+- **T-024 修复生产首页提前加载 3D 依赖**（2026-07-28 完成，提交 `f151bfb`）
+  - Hyperplan 审计确认旧入口静态导入 `r3f` 与 `three`；新增生产预览回归先在旧配置上复现 1/3 失败，再删除对象式 `manualChunks`，相同测试 3/3 通过。
+  - 首页冷启动 gzip JS 349.10 → 114.66 KB（-67.2%）；受限配置首页中位 2825 → 1491 ms。路由 lazy、预取入口、`modulePreload: false` 与 UI 均保持不变。
+  - 新增 `npm run test:production`，防止生产依赖图问题再被开发服务器测试漏过。详见 D-022。
 - **T-023 有机拼装实验室 3D 补间动画与视觉收尾**（2026-07-28 完成，提交 `f42f076` / `4d698ed`）
   - **接手修正**：TASKS 待办描述与代码不符——7 个子项中 4 个半已随 T-021 的 `e8169cb` 落地（原子入场缩放+位置补间、双/三键偏移面旋向相机、toast 退出延迟卸载、浮层错峰入场、自定义确认弹窗与配套测试）。先 git 考古核实，再只做缺失部分（教训与 T-022 同款：接手先核对代码，别只信 TASKS）。
   - **本轮新做**：3D 补间遵守 `prefers-reduced-motion`（R3F 不吃 motion.css 的 CSS 兜底，需 JS 显式退化）；删除退场残影（原子缩没、键并拢变细，~200ms 后卸载，不用透明材质防排序伪影，撤销即清残影）；键跟随补间（共享 `animatedPositions` 表，原子 useFrame 优先级 -1 先写、键默认 0 后读，圆柱改单位长度 + scale.y，修掉吸附/撤销后键与原子约 200ms 脱开）；键角弧淡入淡出（`AngleArc` 加默认 1 的可选 `opacity`，其他 3 个调用点零变化）；信息面板键角/官能团区块 grid-rows 高度过渡（收拢保留旧内容、退场后才卸载保住 `toHaveCount(0)` 断言、间距移入收拢内容防双倍空隙）；分子式显示层统一下标（新增 `formatFormulaSubscripts`，`getFormula` 保持 ASCII，8 处浏览器测试期望同步更新）。
@@ -199,12 +215,13 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-当前 `docs/TASKS.md` 待办为空：T-004、T-005、T-022、T-023 及引线标签系列 T-011~T-019 **已全部收口**。其他方向候选（均未立项，动手前先与用户确认）：
+当前 `docs/TASKS.md` 待办为空：T-004、T-005、T-022~T-024 及引线标签系列 T-011~T-019 **已全部收口**。其他方向候选（均未立项，动手前先与用户确认）：
 
-1. macOS 环境跑一次完整 Darwin 视觉回归：审核 T-023 预期内的 2 张拼装页快照漂移（`organic-builder-ethylene` / `organic-builder-mobile-info`，因分子式下标），并确认键圆柱单位长度化与全站动画 wrapper 无非预期布局漂移。
-2. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
-3. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
-4. 正式部署配置（SPA history fallback）、根 README、Node `engines` 声明等待确认项。
+1. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。
+2. macOS 环境跑一次完整 Darwin 视觉回归：审核 T-023 预期内的 2 张拼装页快照漂移（`organic-builder-ethylene` / `organic-builder-mobile-info`，因分子式下标），并确认键圆柱单位长度化与全站动画 wrapper 无非预期布局漂移。
+3. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
+4. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
+5. 正式部署配置（SPA history fallback）、根 README、Node `engines` 声明等待确认项。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
@@ -219,6 +236,7 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 - 23 个 JSON 通过 `as unknown as MoleculeRecord` 接入，绕过了静态结构核验，当前没有运行时 schema / 引用完整性测试。
 - `backend/src/molecules.js` 与前端 6 个核心 JSON 重复。T-005（commit `fd67aca`）已加防漂移契约测试：5 个 VSEPR 分子的结构核心逐字锁定，漂移即测试变红；教学文案与 nacl 简化胞的差异是**有意保留**的（见 `docs/BACKEND_DATA_SYNC.md`），未做构建期单源生成。
 - `createBrowserRouter` 的生产静态托管需要 SPA history fallback；当前仓库没有正式部署配置。
+- 自动分包后的按需 `ThreeViewerFrame` chunk 约 845.42 KB（gzip 227.97 KB），仍触发 Vite large chunk 警告；首页已不下载它，但受限设备直接进入 CH₄ 的 Canvas 中位约 4.38 秒，略高于 4 秒目标。
 - 当前有两处显式化学待核实项：
   - `mockMolecules.ts` 的 BF₃ 缺电子表述。
   - `caf2.json` 的约 5.46 Å 晶胞参数。

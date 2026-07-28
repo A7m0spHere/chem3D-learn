@@ -26,6 +26,25 @@
 
 ## 已完成
 
+### T-024 修复生产首页提前加载 3D 依赖并补生产回归
+
+- **完成**：2026-07-28（Codex）
+- **提交**：`f151bfb fix(perf): keep 3d chunks off production homepage`
+- **背景**：Hyperplan 方法审计发现，`vite.config.ts` 的对象式 `manualChunks` 虽把 `three` / `r3f` 命名为独立 chunk，却吸收了共享 React 运行时；生产入口因此静态导入 `r3f`，再连带导入 `three`。首页冷启动实际下载 `index + r3f + three`，不是单纯的 688 KB 构建警告。
+- **内容**：
+  - 删除对象式 `manualChunks`，交回 Rollup 自动分包；保留 `modulePreload: false`、`/module/:id` 路由 lazy、卡片 hover/focus 预取和 `/modules` 空闲预取。
+  - 新增 `playwright.production.config.ts` 与 `npm run test:production`：先 build，再用 `vite preview` 跑现有无截图预取用例，补上开发服务器无法覆盖的生产依赖图回归。
+  - 生产断言同时识别当前 `ThreeViewerFrame-*` 与历史 `three-*` / `r3f-*` 产物名，防止因 chunk 改名出现假通过。
+- **效果**：
+  - 首页冷启动 JS：修复前 `index + r3f + three` **1223.80 KB / gzip 349.10 KB**；修复后只请求 `index` **356.80 KB / gzip 114.66 KB**，gzip 减少 **67.2%**。
+  - 受限配置（1.6 Mbps、150 ms、4× CPU，5 次冷启动）：首页中位 `networkidle` **2825 → 1491 ms**；CH₄ 直达 Canvas **5124 → 4377 ms**；预取后点击到 Canvas 中位 **1300 ms**，比当前直达快 **70.3%**；无 page/console error。
+- **验证**：
+  - [x] 旧配置下新增生产入口准确复现：**1 失败 / 2 通过**，失败项为“首页初始不下载重型 3D chunk”。
+  - [x] 修复后设置 `$env:PLAYWRIGHT_CHANNEL='chrome'` 并运行 `npm run test:production`：**3 / 3 通过**。
+  - [x] 开发态定向预取回归：**3 / 3 通过**；`npm run lint` 通过；`npm run test:logic` **83 / 83 通过**。
+  - [x] 未改 UI、路由、数据、Viewer、lockfile 或 Darwin 快照。
+- **已知限制**：构建仍提示 `ThreeViewerFrame` 约 **845.42 KB / gzip 227.97 KB** 超过 500 KB；它现在只在 3D 意图/路由下按需加载，不再影响首页。受限配置直达 CH₄ 中位仍为 4.38 秒，略高于 4 秒门槛；后续应优先评估加载反馈或预取时机，不因警告直接扩大为新一轮 vendor 拆分。
+
 ### T-023 有机拼装实验室：3D 补间动画与视觉收尾
 
 - **完成**：2026-07-28（Claude Code）

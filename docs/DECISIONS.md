@@ -234,3 +234,14 @@
 - **验证**：`npm run build`（含 `tsc --noEmit`）、`npm run lint` 通过；`npm run test:logic` **83 / 83**（原 82 + formatter 回归 1 项）；`PLAYWRIGHT_CHANNEL=chrome` 拼装页无截图用例 **10 / 10**（含分子式下标断言、键角区块收拢/展开、拔下+撤销、确认弹窗、reduced-motion 入场）。
 - **已知暴露**：InfoPanel 分子式改下标会让 `organic-builder-ethylene` / `organic-builder-mobile-info` 两张 Darwin 快照在 macOS 漂移（预期内，接手前 HANDOFF 已预告）；键圆柱单位长度 + scale.y 数学上与原渲染等价，macOS 回归时一并目检。
 - **教训（补进流程）**：TASKS 的范围描述可能滞后于代码——本轮与上轮（T-022「只有苯不一致」实为四个种子全不一致）连续两次出现同类漂移，方向相反（这次是「记为未做、实际已做」）。接手任何任务先 `git log -S` 核对关键符号的落地情况，再定范围。
+
+## D-022 生产 3D 分包交回 Rollup 自动处理，并用生产预览锁定首页边界（T-024）
+
+- **日期**：2026-07-28（Codex，commit `f151bfb`）
+- **决定**：
+  - 删除 `vite.config.ts` 中对象式 `manualChunks: { three, r3f }`，不立刻改成更复杂的函数式分包或引入新依赖。
+  - 保留 `modulePreload: false`、React Router 路由 lazy、`prefetchViewerChunks` 的 hover/focus/idle 入口；这些机制分别控制加载时机，本轮不混在一起重写。
+  - 新增 `playwright.production.config.ts` 与 `npm run test:production`，用真实 `vite preview` 运行既有无截图预取回归；开发态 Vite 测试继续保留，分别覆盖源码模块图与生产 bundle 图。
+- **理由**：对象式 `manualChunks` 会把指定包的依赖一并吸入 chunk。实际构建中共享 React/JSX 运行时进入 `r3f`，导致入口 `index` 静态导入 `r3f`，继而静态导入 `three`；首页因此下载 1223.80 KB JS（gzip 349.10 KB）。删除该规则后，首页只请求 356.80 KB 的 `index`（gzip 114.66 KB），重型依赖图移到按需的 `ThreeViewerFrame` chunk。旧配置下生产回归 1/3 失败、修复后 3/3 通过，证明这是依赖图问题，不是仅凭警告推测。
+- **取舍**：自动分包后的 `ThreeViewerFrame` 为 845.42 KB（gzip 227.97 KB），单文件警告比原 `three` 688 KB 更大，但首页不再请求它。当前优化目标是课堂首屏的真实加载边界，不是让 Vite 控制台零警告。若未来有证据证明 3D 直达仍不可接受，再单独评估函数式 chunks / `onlyExplicitManualChunks`；不要恢复会吸收共享运行时的对象式规则。
+- **验证与边界**：1.6 Mbps、150 ms、4× CPU 下 5 次冷启动，首页中位 2825 → 1491 ms，CH₄ 直达 Canvas 5124 → 4377 ms；预取后点击到 Canvas 1300 ms，比直达快 70.3%，无运行时错误。直达仍略高于 4 秒门槛，因此下一步候选是加载反馈或预取时机，不在本条继续拆 Viewer、改路由或改公共 API。

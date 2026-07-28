@@ -252,7 +252,7 @@ npm run lint
 ```
 
 If tests exist, run the tests that apply to the change (see command table below).
-Note: the frontend has **no** `npm test` script. Use `npm run test:logic` or `npm run test:visual` instead.
+Note: the frontend has **no** `npm test` script. Use `npm run test:logic`, `npm run test:production`, or `npm run test:visual` instead.
 
 For documentation-only tasks, do not run `npm run build` unless the user explicitly asks.
 
@@ -269,6 +269,7 @@ npm run dev          # Vite dev server, default http://localhost:5173
 npm run build        # tsc --noEmit && vite build
 npm run lint         # eslint .
 npm run test:logic   # Playwright logic tests (playwright.logic.config.ts)
+npm run test:production # build + production preview prefetch regression (no screenshots)
 npm run test:visual  # 截图回归 + 浏览器交互/布局测试
 npm run check        # build + test:visual
 npm run preview      # preview the production build
@@ -276,6 +277,7 @@ npm run preview      # preview the production build
 
 - 当前 80 张视觉快照全部为 macOS 基线（`*-darwin.png`），没有 Windows/Linux 基线；不要在 Windows/Linux 上更新这些快照。
 - 当前 Windows 环境缺少 Playwright 默认使用的 `chromium_headless_shell`，直接运行 `npm run test:visual` 会在浏览器启动阶段失败。系统 Chrome 通道的冒烟测试已验证可用：PowerShell 中先设置 `$env:PLAYWRIGHT_CHANNEL='chrome'`。完整截图回归仍受 macOS 基线限制。
+- `npm run test:production` 会先构建，再用 `vite preview` 运行 `prefetch-viewer-chunks.visual.spec.ts`；它不含截图，用于防止生产首页再次提前下载 3D chunk。
 - `npm run check` 等于 build + 完整 visual 测试，因此也受上述浏览器和平台条件约束。
 
 ### backend/ (minimal read-only API, zero runtime deps)
@@ -428,12 +430,13 @@ $env:CHEM3D_CAPTURE_URL = 'http://127.0.0.1:5173'
 
 | Scope | Command | Current Windows status |
 | --- | --- | --- |
-| frontend type/build | `npm run build` | 已通过；保留既有 large chunk 警告 |
+| frontend type/build | `npm run build` | 已通过；保留按需 3D chunk 的 large chunk 警告 |
 | frontend lint | `npm run lint` | 已通过 |
-| frontend pure logic | `npm run test:logic` | 23 / 23 已通过，不依赖浏览器 |
+| frontend pure logic | `npm run test:logic` | 83 / 83 已通过，不依赖浏览器 |
+| frontend production prefetch | 设置 `$env:PLAYWRIGHT_CHANNEL = 'chrome'` 后运行 `npm run test:production` | 3 / 3 已通过，不含截图 |
 | frontend browser behavior | 设置 `$env:PLAYWRIGHT_CHANNEL = 'chrome'` 后运行针对性无截图用例 | 系统 Chrome 通道已验证可用 |
 | frontend visual snapshots | `npm run test:visual` | 只有 80 张 Darwin 基线；Windows 不得更新 |
-| backend | `npm test` | 5 / 5 已通过 |
+| backend | `npm test` | 22 / 22 已通过 |
 | video | `npm run lint` / `npm run render` | 本机尚未安装 `video/node_modules`，未验证 |
 
 - Playwright 缓存当前有 Chromium，但缺少默认配置需要的 `chromium_headless_shell`；不要把“缓存存在”误写成完整视觉环境可用。
