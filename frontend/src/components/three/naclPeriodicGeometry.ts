@@ -34,7 +34,9 @@ export type NaClSublattice = "sodium" | "chloride";
  * - `basisIndex`：常规晶胞内全局基元位点索引 0..7（Cl⁻ 0..3，Na⁺ 4..7），(cell + basisIndex) 唯一。
  * - `cell`：整数晶胞平移 [i,j,k]，i,j,k ∈ [0,size)。
  * - `fractional`：晶胞内分数坐标（已含 cell 平移，未居中，范围 [0,size)）。
- * - `cartesian`：笛卡尔坐标（已整体居中，几何中心落在原点，便于未来 Viewer 对准相机目标）。
+ * - `cartesian`：笛卡尔坐标，按**晶胞体积**居中（`centerFractional(fractional, size)`，
+ *   即以 `size/2` 为原点），使 N×N×N 超晶胞的空间范围关于原点对称。canonical 位点
+ *   集合自身的算术平均值不作为中心（正侧边界的显示镜像尚未包含在 canonical 集合中）。
  */
 export type NaClPeriodicSite = {
   id: string;
@@ -50,17 +52,32 @@ export type NaClPeriodicSite = {
  * 中心位点的某个最近邻异号离子的周期镜像。
  *
  * 一个 canonical site（siteId）在周期边界条件下可对应多个不同的周期镜像
- * （imageShift 不同），尤其在 N=1 时，同一 siteId 会以不同 imageShift 出现多次。
- * 因此六配位的唯一性按 `siteId + imageShift` 判断，而不是只按 siteId 去重。
+ * （periodicImageShift 不同），尤其在 N=1 时，同一 siteId 会以不同
+ * periodicImageShift 出现多次。因此六配位的唯一性按
+ * `siteId + periodicImageShift` 判断，而不是只按 siteId 去重。
+ *
+ * 关键区分：
+ *   - `cellOffset`：候选镜像晶胞相对中心位点所属晶胞的**局部整数偏移**，
+ *     可能非零但仍在当前超晶胞内部（periodicImageShift 为 [0,0,0]）。
+ *   - `periodicImageShift`：canonical 位点到当前镜像的**超晶胞周期平移**，
+ *     每个分量表示跨越了多少个完整 N×N×N 超晶胞，恒为整数；非零值表示
+ *     该镜像来自当前超晶胞外（用于 T-028B 判断幽灵粒子）。**不要用
+ *     `cellOffset !== 0` 判断幽灵粒子**。
  */
 export type NaClPeriodicNeighbor = {
   siteId: string;
   element: "Na+" | "Cl-";
-  /** 周期镜像相对中心所在 cell 的整数平移。 */
-  imageShift: Vec3;
-  /** 周期镜像的绝对分数坐标（已居中）。 */
-  fractional: Vec3;
-  /** 周期镜像的笛卡尔坐标（已居中）。 */
+  /** 邻居候选晶胞相对中心位点所属晶胞的整数偏移。 */
+  cellOffset: Vec3;
+  /**
+   * canonical 位点到当前镜像的超晶胞周期平移。
+   * 每个分量表示跨越了多少个完整 N×N×N 超晶胞，恒为整数。
+   * 当前超晶胞内部的普通邻居为 [0,0,0]；非零值表示来自超晶胞外的周期镜像。
+   */
+  periodicImageShift: Vec3;
+  /** 候选镜像的未居中绝对分数坐标，可超出 [0,size)。 */
+  absoluteFractional: Vec3;
+  /** 候选镜像在晶胞体积居中坐标系中的笛卡尔位置。 */
   cartesian: Vec3;
   /** 最近邻方向，单位向量，覆盖 ±x/±y/±z。 */
   direction: Vec3;
@@ -71,13 +88,17 @@ export type NaClPeriodicNeighbor = {
 /**
  * 为补齐超晶胞外边界而显示的同一周期位点的镜像副本。
  *
+ * `periodicImageShift` 与 NaClPeriodicNeighbor 同义：表示该显示副本对应的
+ * 超晶胞周期平移，非零值表示它来自当前超晶胞外的周期镜像。T-028B 依据此字段
+ * （而非 cellOffset）判断幽灵粒子。
+ *
  * 本轮（T-028A）只预留类型边界，不实现其生成逻辑；后续 T-028B/C 在渲染层
  * 需要时再填充，且必须与 NaClPeriodicSite 明确区分。
  */
 export type NaClDisplayInstance = {
   id: string;
   siteId: string;
-  imageShift: Vec3;
+  periodicImageShift: Vec3;
   cartesian: Vec3;
 };
 
@@ -120,7 +141,12 @@ export const NACL_LATTICE_PARAMETER = 2;
  */
 export const NACL_NEAREST_DISTANCE = NACL_LATTICE_PARAMETER / 2;
 
-/** 晶格超晶胞中心（分数坐标），用于把 [0,size) 范围整体平移到以原点为中心。 */
+/**
+ * 晶胞体积居中：把 `[0,size)` 半开周期区间整体平移到关于原点对称的 `[-size/2, +size/2]`。
+ *
+ * 居中的是晶胞空间范围（用于未来晶胞边框与相机目标），不是 canonical 位点
+ * 列表的算术平均值——canonical 位点集合因不含正侧边界的显示镜像，平均值不为零。
+ */
 export function centerFractional(frac: Vec3, size: number): Vec3 {
   const half = size / 2;
   return [frac[0] - half, frac[1] - half, frac[2] - half];
@@ -159,7 +185,8 @@ function globalBasisIndex(sublattice: NaClSublattice, subIndex: number): number 
  * - 输出严格的 `8 * size³` 个位点（4·size³ Na⁺ + 4·size³ Cl⁻），Na⁺ 与 Cl⁻ 数量相同。
  * - 遍历顺序确定：先全 Cl⁻ 子格子（i,j,k,组内 basisIndex 升序），再全 Na⁺ 子格子。
  * - id 稳定且唯一：`nacl-${i}-${j}-${k}-${basisIndex}`（basisIndex 全局 0..7）。
- * - 笛卡尔坐标已整体居中，几何中心落在原点。
+ * - `cartesian` 按**晶胞体积**居中（`centerFractional`，即 size/2 偏移），使超晶胞
+ *   空间范围关于原点对称；canonical 位点集合自身的算术平均值不作为中心。
  * - 不依赖 React、R3F、Three.js；不读 nacl.json；不返回用于外边界闭合的重复显示实例。
  */
 export function generateNaClPeriodicSites(size: number): NaClPeriodicSite[] {
@@ -168,10 +195,6 @@ export function generateNaClPeriodicSites(size: number): NaClPeriodicSite[] {
   }
 
   const sites: NaClPeriodicSite[] = [];
-  // 居中常量：让全部位点（含基元偏移与晶胞平移）的重心严格落在原点。
-  // 常规晶胞 8 个基元位点的 fractional 重心 = 0.25（每晶胞），
-  // 晶胞平移 i,j,k ∈ [0,size) 的均值 = (size-1)/2，故 centerOffset = 0.25 + (size-1)/2。
-  const centerOffset = 1 / 4 + (size - 1) / 2;
 
   const buildSublattice = (sublattice: NaClSublattice) => {
     const basis = sublattice === "chloride" ? naclConventionalBasis.chloride : naclConventionalBasis.sodium;
@@ -182,11 +205,7 @@ export function generateNaClPeriodicSites(size: number): NaClPeriodicSite[] {
         for (let j = 0; j < size; j += 1) {
           for (let k = 0; k < size; k += 1) {
             const fractional: Vec3 = [i + b[0], j + b[1], k + b[2]];
-            const centered: Vec3 = [
-              fractional[0] - centerOffset,
-              fractional[1] - centerOffset,
-              fractional[2] - centerOffset,
-            ];
+            const centered = centerFractional(fractional, size);
             const cartesian = fractionalToCartesian(centered);
             sites.push({
               id: `nacl-${i}-${j}-${k}-${basisIndex}`,
@@ -244,13 +263,15 @@ function vec3Distance(a: Vec3, b: Vec3): number {
  * - Na⁺ 中心 → 6 个 Cl⁻ 周期镜像；Cl⁻ 中心 → 6 个 Na⁺ 周期镜像。
  * - 6 个距离均等于理论最近邻距离 a/2。
  * - 6 个位移方向覆盖 ±x、±y、±z。
- * - 保留周期 `imageShift`（镜像所在 cell 相对中心 cell 的整数平移）。
+ * - `cellOffset`：邻居候选晶胞相对中心 cell 的局部整数偏移（可能非零但仍在当前超晶胞内）。
+ * - `periodicImageShift`：canonical 位点到镜像的超晶胞周期平移（整数），非零值表示
+ *   该镜像来自当前超晶胞外。**不要用 `cellOffset !== 0` 判断幽灵粒子**。
  * - 不把同一 canonical site 的不同周期镜像错误合并：N=1 时多个邻居可能拥有相同
- *   siteId，但必须拥有不同 imageShift，六配位按 `siteId + imageShift` 判断唯一性。
+ *   siteId，但必须拥有不同 periodicImageShift，六配位按 `siteId + periodicImageShift` 判断唯一性。
  * - N=2、N=3 的边界位点仍返回完整六配位（候选范围 ±1 晶胞足以覆盖周期镜像补齐）。
  * - 不返回同号离子。
  *
- * 返回顺序确定：按 imageShift 字典序，再按 siteId 字典序排序。
+ * 返回顺序确定：按 periodicImageShift 字典序，再按 siteId 字典序排序。
  */
 export function getNaClCoordinationImages(
   centerSiteId: string,
@@ -260,6 +281,12 @@ export function getNaClCoordinationImages(
   if (!Number.isInteger(size) || size < 1) {
     throw new Error(`getNaClCoordinationImages: size 必须是 >=1 的整数，收到 ${size}`);
   }
+  // 校验 sites 与 size 一致，避免悄悄生成不存在的 canonical siteId。
+  if (sites.length !== 8 * size ** 3) {
+    throw new Error(
+      `getNaClCoordinationImages: sites 数量 ${sites.length} 与 size=${size} 不匹配（应为 ${8 * size ** 3}）`,
+    );
+  }
 
   const center = findSite(sites, centerSiteId);
   // 配位对象为异号子格子。
@@ -267,10 +294,6 @@ export function getNaClCoordinationImages(
   const targetBasis = targetSublattice === "chloride" ? naclConventionalBasis.chloride : naclConventionalBasis.sodium;
   const targetElement: "Na+" | "Cl-" = targetSublattice === "chloride" ? "Cl-" : "Na+";
 
-  // 枚举中心 cell 的 ±1 邻域内的晶胞整数偏移；size=1 时邻域也是 ±1（覆盖周期镜像）。
-  // 居中常量与 generateNaClPeriodicSites 一致（重心居中），保证 center.cartesian 与
-  // 邻居 cartesian 处于同一坐标系，距离判定正确。
-  const centerOffset = 1 / 4 + (size - 1) / 2;
   const candidates: NaClPeriodicNeighbor[] = [];
 
   for (let di = -1; di <= 1; di += 1) {
@@ -290,12 +313,8 @@ export function getNaClCoordinationImages(
             neighborCell[1] + targetBasis[subIndex][1],
             neighborCell[2] + targetBasis[subIndex][2],
           ];
-          // 居中笛卡尔坐标（与生成器同一 centerOffset）。
-          const centered: Vec3 = [
-            absoluteFractional[0] - centerOffset,
-            absoluteFractional[1] - centerOffset,
-            absoluteFractional[2] - centerOffset,
-          ];
+          // 居中笛卡尔坐标（晶胞体积居中，与生成器同一 centerFractional）。
+          const centered = centerFractional(absoluteFractional, size);
           const cartesian = fractionalToCartesian(centered);
 
           const dist = vec3Distance(center.cartesian, cartesian);
@@ -306,11 +325,17 @@ export function getNaClCoordinationImages(
           // canonical siteId：把 neighborCell wrap 到 [0,size)，得到所属 canonical 晶胞。
           const canonicalCell: Vec3 = wrapPeriodicFractional(neighborCell, size);
           const siteId = `nacl-${canonicalCell[0]}-${canonicalCell[1]}-${canonicalCell[2]}-${basisIndex}`;
-          // imageShift：镜像 cell 相对中心 cell 的整数平移（保留周期镜像信息）。
-          const imageShift: Vec3 = [
+          // cellOffset：邻居候选晶胞相对中心 cell 的局部整数偏移。
+          const cellOffset: Vec3 = [
             neighborCell[0] - center.cell[0],
             neighborCell[1] - center.cell[1],
             neighborCell[2] - center.cell[2],
+          ];
+          // periodicImageShift：canonical 位点到当前镜像的超晶胞周期平移（整数）。
+          const periodicImageShift: Vec3 = [
+            (neighborCell[0] - canonicalCell[0]) / size,
+            (neighborCell[1] - canonicalCell[1]) / size,
+            (neighborCell[2] - canonicalCell[2]) / size,
           ];
           // 方向：从中心指向镜像的单位方向（笛卡尔差归一化，方向应恰好沿 ±x/±y/±z）。
           const delta: Vec3 = [
@@ -324,8 +349,9 @@ export function getNaClCoordinationImages(
           candidates.push({
             siteId,
             element: targetElement,
-            imageShift,
-            fractional: absoluteFractional,
+            cellOffset,
+            periodicImageShift,
+            absoluteFractional,
             cartesian,
             direction,
             distance: dist,
@@ -335,10 +361,15 @@ export function getNaClCoordinationImages(
     }
   }
 
-  // 按确定性顺序排序：imageShift 字典序，再 siteId 字典序。
+  // 按确定性顺序排序：periodicImageShift 字典序，再 cellOffset，再 siteId 字典序。
   candidates.sort((x, y) => {
     for (let i = 0; i < 3; i += 1) {
-      if (x.imageShift[i] !== y.imageShift[i]) return x.imageShift[i] - y.imageShift[i];
+      if (x.periodicImageShift[i] !== y.periodicImageShift[i]) {
+        return x.periodicImageShift[i] - y.periodicImageShift[i];
+      }
+    }
+    for (let i = 0; i < 3; i += 1) {
+      if (x.cellOffset[i] !== y.cellOffset[i]) return x.cellOffset[i] - y.cellOffset[i];
     }
     return x.siteId < y.siteId ? -1 : x.siteId > y.siteId ? 1 : 0;
   });

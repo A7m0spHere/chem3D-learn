@@ -299,3 +299,24 @@
   - 重心居中保证未来 Viewer 接入时相机 target=[0,0,0] 即对准结构中心。
   - Na-Cl 最近邻距离 a/2、方向沿三轴 ± 为标准 NaCl 结构结果，代码内标注 `TODO-CHEM-VERIFY` 待复核。
 - **验证**：`npm run build` 通过；`npm run lint` 通过（0 warning）；`npm run test:logic` 83 → 109 通过（新增 26 项 NaCl 周期契约）。无 UI 改动，未运行 Darwin 视觉回归。纯新增文件，零破坏现有测试。
+
+### T-028A.1 周期坐标语义修正（同决定追加，不另立冲突决定）
+
+- **日期**：2026-07-29（Claude Code）
+- **分支**：`feat/t-028a-nacl-periodic-kernel`（follow-up commit，不 amend、不 force push）
+- **修正背景**：代码复核发现两个会影响 T-028B 晶胞边框与周期幽灵粒子的接口问题。
+- **修正1（居中语义）**：
+  - **原 T-028A** 用私有 `centerOffset = 1/4 + (size-1)/2` 使 canonical 位点算术平均值为零，但这会让 N×N×N 晶胞体积与未来晶胞边框偏离原点。
+  - **改为** `centerFractional(fractional, size)`（即 `size/2` 偏移），居中的是**晶胞空间范围**（`[0,size)` → `[-size/2, +size/2]`，N=1 边界 `[-1,+1]`、N=2 `[-2,+2]`、N=3 `[-3,+3]`），与未来全部晶胞边框使用同一空间中心。
+  - **canonical 位点平均值不作为晶胞中心**：canonical 集合不含正侧边界的显示镜像，平均值不为零，属正常。删除「全部 canonical 位点几何中心严格位于原点」的错误注释与测试。
+  - 只维护 `centerFractional()` 一套居中公式，不再有第二套私有 centerOffset。
+- **修正2（cellOffset 与 periodicImageShift 拆分）**：
+  - **原 T-028A** 的 `imageShift` 实际是 `neighborCell - center.cell`（局部晶胞偏移），非 canonical 位点到镜像的超晶胞周期平移。
+  - **改为两个不同概念**：
+    - `cellOffset = neighborCell - center.cell`：邻居候选晶胞相对中心 cell 的**局部整数偏移**，可能非零但仍在当前超晶胞内（`periodicImageShift=[0,0,0]`）。
+    - `periodicImageShift = (neighborCell - canonicalCell) / size`：canonical 位点到镜像的**超晶胞周期平移**，恒为整数；非零值表示来自当前超晶胞外。
+  - **T-028B 幽灵粒子只能依据 `periodicImageShift !== [0,0,0]` 判断，不得用 `cellOffset !== 0`**。
+  - 邻居 `fractional` 字段重命名为 `absoluteFractional`（明确未居中、可超 `[0,size)`），`cartesian` 才是晶胞体积居中后坐标。
+- **修正3（周期镜像可重建契约）**：新增测试断言 `neighbor.cartesian[axis] ≈ canonicalSite.cartesian[axis] + periodicImageShift[axis] * size * NACL_LATTICE_PARAMETER`，三轴都成立，保证 T-028B 能据 canonical site + periodicImageShift 正确放置幽灵粒子。
+- **修正4（API 一致性）**：`getNaClCoordinationImages` 收到 `sites.length !== 8*size³` 时抛错，避免悄悄生成不存在的 canonical siteId。
+- **验证**：build/lint 通过；`test:logic` 109 → 120 通过（删除重心断言、改写旧 imageShift 断言，新增晶胞体积居中/cellOffset/periodicImageShift/重建/API 一致性契约）。无 UI 改动，未运行 Darwin 视觉回归。

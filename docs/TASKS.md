@@ -33,13 +33,14 @@
 ### T-028A NaCl 周期几何纯函数内核 + 逻辑测试
 
 - **完成**：2026-07-29（Claude Code）
-- **分支**：`feat/t-028a-nacl-periodic-kernel`
+- **分支**：`feat/t-028a-nacl-periodic-kernel`（T-028A commit `a48d65d` + T-028A.1 follow-up commit）
 - **内容**：
-  - 新增 `frontend/src/components/three/naclPeriodicGeometry.ts`：基于 NaCl 常规立方晶胞（非原胞）的 4 Cl⁻ + 4 Na⁺ 分数坐标基元，生成 N×N×N 超晶胞独立周期位点（8·N³ 个，Na⁺:Cl⁻=1:1）与六配位周期镜像。区分 `NaClPeriodicSite`（独立位点）与 `NaClDisplayInstance`（显示镜像副本，本轮只留类型边界）。
-  - 新增 `frontend/tests/logic/nacl-periodic.logic.spec.ts` 26 项契约。
-  - **验收标准达成**：N=1/2/3 → 8/64/216 位点；id 与 (cell+basisIndex) 唯一；canonical fractional 去重；重心居中过原点；六配位（siteId+imageShift 唯一、距离 a/2、±x±y±z 全覆盖、N=1 允许同 siteId 不同 imageShift、边界完整六配位、不返回同号离子、不把周期镜像误算为额外 canonical site）。
+  - 新增 `frontend/src/components/three/naclPeriodicGeometry.ts`：基于 NaCl 常规立方晶胞（非原胞）的 4 Cl⁻ + 4 Na⁺ 分数坐标基元，生成 N×N×N 超晶胞独立周期位点（8·N³ 个，Na⁺:Cl⁻=1:1）与六配位周期镜像。区分 `NaClPeriodicSite`（独立位点）与 `NaClDisplayInstance`（显示镜像副本，留类型边界）。
+  - 新增 `frontend/tests/logic/nacl-periodic.logic.spec.ts` 契约测试。
+  - **T-028A.1 修正**（follow-up）：居中改为晶胞体积居中（`centerFractional`/size/2），删除私有 centerOffset；邻居字段拆分为 `cellOffset`（局部晶胞偏移）+ `periodicImageShift`（超晶胞周期平移，整数）；`fractional`→`absoluteFractional`；新增周期镜像可重建契约与 sites/size 一致性校验。详见 D-026 修正记录。
+  - **验收标准达成**：N=1/2/3 → 8/64/216 位点；id 与 (cell+basisIndex) 唯一；canonical fractional 去重；晶胞体积居中（边界关于原点对称）；六配位（siteId+periodicImageShift 唯一、距离 a/2、±x±y±z 全覆盖、N=1 允许同 siteId 不同 periodicImageShift、边界完整六配位、不返回同号离子、canonical+periodicImageShift 重建镜像 cartesian、不把周期镜像误算为额外 canonical site）。
   - **明确未做**：不接入旧 NaCl Viewer、不改 `nacl.json`、不改教学模式、无 UI、无视觉快照。
-- **验证**：`npm run build` 通过；`npm run lint` 通过（0 warning）；`npm run test:logic` 83 → 109 通过。详见 D-026 与 HANDOFF。
+- **验证**：`npm run build` 通过；`npm run lint` 通过（0 warning）；`npm run test:logic` 83 → 109 → **120 通过**。详见 D-026 与 HANDOFF。
 - **下一步**：T-028B 接入 Viewer 时必须遵守内核接口约束（见 HANDOFF「T-028B 接入须知」）。
 
 ### T-027 正式部署、SPA history fallback 与 README 在线入口
