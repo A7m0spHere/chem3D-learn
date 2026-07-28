@@ -1,9 +1,10 @@
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { Html, Line, OrbitControls } from "@react-three/drei";
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { Plane, Quaternion, Vector3, type Group } from "three";
 import { AngleArc } from "@/components/three/AngleArc";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { builderElementConfig, canSetBond, detachBuilderAtom } from "@/lib/organicBuilderChemistry";
 import type {
   BuilderAtom,
@@ -46,6 +47,23 @@ type DragState = {
 
 const DETACH_DISTANCE = 0.56;
 const SNAP_DISTANCE = 0.92;
+
+// 删除退场残影：原子缩没、键并拢变细，约 200ms 后从场景卸载。
+type GhostAtomSnapshot = {
+  key: string;
+  atomId: string;
+  position: BuilderVec3;
+  radius: number;
+  color: string;
+};
+
+type GhostBondSnapshot = {
+  key: string;
+  bondId: string;
+  start: BuilderVec3;
+  end: BuilderVec3;
+  order: BuilderBondOrder;
+};
 
 export function OrganicBuilderCanvas({
   bondAngles,
@@ -122,6 +140,78 @@ export function OrganicBuilderCanvas({
   // 拖转视角（pointerdown → move → up）在浏览器里同样产生 click，会触发 onPointerMissed；
   // 记录按下位置，位移超过阈值时视为旋转视角，不清空当前选中。
   const pointerMissGuard = useRef<{ x: number; y: number }>();
+  const prefersReducedMotion = useReducedMotion();
+  // 各原子当前"实际显示位置"（补间途中的位置）。原子每帧写入，键每帧读取端点，
+  // 保证键跟着补间中的原子一起动，而不是先一步跳到目标几何。条目不主动清理：
+  // 按 id 覆盖写、体量极小，删除后的残值还可作为退场残影的位置来源。
+  const animatedPositionsRef = useRef(new Map<string, Vector3>());
+  const [ghostAtoms, setGhostAtoms] = useState<GhostAtomSnapshot[]>([]);
+  const [ghostBonds, setGhostBonds] = useState<GhostBondSnapshot[]>([]);
+  const ghostKeyRef = useRef(0);
+  const prevMoleculeRef = useRef(molecule);
+  // 对比前后分子，为被删除的原子/键生成退场残影；撤销把同 id 部件加回来时，
+  // 先清掉对应残影，避免实体和残影短暂同屏。
+  useEffect(() => {
+    const previous = prevMoleculeRef.current;
+    prevMoleculeRef.current = molecule;
+    if (previous === molecule) return;
+    const currentAtomIds = new Set(molecule.atoms.map((candidate) => candidate.id));
+    const currentBondIds = new Set(molecule.bonds.map((candidate) => candidate.id));
+    const removedAtoms = prefersReducedMotion
+      ? []
+      : previous.atoms.filter((candidate) => !currentAtomIds.has(candidate.id));
+    const removedBonds = prefersReducedMotion
+      ? []
+      : previous.bonds.filter((candidate) => !currentBondIds.has(candidate.id));
+    const prevAtomsById = new Map(previous.atoms.map((candidate) => [candidate.id, candidate]));
+    const displayedPosition = (atomId: string): BuilderVec3 | undefined => {
+      const animated = animatedPositionsRef.current.get(atomId);
+      if (animated) return [animated.x, animated.y, animated.z];
+      return prevAtomsById.get(atomId)?.position;
+    };
+    const nextGhostKey = () => {
+      ghostKeyRef.current += 1;
+      return `ghost-${ghostKeyRef.current}`;
+    };
+    setGhostAtoms((current) => {
+      const kept = current.filter((ghost) => !currentAtomIds.has(ghost.atomId));
+      const additions = removedAtoms.map((atom) => {
+        const config = builderElementConfig[atom.element];
+        return {
+          key: nextGhostKey(),
+          atomId: atom.id,
+          position: displayedPosition(atom.id) ?? atom.position,
+          radius: atom.radius ?? config.radius,
+          color: atom.color ?? config.color,
+        };
+      });
+      if (kept.length === current.length && additions.length === 0) return current;
+      return [...kept, ...additions];
+    });
+    setGhostBonds((current) => {
+      const kept = current.filter((ghost) => !currentBondIds.has(ghost.bondId));
+      const additions = removedBonds.flatMap((candidate) => {
+        const start = displayedPosition(candidate.atomIds[0]);
+        const end = displayedPosition(candidate.atomIds[1]);
+        if (!start || !end) return [];
+        return [{
+          key: nextGhostKey(),
+          bondId: candidate.id,
+          start,
+          end,
+          order: candidate.order,
+        }];
+      });
+      if (kept.length === current.length && additions.length === 0) return current;
+      return [...kept, ...additions];
+    });
+  }, [molecule, prefersReducedMotion]);
+  const handleGhostAtomDone = useCallback((key: string) => {
+    setGhostAtoms((current) => current.filter((ghost) => ghost.key !== key));
+  }, []);
+  const handleGhostBondDone = useCallback((key: string) => {
+    setGhostBonds((current) => current.filter((ghost) => ghost.key !== key));
+  }, []);
 
   const handlePointerDown = (atom: BuilderAtom, event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
@@ -225,6 +315,7 @@ export function OrganicBuilderCanvas({
 
         {displayMolecule.bonds.map((candidate) => (
           <BuilderBondMesh
+            animatedPositions={animatedPositionsRef.current}
             atomsById={atomsById}
             bond={candidate}
             isDragging={Boolean(drag && candidate.atomIds.includes(drag.atomId))}
@@ -237,8 +328,13 @@ export function OrganicBuilderCanvas({
           />
         ))}
 
+        {ghostBonds.map((ghost) => (
+          <GhostBondMesh ghost={ghost} key={ghost.key} onDone={handleGhostBondDone} />
+        ))}
+
         {displayAtoms.map((candidate) => (
           <BuilderAtomMesh
+            animatedPositions={animatedPositionsRef.current}
             atom={candidate}
             isDragging={candidate.id === drag?.atomId}
             isSelected={candidate.id === selectedAtomId}
@@ -251,20 +347,20 @@ export function OrganicBuilderCanvas({
             onPointerDown={(event) => handlePointerDown(candidate, event)}
             onPointerMove={(event) => handlePointerMove(candidate, event)}
             onPointerUp={(event) => handlePointerUp(candidate, event)}
+            reducedMotion={prefersReducedMotion}
           />
         ))}
 
-        {!drag ? visibleBondAngles.map((angle) => (
-          <AngleArc
-            angle={angle}
-            atomsById={angleAtomsById}
-            htmlPointerEvents="none"
-            key={angle.id}
-            labelVariant="minimal"
-            radius={0.48}
-            showGuideLine={false}
-          />
-        )) : null}
+        {ghostAtoms.map((ghost) => (
+          <GhostAtomMesh ghost={ghost} key={ghost.key} onDone={handleGhostAtomDone} />
+        ))}
+
+        <BuilderAngleArcs
+          angles={visibleBondAngles}
+          atomsById={angleAtomsById}
+          hidden={Boolean(drag)}
+          reducedMotion={prefersReducedMotion}
+        />
 
         {movingAtom && snapTarget ? (
           <Line
@@ -312,15 +408,45 @@ export function OrganicBuilderCanvas({
 // useFrame 内复用的临时向量，避免每帧新建对象。
 const atomPositionTarget = new Vector3();
 const bondAxisTemp = new Vector3();
+const bondStartTemp = new Vector3();
+const bondEndTemp = new Vector3();
 const toCameraTemp = new Vector3();
 const offsetDesiredTemp = new Vector3();
 const bondLocalXTemp = new Vector3();
 const bondLocalZTemp = new Vector3();
+// 圆柱几何的本体轴向；只作 setFromUnitVectors 的只读输入，禁止原地修改。
+const BOND_UP = new Vector3(0, 1, 0);
+
+// 退场残影与键角弧淡入淡出的速度（单位：progress/秒），对应约 190~210ms。
+const GHOST_FADE_SPEED = 5.2;
+const ARC_FADE_SPEED = 6.5;
+const NO_ANGLES: BuilderBondAngleMatch[] = [];
+
+// 残影只是视觉余韵，不参与拾取，避免短暂挡住背后的可点部件。
+const disableRaycast = () => undefined;
+
+function writeAnimatedPosition(map: Map<string, Vector3>, atomId: string, position: Vector3) {
+  const existing = map.get(atomId);
+  if (existing) {
+    existing.copy(position);
+    return;
+  }
+  map.set(atomId, position.clone());
+}
+
+// 返回值可能直接引用共享表里的向量，调用方只读、不得原地修改。
+function readDisplayedPosition(map: Map<string, Vector3>, atom: BuilderAtom, fallback: Vector3): Vector3 {
+  const animated = map.get(atom.id);
+  if (animated) return animated;
+  return fallback.set(atom.position[0], atom.position[1], atom.position[2]);
+}
 
 function BuilderAtomMesh({
+  animatedPositions,
   atom,
   isDragging,
   isSelected,
+  reducedMotion,
   onPointerDown,
   onPointerMove,
   onPointerUp,
@@ -328,9 +454,11 @@ function BuilderAtomMesh({
   onDomDragMove,
   onDomDragStart,
 }: {
+  animatedPositions: Map<string, Vector3>;
   atom: BuilderAtom;
   isDragging: boolean;
   isSelected: boolean;
+  reducedMotion: boolean;
   onPointerDown: (event: ThreeEvent<PointerEvent>) => void;
   onPointerMove: (event: ThreeEvent<PointerEvent>) => void;
   onPointerUp: (event: ThreeEvent<PointerEvent>) => void;
@@ -347,30 +475,40 @@ function BuilderAtomMesh({
   // 轻量补间（frameloop="demand" 下通过 invalidate 续帧）：
   // 新增原子从 0.45 缩放弹入；吸附/建议摆位的位置变化平滑过渡而不是瞬移；
   // 拖拽中的原子跳过位置补间，保持与指针 1:1 跟手。
+  // prefers-reduced-motion 下全部退化为直接落位，不做任何 3D 补间。
+  // 优先级 -1：先于键网格（默认 0）执行，保证键在同一帧读到的端点不滞后。
   useFrame((_, delta) => {
     const group = groupRef.current;
     if (!group) return;
     const target = atomPositionTarget.set(atom.position[0], atom.position[1], atom.position[2]);
     let animating = false;
-    if (!entranceInitialized.current) {
+    if (reducedMotion) {
       entranceInitialized.current = true;
       group.position.copy(target);
-      group.scale.setScalar(0.45);
-    }
-    if (isDragging || group.position.distanceTo(target) < 0.003) {
-      group.position.copy(target);
-    } else {
-      group.position.lerp(target, Math.min(1, delta * 11));
-      animating = true;
-    }
-    if (Math.abs(group.scale.x - 1) > 0.005) {
-      group.scale.setScalar(group.scale.x + (1 - group.scale.x) * Math.min(1, delta * 9));
-      animating = true;
-    } else if (group.scale.x !== 1) {
       group.scale.setScalar(1);
+    } else {
+      if (!entranceInitialized.current) {
+        entranceInitialized.current = true;
+        group.position.copy(target);
+        group.scale.setScalar(0.45);
+      }
+      if (isDragging || group.position.distanceTo(target) < 0.003) {
+        group.position.copy(target);
+      } else {
+        group.position.lerp(target, Math.min(1, delta * 11));
+        animating = true;
+      }
+      if (Math.abs(group.scale.x - 1) > 0.005) {
+        group.scale.setScalar(group.scale.x + (1 - group.scale.x) * Math.min(1, delta * 9));
+        animating = true;
+      } else if (group.scale.x !== 1) {
+        group.scale.setScalar(1);
+      }
     }
+    // 把实际显示位置同步给共享表，键网格据此每帧对齐端点。
+    writeAnimatedPosition(animatedPositions, atom.id, group.position);
     if (animating) invalidate();
-  });
+  }, -1);
 
   return (
     <group ref={groupRef}>
@@ -485,58 +623,61 @@ function BuilderAtomDragHandle({
 }
 
 function BuilderBondMesh({
+  animatedPositions,
   atomsById,
   bond,
   isDragging,
   isSelected,
   onSelect,
 }: {
+  animatedPositions: Map<string, Vector3>;
   atomsById: Map<string, BuilderAtom>;
   bond: BuilderBond;
   isDragging: boolean;
   isSelected: boolean;
   onSelect: () => void;
 }) {
-  const geometry = useMemo(() => {
-    const startAtom = atomsById.get(bond.atomIds[0]);
-    const endAtom = atomsById.get(bond.atomIds[1]);
-    if (!startAtom || !endAtom) return undefined;
-    const start = new Vector3(...startAtom.position);
-    const end = new Vector3(...endAtom.position);
-    const direction = new Vector3().subVectors(end, start);
-    return {
-      length: direction.length(),
-      midpoint: new Vector3().addVectors(start, end).multiplyScalar(0.5),
-      quaternion: new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize()),
-    };
-  }, [atomsById, bond.atomIds]);
+  const groupRef = useRef<Group>(null);
   const offsetGroupRef = useRef<Group>(null);
+  const startAtom = atomsById.get(bond.atomIds[0]);
+  const endAtom = atomsById.get(bond.atomIds[1]);
+  // 端点每帧取原子的"实际显示位置"（补间途中的位置），键跟着原子一起动，
+  // 不再先一步跳到最终几何；圆柱用单位长度 + scale.y 表达键长。
   // 双/三键的并排偏移面始终旋向相机（绕键轴转动内层 group），
   // 避免某些视角下多根圆柱重叠成一条线、被学生误读为单键。
   useFrame(({ camera }) => {
-    if (!geometry || bond.order === 1 || !offsetGroupRef.current) return;
-    bondAxisTemp.set(0, 1, 0).applyQuaternion(geometry.quaternion);
-    toCameraTemp.copy(camera.position).sub(geometry.midpoint);
+    const group = groupRef.current;
+    if (!group || !startAtom || !endAtom) return;
+    const start = readDisplayedPosition(animatedPositions, startAtom, bondStartTemp);
+    const end = readDisplayedPosition(animatedPositions, endAtom, bondEndTemp);
+    bondAxisTemp.subVectors(end, start);
+    const length = bondAxisTemp.length();
+    if (length < 1e-5) return;
+    group.position.addVectors(start, end).multiplyScalar(0.5);
+    group.quaternion.setFromUnitVectors(BOND_UP, bondAxisTemp.normalize());
+    group.scale.set(1, length, 1);
+    if (bond.order === 1 || !offsetGroupRef.current) return;
+    toCameraTemp.copy(camera.position).sub(group.position);
     offsetDesiredTemp.crossVectors(bondAxisTemp, toCameraTemp);
     if (offsetDesiredTemp.lengthSq() < 1e-6) return;
     offsetDesiredTemp.normalize();
-    bondLocalXTemp.set(1, 0, 0).applyQuaternion(geometry.quaternion);
-    bondLocalZTemp.set(0, 0, 1).applyQuaternion(geometry.quaternion);
+    bondLocalXTemp.set(1, 0, 0).applyQuaternion(group.quaternion);
+    bondLocalZTemp.set(0, 0, 1).applyQuaternion(group.quaternion);
     offsetGroupRef.current.rotation.y = -Math.atan2(
       offsetDesiredTemp.dot(bondLocalZTemp),
       offsetDesiredTemp.dot(bondLocalXTemp),
     );
   });
-  if (!geometry) return null;
+  if (!startAtom || !endAtom) return null;
   const radius = 0.04;
   const offset = 0.1;
   const offsets = bond.order === 1 ? [0] : bond.order === 2 ? [-offset, offset] : [-offset, 0, offset];
   return (
-    <group position={geometry.midpoint} quaternion={geometry.quaternion}>
+    <group ref={groupRef}>
       <group ref={offsetGroupRef}>
         {offsets.map((position) => (
           <mesh key={position} onClick={(event) => { event.stopPropagation(); onSelect(); }} position={[position, 0, 0]}>
-            <cylinderGeometry args={[radius, radius, geometry.length, 20]} />
+            <cylinderGeometry args={[radius, radius, 1, 20]} />
             <meshStandardMaterial
               color={isDragging ? "#F4A261" : isSelected ? "#2A9D8F" : "#AFC2BD"}
               emissive={isSelected ? "#2A9D8F" : "#000000"}
@@ -547,10 +688,200 @@ function BuilderBondMesh({
         ))}
       </group>
       <mesh onClick={(event) => { event.stopPropagation(); onSelect(); }}>
-        <cylinderGeometry args={[0.14, 0.14, geometry.length, 12]} />
+        <cylinderGeometry args={[0.14, 0.14, 1, 12]} />
         <meshBasicMaterial opacity={0} transparent />
       </mesh>
     </group>
+  );
+}
+
+// 被删除原子的退场残影：原样渲染一颗同色球并缩没，结束后自我上报卸载。
+function GhostAtomMesh({ ghost, onDone }: { ghost: GhostAtomSnapshot; onDone: (key: string) => void }) {
+  const groupRef = useRef<Group>(null);
+  const progressRef = useRef(1);
+  const doneRef = useRef(false);
+  const invalidate = useThree((state) => state.invalidate);
+  useFrame((_, delta) => {
+    if (doneRef.current) return;
+    const next = Math.max(0, progressRef.current - delta * GHOST_FADE_SPEED);
+    progressRef.current = next;
+    groupRef.current?.scale.setScalar(Math.max(0.001, next));
+    if (next <= 0) {
+      doneRef.current = true;
+      onDone(ghost.key);
+      return;
+    }
+    invalidate();
+  });
+  return (
+    <group position={ghost.position} ref={groupRef}>
+      <mesh raycast={disableRaycast}>
+        <sphereGeometry args={[ghost.radius, 24, 24]} />
+        <meshStandardMaterial color={ghost.color} metalness={0.04} roughness={0.34} />
+      </mesh>
+    </group>
+  );
+}
+
+// 被删除键的退场残影：圆柱向键轴并拢变细直至消失（缩 x/z，同时并拢多键偏移）。
+function GhostBondMesh({ ghost, onDone }: { ghost: GhostBondSnapshot; onDone: (key: string) => void }) {
+  const thinningRef = useRef<Group>(null);
+  const progressRef = useRef(1);
+  const doneRef = useRef(false);
+  const invalidate = useThree((state) => state.invalidate);
+  const transform = useMemo(() => {
+    const start = new Vector3(...ghost.start);
+    const end = new Vector3(...ghost.end);
+    const direction = new Vector3().subVectors(end, start);
+    const length = direction.length();
+    if (length < 1e-5) return undefined;
+    return {
+      length,
+      midpoint: new Vector3().addVectors(start, end).multiplyScalar(0.5),
+      quaternion: new Quaternion().setFromUnitVectors(BOND_UP, direction.normalize()),
+    };
+  }, [ghost]);
+  useFrame((_, delta) => {
+    if (doneRef.current) return;
+    const next = Math.max(0, progressRef.current - delta * GHOST_FADE_SPEED);
+    progressRef.current = next;
+    thinningRef.current?.scale.set(Math.max(0.001, next), 1, Math.max(0.001, next));
+    if (next <= 0) {
+      doneRef.current = true;
+      onDone(ghost.key);
+      return;
+    }
+    invalidate();
+  });
+  if (!transform) return null;
+  const offsets = ghost.order === 1 ? [0] : ghost.order === 2 ? [-0.1, 0.1] : [-0.1, 0, 0.1];
+  return (
+    <group position={transform.midpoint} quaternion={transform.quaternion}>
+      <group ref={thinningRef}>
+        {offsets.map((position) => (
+          <mesh key={position} position={[position, 0, 0]} raycast={disableRaycast}>
+            <cylinderGeometry args={[0.04, 0.04, transform.length, 12]} />
+            <meshStandardMaterial color="#AFC2BD" roughness={0.44} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
+// 键角弧的进出场管理：新出现的弧淡入、消失（含拖拽隐藏）的弧淡出后再卸载；
+// prefers-reduced-motion 下保持旧行为（直接挂载/卸载，不做淡入淡出）。
+function BuilderAngleArcs({
+  angles,
+  atomsById,
+  hidden,
+  reducedMotion,
+}: {
+  angles: BuilderBondAngleMatch[];
+  atomsById: Map<string, Atom>;
+  hidden: boolean;
+  reducedMotion: boolean;
+}) {
+  const [entries, setEntries] = useState<{ angle: BuilderBondAngleMatch; visible: boolean }[]>([]);
+  useEffect(() => {
+    if (reducedMotion) {
+      setEntries((current) => current.length === 0 ? current : []);
+      return;
+    }
+    const targetAngles = hidden ? NO_ANGLES : angles;
+    setEntries((current) => {
+      const targetIds = new Set(targetAngles.map((angle) => angle.id));
+      const currentIds = new Set(current.map((entry) => entry.angle.id));
+      const next = current.map((entry) => {
+        const latest = targetAngles.find((angle) => angle.id === entry.angle.id);
+        return { angle: latest ?? entry.angle, visible: targetIds.has(entry.angle.id) };
+      });
+      targetAngles.forEach((angle) => {
+        if (!currentIds.has(angle.id)) next.push({ angle, visible: true });
+      });
+      const unchanged = next.length === current.length && next.every((entry, index) =>
+        entry.angle === current[index].angle && entry.visible === current[index].visible);
+      return unchanged ? current : next;
+    });
+  }, [angles, hidden, reducedMotion]);
+  const handleExited = useCallback((angleId: string) => {
+    setEntries((current) => current.filter((entry) => entry.angle.id !== angleId));
+  }, []);
+  if (reducedMotion) {
+    return (
+      <>
+        {(hidden ? NO_ANGLES : angles).map((angle) => (
+          <AngleArc
+            angle={angle}
+            atomsById={atomsById}
+            htmlPointerEvents="none"
+            key={angle.id}
+            labelVariant="minimal"
+            radius={0.48}
+            showGuideLine={false}
+          />
+        ))}
+      </>
+    );
+  }
+  return (
+    <>
+      {entries.map((entry) => (
+        <FadingAngleArc
+          angle={entry.angle}
+          atomsById={atomsById}
+          key={entry.angle.id}
+          onExited={handleExited}
+          visible={entry.visible}
+        />
+      ))}
+    </>
+  );
+}
+
+function FadingAngleArc({
+  angle,
+  atomsById,
+  onExited,
+  visible,
+}: {
+  angle: BuilderBondAngleMatch;
+  atomsById: Map<string, Atom>;
+  onExited: (angleId: string) => void;
+  visible: boolean;
+}) {
+  const invalidate = useThree((state) => state.invalidate);
+  // 挂载即从 0 淡入；退场淡到 0 后向父级上报，由父级真正卸载。
+  const opacityRef = useRef(0);
+  const exitNotifiedRef = useRef(false);
+  const [renderedOpacity, setRenderedOpacity] = useState(0);
+  useFrame((_, delta) => {
+    if (visible) exitNotifiedRef.current = false;
+    const target = visible ? 1 : 0;
+    const current = opacityRef.current;
+    if (current === target) {
+      if (!visible && !exitNotifiedRef.current) {
+        exitNotifiedRef.current = true;
+        onExited(angle.id);
+      }
+      return;
+    }
+    const step = delta * ARC_FADE_SPEED;
+    const next = current < target ? Math.min(target, current + step) : Math.max(target, current - step);
+    opacityRef.current = next;
+    setRenderedOpacity(next);
+    invalidate();
+  });
+  return (
+    <AngleArc
+      angle={angle}
+      atomsById={atomsById}
+      htmlPointerEvents="none"
+      labelVariant="minimal"
+      opacity={renderedOpacity}
+      radius={0.48}
+      showGuideLine={false}
+    />
   );
 }
 

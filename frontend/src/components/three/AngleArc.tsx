@@ -16,6 +16,8 @@ export type AngleArcProps = {
   showGuideLine?: boolean;
   labelVariant?: AngleArcLabelVariant;
   htmlPointerEvents?: "auto" | "none";
+  /** 0~1 的整体透明度，供淡入淡出场景使用；默认 1，渲染与未传时完全一致。 */
+  opacity?: number;
 };
 
 const DEFAULT_LABEL_OFFSET: Vec3 = [0, 0, 0];
@@ -28,6 +30,7 @@ export function AngleArc({
   showGuideLine = true,
   labelVariant = "default",
   htmlPointerEvents = "auto",
+  opacity = 1,
 }: AngleArcProps) {
   const arc = useMemo(() => {
     const first = atomsById.get(angle.atomIds[0]);
@@ -69,14 +72,21 @@ export function AngleArc({
     return null;
   }
 
+  const clampedOpacity = Math.max(0, Math.min(1, opacity));
+
   return (
     <group>
-      <Line color="#F4A261" lineWidth={2.5} points={arc.points} />
+      <Line
+        color="#F4A261"
+        lineWidth={2.5}
+        points={arc.points}
+        {...(clampedOpacity < 1 ? { opacity: clampedOpacity, transparent: true } : {})}
+      />
       {showGuideLine ? (
         <Line
           color="#F4A261"
           lineWidth={1.5}
-          opacity={0.82}
+          opacity={0.82 * clampedOpacity}
           points={[arc.guideStart, arc.labelPosition]}
           transparent
         />
@@ -93,6 +103,7 @@ export function AngleArc({
               ? "whitespace-nowrap text-[11px] font-bold text-[#B96320] drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]"
               : htmlOverlayAngleLabelClass
           }
+          style={clampedOpacity < 1 ? { opacity: clampedOpacity } : undefined}
         >
           {angle.label}
         </span>
