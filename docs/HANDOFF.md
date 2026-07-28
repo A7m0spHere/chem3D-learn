@@ -8,6 +8,37 @@
 ## 最近一次交接
 
 - **Agent**：Codex
+- **日期**：2026-07-29
+- **分支**：`main`
+- **任务**：T-025 创建公开仓库根 README 与项目原生视觉资产。
+- **提交**：`5350ef2 docs: add project readme and visual showcase`
+
+### 本轮做的事
+
+1. **建立公开仓库首页**：新增根 `README.md`，以“价值 → 真实界面 → 核心能力 → 快速开始 → 技术与验证细节”为阅读顺序，覆盖产品边界、参与入口与许可证现状。
+2. **创建项目原生 hero**：新增 `assets/readme/hero.svg`，复用项目设计 token，以 CH₄ 正四面体、109.5° 键角和“观察—切换—讲解”为视觉语法；没有通用 AI/SaaS 装饰。
+3. **使用真实证明**：复用现有首页 / NH₃ 截图，并从当前 `/lab/organic-builder/ethylene-planar` 重新采集 `assets/readme/organic-builder.png`，等到 Canvas ready 和 `C₂H₄` 下标出现后才截图。
+4. **不制造仓库状态**：仓库没有 CI、正式部署地址和 `LICENSE`，README 不放无依据的 build/license badge 或在线演示链接，并明确当前许可证现状。
+
+### 验证结果
+
+- `audit_readme.py`：通过；4 个本地图片引用与 SVG 基础结构有效。
+- README 本地链接：hero、3 张真实界面图和 5 份文档全部存在。
+- hero 用系统 Chrome 渲染 900×315 / 360×126 两种宽度，桌面和窄屏目检无裁切。
+- 本任务仅改文档与静态资产，未运行 `npm run build`。
+
+### 已知限制与建议
+
+- 仓库尚无正式部署配置，README 因此没有在线演示按钮；部署后再补正式 URL 与 SPA fallback 说明。
+- 当前没有 `LICENSE` 文件。若维护者希望接受外部贡献或授权复用，下一任务应先选定并添加许可证，再更新 README 徽章和许可证段落。
+
+---
+
+## 往期
+
+### 2026-07-28 Codex：T-024 修复生产首页提前加载 3D 依赖
+
+- **Agent**：Codex
 - **日期**：2026-07-28
 - **分支**：`main`
 - **任务**：T-024 修复生产首页提前加载 3D 依赖，并补真实生产预览回归。
@@ -32,10 +63,6 @@
 - `ThreeViewerFrame` 约 845.42 KB / gzip 227.97 KB，仍有 Vite large chunk 警告，但现在只在 3D 意图/路由下请求；不要为了消除警告恢复对象式 `manualChunks`。
 - 受限设备直达 CH₄ 中位仍约 4.38 秒，略高于 4 秒目标。下一任务应先评估最小加载反馈或预取时机，不直接扩大为 Viewer 解耦或新一轮 vendor 拆分。
 - Windows 没有 Darwin 基线；本任务无 UI 变化，未跑/未更新完整视觉快照。
-
----
-
-## 往期
 
 ### 2026-07-28 Claude Code：T-023 有机拼装实验室 3D 补间动画与视觉收尾
 
@@ -184,7 +211,7 @@
 
 ---
 
-## 往期
+## 更早记录
 
 ### 2026-07-26 Claude Code：T-015 用 `CalloutLabel` 扩展 PBA viewer 的恒显场景标签（引线标签第二批，扩展第 4 个 viewer）
 

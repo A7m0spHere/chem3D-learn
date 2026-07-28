@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-28（Codex，T-024 修复生产首页提前加载 3D 依赖，提交 `f151bfb`）
+> 最后更新：2026-07-29（Codex，T-025 创建根 README 与项目原生视觉资产）
 
 ## 一句话定位
 
@@ -26,6 +26,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
+- **T-025 已提交**（2026-07-29，`5350ef2`）：新增根 `README.md`、`assets/readme/hero.svg` 与基于当前前端重新采集的 `assets/readme/organic-builder.png`。README 以真实界面截图开场，覆盖核心能力、快速开始、技术栈、项目结构、验证命令、产品边界与许可证现状；没有虚构在线演示、CI 状态或开源许可证。技能审计通过，SVG 已按 900px / 360px GitHub 宽度渲染目检。
+
 - **T-024 已提交**（2026-07-28，`f151bfb`）：删除会吸收共享 React 运行时的对象式 `manualChunks`，生产首页不再静态下载 `r3f/three`；新增真实 `vite preview` 的无截图回归入口 `npm run test:production`。首页冷启动 gzip JS 349.10 → 114.66 KB，受限配置中位 2825 → 1491 ms。大 chunk 警告仍存在，但已移到按需的 `ThreeViewerFrame`，详见 D-022。
 
 - **T-023 已提交**（2026-07-28，2 个代码 commit + 1 个 docs commit）：
@@ -46,6 +48,14 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-29，T-025）
+
+- `beautify-github-readme` 自带 `audit_readme.py`：**通过**；4 个本地图片引用与 SVG 基础结构均有效。
+- 本地链接检查：hero、3 张真实界面图与 5 个文档链接均存在。
+- `hero.svg`：用项目现有 Playwright + 系统 Chrome 按 900×315 与 360×126 两种 GitHub 显示宽度渲染，桌面与窄屏均无裁切；窄屏细节由紧邻 Markdown 提供等价说明。
+- `organic-builder.png`：由当前 `/lab/organic-builder/ethylene-planar` 页面重新采集，等待 Canvas ready 且 `C₂H₄` 下标显示出现后截图；临时 Vite 服务与浏览器均已关闭。
+- 本任务仅改文档与 README 静态资产，未改前端源码，因此按仓库规则未运行 `npm run build`。
 
 ## 独立验证结果（2026-07-28，T-024）
 
@@ -114,6 +124,10 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 最近完成
 
+- **T-025 根 README 与项目原生视觉资产**（2026-07-29 完成，提交 `5350ef2`）
+  - 采用 README mode 重建仓库首页：首屏使用从 CH₄ 正四面体、109.5° 键角和“观察—切换—讲解”学习流程提炼的静态 SVG hero，紧接首页、NH₃ 学习页与当前有机拼装页真实截图。
+  - README 提供功能范围、快速开始、技术栈、数据流、目录结构、测试命令、产品边界、参与入口与许可证现状；明确前端无需后端即可运行，`frontend/` 与 `video/` 依赖树隔离。
+  - 未添加无依据的 CI / license badge、在线演示地址、采用数据或功能承诺。详见 D-023。
 - **T-024 修复生产首页提前加载 3D 依赖**（2026-07-28 完成，提交 `f151bfb`）
   - Hyperplan 审计确认旧入口静态导入 `r3f` 与 `three`；新增生产预览回归先在旧配置上复现 1/3 失败，再删除对象式 `manualChunks`，相同测试 3/3 通过。
   - 首页冷启动 gzip JS 349.10 → 114.66 KB（-67.2%）；受限配置首页中位 2825 → 1491 ms。路由 lazy、预取入口、`modulePreload: false` 与 UI 均保持不变。
@@ -221,7 +235,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 2. macOS 环境跑一次完整 Darwin 视觉回归：审核 T-023 预期内的 2 张拼装页快照漂移（`organic-builder-ethylene` / `organic-builder-mobile-info`，因分子式下标），并确认键圆柱单位长度化与全站动画 wrapper 无非预期布局漂移。
 3. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
 4. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
-5. 正式部署配置（SPA history fallback）、根 README、Node `engines` 声明等待确认项。
+5. 正式部署配置（SPA history fallback）与前端 / 视频 Node `engines` 声明等待确认项。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
@@ -244,7 +258,6 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 其他待确认
 
-- 是否需要创建根 README；当前根目录和 `frontend/` 均无 README。
 - `docs/ROADMAP.md` 的 v1.0 RC 计划与实际实现如何对应。
 - 前端与视频未声明 Node `engines`，最低支持版本待确认。
 - 正式部署平台、缓存策略和 SPA fallback 配置待确认。

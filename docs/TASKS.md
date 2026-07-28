@@ -26,6 +26,21 @@
 
 ## 已完成
 
+### T-025 创建公开仓库根 README 与项目原生视觉资产
+
+- **完成**：2026-07-29（Codex）
+- **提交**：`5350ef2 docs: add project readme and visual showcase`
+- **内容**：
+  - 使用 `beautify-github-readme` 的 README mode 创建根 `README.md`，阅读顺序为“价值 → 真实界面 → 核心能力 → 首次运行 → 技术与验证细节”。
+  - 新增 `assets/readme/hero.svg`：沿用设计 token，以 CH₄ 正四面体、109.5° 键角和“观察—切换—讲解”作为项目原生 motif；静态 SVG 自带标题、描述和完整背景。
+  - 新增 `assets/readme/organic-builder.png`：从当前 `/lab/organic-builder/ethylene-planar` 页面重新采集，避免复用已知会因分子式下标产生漂移的旧 Darwin 快照。
+  - README 复用现有首页与 NH₃ 真实截图，提供快速开始、技术栈、数据流、仓库结构、验证命令、产品边界、参与入口和许可证现状。
+- **验收**：
+  - [x] `audit_readme.py` 通过，4 个本地图片引用与 SVG 基础结构有效。
+  - [x] 所有 README 本地链接存在；没有虚构在线演示、CI 状态、采用数据或许可证。
+  - [x] hero 在 900px 与 360px GitHub 显示宽度下无裁切，桌面和窄屏目检通过。
+  - [x] 本任务仅改文档与静态资产，按规则未运行前端 build。
+
 ### T-024 修复生产首页提前加载 3D 依赖并补生产回归
 
 - **完成**：2026-07-28（Codex）
