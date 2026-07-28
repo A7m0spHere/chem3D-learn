@@ -219,3 +219,18 @@
   - 加了退化值防御：参考键长被夹在 `[0.35, 2]`，避免手工构造的重叠/超长原子把摆位带偏。
 - **验证**：新增 2 项 logic 回归（`organic-builder-fixes.logic.spec.ts`：拔下的 H 吸附回去沿用分子键长标尺、从零拼装仍用样式化标尺）；`test:logic` 80 → **82 通过**；build / lint 通过；浏览器行为回归（`PLAYWRIGHT_CHANNEL=chrome`）跑了拼装页 10 个无截图用例（含拔下 / 撤销流程）全绿，未触碰 3 个带快照的用例。
 - **约束**：这是「样式化教学标尺」下的一致性修复，不是真实键长（真实 C–H≈1.09 Å、C–C≈1.54 Å 的相对比例并未建模）。键长匹配仍服务于视觉一致，不代表定量正确。
+
+## D-021 T-023 范围修正与 3D 补间收尾：共享位置表 + 退场残影 + 显示层分子式（T-023）
+
+- **日期**：2026-07-28（Claude Code，commits `f42f076` / `4d698ed`）
+- **背景**：接手 T-023 时逐项 git 考古发现，TASKS 待办描述已过时——`e8169cb`（T-021 第 4 个提交）实际已包含 7 个子项中的 4 个半（原子入场缩放与位置补间、双/三键偏移面旋向相机、toast 退出延迟卸载、浮层错峰入场、自定义确认弹窗，且两个浏览器 spec 已改用自定义弹窗按钮），当时的 docs 提交没有意识到工作区里混入了这批实现。真正缺失的是：删除退场、键角弧过渡、3D 补间的 reduced-motion、信息面板高度过渡、分子式排版统一，以及一个伴生缺陷——原子补间途中键先跳到最终几何、约 200ms 与原子脱开。
+- **决定与取舍**：
+  1. **键跟随用共享位置表，而不是把键改成 state 驱动重渲染**：原子 useFrame（优先级 **-1**）每帧把实际显示位置写入 `Map<atomId, Vector3>`，键 useFrame（默认 0）读端点、每帧更新 group 变换（圆柱改单位长度 + `scale.y` 表达键长）。-1 优先级是关键：R3F 按订阅顺序执行 useFrame，后挂载的键会排在原子后面，若不显式排序，拖拽时键会滞后原子一帧。表条目不清理——按 id 覆盖写、体量极小，删除后的残值还作为退场残影的位置来源。
+  2. **退场残影不用透明材质**：被删原子「缩没」、被删键「向轴并拢变细」（scale 归零后卸载），避免 transparent 材质的深度排序伪影；残影禁用 raycast，不挡背后可点部件；撤销把同 id 部件加回来时立即清掉对应残影，防实体与残影同屏。
+  3. **键角弧过渡靠给共享 `AngleArc` 加可选 `opacity` prop**（默认 1，未传时渲染与原来逐位一致），而不是复制一份拼装页专用的弧组件。淡入淡出由拼装页本地的 presence 管理器驱动，退场淡到 0 才卸载。其余 3 个调用点（Benzene/Ethylene/MoleculeViewer）不传该 prop，Darwin 快照零暴露。
+  4. **reduced-motion 在 3D 侧必须 JS 显式处理**：motion.css 的全局 `prefers-reduced-motion` 兜底只作用于 DOM（toast/浮层/弹窗/信息面板已被覆盖），R3F 画布内补间不吃 CSS，需在 useFrame 内直接落位并跳过残影/淡入淡出。
+  5. **信息面板条件区块「退场动画结束后才真正卸载」**：`CollapsibleSection`（grid-rows 0fr↔1fr + 透明度）在收拢期间保留最后一份非空内容，340ms 后置 closed 卸载——既有浏览器断言 `toHaveCount(0)` 依靠 Playwright 自动重试保持成立，无需改测试语义；区块间距（pt-4）放进收拢内容内部，折叠不留双倍空隙；首挂载即打开不播动画，避免与整页浮层入场叠加。
+  6. **分子式只在显示层转下标**：新增纯函数 `formatFormulaSubscripts`（ASCII 数字 → Unicode 下标，无数字输入原样返回、幂等），`getFormula` 保持 "C2H4" 式 ASCII 输出——教学词典比较、既有 8 处 `getFormula` logic 断言都依赖 ASCII，动它属于高风险零收益。
+- **验证**：`npm run build`（含 `tsc --noEmit`）、`npm run lint` 通过；`npm run test:logic` **83 / 83**（原 82 + formatter 回归 1 项）；`PLAYWRIGHT_CHANNEL=chrome` 拼装页无截图用例 **10 / 10**（含分子式下标断言、键角区块收拢/展开、拔下+撤销、确认弹窗、reduced-motion 入场）。
+- **已知暴露**：InfoPanel 分子式改下标会让 `organic-builder-ethylene` / `organic-builder-mobile-info` 两张 Darwin 快照在 macOS 漂移（预期内，接手前 HANDOFF 已预告）；键圆柱单位长度 + scale.y 数学上与原渲染等价，macOS 回归时一并目检。
+- **教训（补进流程）**：TASKS 的范围描述可能滞后于代码——本轮与上轮（T-022「只有苯不一致」实为四个种子全不一致）连续两次出现同类漂移，方向相反（这次是「记为未做、实际已做」）。接手任何任务先 `git log -S` 核对关键符号的落地情况，再定范围。

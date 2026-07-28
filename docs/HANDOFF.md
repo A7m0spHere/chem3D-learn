@@ -10,37 +10,49 @@
 - **Agent**：Claude Code
 - **日期**：2026-07-28
 - **分支**：`main`（已推送到 `origin/main`）
-- **任务**：T-022 剩余项——统一有机拼装实验室的样式化键长标尺，修掉「把种子分子上的 H 拔下再吸附回去，键长会明显长一截」。
-- **提交**：`b06c653 fix(builder): reuse local bond-length scale when reattaching atoms`（配套 docs commit 见文件末尾 git log）。
+- **任务**：T-023 有机拼装实验室 3D 补间动画与视觉收尾（接手"昨天未开发完的"）。
+- **提交**：`f42f076 feat(builder): finish 3d tweens with exit ghosts and reduced motion`、`4d698ed feat(builder): animate info panel sections and unify formula subscripts`（配套 docs commit 见 git log）。
 
 ### 本轮做的事
 
-1. **先核对，发现原记录范围偏窄**。TASKS 只说苯种子 C–H = 0.66 与标尺 0.92 不一致。实测四个种子后确认**没有一个种子的键长与标尺一致**——苯 C–H 0.66 / 重原子间 1.12；乙烯 1.09 / 1.34；乙炔 1.10 / 1.24；共面综合模型 C–H 约 0.45~0.59 / 重原子间 0.72~1.16。根因是同一个：`getSuggestedPosition` 无论分子本身用什么标尺，都用常数（含 H 0.92、重原子间 1.08）算新键长，所以从种子里拔下任意 H 再吸附回去都会跳变，苯只是最扎眼的一例。
-2. **选了不碰种子坐标的方案**。种子（`benzeneBuilderSeed` / `ethyleneBuilderSeed` / `acetyleneBuilderSeed`）同时喂给模块 viewer `BenzenePlanarCell` / `EthylenePlanarCell` / `AcetyleneLinearCell`，这些 viewer 有 Darwin 快照（`benzene-planar-*`、`acetylene-linear-*`、`organic-builder-ethylene` 等），Windows 上不能重算基线。所以**不改种子坐标**，改为让 `getSuggestedPosition` 沿用分子局部键长：新增 `resolveBondLength`，先取「同一中心原子上的同类键（元素对 + 键级都相同）」的中位数，退回「全分子同类键」的中位数，都没有才用样式化常数，并把参考值夹在 0.35~2 防退化。从零拼装时分子内本就全是常数长度，因此**行为不变**。
-3. 新增 2 项 logic 回归（`organic-builder-fixes.logic.spec.ts`）：一是拔下苯 H 再吸附回去，键长与其余五个 C–H 一致（0.66）；二是从零拼装 C–H 仍为样式化 0.92。
+1. **先核对，发现 TASKS 范围记录反向漂移**。T-023 待办列的 7 个子项里，**4 个半已随 T-021 的 `e8169cb` 落地**（用 `git log -S entranceInitialized/offsetGroupRef/CONFIRM_COPY` 核实）：原子入场缩放+位置补间、双/三键偏移面旋向相机、toast 退出延迟卸载、浮层错峰入场、自定义确认弹窗（两个浏览器 spec 也已改用自定义弹窗按钮——TASKS 里"4 处 page.once(dialog) 可简化"的注也过时了）。上轮教训是"记为已做的其实没做全"，这轮是"记为未做的其实已做"——同一个病，方向相反。
+2. **只做真正缺失的 5 件事**（详见 D-021）：
+   - 3D 补间遵守 `prefers-reduced-motion`：R3F 画布内 JS 补间不吃 motion.css 的 CSS 全局兜底，需在 useFrame 里显式直接落位。
+   - 删除退场残影：原子缩没、键并拢变细（~200ms 后卸载）；不用透明材质（防深度排序伪影）；残影禁 raycast；撤销加回同 id 部件立即清残影。
+   - 键跟随补间：共享 `animatedPositions` 表（原子 useFrame **优先级 -1** 先写、键默认 0 后读，键圆柱改单位长度 + `scale.y`），修掉吸附/撤销后"键先跳终点、原子飞过去追"的 200ms 脱节。-1 优先级是必须的：R3F 按订阅顺序执行 useFrame，不排序则拖拽时键滞后一帧。
+   - 键角弧淡入淡出：共享 `AngleArc` 加可选 `opacity`（默认 1、未传时渲染逐位一致，Benzene/Ethylene/MoleculeViewer 三个调用点与 Darwin 快照零暴露）。
+   - 信息面板：键角/官能团区块 `CollapsibleSection`（grid-rows 0fr↔1fr）高度过渡，收拢期间保留最后一份非空内容、**退场结束后才真正卸载**——既有 `toHaveCount(0)` 断言靠 Playwright 自动重试保持成立；间距 pt-4 移入收拢内容内部防折叠双倍空隙。分子式显示层新增 `formatFormulaSubscripts`（"C2H4"→"C₂H₄"），`getFormula` 保持 ASCII（词典与 8 处既有 logic 断言依赖），2 个浏览器 spec 的 8 处期望同步改为下标。
 
 ### 验证结果
 
 - `frontend npm run build`：**通过**（含 `tsc --noEmit`），保留既有 `three` chunk ~688 KB 非阻断警告。
 - `frontend npm run lint`：**通过**。
-- `frontend npm run test:logic`：**82 / 82 通过**（原 80 + 新增 2 项）。
-- 浏览器行为回归（`PLAYWRIGHT_CHANNEL=chrome`，无截图用例）：`organic-builder-fragments` 1/1 + `organic-builder` 9 项无快照用例（含「拔下并撤销」流程）**全部通过**，共 10/10。
-- `git diff --check`：无换行噪声；`git status` 确认只改 `organicBuilderChemistry.ts` + `organic-builder-fixes.logic.spec.ts`，未触碰任何 Darwin 快照 / lockfile / 缓存。
+- `frontend npm run test:logic`：**83 / 83 通过**（原 82 + formatter 回归 1 项）。
+- 浏览器行为回归（`PLAYWRIGHT_CHANNEL=chrome`，`--grep-invert` 排除 2 个含截图用例）：拼装页 **10 / 10 通过**（含分子式下标断言、键角区块收拢/展开、拔下+撤销、确认弹窗、reduced-motion 入场）。
+- `git diff --check` 无换行噪声；`git status` 确认只改 4 个源文件 + 3 个测试文件 + 文档，未触碰 Darwin 快照 / lockfile / 缓存。
+- 过程插曲：验证期间 Claude Code auto 权限模式的安全分类器（Anthropic 侧服务）一度不可用、无法执行 npm 命令，经项目所有者切换权限模式后恢复。环境事件，与代码无关。
 
 ### 已知限制
 
-- 只改了「新键摆位」的键长来源。种子坐标本身仍是各自的旧标尺（苯 0.66 等），这是有意为之——避免动到 viewer 的 Darwin 快照。若将来要让种子也统一到 0.92 标尺，必须在 macOS 上重算 `benzene-planar` / `acetylene-linear` / `organic-builder-ethylene` 等快照，Windows 不能做。
-- 完整 Darwin 视觉回归**未运行**（Windows 无基线、不得更新）。本轮只跑了无截图用例。
+- 完整 Darwin 视觉回归**未运行**（Windows 无基线、不得更新）。**预期内漂移**：`organic-builder-ethylene` / `organic-builder-mobile-info` 两张快照因 InfoPanel 分子式改下标需在 macOS 审核重算；键圆柱改单位长度 + scale.y 数学上等价，macOS 回归时一并目检。
+- 键角弧仍按 state 目标位置绘制，原子补间途中弧短暂领先原子（弧只出现在结构完整的静止场景，接受）。OrbitControls target 随删除跳变属既有行为，未纳入本轮。
 
 ### 给下一个 Agent 的建议
 
-1. **T-022 已收口**，backlog 只剩 T-023（3D 补间动画与视觉 token 收尾，纯体验、不涉及教学正确性）。
-2. 若接 T-023，注意其中「统一分子式排版」和「双键圆柱朝向相机」会改 `OrganicBuilderCanvas.tsx` 的 3D 渲染，同样牵动拼装页 Darwin 快照——Windows 上只能跑无截图用例，快照审核留给 macOS。
-3. 教训留存（沿用上一轮）：接手前别只读 TASKS 就认定范围，先 grep / 实测核对代码。本轮 TASKS 说「只有苯不一致」，实测是四个种子全不一致，范围比记录宽。
+1. **backlog 已清空**。候选方向见 PROJECT_STATUS「下一步」：macOS 视觉回归审核（含本轮 2 张预期漂移）、两处 `TODO-CHEM-VERIFY` 化学核实、后端单源方案 B、部署配置。动手前先与用户确认立项。
+2. 教训延续并升级：TASKS 范围描述连续两轮与代码漂移（T-022 记窄了、T-023 记反了）。接手任务先用 `git log -S <关键符号>` 核对每一子项的落地情况，再定范围；完成任务的同一批 docs 提交里，把"顺带做掉的"逐项写清。
+3. 若做 macOS 视觉回归：除 2 张预期漂移外，其余拼装页快照理论上不应变化（键渲染等价、面板在完整结构下首挂载即展开无动画）；若出现其他漂移，先查 `CollapsibleSection` 首挂载分支与 `AngleArc` 未传 opacity 的调用点。
 
 ---
 
 ## 往期
+
+### 2026-07-28 Claude Code：T-022 键长标尺统一收尾
+
+- **提交**：`b06c653 fix(builder): reuse local bond-length scale when reattaching atoms`（配套 docs `7bc7f69`）。
+- 核对发现范围比 TASKS 记录（只提苯 C–H 0.66）宽：四个种子键长全都偏离 `getStylizedBondLength` 标尺（乙烯 1.09、乙炔 1.10、共面综合 ~0.45），根因同一个——`getSuggestedPosition` 无条件用常数摆位，拔下再吸附回去键长跳变。
+- 采取不改种子坐标的方案（种子被 `BenzenePlanarCell` 等 viewer 复用、牵动 Darwin 快照）：新增 `resolveBondLength`，优先取同一中心原子上的同类键，退回全分子同类键中位数，都没有才用样式化常数，参考值夹在 0.35~2。从零拼装行为不变。
+- `test:logic` 80 → 82；build / lint 通过；chrome 通道无截图用例 9 + 1 通过。种子坐标本身仍是旧标尺（有意保留）；若将来统一到 0.92 需在 macOS 重算快照。详见 D-020。
 
 ### 2026-07-28 Claude Code：T-021 提交 + 校正 T-022 记录
 

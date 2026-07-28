@@ -14,36 +14,38 @@
 
 ## 待办（按优先级）
 
-### T-023 有机拼装实验室：3D 补间动画与视觉 token 收尾
-
-- **状态**：待办
-- **优先级**：中（体验与视觉一致性，不涉及教学正确性）
-- **背景**：T-021 只做了教学正确性与关键交互，动画与视觉打磨留在本任务。已核实的现状如下。
-- **动画部分**：
-  1. **3D 场景内所有状态变化都没有补间**：添加原子瞬现、删除瞬消、吸附成键时原子从拖放点瞬移到标准位置、键角弧随拖拽瞬隐瞬现。建议在 `OrganicBuilderCanvas.tsx` 引入按 `atom.id` 记忆上一帧位置的插值（T-021 已引入 `useFrame`，可复用），并遵守 `prefers-reduced-motion`。
-  2. **双键/三键圆柱偏移固定在局部 X 轴**，不朝向相机，某些视角下会重叠成一条线，学生可能误读键级。建议按相机方向计算垂直偏移基矢。
-  3. 反馈提示条（toast）**退出时直接从 DOM 卸载**，`transition-opacity` 不会播放；建议加延迟卸载或用 CSS 动画。
-  4. 直接访问页面（无入场过渡）时所有浮层同帧闪现，没有错峰（stagger）入场。
-- **视觉部分**：
-  5. 原生 `window.confirm`（"新建空白模型" / "恢复起点"）与页面自定义离开弹窗风格割裂，建议统一为自定义弹窗。注意：`tests/visual/organic-builder.visual.spec.ts` 与 `organic-builder-fragments.visual.spec.ts` 中有 4 处 `page.once("dialog", ...)`，T-021 已改为兼容两种实现（既接受原生 dialog 也接受自定义按钮），改完后可简化。
-  6. 信息面板的条件区块（键角匹配 / 官能团）出现消失时高度跳变无过渡。
-  7. 分子式排版两套并存：`getFormula` 输出 "C2H4"，种子 `formula` 字段是 "C₂H₄"。建议统一（渲染 `<sub>` 或统一转 Unicode 下标）。
-- **已完成的部分**（T-021 中顺带做掉，本任务不必重复）：`shadow-overlay` / `shadow-overlay-strong` / `accent-dark` 三个 token 已加入 `tailwind.config.ts` 并替换页面内 7+ 处硬编码阴影与 `text-amber-800`；`builder-overlay-enter` / `builder-floating-panel` / `organic-builder-immersive` 三个死类名已清理；返回按钮已加直达兜底与反向过渡。
-- **验收标准**：
-  - [ ] 3D 内容变化有可见补间，且 `prefers-reduced-motion: reduce` 下退化为无动画。
-  - [ ] 双键/三键在任意视角都能看出键级。
-  - [ ] 无原生 `confirm`；确认弹窗风格与离开弹窗一致，破坏性动作不用主色主按钮。
-  - [ ] `npm run build` / `npm run lint` / `npm run test:logic` 通过；不更新 Darwin 截图基线。
+（暂无。全部 backlog 已收口；新方向立项前先与用户确认。）
 
 ---
 
 ## 搁置 / 低优先级
 
-（暂无。全部 backlog 已收口。）
+（暂无。）
 
 ---
 
 ## 已完成
+
+### T-023 有机拼装实验室：3D 补间动画与视觉收尾
+
+- **完成**：2026-07-28（Claude Code）
+- **提交**：`f42f076`（3D 补间收尾：退场残影 / 键跟随 / reduced-motion）、`4d698ed`（信息面板高度过渡 + 分子式下标统一）
+- **接手时的关键修正**：本条待办描述与代码不符——**7 个子项中有 4 个半已随 T-021 的 `e8169cb` 落地**（原子入场缩放 + 位置补间、双/三键偏移面旋向相机、toast 退出动画、浮层错峰入场、自定义确认弹窗，测试也已改用自定义弹窗按钮），当时的 docs 提交未察觉。本轮先逐项 git 考古核实，再只做真正缺失的部分。详见 D-021。
+- **本轮实际开发内容**：
+  - **3D 补间遵守 `prefers-reduced-motion`**：画布内 JS 补间（R3F 不吃 motion.css 的 CSS 兜底）在 reduce 下全部退化为直接落位、无入场缩放、无残影、键角弧直接挂卸。
+  - **删除退场动画**：被删原子缩没、被删键向轴并拢变细（约 200ms 残影后真正卸载）；不用透明材质避免排序伪影；残影禁用 raycast；撤销把同 id 部件加回来时立即清残影。
+  - **键跟随补间**：新增共享 `animatedPositions` 注册表——原子 useFrame（优先级 -1）每帧先写实际显示位置，键 useFrame（默认 0）后读端点更新（圆柱改单位长度 + `scale.y`），修掉「吸附/撤销后约 200ms 键先跳到终点、原子飞过去追」的脱节；-1 优先级避免 R3F 按挂载顺序执行造成的一帧滞后。
+  - **键角弧淡入淡出**：`BuilderAngleArcs` 进出场管理（含拖拽隐藏），退场淡出后再卸载；共享组件 `AngleArc` 增加可选 `opacity` prop，默认 1、未传时渲染与原来逐位一致（Benzene/Ethylene/MoleculeViewer 三个调用点不受影响）。
+  - **信息面板高度过渡**：键角匹配 / 官能团区块用本地 `CollapsibleSection`（grid-rows 0fr↔1fr + 透明度）；收拢期间保留最后一份非空内容、退场结束后才真正卸载（`toHaveCount(0)` 断言在自动重试内成立）；间距（pt-4）移入收拢内容内部，折叠不留双倍空隙；首挂载即打开不播动画。
+  - **分子式排版统一**：新增显示层纯函数 `formatFormulaSubscripts`（"C2H4"→"C₂H₄"），InfoPanel 应用；`getFormula` 保持 ASCII（词典比较与既有 logic 测试依赖）；同步更新 2 个浏览器 spec 的 8 处分子式期望。
+- **验收标准核对**：
+  - [x] 3D 内容变化有可见补间（入场 e8169cb 已有 + 本轮补退场/键跟随/弧淡入淡出），且 `prefers-reduced-motion: reduce` 下退化为无动画。
+  - [x] 双键/三键在任意视角都能看出键级（e8169cb 已落地，本轮核实并保留）。
+  - [x] 无原生 `confirm`；确认弹窗风格与离开弹窗一致，破坏性动作不用主色主按钮（e8169cb 已落地，本轮核实）。
+  - [x] `npm run build` / `npm run lint` 通过；`npm run test:logic` **83 / 83 通过**（原 82 + 新增 formatter 回归 1 项）。
+  - [x] `PLAYWRIGHT_CHANNEL=chrome` 定向跑拼装页无截图用例 **10 / 10 通过**（含分子式下标断言、键角区块收拢/展开、拔下+撤销、确认弹窗、reduced-motion 入场流程）。
+  - [x] 未更新 Darwin 截图基线，未动 lockfile / 缓存。
+- **已知限制**：InfoPanel 分子式改为下标后，`organic-builder-ethylene` / `organic-builder-mobile-info` 两张 Darwin 快照会在 macOS 上漂移，需 macOS 环境审核重算（Windows 无基线、不得更新）；键圆柱改单位长度 + scale.y 在数学上与原渲染等价，macOS 回归时一并目检。原生 `window.confirm` 相关的测试简化（TASKS 旧注）已在 e8169cb 完成，无遗留。
 
 ### T-021 有机拼装实验室教学正确性与交互修复
 

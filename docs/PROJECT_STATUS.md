@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-28（Claude Code，T-022 收尾：拔下原子吸附回去沿用局部键长标尺，提交 `b06c653`）
+> 最后更新：2026-07-28（Claude Code，T-023 收尾：3D 补间/退场残影/键跟随/信息面板过渡/分子式下标，提交 `f42f076` + `4d698ed`）
 
 ## 一句话定位
 
@@ -26,6 +26,11 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
+- **T-023 已提交**（2026-07-28，2 个代码 commit + 1 个 docs commit）：
+  - `f42f076 feat(builder): finish 3d tweens with exit ghosts and reduced motion` —— 画布补间收尾（`OrganicBuilderCanvas.tsx`、`AngleArc.tsx` 加默认 1 的可选 `opacity`）
+  - `4d698ed feat(builder): animate info panel sections and unify formula subscripts` —— 信息面板高度过渡与分子式下标（`OrganicBuilderInfoPanel.tsx`、`organicBuilderChemistry.ts`、3 个测试文件）
+  - 接手时核对发现 TASKS 的 T-023 描述过时：7 个子项中 4 个半已随 T-021 的 `e8169cb` 落地（键级朝相机、toast 退出、错峰入场、确认弹窗、原子入场+位置补间）。本轮只补真正缺失的部分，详见 D-021。
+
 - **T-021 已提交**（2026-07-28，按 D-019 分组拆成 4 个代码 commit + 1 个 docs commit）：
   - `d6ea076 fix(builder): correct bond geometry and functional-group detection` —— 化学与几何层（`organicBuilderChemistry.ts`、`organicBuilderGeometry.ts`、`types/organicBuilder.ts`、`organicBuilderSeeds.ts`、`tailwind.config.ts`）
   - `c940c33 fix(builder): keep chinese names consistent and refuse to guess` —— 命名层（`organicBuilderNomenclature.ts`）
@@ -39,6 +44,15 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-28，T-023）
+
+- `frontend npm run build`：**通过**（含 `tsc --noEmit`）；保留既有 `three` chunk ~688 KB 非阻断警告。
+- `frontend npm run lint`：**通过**。
+- `frontend npm run test:logic`：**83 / 83 通过**（原 82 + 新增 `formatFormulaSubscripts` 回归 1 项）。
+- 浏览器行为回归（`PLAYWRIGHT_CHANNEL=chrome`，排除 2 个含截图用例）：拼装页 **10 / 10 通过**（含分子式下标断言、键角区块收拢/展开、拔下+撤销、确认弹窗、reduced-motion 入场）。
+- Darwin 视觉回归：**未运行**（Windows 无基线，不得更新）。已知 `organic-builder-ethylene` / `organic-builder-mobile-info` 两张快照会因分子式下标在 macOS 漂移，需 macOS 审核重算。
+- 过程记录：本轮验证期间 Claude Code auto 权限模式的安全分类器（Anthropic 侧服务）一度不可用，无法执行 npm 命令；经项目所有者切换权限模式后恢复执行。属环境事件，与项目代码无关。
 
 ## 独立验证结果（2026-07-27，T-021）
 
@@ -84,10 +98,14 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 正在进行
 
-（暂无。T-021 与 T-022 均已提交完毕；剩余的 T-023 见 `docs/TASKS.md` 待办。）
+（暂无。T-021 ~ T-023 均已提交完毕；backlog 已全部收口。）
 
 ## 最近完成
 
+- **T-023 有机拼装实验室 3D 补间动画与视觉收尾**（2026-07-28 完成，提交 `f42f076` / `4d698ed`）
+  - **接手修正**：TASKS 待办描述与代码不符——7 个子项中 4 个半已随 T-021 的 `e8169cb` 落地（原子入场缩放+位置补间、双/三键偏移面旋向相机、toast 退出延迟卸载、浮层错峰入场、自定义确认弹窗与配套测试）。先 git 考古核实，再只做缺失部分（教训与 T-022 同款：接手先核对代码，别只信 TASKS）。
+  - **本轮新做**：3D 补间遵守 `prefers-reduced-motion`（R3F 不吃 motion.css 的 CSS 兜底，需 JS 显式退化）；删除退场残影（原子缩没、键并拢变细，~200ms 后卸载，不用透明材质防排序伪影，撤销即清残影）；键跟随补间（共享 `animatedPositions` 表，原子 useFrame 优先级 -1 先写、键默认 0 后读，圆柱改单位长度 + scale.y，修掉吸附/撤销后键与原子约 200ms 脱开）；键角弧淡入淡出（`AngleArc` 加默认 1 的可选 `opacity`，其他 3 个调用点零变化）；信息面板键角/官能团区块 grid-rows 高度过渡（收拢保留旧内容、退场后才卸载保住 `toHaveCount(0)` 断言、间距移入收拢内容防双倍空隙）；分子式显示层统一下标（新增 `formatFormulaSubscripts`，`getFormula` 保持 ASCII，8 处浏览器测试期望同步更新）。
+  - build / lint 通过；`test:logic` 82 → **83 通过**；chrome 通道拼装页无截图用例 **10 / 10 通过**。Darwin 视觉回归未运行；`organic-builder-ethylene` / `organic-builder-mobile-info` 两张快照将因分子式下标在 macOS 漂移，待 macOS 审核。详见 D-021。
 - **T-021 有机拼装实验室教学正确性与交互修复**（2026-07-27 完成，2026-07-28 提交 `d6ea076` / `c940c33` / `45485b8` / `e8169cb`）
   - 三路只读审查（主 Agent 查 UI/交互/动画，两个子 Agent 查化学状态逻辑与命名键角逻辑），P0 结论全部逐行核对源码后才动手。
   - 修掉 **7 项会向学生展示错误化学事实的硬伤**：O 中心弯折角实际 75° 却标注 104.5°（方向向量分量写反）；CO₂ 型双双键碳摆成 120° V 形却标 180° 直线形（只判断有无双键、不数个数）；不饱和醇/酮/胺的中文名丢失"烯/炔"（丙烯醇显示为"丙-1-醇"，即另一种真实分子，而英文正确）；不饱和多元醛中英文都命名为饱和二醛；最长链解析失败时静默降级给出违反"最长碳链"规则的名称；羧基同时误报"羰基+羟基"、苯（凯库勒式）误报"碳碳双键"；三/四元环中心键角标 109.5°（环丙烷真实约 60°）。
@@ -95,7 +113,7 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
   - 顺带：官能团补齐氰基/醚键/酯基（自带 –C≡N 片段此前接上后面板空白）、HCl 不再报"卤代结构"、甲苯进入教学词典、NH₃ 分子式不再显示 "H3N"、`isDirty` 加廉价短路避免每次渲染跑指数级图同构、`shadow-overlay`/`accent-dark` token 化并清理 3 个 CSS 中根本不存在的死类名。
   - build / lint 通过；`test:logic` 由 64 → **80 通过**（新增 16 项针对本次每一条修复的回归）。浏览器行为回归与 Darwin 视觉回归**未运行**。
   - 同批还落地了原 T-022 的前两项：10 个片段模板坐标按各自杂化重写并统一到 `getStylizedBondLength` 标尺（甲基 H–C–H 现为 109.5°，非此前记录的约 70°），`addFragment` 用新增的 `rotateVectorBetween` 把模板 `anchorDirection` 旋转对齐到真实母体方向，不再是纯平移。
-  - **未做**（已写入 TASKS）：T-023 3D 补间动画、双键圆柱朝向相机、确认弹窗统一、分子式排版统一。
+  - **未做**（当时写入 TASKS 的说法，后经 T-023 接手核对修正）：其中「双键圆柱朝向相机、确认弹窗统一、toast/错峰、原子入场补间」实际已随本批 `e8169cb` 落地，真正遗留的是删除退场、键角弧过渡、3D reduced-motion、面板高度过渡与分子式排版，均已由 T-023 完成（见 D-021）。
 - **T-022 有机拼装实验室键长标尺统一**（2026-07-28 完成，提交 `b06c653`）
   - 原 T-022 的前两项（模板坐标重写、片段旋转对齐）已随 T-021 批次落地，本次收尾第 3 项：拔下的原子吸附回去时不再无条件用样式化常数 0.92，而是沿用该分子的局部键长标尺。
   - 核对时发现范围比原记录（只提苯 C–H = 0.66）更广：四个种子的键长都各自偏离 `getStylizedBondLength` 标尺（乙烯 C–H = 1.09、乙炔 1.10、共面综合模型约 0.45），根因相同——拔下再吸附会明显长/短一截。
@@ -181,15 +199,12 @@ T-008 路由级 lazy 后，`index` 首屏主包从约 496 KB 降到约 209 KB（
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-当前待办见 `docs/TASKS.md`，按优先级：
+当前 `docs/TASKS.md` 待办为空：T-004、T-005、T-022、T-023 及引线标签系列 T-011~T-019 **已全部收口**。其他方向候选（均未立项，动手前先与用户确认）：
 
-1. **T-023 3D 补间动画与视觉 token 收尾**（体验与一致性，不涉及教学正确性）。
-
-更早的 backlog（T-004、T-005、T-022 及引线标签系列 T-011~T-019）**已全部收口**。其他方向候选（均未立项，动手前先与用户确认）：
-
-1. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
-2. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
-3. 正式部署配置（SPA history fallback）、根 README、Node `engines` 声明等待确认项。
+1. macOS 环境跑一次完整 Darwin 视觉回归：审核 T-023 预期内的 2 张拼装页快照漂移（`organic-builder-ethylene` / `organic-builder-mobile-info`，因分子式下标），并确认键圆柱单位长度化与全站动画 wrapper 无非预期布局漂移。
+2. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
+3. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
+4. 正式部署配置（SPA history fallback）、根 README、Node `engines` 声明等待确认项。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
