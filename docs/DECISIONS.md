@@ -257,3 +257,14 @@
   - 命令、路径、产品边界和测试说明保留为 Markdown；SVG 只承担身份、层级和空间结构示意，图片失效时 README 仍可理解和使用。
 - **理由**：公开仓库首页首先需要让学生、教师和开发者看懂“这是做什么的”并看到真实成果。项目原生几何比模板化 banner 更可信；把易变命令和范围写在 Markdown 中，也比写死在图片里更易维护。
 - **验证**：skill 自带 README audit 通过；4 个本地图片引用与 SVG 基础结构有效；hero 用系统 Chrome 在 900px / 360px 两种 GitHub 宽度渲染，无裁切；全部本地链接存在。
+
+## D-024 仓库采用标准 MIT License，版权持有人使用 GitHub 仓库所有者名称（T-026）
+
+- **日期**：2026-07-29（Codex）
+- **提交**：`84a504e docs: license project under MIT`
+- **决定**：
+  - 根 `LICENSE` 使用 SPDX 标识 `MIT` 的标准许可证文本，仅把可替换版权行填写为 `Copyright (c) 2026 A7m0spHere`。
+  - README 使用静态 MIT 徽章并链接到本地 `./LICENSE`；正文只提示保留版权与许可声明，不添加超出许可证文本的额外限制。
+  - 不改 `frontend/`、`backend/`、`video/` 的 `private` package metadata，也不为许可证任务触碰各自 lockfile。
+- **理由**：用户已明确选择 MIT。仓库所有者名称是当前可核实、可公开对应的版权主体标识；根许可证足以声明整个仓库的默认授权范围，子项目 metadata 可在未来发布 npm package 时再单独规划。
+- **验证**：许可证标题、版权行、授权条款与免责声明完整，无占位符；README 的 MIT 徽章唯一且本地许可证链接有效；`git diff --check` 通过。

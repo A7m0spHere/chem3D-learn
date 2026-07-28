@@ -10,6 +10,35 @@
 - **Agent**：Codex
 - **日期**：2026-07-29
 - **分支**：`main`
+- **任务**：T-026 采用 MIT License 并同步 README。
+- **提交**：`84a504e docs: license project under MIT`
+
+### 本轮做的事
+
+1. 新增根 `LICENSE`，使用 SPDX `MIT` 标准文本，版权行为 `Copyright (c) 2026 A7m0spHere`。
+2. README 徽章区新增链接到 `./LICENSE` 的 MIT badge；许可证段落改为 MIT 授权与保留声明提示。
+3. 保持 `frontend/`、`backend/`、`video/` 的 package metadata 与 lockfile 不变。
+
+### 验证结果
+
+- MIT 标题、版权行、授权条款、`AS IS` 免责声明完整，无占位符。
+- README MIT 徽章仅 1 处，许可证及其余本地资源 / 文档链接全部存在。
+- `git diff --check` 通过。
+- 仅修改许可证与文档，未运行 `npm run build`。
+
+### 已知限制与建议
+
+- README 仍没有在线演示入口，因为仓库尚未配置正式部署与 SPA history fallback；许可证事项已收口。
+
+---
+
+## 往期
+
+### 2026-07-29 Codex：T-025 创建公开仓库根 README 与项目原生视觉资产
+
+- **Agent**：Codex
+- **日期**：2026-07-29
+- **分支**：`main`
 - **任务**：T-025 创建公开仓库根 README 与项目原生视觉资产。
 - **提交**：`5350ef2 docs: add project readme and visual showcase`
 
@@ -31,10 +60,6 @@
 
 - 仓库尚无正式部署配置，README 因此没有在线演示按钮；部署后再补正式 URL 与 SPA fallback 说明。
 - 当前没有 `LICENSE` 文件。若维护者希望接受外部贡献或授权复用，下一任务应先选定并添加许可证，再更新 README 徽章和许可证段落。
-
----
-
-## 往期
 
 ### 2026-07-28 Codex：T-024 修复生产首页提前加载 3D 依赖
 

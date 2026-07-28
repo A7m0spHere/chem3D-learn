@@ -26,6 +26,20 @@
 
 ## 已完成
 
+### T-026 采用 MIT License 并同步 README
+
+- **完成**：2026-07-29（Codex）
+- **提交**：`84a504e docs: license project under MIT`
+- **内容**：
+  - 新增根 `LICENSE`，使用 SPDX `MIT` 标准文本；版权行为 `Copyright (c) 2026 A7m0spHere`。
+  - README 徽章区新增链接到 `./LICENSE` 的 MIT 徽章。
+  - README 许可证段落改为明确的 MIT 说明与保留版权 / 许可声明提示。
+- **验收**：
+  - [x] 标准文本包含标题、版权行、授权条款和免责声明，无占位符残留。
+  - [x] MIT 徽章唯一，许可证与 README 全部本地链接存在。
+  - [x] `git diff --check` 通过；未修改业务代码、依赖或 lockfile。
+  - [x] 本任务为许可证与文档修改，按规则未运行前端 build。
+
 ### T-025 创建公开仓库根 README 与项目原生视觉资产
 
 - **完成**：2026-07-29（Codex）

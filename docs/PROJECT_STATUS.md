@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Codex，T-025 创建根 README 与项目原生视觉资产）
+> 最后更新：2026-07-29（Codex，T-026 采用 MIT License）
 
 ## 一句话定位
 
@@ -26,6 +26,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
+- **T-026 已提交**（2026-07-29，`84a504e`）：新增根 `LICENSE`，采用 SPDX 标识为 `MIT` 的标准许可证文本，版权行为 `Copyright (c) 2026 A7m0spHere`；README 新增链接到 `./LICENSE` 的 MIT 徽章，并把许可证段落改为明确的 MIT 说明。未修改任何子项目依赖或 package metadata。
+
 - **T-025 已提交**（2026-07-29，`5350ef2`）：新增根 `README.md`、`assets/readme/hero.svg` 与基于当前前端重新采集的 `assets/readme/organic-builder.png`。README 以真实界面截图开场，覆盖核心能力、快速开始、技术栈、项目结构、验证命令、产品边界与许可证现状；没有虚构在线演示、CI 状态或开源许可证。技能审计通过，SVG 已按 900px / 360px GitHub 宽度渲染目检。
 
 - **T-024 已提交**（2026-07-28，`f151bfb`）：删除会吸收共享 React 运行时的对象式 `manualChunks`，生产首页不再静态下载 `r3f/three`；新增真实 `vite preview` 的无截图回归入口 `npm run test:production`。首页冷启动 gzip JS 349.10 → 114.66 KB，受限配置中位 2825 → 1491 ms。大 chunk 警告仍存在，但已移到按需的 `ThreeViewerFrame`，详见 D-022。
@@ -48,6 +50,13 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-29，T-026）
+
+- MIT 文本结构检查：标题、版权行、授权条款与 `AS IS` 免责声明均存在，且没有遗留 `<year>` / `<copyright holders>` 占位符。
+- README 链接检查：MIT 徽章仅 1 处，`./LICENSE` 及其余 10 个本地资源 / 文档引用全部存在；旧“尚未包含 LICENSE”文案已清除。
+- `git diff --check`：通过。
+- 本任务仅改许可证、README 与治理文档，未改前端源码，因此按仓库规则未运行 `npm run build`。
 
 ## 独立验证结果（2026-07-29，T-025）
 
@@ -124,6 +133,10 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 最近完成
 
+- **T-026 采用 MIT License 并同步 README**（2026-07-29 完成，提交 `84a504e`）
+  - 以 SPDX `MIT` 标准文本新增根许可证，版权持有人使用仓库所有者 `A7m0spHere`。
+  - README 技术徽章区新增 MIT badge，并链接到仓库内 `LICENSE`；许可证段落改为明确的授权与保留声明提示。
+  - 未修改 `frontend/`、`backend/`、`video/` 的 package metadata，避免为私有子 package 改写 lockfile。详见 D-024。
 - **T-025 根 README 与项目原生视觉资产**（2026-07-29 完成，提交 `5350ef2`）
   - 采用 README mode 重建仓库首页：首屏使用从 CH₄ 正四面体、109.5° 键角和“观察—切换—讲解”学习流程提炼的静态 SVG hero，紧接首页、NH₃ 学习页与当前有机拼装页真实截图。
   - README 提供功能范围、快速开始、技术栈、数据流、目录结构、测试命令、产品边界、参与入口与许可证现状；明确前端无需后端即可运行，`frontend/` 与 `video/` 依赖树隔离。
