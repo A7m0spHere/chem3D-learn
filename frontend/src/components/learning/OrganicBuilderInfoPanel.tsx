@@ -1,4 +1,6 @@
 import { AlertCircle, CheckCircle2, FlaskConical, Info, Network, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { formatFormulaSubscripts } from "@/lib/organicBuilderChemistry";
 import type { OrganicSystematicNameResult } from "@/lib/organicBuilderNomenclature";
 import type {
   BuilderBondAngleMatch,
@@ -40,25 +42,34 @@ export function OrganicBuilderInfoPanel({
     ? systematicName.reasonZh
     : "完成价态并连接为一个整体后，系统会先匹配教学词典，再按本地规则生成名称。";
   const angleGroups = groupBondAngleMatches(bondAngles);
+  // 折叠退场期间继续渲染最后一份非空内容，让区块"带着内容收拢"而不是先清空再塌陷。
+  const lastAngleGroupsRef = useRef(angleGroups);
+  const lastFunctionalGroupsRef = useRef(functionalGroups);
+  useEffect(() => {
+    if (angleGroups.length > 0) lastAngleGroupsRef.current = angleGroups;
+    if (functionalGroups.length > 0) lastFunctionalGroupsRef.current = functionalGroups;
+  });
+  const displayAngleGroups = angleGroups.length > 0 ? angleGroups : lastAngleGroupsRef.current;
+  const displayFunctionalGroups = functionalGroups.length > 0 ? functionalGroups : lastFunctionalGroupsRef.current;
 
   return (
-    <aside className="space-y-4" data-testid="organic-builder-info">
+    <aside data-testid="organic-builder-info">
       <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-overlay backdrop-blur-xl">
         <div className="flex items-center gap-2 text-primary-dark">
           <FlaskConical className="h-5 w-5" />
           <h2 className="font-bold">结构信息</h2>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <InfoCell label="分子式" value={formula || "—"} testId="builder-formula" />
+          <InfoCell label="分子式" value={formula ? formatFormulaSubscripts(formula) : "—"} testId="builder-formula" />
           <InfoCell label="相对分子质量" value={relativeMass > 0 ? relativeMass.toFixed(3) : "—"} />
           <InfoCell label="独立片段" value={String(validation.fragmentCount)} />
           <InfoCell label="价态完成度" value={`${progress}%`} />
         </div>
       </section>
 
-      {angleGroups.length > 0 ? (
+      <CollapsibleSection open={angleGroups.length > 0}>
         <section
-          className="motion-fade-in rounded-2xl border border-accent/30 bg-white/92 p-5 shadow-overlay backdrop-blur-xl"
+          className="rounded-2xl border border-accent/30 bg-white/92 p-5 shadow-overlay backdrop-blur-xl"
           data-testid="builder-bond-angle-matches"
         >
           <div className="flex items-center justify-between gap-3">
@@ -69,7 +80,7 @@ export function OrganicBuilderInfoPanel({
             <span className="rounded-full bg-accent/15 px-2.5 py-1 text-xs font-bold text-accent-dark">结构完整</span>
           </div>
           <div className="mt-4 space-y-2.5">
-            {angleGroups.map((group) => (
+            {displayAngleGroups.map((group) => (
               <div
                 className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2.5"
                 key={group.key}
@@ -88,9 +99,9 @@ export function OrganicBuilderInfoPanel({
             依据局部连接、键级和中性价态匹配典型教学值；不是对当前坐标进行量化计算得到的实测键角。
           </p>
         </section>
-      ) : null}
+      </CollapsibleSection>
 
-      <section className={`rounded-2xl border p-5 shadow-overlay backdrop-blur-xl ${hasResolvedName ? "border-primary/30 bg-primary/10" : "border-white/80 bg-white/90"}`}>
+      <section className={`mt-4 rounded-2xl border p-5 shadow-overlay backdrop-blur-xl ${hasResolvedName ? "border-primary/30 bg-primary/10" : "border-white/80 bg-white/90"}`}>
         <div className="flex items-start gap-3">
           {knownMolecule ? (
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -163,7 +174,7 @@ export function OrganicBuilderInfoPanel({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-overlay backdrop-blur-xl">
+      <section className="mt-4 rounded-2xl border border-white/80 bg-white/90 p-5 shadow-overlay backdrop-blur-xl">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Network className="h-5 w-5 text-primary-dark" />
@@ -193,20 +204,20 @@ export function OrganicBuilderInfoPanel({
         </div>
       </section>
 
-      {functionalGroups.length > 0 ? (
-        <section className="motion-fade-in rounded-2xl border border-white/80 bg-white/90 p-5 shadow-overlay backdrop-blur-xl">
+      <CollapsibleSection open={functionalGroups.length > 0}>
+        <section className="rounded-2xl border border-white/80 bg-white/90 p-5 shadow-overlay backdrop-blur-xl">
           <h2 className="font-bold text-text-primary">识别到的结构片段</h2>
           <div className="mt-3 flex flex-wrap gap-2">
-            {functionalGroups.map((group) => (
+            {displayFunctionalGroups.map((group) => (
               <span className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-xs font-semibold text-primary-dark" key={group}>
                 {group}
               </span>
             ))}
           </div>
         </section>
-      ) : null}
+      </CollapsibleSection>
 
-      <section className="rounded-2xl border border-white/80 bg-white/80 p-4 text-sm leading-6 text-text-secondary shadow-lg backdrop-blur-xl">
+      <section className="mt-4 rounded-2xl border border-white/80 bg-white/80 p-4 text-sm leading-6 text-text-secondary shadow-lg backdrop-blur-xl">
         <div className="flex items-start gap-2">
           <Info className="mt-1 h-4 w-4 shrink-0" />
           <p>{seedNoteZh ?? "这里的键长、键角和自动排布用于建立空间直觉，不代表量化计算得到的最低能量构象。"}</p>
@@ -250,6 +261,52 @@ function InfoCell({ label, value, testId }: { label: string; value: string; test
     <div className="rounded-xl border border-border bg-background px-3 py-2.5">
       <div className="text-xs text-text-secondary">{label}</div>
       <div className="mt-0.5 font-bold text-text-primary" data-testid={testId}>{value}</div>
+    </div>
+  );
+}
+
+type CollapsePhase = "closed" | "enter" | "open" | "exit";
+
+// 条件区块的高度过渡（grid-rows 0fr↔1fr + 透明度）：
+// 出现时从 0 平滑展开，消失时先收拢、动画结束后才真正卸载——
+// 浏览器测试对 `toHaveCount(0)` 的既有断言在自动重试内仍然成立。
+// 首次挂载即打开时不播动画，避免与整页浮层入场叠加；
+// prefers-reduced-motion 由 motion.css 全局把 transition 压到 0.01ms 兜底。
+// 区块间距（pt-4）放在收拢内容内部，折叠后不会留下双倍空隙。
+function CollapsibleSection({ children, open }: { children: React.ReactNode; open: boolean }) {
+  const [phase, setPhase] = useState<CollapsePhase>(open ? "open" : "closed");
+  useEffect(() => {
+    setPhase((current) => {
+      if (open) {
+        if (current === "closed") return "enter";
+        if (current === "exit") return "open";
+        return current;
+      }
+      return current === "open" || current === "enter" ? "exit" : current;
+    });
+  }, [open]);
+  useEffect(() => {
+    if (phase === "enter") {
+      const frame = window.requestAnimationFrame(() => setPhase("open"));
+      return () => window.cancelAnimationFrame(frame);
+    }
+    if (phase === "exit") {
+      const timer = window.setTimeout(() => setPhase("closed"), 340);
+      return () => window.clearTimeout(timer);
+    }
+  }, [phase]);
+  if (phase === "closed") return null;
+  const expanded = phase === "open";
+  return (
+    <div
+      aria-hidden={!open}
+      className={`grid transition-[grid-template-rows] duration-300 ease-out-soft ${expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+    >
+      <div className="min-h-0 overflow-hidden">
+        <div className={`pt-4 transition-opacity duration-300 ease-out-soft ${expanded ? "opacity-100" : "opacity-0"}`}>
+          {children}
+        </div>
+      </div>
     </div>
   );
 }

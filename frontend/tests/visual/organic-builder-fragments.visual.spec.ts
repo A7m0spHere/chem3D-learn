@@ -31,7 +31,7 @@ test("新增片段按钮出现在工具箱且可拼接（乙烯基 → 丙-1-烯
   await toolbox.getByRole("button", { name: "–CH=CH₂" }).click();
   await page.getByRole("button", { name: "一键补氢" }).click();
 
-  await expect(page.getByTestId("builder-formula")).toHaveText("C3H6");
+  await expect(page.getByTestId("builder-formula")).toHaveText("C₃H₆");
   // 丙烯在 knownOrganicMolecules 词典中，命中精确识别走 builder-known-name 分支
   //（而非本地系统命名 builder-systematic-name）。
   await expect(page.getByTestId("builder-known-name")).toHaveText("丙烯");

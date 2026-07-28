@@ -9,6 +9,7 @@ import {
   autoFillHydrogens,
   detectFunctionalGroups,
   findKnownMolecule,
+  formatFormulaSubscripts,
   getFormula,
   getSuggestedPosition,
   knownOrganicMolecules,
@@ -400,6 +401,21 @@ test("从零拼装时键长仍使用样式化标尺", () => {
   state = builderHistoryReducer(state, { type: "add-atom", element: "H", order: 1, attachToId: carbonId });
   const hydrogenId = state.present.atoms.find((atom) => atom.element === "H")!.id;
   expect(measureBond(state.present, carbonId, hydrogenId)).toBeCloseTo(0.92, 2);
+});
+
+test("分子式显示层把 ASCII 数字转为 Unicode 下标", () => {
+  // T-023：getFormula 保持 "C2H4" 这类 ASCII 输出（词典与既有测试依赖），
+  // 界面显示统一经 formatFormulaSubscripts 转为与种子/模块目录一致的下标排版。
+  expect(formatFormulaSubscripts("C2H4")).toBe("C₂H₄");
+  expect(formatFormulaSubscripts("CH3NO")).toBe("CH₃NO");
+  expect(formatFormulaSubscripts("C6H4Cl2")).toBe("C₆H₄Cl₂");
+  // 多位数逐位替换，不吞并十位。
+  expect(formatFormulaSubscripts("C11H24")).toBe("C₁₁H₂₄");
+  // 没有数字的分子式原样返回；已是下标的输入不再有 ASCII 数字，重复调用结果不变。
+  expect(formatFormulaSubscripts("HCl")).toBe("HCl");
+  expect(formatFormulaSubscripts("C₂H₄")).toBe("C₂H₄");
+  // 与真实 getFormula 输出串联：乙烯种子 → "C2H4" → "C₂H₄"。
+  expect(formatFormulaSubscripts(getFormula(ethyleneBuilderSeed))).toBe("C₂H₄");
 });
 
 function measureBond(molecule: BuilderMolecule, firstId: string, secondId: string): number {

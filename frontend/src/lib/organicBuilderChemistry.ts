@@ -307,6 +307,27 @@ export function getFormula(molecule: BuilderMolecule): string {
     .join("");
 }
 
+const SUBSCRIPT_DIGITS: Record<string, string> = {
+  "0": "₀",
+  "1": "₁",
+  "2": "₂",
+  "3": "₃",
+  "4": "₄",
+  "5": "₅",
+  "6": "₆",
+  "7": "₇",
+  "8": "₈",
+  "9": "₉",
+};
+
+// 仅供显示层使用：把 getFormula 的 ASCII 输出（"C2H4"）转成教学材料通用的
+// Unicode 下标写法（"C₂H₄"），与种子/模块目录的 formula 字段排版统一。
+// getFormula 本身保持 ASCII，词典比较与既有逻辑测试不受影响；
+// 对已是下标的字符串无 ASCII 数字可替换，重复调用结果不变。
+export function formatFormulaSubscripts(formula: string): string {
+  return formula.replace(/\d/g, (digit) => SUBSCRIPT_DIGITS[digit] ?? digit);
+}
+
 export function getRelativeMolecularMass(molecule: BuilderMolecule): number {
   return Number(
     molecule.atoms

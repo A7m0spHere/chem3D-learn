@@ -17,7 +17,7 @@ async function dragFirstBuilderAtom(page: Page) {
 test("拼装实验室识别乙烯并支持从空白补成甲烷", async ({ page }) => {
   await page.goto("/lab/organic-builder/ethylene-planar");
   await expect(page.getByTestId("organic-builder-page")).toBeVisible();
-  await expect(page.getByTestId("builder-formula")).toHaveText("C2H4");
+  await expect(page.getByTestId("builder-formula")).toHaveText("C₂H₄");
   await expect(page.getByTestId("builder-known-name")).toHaveText("乙烯");
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("平面三角形 · sp²");
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("≈120°");
@@ -41,7 +41,7 @@ test("拼装实验室识别乙烯并支持从空白补成甲烷", async ({ page 
   await page.getByTestId("builder-add-c").click();
   await expect(page.getByTestId("builder-bond-angle-matches")).toHaveCount(0);
   await page.getByRole("button", { name: "一键补氢" }).click();
-  await expect(page.getByTestId("builder-formula")).toHaveText("CH4");
+  await expect(page.getByTestId("builder-formula")).toHaveText("CH₄");
   await expect(page.getByTestId("builder-known-name")).toHaveText("甲烷");
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("四面体 · sp³");
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("≈109.5°");
@@ -59,7 +59,7 @@ test("未收录的氯甲烷由本地规则生成双语系统名称", async ({ pa
   await page.getByTestId("builder-add-cl").click();
   await page.getByRole("button", { name: "一键补氢" }).click();
 
-  await expect(page.getByTestId("builder-formula")).toHaveText("CH3Cl");
+  await expect(page.getByTestId("builder-formula")).toHaveText("CH₃Cl");
   await expect(page.getByTestId("builder-systematic-name")).toHaveText("氯甲烷");
   await expect(page.getByTestId("organic-builder-info")).toContainText("chloromethane · 卤代烃");
   await expect(page.getByTestId("organic-builder-info")).toContainText("不包含 E/Z、R/S 等立体化学信息");
@@ -81,7 +81,7 @@ test("从空白模型拼出甲酰胺后同步显示名称、片段和酰胺氮�
   await page.getByTestId("builder-add-n").click();
   await page.getByRole("button", { name: "一键补氢" }).click();
 
-  await expect(page.getByTestId("builder-formula")).toHaveText("CH3NO");
+  await expect(page.getByTestId("builder-formula")).toHaveText("CH₃NO");
   await expect(page.getByTestId("builder-systematic-name")).toHaveText("甲酰胺");
   await expect(page.getByTestId("organic-builder-info")).toContainText("methanamide · 酰胺");
   await expect(page.getByTestId("organic-builder-info")).toContainText("酰胺基");
@@ -104,7 +104,7 @@ test("苯依次接入三个氯后生成单取代、邻位二取代及三取代�
   await carbonHandle.click({ force: true });
   await page.getByTestId("builder-add-cl").click();
 
-  await expect(page.getByTestId("builder-formula")).toHaveText("C6H5Cl");
+  await expect(page.getByTestId("builder-formula")).toHaveText("C₆H₅Cl");
   await expect(page.getByTestId("builder-systematic-name")).toHaveText("氯苯");
   await expect(page.getByTestId("organic-builder-info")).toContainText("chlorobenzene · 卤代芳烃");
 
@@ -113,7 +113,7 @@ test("苯依次接入三个氯后生成单取代、邻位二取代及三取代�
   await page.getByTestId("builder-atom-handle-c2").click({ force: true });
   await page.getByTestId("builder-add-cl").click();
 
-  await expect(page.getByTestId("builder-formula")).toHaveText("C6H4Cl2");
+  await expect(page.getByTestId("builder-formula")).toHaveText("C₆H₄Cl₂");
   await expect(page.getByTestId("builder-systematic-name")).toHaveText("1,2-二氯苯");
   await expect(page.getByTestId("organic-builder-info")).toContainText("1,2-dichlorobenzene · 卤代芳烃");
   await expect(page.getByTestId("builder-position-alias")).toContainText("邻位（1,2-） · ortho (o-)");
@@ -125,7 +125,7 @@ test("苯依次接入三个氯后生成单取代、邻位二取代及三取代�
   await page.getByTestId("builder-atom-handle-c3").click({ force: true });
   await page.getByTestId("builder-add-cl").click();
 
-  await expect(page.getByTestId("builder-formula")).toHaveText("C6H3Cl3");
+  await expect(page.getByTestId("builder-formula")).toHaveText("C₆H₃Cl₃");
   await expect(page.getByTestId("builder-systematic-name")).toHaveText("1,2,3-三氯苯");
   await expect(page.getByTestId("organic-builder-info")).toContainText("1,2,3-trichlorobenzene · 卤代芳烃");
   await expect(page.getByTestId("builder-position-alias")).toHaveCount(0);
