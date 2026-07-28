@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "check": "npm run build && npm run test:visual",
     "test:logic": "playwright test --config=playwright.logic.config.ts",
+    "test:production": "npm run build && playwright test --config=playwright.production.config.ts",
     "preview": "vite preview",
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots"

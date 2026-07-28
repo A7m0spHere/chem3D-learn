@@ -10,19 +10,9 @@ export default defineConfig({
     },
   },
   build: {
-    // 主包是单 chunk，无静态子 chunk 需预加载；关闭 modulePreload 避免 Vite
-    // 在每个页面都预加载 three/r3f（否则首页仍会下载 ~280KB，抵消代码分割收益）。
-    // three/r3f 改由进入 3D 模块或悬停预取时按需加载。
+    // 3D 页面通过路由 lazy 与显式预取按需加载。这里不再用对象式 manualChunks
+    // 强制拆 three/r3f，因为它会吸收共享 React 运行时，反而让首页静态依赖 3D vendor。
+    // 关闭 modulePreload，避免 Vite 为当前动态入口主动插入模块预加载。
     modulePreload: false,
-    rollupOptions: {
-      output: {
-        // 把重型 3D 依赖切成独立 vendor chunk，配合 React.lazy 让首页/考试页等
-        // 非 3D 页面不再下载 three.js 与 R3F。
-        manualChunks: {
-          three: ["three"],
-          r3f: ["@react-three/fiber", "@react-three/drei"],
-        },
-      },
-    },
   },
 });

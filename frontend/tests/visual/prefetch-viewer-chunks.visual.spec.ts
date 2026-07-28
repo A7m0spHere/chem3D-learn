@@ -3,17 +3,19 @@ import { expect, test } from "@playwright/test";
 // ---------------------------------------------------------------------------
 // T-006 回归：模块卡片按意图预取 3D 资源。
 //
-// 现状（T-008 之后）：three/r3f 是重型共享 vendor chunk，ModuleDetailPage 是
-// 独立页面 chunk（含 23 个分子 JSON）。两者都只应在用户"表现出进入 3D 模块的
-// 意图"时预取——hover/focus 模块卡，或在模块列表页空闲时——而不是在首页或
-// 列表页的初始渲染里下载。lib/prefetch.ts 的 `warmed` 单次守卫负责这一点。
+// 现状（T-024 之后）：Rollup 自动分包把 three/r3f 依赖图放入
+// ThreeViewerFrame chunk，ModuleDetailPage 是独立页面 chunk（含 23 个分子
+// JSON）。两者都只应在用户"表现出进入 3D 模块的意图"时预取——hover/focus
+// 模块卡，或在模块列表页空闲时——而不是在首页或列表页的初始渲染里下载。
+// lib/prefetch.ts 的 `warmed` 单次守卫负责这一点。
 //
 // 本文件用网络请求监听断言"何时下载了哪些 chunk"，只用 URL 断言，不含任何
 // toMatchSnapshot / toHaveScreenshot，因此不触碰 Darwin 视觉基线，可在 Windows
 // 系统 Chrome 通道运行。
 //
 // chunk 命名（vite 产物，带 hash）：
-//   - three-*.js / r3f-*.js       —— 重型 3D vendor
+//   - ThreeViewerFrame-*.js       —— 当前自动分包的重型 3D 依赖图
+//   - three-*.js / r3f-*.js       —— T-024 前对象式 manualChunks 的历史产物
 //   - ModuleDetailPage-*.js       —— lazy 页面 chunk
 //   - MoleculeViewer-*.js         —— 预取入口组件（拉起 three/r3f）
 // ---------------------------------------------------------------------------
@@ -30,9 +32,10 @@ function trackScriptRequests(page: import("@playwright/test").Page): string[] {
 }
 
 // dev（Vite）与 production 的 chunk URL 形态不同，两者都要能匹配：
-//   - three/r3f vendor：dev 是 /node_modules/.vite/deps/@react-three_fiber|drei.js
-//     （依赖预构建；three 本身作为传递依赖被打进这两个包），production 是
-//     /three-[hash].js 或 /r3f-[hash].js 产物 chunk。
+//   - 重型 3D 依赖：dev 是 /node_modules/.vite/deps/@react-three_fiber|drei.js
+//     （依赖预构建；three 本身作为传递依赖被打进这两个包），production 当前是
+//     /ThreeViewerFrame-[hash].js；同时保留历史 /three-* /r3f-* 匹配，以便对象式
+//     manualChunks 回归时立即变红。
 //   - ModuleDetailPage 页面 chunk：dev 是 /src/pages/ModuleDetailPage.tsx（可能带
 //     ?t= 时间戳），production 是 /ModuleDetailPage-[hash].js。
 //   - MoleculeViewer 预取入口：dev 是 /src/components/three/MoleculeViewer.tsx，
@@ -40,8 +43,8 @@ function trackScriptRequests(page: import("@playwright/test").Page): string[] {
 // 注意：不能用宽松的 /(three)/ 匹配——首页会静态加载 three/ 目录下的轻量占位组件
 // ModulePlaceholderViewer.tsx（不含 three.js/R3F），路径含 "three" 但不是 vendor，
 // 宽松匹配会把它误判成重型依赖而让"首页不下载 three"的断言假失败。
-const isThreeOrR3f = (url: string) =>
-  /\/(three|r3f)-[^/]+\.js(\?|$)/.test(url) ||
+const isHeavy3dChunk = (url: string) =>
+  /\/(ThreeViewerFrame|three|r3f)-[^/]+\.js(\?|$)/.test(url) ||
   /\/\.vite\/deps\/@react-three_(fiber|drei)\.js/.test(url);
 const isModuleDetailPage = (url: string) =>
   /\/ModuleDetailPage-[^/]+\.js(\?|$)/.test(url) || /\/pages\/ModuleDetailPage\.tsx/.test(url);
@@ -54,7 +57,7 @@ test.describe("T-006 模块卡片按意图预取 3D 资源", () => {
     await page.goto("/", { waitUntil: "networkidle" });
 
     // 首页是非 3D 页面：初始渲染不应下载任何重型 3D vendor 或模块详情页 chunk。
-    expect(scripts.some(isThreeOrR3f)).toBe(false);
+    expect(scripts.some(isHeavy3dChunk)).toBe(false);
     expect(scripts.some(isModuleDetailPage)).toBe(false);
   });
 
