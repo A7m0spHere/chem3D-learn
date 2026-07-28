@@ -8,6 +8,7 @@
   <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white">
   <img alt="React Three Fiber" src="https://img.shields.io/badge/React_Three_Fiber-3D-1F2933?style=flat-square&logo=threedotjs&logoColor=white">
   <img alt="Node.js 20 or newer" src="https://img.shields.io/badge/Node.js-%E2%89%A520-339933?style=flat-square&logo=nodedotjs&logoColor=white">
+  <a href="./LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-F4A261?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -162,4 +163,4 @@ npm test
 
 ## 许可证
 
-当前仓库尚未包含 `LICENSE` 文件。使用、修改或分发代码前，请先联系仓库维护者确认授权范围。
+本项目使用 [MIT License](./LICENSE)。使用、复制、修改或分发代码时，请保留许可证中的版权与许可声明。
