@@ -268,3 +268,16 @@
   - 不改 `frontend/`、`backend/`、`video/` 的 `private` package metadata，也不为许可证任务触碰各自 lockfile。
 - **理由**：用户已明确选择 MIT。仓库所有者名称是当前可核实、可公开对应的版权主体标识；根许可证足以声明整个仓库的默认授权范围，子项目 metadata 可在未来发布 npm package 时再单独规划。
 - **验证**：许可证标题、版权行、授权条款与免责声明完整，无占位符；README 的 MIT 徽章唯一且本地许可证链接有效；`git diff --check` 通过。
+
+## D-025 正式公开部署采用 GitHub Pages；Vite base、Router basename 与 404 路由恢复分层处理（T-027）
+
+- **日期**：2026-07-29（Codex）
+- **提交**：`6ada065` / `f31a6e3` / `67f5f94`
+- **决定**：
+  - 正式公开地址采用 `https://a7m0sphere.github.io/chem3D-learn/`，由 GitHub Actions 从 `main` 构建并发布 `frontend/dist`。
+  - Pages 构建单独执行 `vite build --base=/chem3D-learn/`；普通 `npm run build` 与 Sites 构建继续使用 `/`，避免为了单一平台破坏本地开发或根域部署。
+  - `index.html` 用 `<base href="%BASE_URL%">` 暴露当前构建基路径，`router.tsx` 从 `document.baseURI` 派生 React Router basename；不把 GitHub 仓库名硬编码进业务路由。
+  - GitHub Pages 无服务端 rewrite，使用 `public/404.html` 把未知路径编码进 `__spa` 查询参数跳到站点根页，入口脚本再用 `history.replaceState` 恢复原始路径。新增产物测试锁定资源基路径、fallback 与社交图。
+  - README 和分享元信息只指向可匿名访问的 GitHub Pages 地址。最初创建的 Sites 项目与 Worker 仍保留为根路径部署兼容方案，但工作区策略禁止公开 Sites，不能作为公开体验入口。
+- **理由**：公开仓库需要无需登录即可打开的体验地址。Sites 版本 2 已部署成功，但匿名请求被访问策略拦截为 401，且将站点切换为 public 时平台明确返回“Publishing Sites to the internet is not enabled for this workspace”。GitHub Pages 对公开仓库可用，并能通过官方 Actions artifact 流程持续发布；分开 base / basename / fallback 三层后，部署差异不会渗进教学页面。
+- **验证与边界**：Pages 产物测试 3 / 3、Sites fallback 3 / 3、logic 83 / 83、production prefetch 3 / 3、lint 通过；Actions run `30400567495` build / deploy 成功。真实 Chrome 直达首页、Modules、NH₃、乙烯拼装和考试专题深层路径均渲染正确且无页面错误。受 GitHub Pages 能力限制，深层 URL 的首个原始 HTTP 响应仍是 404，随后由 JavaScript 跳转并恢复路径；如需服务器原生 200 rewrite 或更强 SEO，应改用支持 rewrite 的公开托管。

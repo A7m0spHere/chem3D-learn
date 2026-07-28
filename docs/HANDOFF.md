@@ -10,29 +10,41 @@
 - **Agent**：Codex
 - **日期**：2026-07-29
 - **分支**：`main`
-- **任务**：T-026 采用 MIT License 并同步 README。
-- **提交**：`84a504e docs: license project under MIT`
+- **任务**：T-027 正式部署、SPA history fallback 与 README 在线入口。
+- **提交**：`6ada065 feat(deploy): add Sites hosting with SPA fallback`、`f31a6e3 docs(deploy): link production site`、`67f5f94 feat(deploy): publish frontend with GitHub Pages`
 
 ### 本轮做的事
 
-1. 新增根 `LICENSE`，使用 SPDX `MIT` 标准文本，版权行为 `Copyright (c) 2026 A7m0spHere`。
-2. README 徽章区新增链接到 `./LICENSE` 的 MIT badge；许可证段落改为 MIT 授权与保留声明提示。
-3. 保持 `frontend/`、`backend/`、`video/` 的 package metadata 与 lockfile 不变。
+1. 新增 GitHub Pages Actions 发布流：Node 20 + `npm ci` + `npm run test:pages` + artifact deploy；首次 run `30400567495` 的 build / deploy 均成功。
+2. Pages 构建使用 `/chem3D-learn/` base；入口 `<base href="%BASE_URL%">` 与 `document.baseURI` 让 React Router 自动选择 `/` 或仓库子路径 basename。
+3. 新增 `public/404.html`：把直接访问的深层路径编码到 `__spa` 后跳到根页，入口脚本用 `history.replaceState` 恢复原始 URL。
+4. README 增加在线体验徽章、导航和正文入口；`index.html` 补 canonical、Open Graph / Twitter 大图；新增 `frontend/public/og.png`。
+5. Sites Worker / 构建整理 / 3 项 fallback 测试作为根路径部署兼容方案保留。Sites 版本 2 发布成功，但工作区禁止 public，故正式公开地址改用 GitHub Pages。
 
 ### 验证结果
 
-- MIT 标题、版权行、授权条款、`AS IS` 免责声明完整，无占位符。
-- README MIT 徽章仅 1 处，许可证及其余本地资源 / 文档链接全部存在。
-- `git diff --check` 通过。
-- 仅修改许可证与文档，未运行 `npm run build`。
+- `npm run test:pages` **3 / 3**；`npm run test:sites` **3 / 3**；`npm run lint` 通过。
+- `npm run test:logic` **83 / 83**；系统 Chrome 下 `npm run test:production` **3 / 3**。
+- Actions run `30400567495` build / deploy 均成功。
+- 系统 Chrome 直接访问首页、Modules、NH₃、乙烯拼装和晶胞均摊考试专题，均保持深层 URL、H1 正确、无 `pageerror`。
+- 线上 `og.png` 返回 200 / `image/png` / 1,434,334 bytes。
 
 ### 已知限制与建议
 
-- README 仍没有在线演示入口，因为仓库尚未配置正式部署与 SPA history fallback；许可证事项已收口。
+- 正式公开地址：`https://a7m0sphere.github.io/chem3D-learn/`。
+- GitHub Pages 的深层路径首个原始 HTTP 响应仍是 404，JavaScript 随后跳转并恢复原路径；浏览器体验已验证可用。若将来要求服务端原生 200 rewrite / 更强 SEO，迁移到支持 rewrite 的公开托管。
+- 尚未配置自定义域名；完整 Darwin 视觉回归未运行、未更新任何快照。
+- `ThreeViewerFrame` 仍有 845.42 KB / gzip 227.97 KB 的既有非阻断警告。
 
 ---
 
 ## 往期
+
+### 2026-07-29 Codex：T-026 采用 MIT License 并同步 README
+
+- 新增根 `LICENSE`，使用标准 MIT 文本与 `Copyright (c) 2026 A7m0spHere`。
+- README 新增链接到许可证的 MIT 徽章与明确许可证段落；未修改子项目 package metadata 或 lockfile。
+- 提交：`84a504e docs: license project under MIT`。
 
 ### 2026-07-29 Codex：T-025 创建公开仓库根 README 与项目原生视觉资产
 

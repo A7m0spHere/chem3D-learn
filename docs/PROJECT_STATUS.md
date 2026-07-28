@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Codex，T-026 采用 MIT License）
+> 最后更新：2026-07-29（Codex，T-027 正式部署与 SPA history fallback）
 
 ## 一句话定位
 
@@ -25,6 +25,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
 ## 当前工作区状态（重要）
+
+- **T-027 已部署并推送**（2026-07-29，`6ada065` / `f31a6e3` / `67f5f94`）：正式公开站点为 `https://a7m0sphere.github.io/chem3D-learn/`。GitHub Pages 已设为 Actions 发布源，`deploy-pages.yml` 在 `main` 变化后安装前端依赖、运行 Pages 专用构建与 3 项产物测试，再发布 `frontend/dist`；首次 run `30400567495` 的 build / deploy 均成功。Vite 用 `/chem3D-learn/` 子路径构建，React Router 从 `%BASE_URL%` 生成的 `<base>` 读取 basename，`404.html` 负责保留并恢复直接访问的深层路由。README 已加入在线体验入口，`index.html` 已补 canonical、Open Graph / Twitter 元信息，社交图为 `frontend/public/og.png`。
 
 - **T-026 已提交**（2026-07-29，`84a504e`）：新增根 `LICENSE`，采用 SPDX 标识为 `MIT` 的标准许可证文本，版权行为 `Copyright (c) 2026 A7m0spHere`；README 新增链接到 `./LICENSE` 的 MIT 徽章，并把许可证段落改为明确的 MIT 说明。未修改任何子项目依赖或 package metadata。
 
@@ -50,6 +52,16 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-29，T-027）
+
+- `frontend npm run test:pages`：**3 / 3 通过**；验证 `/chem3D-learn/` 资源基路径、SPA `404.html` 路由恢复脚本和社交预览 PNG 已进入 Pages 产物。
+- `frontend npm run test:sites`：**3 / 3 通过**；根路径 Worker 继续覆盖导航 fallback、静态资源直出和真实 404。
+- `frontend npm run lint`：**通过**；`frontend npm run test:logic`：**83 / 83 通过**。
+- 设置 `$env:PLAYWRIGHT_CHANNEL='chrome'` 后运行 `npm run test:production`：**3 / 3 通过**。
+- GitHub Actions run `30400567495`：build / deploy 均成功；真实系统 Chrome 直接访问首页、Modules、NH₃、乙烯拼装与晶胞均摊考试专题深层 URL，最终地址保持原路径、页面标题与 H1 正确、`pageerror` 为 0。
+- 线上 `og.png`：HTTP 200、`image/png`、1,434,334 bytes。
+- 保留既有 `ThreeViewerFrame` 845.42 KB / gzip 227.97 KB 非阻断警告；未运行或更新 Darwin 截图基线。
 
 ## 独立验证结果（2026-07-29，T-026）
 
@@ -133,6 +145,10 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 最近完成
 
+- **T-027 正式部署、SPA history fallback 与 README 在线入口**（2026-07-29 完成，提交 `6ada065` / `f31a6e3` / `67f5f94`）
+  - GitHub Pages 作为正式公开托管；Actions 对 `main` 的前端变更自动执行 Pages 专用构建、产物契约测试与发布。
+  - Vite 资源基路径、React Router basename 与 GitHub Pages 404 路由恢复协同工作；本地 / Sites 根路径构建保持 `/`。
+  - README、canonical、Open Graph / Twitter 图片全部指向公开站点；新增项目原生社交预览图。详见 D-025。
 - **T-026 采用 MIT License 并同步 README**（2026-07-29 完成，提交 `84a504e`）
   - 以 SPDX `MIT` 标准文本新增根许可证，版权持有人使用仓库所有者 `A7m0spHere`。
   - README 技术徽章区新增 MIT badge，并链接到仓库内 `LICENSE`；许可证段落改为明确的授权与保留声明提示。
@@ -248,7 +264,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 2. macOS 环境跑一次完整 Darwin 视觉回归：审核 T-023 预期内的 2 张拼装页快照漂移（`organic-builder-ethylene` / `organic-builder-mobile-info`，因分子式下标），并确认键圆柱单位长度化与全站动画 wrapper 无非预期布局漂移。
 3. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）。
 4. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
-5. 正式部署配置（SPA history fallback）与前端 / 视频 Node `engines` 声明等待确认项。
+5. 前端 / 视频 Node `engines` 声明仍待确认；正式部署与 SPA history fallback 已由 T-027 收口。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
@@ -262,7 +278,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 - React Error Boundary 只能捕获后代组件的渲染、构造和生命周期错误；不能覆盖事件处理、普通异步回调、服务端渲染、边界自身错误，以及所有 R3F 动画帧故障。
 - 23 个 JSON 通过 `as unknown as MoleculeRecord` 接入，绕过了静态结构核验，当前没有运行时 schema / 引用完整性测试。
 - `backend/src/molecules.js` 与前端 6 个核心 JSON 重复。T-005（commit `fd67aca`）已加防漂移契约测试：5 个 VSEPR 分子的结构核心逐字锁定，漂移即测试变红；教学文案与 nacl 简化胞的差异是**有意保留**的（见 `docs/BACKEND_DATA_SYNC.md`），未做构建期单源生成。
-- `createBrowserRouter` 的生产静态托管需要 SPA history fallback；当前仓库没有正式部署配置。
+- GitHub Pages 不提供可配置的服务端 history rewrite；当前 `404.html` 会在真实浏览器中保留原路径并跳转回 SPA，因此用户直达可用，但非 JavaScript 客户端看到的首个深层 URL HTTP 响应仍是 404。若未来需要所有深层 URL 原生返回 200 或更强 SEO，应改用支持服务器 rewrite 的公开托管。
 - 自动分包后的按需 `ThreeViewerFrame` chunk 约 845.42 KB（gzip 227.97 KB），仍触发 Vite large chunk 警告；首页已不下载它，但受限设备直接进入 CH₄ 的 Canvas 中位约 4.38 秒，略高于 4 秒目标。
 - 当前有两处显式化学待核实项：
   - `mockMolecules.ts` 的 BF₃ 缺电子表述。
@@ -273,4 +289,4 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 - `docs/ROADMAP.md` 的 v1.0 RC 计划与实际实现如何对应。
 - 前端与视频未声明 Node `engines`，最低支持版本待确认。
-- 正式部署平台、缓存策略和 SPA fallback 配置待确认。
+- GitHub Pages 已作为正式公开部署平台；自定义域名尚未配置。

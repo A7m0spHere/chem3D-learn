@@ -26,6 +26,23 @@
 
 ## 已完成
 
+### T-027 正式部署、SPA history fallback 与 README 在线入口
+
+- **完成**：2026-07-29（Codex）
+- **提交**：`6ada065 feat(deploy): add Sites hosting with SPA fallback`、`f31a6e3 docs(deploy): link production site`、`67f5f94 feat(deploy): publish frontend with GitHub Pages`
+- **内容**：
+  - 新增 GitHub Pages Actions 工作流；`main` 的前端变更会执行 `npm ci`、`npm run test:pages`、上传 `frontend/dist` 并发布。
+  - Pages 构建使用 `/chem3D-learn/` 资源基路径；React Router 从 `<base href="%BASE_URL%">` 读取 basename。
+  - 新增 `404.html` 深层路由保留 / 恢复脚本与 3 项 Pages 产物测试；同时保留并测试 Sites Worker 的根路径 history fallback。
+  - README 新增在线体验徽章、导航和正文入口；`index.html` 补 canonical、Open Graph / Twitter 元信息；新增 `frontend/public/og.png`。
+  - 正式公开地址：`https://a7m0sphere.github.io/chem3D-learn/`。
+- **验收**：
+  - [x] `npm run test:pages` **3 / 3**、`npm run test:sites` **3 / 3**、`npm run lint` 通过。
+  - [x] `npm run test:logic` **83 / 83**；系统 Chrome 下 `npm run test:production` **3 / 3**。
+  - [x] GitHub Actions run `30400567495` 的 build / deploy 均成功。
+  - [x] 系统 Chrome 直接打开首页与四类有效深层链接，地址恢复正确、页面渲染完成、无 `pageerror`。
+  - [x] 线上社交预览图返回 HTTP 200、`image/png`。
+
 ### T-026 采用 MIT License 并同步 README
 
 - **完成**：2026-07-29（Codex）
