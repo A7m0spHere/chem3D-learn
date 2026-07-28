@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="420" viewBox="0 0 1200 420"
+     role="img" aria-labelledby="title desc">
+  <title id="title">Chem3D Learn 结构化学 3D 学习站</title>
+  <desc id="desc">面向中国高中生与化学教师的交互式结构化学学习网站，通过可旋转的三维模型理解分子构型、晶体结构、化学键与有机立体结构。</desc>
+
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7FAF9"/>
+      <stop offset="1" stop-color="#EEF7F4"/>
+    </linearGradient>
+    <radialGradient id="carbon" cx="36%" cy="28%" r="72%">
+      <stop offset="0" stop-color="#4B5968"/>
+      <stop offset="0.58" stop-color="#1F2933"/>
+      <stop offset="1" stop-color="#111820"/>
+    </radialGradient>
+    <radialGradient id="hydrogen" cx="34%" cy="28%" r="72%">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.62" stop-color="#E8EFED"/>
+      <stop offset="1" stop-color="#C7D5D1"/>
+    </radialGradient>
+    <linearGradient id="bond" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#93AAA5"/>
+      <stop offset="1" stop-color="#64748B"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="1198" height="418" rx="28"
+        fill="url(#background)" stroke="#DDE7E4" stroke-width="2"/>
+
+  <g id="title-block" transform="translate(58 48)"
+     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <g id="category">
+      <rect width="326" height="34" rx="17" fill="#FFFFFF" stroke="#BFDCD6"/>
+      <circle cx="18" cy="17" r="5" fill="#2A9D8F"/>
+      <text x="32" y="23" fill="#1F6F68" font-size="17" font-weight="700"
+            letter-spacing="1">STRUCTURAL CHEMISTRY · 3D</text>
+    </g>
+
+    <text x="0" y="112" fill="#1F2933" font-size="66" font-weight="760"
+          letter-spacing="-1.5">Chem3D Learn</text>
+    <text x="0" y="169" fill="#2A9D8F" font-size="45" font-weight="760"
+          letter-spacing="0.5">结构化学 3D 学习站</text>
+    <rect x="0" y="188" width="302" height="5" rx="2.5" fill="#F4A261"/>
+
+    <text x="0" y="236" fill="#334155" font-size="23" font-weight="520">
+      <tspan x="0" dy="0">把抽象的空间结构变成可旋转、可观察、</tspan>
+      <tspan x="0" dy="34">可按步骤讲解的中文课堂学习体验。</tspan>
+    </text>
+
+    <g id="topics" transform="translate(0 316)" font-size="18" font-weight="650">
+      <g>
+        <rect width="112" height="38" rx="19" fill="#E1F2EE"/>
+        <text x="56" y="25" text-anchor="middle" fill="#1F6F68">分子构型</text>
+      </g>
+      <g transform="translate(124 0)">
+        <rect width="112" height="38" rx="19" fill="#FFFFFF" stroke="#DDE7E4"/>
+        <text x="56" y="25" text-anchor="middle" fill="#475569">晶体结构</text>
+      </g>
+      <g transform="translate(248 0)">
+        <rect width="112" height="38" rx="19" fill="#FFFFFF" stroke="#DDE7E4"/>
+        <text x="56" y="25" text-anchor="middle" fill="#475569">化学键</text>
+      </g>
+      <g transform="translate(372 0)">
+        <rect width="112" height="38" rx="19" fill="#FFFFFF" stroke="#DDE7E4"/>
+        <text x="56" y="25" text-anchor="middle" fill="#475569">有机立体</text>
+      </g>
+    </g>
+  </g>
+
+  <path d="M650 48V372" stroke="#D3E4E0" stroke-width="2"/>
+
+  <g id="molecule-proof" transform="translate(680 35)"
+     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <g id="proof-heading">
+      <text x="0" y="24" fill="#1F6F68" font-size="18" font-weight="750"
+            letter-spacing="1">可交互的教学模型</text>
+      <text x="450" y="24" text-anchor="end" fill="#64748B" font-size="16"
+            font-family="ui-monospace, SFMono-Regular, Menlo, monospace">CH₄ · VSEPR</text>
+    </g>
+
+    <g id="tetrahedral-model" transform="translate(32 38)">
+      <ellipse cx="226" cy="146" rx="190" ry="128" fill="none"
+               stroke="#BFDCD6" stroke-width="2" stroke-dasharray="7 9"/>
+      <path d="M224 145L105 65" stroke="url(#bond)" stroke-width="13"
+            stroke-linecap="round"/>
+      <path d="M224 145L344 53" stroke="url(#bond)" stroke-width="13"
+            stroke-linecap="round"/>
+      <path d="M224 145L378 205" stroke="url(#bond)" stroke-width="13"
+            stroke-linecap="round"/>
+      <path d="M224 145L102 242" stroke="url(#bond)" stroke-width="13"
+            stroke-linecap="round"/>
+
+      <path d="M160 102A80 80 0 0 0 158 198" fill="none"
+            stroke="#F4A261" stroke-width="5" stroke-linecap="round"/>
+      <rect x="72" y="137" width="76" height="34" rx="17" fill="#FFF5E9"
+            stroke="#F4A261"/>
+      <text x="110" y="160" text-anchor="middle" fill="#B76522"
+            font-size="18" font-weight="750">109.5°</text>
+
+      <g id="center-atom">
+        <circle cx="224" cy="145" r="45" fill="url(#carbon)"/>
+        <text x="224" y="154" text-anchor="middle" fill="#FFFFFF"
+              font-size="28" font-weight="800">C</text>
+      </g>
+      <g id="hydrogen-atoms" fill="url(#hydrogen)" stroke="#B8C9C5" stroke-width="2">
+        <circle cx="105" cy="65" r="28"/>
+        <circle cx="344" cy="53" r="28"/>
+        <circle cx="378" cy="205" r="28"/>
+        <circle cx="102" cy="242" r="28"/>
+      </g>
+      <g fill="#475569" font-size="18" font-weight="800" text-anchor="middle">
+        <text x="105" y="72">H</text>
+        <text x="344" y="60">H</text>
+        <text x="378" y="212">H</text>
+        <text x="102" y="249">H</text>
+      </g>
+
+      <g transform="translate(286 248)">
+        <rect width="150" height="38" rx="19" fill="#FFFFFF" stroke="#BFDCD6"/>
+        <path d="M20 19a9 9 0 1 0 4-7" fill="none" stroke="#2A9D8F"
+              stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M21 7l5 4-6 2" fill="none" stroke="#2A9D8F"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="88" y="25" text-anchor="middle" fill="#1F6F68"
+              font-size="17" font-weight="700">拖拽旋转观察</text>
+      </g>
+    </g>
+
+    <g id="interaction-metadata" transform="translate(0 330)"
+       font-size="17" font-weight="650">
+      <g>
+        <circle cx="10" cy="10" r="10" fill="#2A9D8F"/>
+        <text x="10" y="16" text-anchor="middle" fill="#FFFFFF" font-size="15">1</text>
+        <text x="29" y="16" fill="#334155">观察空间关系</text>
+      </g>
+      <g transform="translate(160 0)">
+        <circle cx="10" cy="10" r="10" fill="#2A9D8F"/>
+        <text x="10" y="16" text-anchor="middle" fill="#FFFFFF" font-size="15">2</text>
+        <text x="29" y="16" fill="#334155">切换键角与标签</text>
+      </g>
+      <g transform="translate(350 0)">
+        <circle cx="10" cy="10" r="10" fill="#F4A261"/>
+        <text x="10" y="16" text-anchor="middle" fill="#FFFFFF" font-size="15">3</text>
+        <text x="29" y="16" fill="#334155">跟随步骤讲解</text>
+      </g>
+    </g>
+  </g>
+</svg>
