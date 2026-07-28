@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:sites": "npm run build && node scripts/prepare-sites-build.mjs",
     "lint": "eslint .",
     "check": "npm run build && npm run test:visual",
     "test:logic": "playwright test --config=playwright.logic.config.ts",
     "test:production": "npm run build && playwright test --config=playwright.production.config.ts",
+    "test:sites": "npm run build:sites && node --test tests/deployment/sites-spa-fallback.test.mjs",
     "preview": "vite preview",
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots"
