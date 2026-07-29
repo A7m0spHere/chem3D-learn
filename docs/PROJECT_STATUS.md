@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Codex，T-030 v0.1.0-rc.1 发布候选）
+> 最后更新：2026-07-30（Codex，T-031 RC 反馈入口与分诊机制）
 
 ## 一句话定位
 
@@ -25,6 +25,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
 ## 当前工作区状态（重要）
+
+- **T-031 v0.1.0-rc.1 真实反馈收集与问题分级进行中**（2026-07-30）：已审计 GitHub Issues、默认标签、Issue config 与私密漏洞报告设置；审计时 Issues 为 0，不能据此推断 RC 已通过真实用户验证。仓库新增 Bug、化学内容、体验 / 可访问性三类 Issue Form，RC 试用指南、P0–P3 分级、`v0.1.0` / `rc.2` 门槛与只记录真实反馈的台账；README 和仓库内 Release Notes 增加入口。反馈入口建设已完成，真实用户反馈仍为 0，稳定版决策未开始；`v0.1.0-rc.1` tag 与已发布 GitHub Prerelease 保持不变。
 
 - **T-030 v0.1.0-rc.1 发布候选已完成**（2026-07-29）：仓库发布版本当前以前端主产品为准，`frontend` 已更新到 `0.1.0-rc.1`，backend / video 保持独立版本。新增 CHANGELOG、用户向 Release Notes、README RC 入口、发布候选 QA 清单和 D-032；发布准备提交经完整验证后快进进入 `main`，Pages、annotated tag `v0.1.0-rc.1` 与 GitHub prerelease 对应同一发布提交。发布门禁同时修复了 NaCl 教学 Canvas 尚未完成 R3F 事件连接时快速进入周期探索可能出现的 `connect(null)` 竞态；没有改晶体几何、教学语义或快照。
 
@@ -56,6 +58,14 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-30，T-031）
+
+- 开工 SHA、`main` 与 `origin/main` 均为 `8d3e16f4ccf696385ac6d40b7a253e303a1e63b0`；annotated tag `v0.1.0-rc.1` 解引用到同一提交，GitHub Release 仍是 Prerelease。
+- GitHub Issues 两次审计均为 **0**；已有默认标签外，新增并远端确认 `rc-feedback`、`chemistry`、`ux`、`accessibility`，没有创建示例 Issue。
+- Ruby YAML 解析通过；三份 Issue Form 分别有 11 / 10 / 11 个内容块，必需顶层字段存在，body 类型合法，字段 ID 唯一且包含 `rc-feedback`。
+- README 与 Release Notes 的本地反馈文档目标存在；`npm run build`、`npm run lint` 通过。构建保留既有按需 `ThreeViewerFrame` large chunk 非阻断警告。
+- 本任务没有改前端源码、3D、教学数据或快照，因此未运行视觉回归。已发布 GitHub Release body、tag 与版本号均未修改。
 
 ## 独立验证结果（2026-07-29，T-030）
 
@@ -339,7 +349,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-`v0.1.0-rc.1` 已作为 prerelease 发布。下一步只收集候选版本的浏览器兼容、教学表述与交互反馈；不得自动发布稳定版 `v0.1.0`，任何阻断问题应先单独复现、修复和重新验收。
+使用 `docs/RC_FEEDBACK.md` 邀请真实学生、教师和目标设备使用者试用 `v0.1.0-rc.1`，把实际反馈写入 `docs/RC_FEEDBACK_LOG.md` 并按 P0–P3 分诊。不得把“当前零 Issue”当作稳定版证据；不得自动发布 `v0.1.0` 或 `rc.2`。任何阻断问题应先单独复现、修复和重新验收。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。

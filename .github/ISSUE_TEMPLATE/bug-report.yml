@@ -1,0 +1,106 @@
+name: "Bug 报告"
+description: "报告 v0.1.0-rc.1 的页面、3D 画布、交互或浏览器兼容问题"
+title: "[Bug] "
+labels:
+  - "bug"
+  - "rc-feedback"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢试用 Chem3D Learn `v0.1.0-rc.1`。请不要在公开 Issue 中填写个人信息、学生信息、密钥或安全漏洞利用细节。
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: "测试版本"
+      description: "本表单用于当前 RC；若测试的是本地代码，请在下方填写提交 SHA。"
+      options:
+        - "线上 v0.1.0-rc.1"
+        - "本地 main"
+        - "其他本地分支或提交"
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: "页面或模块"
+      description: "填写页面 URL、路由或模块名称。"
+      placeholder: "例如：https://a7m0sphere.github.io/chem3D-learn/module/crystal-nacl"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "复现步骤"
+      description: "从打开页面开始，逐步写出稳定复现问题的操作。"
+      placeholder: |
+        1. 打开……
+        2. 点击……
+        3. 切换……
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "实际结果"
+      description: "说明看到了什么；若偶发，请写明大致频率。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "预期结果"
+      description: "说明你认为正确、可用的表现。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "设备与浏览器"
+      description: "请提供操作系统、设备类型、浏览器名称与版本、屏幕尺寸；本地测试还请提供提交 SHA。"
+      placeholder: "例如：macOS 26.5.2，MacBook，Chrome 149，1440×900；线上版本"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: "发生频率"
+      options:
+        - "每次都发生"
+        - "经常发生"
+        - "偶尔发生"
+        - "只发生过一次"
+        - "暂时无法再次复现"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "截图、录屏或控制台信息"
+      description: "可拖入截图或短录屏，并粘贴相关错误。请先移除个人信息、学生信息、令牌和其他敏感内容。"
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: "对学习或课堂使用的影响"
+      description: "说明它是否阻止学习、导致教学结论错误，或只影响局部体验。维护者会依据证据统一判定 P0–P3。"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: "提交前确认"
+      options:
+        - label: "我已检查现有 Issues，未找到相同问题。"
+          required: true
+        - label: "我没有在公开内容中加入个人信息、学生信息、密钥或安全漏洞利用细节。"
+          required: true

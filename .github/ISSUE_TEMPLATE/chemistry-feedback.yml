@@ -1,0 +1,95 @@
+name: "化学内容反馈"
+description: "报告结构、术语、教学结论、标注或讲解可能存在的化学问题"
+title: "[Chemistry] "
+labels:
+  - "chemistry"
+  - "rc-feedback"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        化学内容会影响课堂结论，请尽量指出具体页面、原文或画面，并附可追溯依据。项目会先复核，不会根据单条意见直接改写事实。
+
+  - type: input
+    id: location
+    attributes:
+      label: "页面、模块或步骤"
+      description: "填写 URL、模块名称，以及出现问题的讲解步骤或视图模式。"
+      placeholder: "例如：NaCl 晶体结构 → 周期探索 → 第一配位层"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feedback_type
+    attributes:
+      label: "问题类型"
+      options:
+        - "结构、构型或空间关系"
+        - "键角、配位数或计数"
+        - "术语、化学式或命名"
+        - "图例、颜色、虚线或标注可能误导"
+        - "教学表述不准确或超出高中范围"
+        - "其他化学内容"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_content
+    attributes:
+      label: "当前内容"
+      description: "请抄写关键短句，或描述画面中具体哪个结构与标注有问题。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: concern
+    attributes:
+      label: "问题与可能影响"
+      description: "说明哪里不准确、容易混淆或可能让学生形成什么错误理解。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "建议核对的正确结论"
+      description: "写出建议结论；不确定时也可以明确写“需要复核”，不要猜测。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: "依据或来源"
+      description: "优先提供教材版本与页码、课程标准、IUCr、同行评审论文或可追溯数据库链接。"
+      placeholder: "来源标题、版本或 DOI / URL；若暂时没有，请写“暂无来源，建议复核”"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "截图或补充说明"
+      description: "可附截图并圈出对应位置。请移除个人信息和学生信息。"
+
+  - type: dropdown
+    id: audience_impact
+    attributes:
+      label: "影响范围"
+      options:
+        - "可能直接导致核心教学结论错误"
+        - "可能误导一个模块或关键步骤"
+        - "局部术语或表述不够严谨"
+        - "仅是改进建议，暂未发现错误"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: "提交前确认"
+      options:
+        - label: "我已区分“教学简化”和“事实错误”，并写明具体疑点。"
+          required: true
+        - label: "我没有在公开内容中加入个人信息、学生信息或其他敏感内容。"
+          required: true

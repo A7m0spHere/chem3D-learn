@@ -1,0 +1,104 @@
+name: "体验与可访问性反馈"
+description: "反馈交互、布局、移动端、课堂投影、可访问性或非核心性能问题"
+title: "[UX] "
+labels:
+  - "rc-feedback"
+  - "ux"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请从一个真实学习或课堂任务出发描述体验。若属于安全漏洞，请不要公开提交利用细节。
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: "反馈类别"
+      description: "若选择可访问性，维护者分诊时会追加 accessibility 标签。"
+      options:
+        - "交互流程或操作反馈"
+        - "桌面或平板布局"
+        - "移动端布局"
+        - "课堂投影可读性"
+        - "键盘、读屏或其他可访问性"
+        - "加载速度或交互流畅度"
+        - "其他体验问题"
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: "页面或模块"
+      description: "填写 URL、路由或模块名称。"
+      placeholder: "例如：首页、Modules、NH₃ 模块、NaCl 周期探索"
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: "你想完成的任务"
+      description: "例如学生想观察键角，或教师想在投影上切换配位层。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: friction
+    attributes:
+      label: "遇到的困难"
+      description: "写出具体操作、看不清或无法理解的地方，以及发生频率。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "理想结果"
+      description: "说明什么变化会让任务更清楚或更容易完成；不要求提供设计稿。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "设备、浏览器与使用场景"
+      description: "请提供操作系统、浏览器及版本、屏幕尺寸，并说明自学、触屏或课堂投影等场景。"
+      placeholder: "例如：iPhone，Safari，390×844，自学；或教室 Windows + Chrome，1080p 投影"
+    validations:
+      required: true
+
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: "可访问性补充"
+      description: "如适用，请说明键盘路径、读屏软件、缩放比例、色觉需求或减少动态效果设置。"
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "截图、录屏或测量"
+      description: "可附截图、录屏、加载时间或操作次数。请移除个人信息和学生信息。"
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: "影响程度"
+      description: "这是使用者感受，最终 P0–P3 由维护者依据影响范围和复现证据统一判定。"
+      options:
+        - "无法完成核心学习任务"
+        - "能完成，但会明显误解或反复卡住"
+        - "局部困难，存在绕行方式"
+        - "偏好或后续改进建议"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: "提交前确认"
+      options:
+        - label: "我已检查现有 Issues，未找到相同反馈。"
+          required: true
+        - label: "我没有在公开内容中加入个人信息、学生信息或安全漏洞利用细节。"
+          required: true

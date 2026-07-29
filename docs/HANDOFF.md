@@ -8,45 +8,50 @@
 ## 最近一次交接
 
 - **Agent**：Codex
-- **日期**：2026-07-29
-- **分支**：`feat/t-030-release-candidate-rc1`（由 `main@618d929` 切出，发布提交快进合并回 `main`）
-- **任务**：T-030 发布 `v0.1.0-rc.1` 首个公开 Release Candidate。
+- **日期**：2026-07-30
+- **分支**：`docs/t-031-rc-feedback-loop`（由 `main@8d3e16f` 切出）
+- **任务**：T-031 为 `v0.1.0-rc.1` 建立真实反馈收集与 P0–P3 分诊闭环。
 
 ### 本轮做的事
 
-1. **冻结前端 RC 版本**：只把 `frontend/package.json` 与 `frontend/package-lock.json` 的项目版本从 `0.1.0` 更新为 `0.1.0-rc.1`；`backend` 仍是 `0.1.0`，`video` 仍是 `1.0.0`，没有改依赖、发布 npm 包或创建稳定版。
-2. **补齐公开发布资料**：新增根 `CHANGELOG.md` 与 `docs/releases/v0.1.0-rc.1.md`；README 增加 RC 徽章、版本状态、版本记录入口和 NaCl 周期工作台说明；D-032 固化 frontend 主版本、SemVer RC、annotated tag 与 GitHub prerelease 策略。
-3. **修复发布门禁暴露的 R3F 生命周期竞态**：Darwin 全量压力测试发现，从 NaCl 教学视图过快进入周期工作台时，R3F 可能尚未完成事件目标连接，切换会触发 `Cannot read properties of null (reading 'addEventListener')`。现在只有 `Canvas.onCreated` 确认事件层 ready 后才开放入口；离开教学视图时同步复位 ready 状态。没有改晶体几何、教学事实或页面布局。
-4. **完成发布级验证**：`npm ci`、build、lint、logic、production、Pages artifact、Darwin 146 项视觉回归、NaCl 工作台五轮压力复跑和 backend 测试全部通过；80 张 Darwin 基线零修改，也没有生成 Windows / Linux PNG。
-5. **按不可变发布对象交付**：发布提交先推送功能分支，再安全快进到 `main`；Pages 对应同一提交成功后，创建 annotated `v0.1.0-rc.1`，并以同名 GitHub Prerelease 和版本化 Release Notes 对外发布。
+1. **审计发布与反馈现状**：开工时 `main` / `origin/main` 为 `8d3e16f`，annotated tag 与 GitHub Prerelease 对应同一提交；Issues 为 0，只有 GitHub 默认标签，私密漏洞报告未启用。
+2. **建立结构化反馈入口**：新增 Bug、化学内容、体验 / 可访问性三类 Issue Form 和 `config.yml`；远端创建 `rc-feedback`、`chemistry`、`ux`、`accessibility` 标签。安全入口明确禁止公开披露，但不伪造未启用的私密报告通道。
+3. **建立真实试用与分诊规则**：新增 `docs/RC_FEEDBACK.md`，覆盖核心分子、NaCl 教学 / 周期工作台、有机拼装、响应式、课堂和可访问性测试路径；固化 P0–P3、`v0.1.0` 与 `rc.2` 门槛。
+4. **建立零虚构台账**：新增 `docs/RC_FEEDBACK_LOG.md`，当前真实反馈为 0；台账只允许写入可追溯 Issue / 实际反馈，不以示例填充，也不把零 Issue 当作“无问题”。
+5. **补齐入口和治理**：README、仓库内 RC Release Notes、QA、PROJECT_STATUS、TASKS、DECISIONS 已同步。已发布 GitHub Release body、tag、版本号、前端源码和快照均未修改。
 
 ### 验证结果
 
-- `frontend npm ci` 通过，lockfile 只有根项目与 package 条目的版本字段变化。
-- `npm run build`、`npm run lint` 通过；`npm run test:logic` **149 / 149**。
-- 默认 Chromium `npm run test:production` **3 / 3**，Pages artifact `npm run test:pages` **3 / 3**。
-- 默认 Chromium完整 Darwin 视觉回归 **146 / 146**；修复后 `crystal-workspace.visual.spec.ts --repeat-each=5` **20 / 20**。
-- `backend npm test` **22 / 22**；snapshot inventory **80 张 Darwin、0 张其他平台**，PNG diff 为空。
+- Ruby YAML 解析：4 / 4 通过。
+- Issue Form 深层校验：Bug 11、Chemistry 10、UX 11 个内容块；必需字段、body 类型、字段 ID 与 `rc-feedback` 标签全部通过。
+- 远端标签：`rc-feedback` / `chemistry` / `ux` / `accessibility` 已确认；GitHub Issues 二次审计仍为 0。
+- `frontend npm run build`、`npm run lint` 通过；保留既有按需 `ThreeViewerFrame` large chunk 非阻断警告。
+- 本任务没有 UI / 3D / 逻辑改动，按范围未运行视觉回归，也没有更新快照。
 
 ### 关键决定与审计结论
 
-- `frontend` 是产品主版本来源；仓库其他子项目保留独立版本，RC 不联动改号。
-- 发布 tag 必须是 annotated tag，GitHub Release 必须标记 Prerelease；`v0.1.0-rc.1` 不等于稳定版 `v0.1.0`。
-- 版本、tag、Release、Pages 与线上内容必须指向同一发布提交；不为写入运行 ID 或 SHA 再制造一个 tag 之外的文档提交。
-- R3F `Canvas` DOM 出现不代表事件层已经可安全卸载；跨 Viewer 切换应以 `onCreated` 明确信号作为 ready 门禁。
+- Bug、化学、体验反馈使用不同表单，因为复现证据、事实来源和使用场景要求不同；提交者不需要自报 P0–P3。
+- P0–P3 由影响范围、教学风险和复现证据决定，不按措辞强烈程度排序。
+- P0 / P1 修复、核心交互 / 教学内容变化、测试或快照变化、需要重新试用时，必须从新提交发布 `rc.2`。
+- 当前真实反馈不足，继续保留 `v0.1.0-rc.1`；不发布 `rc.2`，稳定版 `v0.1.0` 决策也未开始。
 
 ### 已知限制
 
-- WebGL 离子选择仍需要 pointer；工具栏操作与选中结果已有键盘/辅助技术支持，但本轮没有为 125/343 个空间实例生成隐藏 DOM 控件。
-- Playwright 浏览器在受限 sandbox 内会因 macOS Mach port 权限失败，视觉测试需在主机权限下运行；这是执行环境限制，不是产品回归。
-- Vite 仍报告按需 `ThreeViewerFrame` large chunk 非阻断警告；本轮不改分包。
-- BF₃ 缺电子表述、CaF₂ 晶胞参数仍是独立化学待核实项，不在 T-029A 范围内。
-- GitHub Pages 深层 URL 的首个 HTTP 响应仍可能是 404，随后由既有 `404.html` SPA 恢复逻辑回到目标路由。
-- 这是预发布版本；下一步只收集 RC 使用反馈，不启动稳定版或 `rc.2`，除非有新的验收结论。
+- 当前没有真实用户反馈，不能判断 RC 是否已达到稳定版门槛。
+- GitHub 私密漏洞报告未启用；公开入口只能提醒不要披露细节，不能替代维护者的私下联系渠道。
+- `accessibility` 需要维护者在 UX 表单选择对应类别后分诊追加；GitHub Issue Form 不支持按下拉选项条件化自动标签。
+- T-031 必须保持进行中，直到真实试用、P0 / P1 清零、P2 决策和发布门槛复核完成。
 
 ---
 
 ## 往期
+
+### 2026-07-29 Codex：T-030 v0.1.0-rc.1 发布候选
+
+- `frontend` 版本更新为 `0.1.0-rc.1`，backend / video 保持独立版本；新增 CHANGELOG、Release Notes、README RC 入口和发布治理。
+- 发布门禁修复 NaCl 教学 Canvas 事件层尚未 ready 时快速切换可能触发的 R3F `connect(null)` 竞态。
+- build / lint、logic 149 / 149、production 3 / 3、Pages 3 / 3、backend 22 / 22、Darwin 146 / 146 和 Crystal Workspace 五轮 20 / 20 通过。
+- 发布提交快进进入 `main`，Pages 成功；annotated tag `v0.1.0-rc.1` 与 GitHub Prerelease 指向 `8d3e16f`。详见 T-030、D-032 与版本化 Release Notes。
 
 ### 2026-07-29 Codex：T-029B macOS Darwin 完整视觉回归审核
 

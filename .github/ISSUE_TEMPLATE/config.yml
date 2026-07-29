@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "在线体验 v0.1.0-rc.1"
+    url: "https://a7m0sphere.github.io/chem3D-learn/"
+    about: "先在真实 GitHub Pages 站点复现，再选择上方最匹配的反馈表单。"
+  - name: "v0.1.0-rc.1 Release"
+    url: "https://github.com/A7m0spHere/chem3D-learn/releases/tag/v0.1.0-rc.1"
+    about: "查看当前发布候选的能力、验证结果与已知限制。"
+  - name: "RC 试用与反馈指南"
+    url: "https://github.com/A7m0spHere/chem3D-learn/blob/main/docs/RC_FEEDBACK.md"
+    about: "按建议路径试用，并了解 P0–P3 分级和版本决策门槛。"
+  - name: "安全问题：不要公开提交"
+    url: "https://github.com/A7m0spHere/chem3D-learn/security"
+    about: "当前未启用 GitHub 私密漏洞报告；请勿公开披露利用细节，先通过你与维护者已有的私下渠道联系。"

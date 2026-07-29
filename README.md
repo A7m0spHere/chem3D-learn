@@ -20,6 +20,7 @@
   <a href="#快速开始">快速开始</a> ·
   <a href="#项目结构">项目结构</a> ·
   <a href="./CHANGELOG.md">版本记录</a> ·
+  <a href="./docs/RC_FEEDBACK.md">RC 反馈</a> ·
   <a href="#验证与测试">验证与测试</a>
 </p>
 
@@ -30,6 +31,14 @@ Chem3D Learn（结构化学 3D 学习站）是一个面向中国高中生和化�
 **[立即在线体验 →](https://a7m0sphere.github.io/chem3D-learn/)**
 
 当前版本为 `v0.1.0-rc.1` 发布候选，核心学习体验已完成测试，仍欢迎反馈浏览器兼容、教学表述和交互问题。
+
+## 参与 RC 试用
+
+- 阅读 [`v0.1.0-rc.1` Release](https://github.com/A7m0spHere/chem3D-learn/releases/tag/v0.1.0-rc.1)，了解当前能力、验证结果与已知限制。
+- 按 [`RC 试用与反馈指南`](./docs/RC_FEEDBACK.md) 完成一条或多条真实学习路径。
+- 通过 [GitHub Issues](https://github.com/A7m0spHere/chem3D-learn/issues/new/choose) 选择 Bug、化学内容或体验 / 可访问性表单。
+
+请勿提交姓名、学校、班级、联系方式或其他个人信息。安全问题不要公开披露利用细节；当前反馈数量不足以启动稳定版 `v0.1.0` 决策。
 
 ## 真实界面
 
@@ -169,7 +178,7 @@ npm test
 - [`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md)：当前进度、验证结果与已知限制
 - [`AGENTS.md`](./AGENTS.md)：仓库协作、验证与交付规则
 
-如果你发现教学事实、交互或浏览器兼容问题，可以[提交 Issue](https://github.com/A7m0spHere/chem3D-learn/issues)并附上模块路径、浏览器信息和复现步骤。
+如果你发现教学事实、交互或浏览器兼容问题，请先阅读 [`RC 试用与反馈指南`](./docs/RC_FEEDBACK.md)，再从 [Issue 表单入口](https://github.com/A7m0spHere/chem3D-learn/issues/new/choose)提交，并附上模块路径、浏览器信息和复现步骤。
 
 ## 许可证
 

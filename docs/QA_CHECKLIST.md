@@ -101,6 +101,19 @@ For documentation-only tasks:
 - [ ] Release、tag、Pages 部署与线上站点对应同一 release SHA；README 与 CHANGELOG 发布链接有效。
 - [ ] 未发布 npm package、未经审核的二进制附件、稳定版或额外候选版本。
 
+## RC feedback / 候选版本反馈
+
+- [ ] Bug、化学内容、体验 / 可访问性 Issue Form 均可打开，字段与标签符合各自证据需求。
+- [ ] Issue config 提供在线站点、当前 Release 与 RC 指南入口，并明确安全问题不得公开披露。
+- [ ] 反馈台账只记录真实 Issue / 试用反馈，不创建示例、推测或虚构反馈。
+- [ ] 分诊同时记录版本、环境、复现状态、证据、P0–P3 依据、处置和版本影响。
+- [ ] P0 覆盖站点不可用、广泛黑屏、数据丢失 / 安全、核心化学错误与主流浏览器不可用。
+- [ ] P1 覆盖核心功能稳定失败、NaCl 选择 / 配位 / 计数错误、严重布局、误导教学与深层路由失败。
+- [ ] P2 在稳定版前修复或明确接受；P3 不单独触发新 RC。
+- [ ] 发布 `v0.1.0` 前已有真实目标用户试用、无开放 P0 / P1、P2 有结论、完整测试与 Pages 冒烟通过、无化学阻断。
+- [ ] P0 / P1 修复、核心交互 / 教学内容变化、测试或快照变化、需要重新试用时发布新 RC；不移动既有 tag。
+- [ ] 没有足够真实反馈时继续保留当前 RC，不把“零 Issue”解释为稳定版已验证。
+
 ## Gemini Draft Review
 
 - [ ] Gemini draft material is treated as reference, not source of architectural truth.
