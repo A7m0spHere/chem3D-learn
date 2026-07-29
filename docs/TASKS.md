@@ -11,7 +11,7 @@
 - **T-028 Crystal Workspace / 晶体探索工作台**（新方向，分阶段实施）
   - **T-028A**：NaCl 周期几何纯函数内核 + 逻辑测试 —— ✅ 已完成（合并入 main，commit `a48d65d` + `777f468`，详见 D-026）。
   - **T-028B**：NaCl 周期探索 Viewer —— ✅ 已完成（分支 `feat/t-028b-nacl-periodic-viewer`，commit `5a44e30` + Commit 2，详见下方「已完成」与 D-027）。
-  - **T-028C**：粒子选择与第一配位层提取 —— 待立项（需用户确认）。
+  - **T-028C**：粒子选择与第一配位层隔离 —— ✅ 已完成（分支 `feat/t-028c-nacl-coordination-selection`，commit `a7fe1c6` + Commit 2，详见下方「已完成」与 D-028）。
   - **T-028D**：工作台控件条 UI 收尾 + 完整测试 + 治理收尾 —— 待立项。
 
 ---
@@ -29,6 +29,19 @@
 ---
 
 ## 已完成
+
+### T-028C NaCl 粒子选择与第一配位层隔离
+
+- **完成**：2026-07-29（Claude Code）
+- **分支**：`feat/t-028c-nacl-coordination-selection`（由含 T-028B 的 main 切出；T-028B 已先 ff-merge 到 main）
+- **提交**：`a7fe1c6 feat(t-028c): add NaCl coordination display cluster` + Commit 2 `feat(t-028c): add periodic ion selection and coordination isolation`
+- **内容**：
+  - **Commit 1**：`naclPeriodicGeometry.ts` 新增 `NaClDisplaySelection`（选择身份 = siteId + periodicImageShift）、`NaClCoordinationDisplayAtom`/`NaClCoordinationDisplayCluster` 类型与纯函数 `buildNaClCoordinationDisplayCluster`（精确匹配被点击显示副本 → getNaClCoordinationImages 取 canonical 六邻居 → 叠加 selectedShift 得 combinedShift → 据当前 displayInstances 是否含 siteId+combinedShift 判 ghost）。新增 9 项 logic 契约（本体/边界副本选择、6 异号最近邻、ghost 不依赖 cellOffset、边界副本整体平移出现负 shift ghost、重建公式、结果确定）。
+  - **Commit 2**：`NaClPeriodicCell` 重构为完整可点击实例数组 + 点击回传 siteId+periodicImageShift、背景降权/隔离/聚焦层覆盖渲染、六条虚线配位引导、幽灵半透明+线框、demand frameloop 下 InvalidateOnChange、onPointerMissed 清除；`useCrystalWorkspaceControls` 扩展 selectedDisplay/isolateCoordination（改尺寸/进出周期/切模块清除选择并关隔离，改边框不清除）；`CrystalWorkspaceToolbar` 选择时显示「仅看配位层」+「退出选择」；`NaClPeriodicPanel` 动态选择摘要；`ModuleDetailPage` 页面层 useMemo 生成 cluster 供 Viewer+Panel 共用；`crystal-workspace.visual.spec.ts` 新增选择交互测试。
+  - **关键区分**：选择身份必须是 `siteId + periodicImageShift`；被点击副本是 cluster 空间中心；邻居最终 shift = selectedShift + neighbor.periodicImageShift；ghost 判定基于当前 displayInstances 是否含最终显示身份，不用 cellOffset；幽灵粒子和虚线不代表额外独立离子或共价键。
+  - **明确未做**：不实现拖动/删除粒子/改晶胞参数/约束模式/能量判断/保存/IndexedDB/分享/截图/晶面切片/相机持久化/其他晶体接入/改教学 Viewer/T-028D。
+- **验证**：build/lint 通过；`test:logic` 149 通过（新增 9 项配位 cluster 契约）；Chrome `test:production` 3/3、`crystal-workspace` 交互 2/2 通过；NaCl 既有文本断言零回归。详见 D-028 与 HANDOFF。
+- **下一步**：T-028D 工作台 UI 收尾 + 完整测试 + 治理收尾。
 
 ### T-028B NaCl 周期探索 Viewer
 

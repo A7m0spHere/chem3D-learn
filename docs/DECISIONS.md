@@ -338,3 +338,23 @@
   - 区分独立位点与显示副本是晶体学正确性要求：边界显示副本只是视觉闭合手段，不是额外离子。混同会让学生误以为边界离子重复计数。
   - Canvas key 重置是最简可靠方案，避免复杂相机状态系统；角度重置可接受，因用户主动切尺寸时本就期望重新观察。
 - **验证与边界**：build/lint 通过；`test:logic` 140 通过（新增 20 项几何契约）；Chrome `test:production` 3/3（首页不下载 3D chunk，NaClPeriodicCell 独立懒加载 chunk）；Chrome `crystal-workspace` 交互 1/1（10 验证点）；NaCl 既有文本断言零回归。Windows 其他晶体 Darwin 快照用例因无基线失败（既有平台限制）。相机重置取舍与状态分离边界已记录供 T-028C/D 续接。
+
+## D-028 NaCl 粒子选择身份为 `siteId + periodicImageShift`；配位 cluster 纯函数化，幽灵判定基于最终显示身份（T-028C）
+
+- **日期**：2026-07-29（Claude Code）
+- **分支**：`feat/t-028c-nacl-coordination-selection`（由含 T-028B `73a89c5` 的 main 切出；T-028B 已先 ff-merge 到 main）
+- **提交**：`a7fe1c6`（Commit 1 cluster 纯函数 + logic）+ Commit 2（Viewer 点击/聚焦层/hook/toolbar/panel/接线/交互测试）
+- **决定**：
+  1. **选择身份必须是 `siteId + periodicImageShift`，不是单个 `siteId`**：同一 canonical site 可同时以 shift=[0,0,0] 本体和 shift 非零的边界副本出现在画面中，点击哪个副本就以哪个为配位 cluster 的空间中心。新增 `NaClDisplaySelection` 类型；显示实例唯一身份键为 `${siteId}@${shift.join(",")}`。不用数组 index 作持久身份。
+  2. **配位 cluster 逻辑写成纯函数 `buildNaClCoordinationDisplayCluster`**（在 `naclPeriodicGeometry.ts`），不在 JSX 里写周期组合逻辑。页面层用 `useMemo` 生成一次，Viewer 与 Panel 共享同一结果，不在多个组件重复配位算法。
+  3. **中心可能是边界副本，邻居最终平移为组合平移**：`combinedShift = selectedShift + neighbor.periodicImageShift`；最终坐标 = `neighbor.cartesian + selectedShift * (size*a)` = `canonicalNeighbor.cartesian + combinedShift * (size*a)`。选择边界副本时整个 cluster 随 selectedShift 平移。
+  4. **幽灵判定基于「当前 `displayInstances` 是否已包含最终显示身份 `siteId+combinedShift`」**，不能用 `neighbor.periodicImageShift !== 0` 或 `cellOffset` 单独判断——中心本身平移后，原本在超晶胞内的邻居可能被推到显示模型外（反之亦然）。ghost 的 combined shift 可以超出 0/1（出现 2 或 -1）。幽灵粒子不写回 canonical sites、不写回 `generateNaClDisplayInstances`，不计入独立位点或显示实例统计。
+  5. **Viewer 重构为完整显示对象数组**：`NaClRenderableInstance` 携带 `{id, siteId, element, periodicImageShift, cartesian}`，`<Instance>` 用稳定实例 id 作 key、`onClick` 回传 `siteId + periodicImageShift`；不再用两个平行数组 + index 对齐。背景仍是 Na⁺/Cl⁻ 双组共享 geometry/material 的 Drei `<Instances>`（343 粒子不建 343 份 geometry）。
+  6. **视觉分层**：无选择保持 T-028B；有选择非隔离时背景离子换低饱和浅色（不用低透明度，规避透明排序伪影），中心/邻居用独立 mesh 覆盖渲染（≤7 个）——中心放大 + emissive 发光、邻居轻度 emissive、幽灵半透明 + 线框轮廓；隔离模式隐藏背景离子、边框降权不隐藏。六条虚线用 drei `<Line dashed>`，仅表示最近邻配位关系，不写 molecule.bonds、不称共价键。`frameloop="demand"` 下用 `InvalidateOnChange` 在选择/隔离变化时主动续帧。
+  7. **状态清除规则**：改尺寸、进入/退出周期探索、切模块均清除选择并关闭隔离（封装 `setSupercellSize` handler，不裸暴露 setter）；改边框模式不清除。
+- **理由**：
+  - 只存 siteId 会让边界副本点击「跳回」canonical 本体，破坏「点哪个就以哪个为中心」的空间直觉。`siteId + periodicImageShift` 是 T-028B 已保留的显示实例唯一身份，直接复用。
+  - cluster 纯函数化让配位几何正确性完全被 logic 测试覆盖，Panel 的幽灵数量/配位信息也来自同一结果，不产生第二套算法。
+  - 幽灵判定必须看「最终显示身份是否在当前模型内」这一唯一正确判据：D-026 已明确 `cellOffset !== 0` 不能判幽灵，本轮进一步明确「中心自身平移后 periodicImageShift 也不够」——只有 combined 身份查 `displayInstances` 才对。
+  - 低饱和浅色而非低透明度降权背景，避免 343 个半透明球的深度排序伪影（沿用项目既有「退场残影不用透明材质」的同类取舍）。
+- **验证与边界**：build/lint 通过（0 warning）；`test:logic` 140 → **149 通过**（新增 9 项 cluster 契约：本体/边界副本选择、同 siteId 不同 shift 区分、不存在 selection 抛错、N=1/2/3 六邻居身份唯一+距离+方向、不修改输入+确定性、canonical 中心 cellOffset≠0 非幽灵、边界副本整体平移+出现负 shift 幽灵、combined shift 重建公式）；Chrome `test:production` 3/3；Chrome `crystal-workspace` 交互（含新增选择用例）通过；NaCl 既有文本断言零回归。人工边界选择检查见 HANDOFF。相机状态持久化仍留 T-028D。

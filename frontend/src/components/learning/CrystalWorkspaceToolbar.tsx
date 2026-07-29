@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, Grid3x3, Layers3 } from "lucide-react";
+import { ArrowLeft, Eye, Grid3x3, Layers3, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type {
   CrystalCellFrameMode,
@@ -6,19 +6,27 @@ import type {
 } from "@/hooks/useCrystalWorkspaceControls";
 
 // ---------------------------------------------------------------------------
-// NaCl 周期探索工作台控件条（T-028B）。
+// NaCl 周期探索工作台控件条（T-028B 基础 + T-028C 选择控件）。
 //
 // 与教材教学模式共享的 CrystalModeToolbar 分离：本控件条只在「周期探索模式」下出现，
 // 提供返回教学视图、切换超晶胞尺寸、切换晶胞边框三态。沿用现有 chem-control-console /
 // chem-touch-button 样式，不引入新视觉系统。
+//
+// T-028C：存在选择（hasSelection）时额外显示「仅看配位层」开关与「退出选择」按钮，
+// 作为独立视觉分组换行排布，不挤掉 N=1/2/3 与边框控件。
 // ---------------------------------------------------------------------------
 
 type CrystalWorkspaceToolbarProps = {
   supercellSize: CrystalSupercellSize;
   cellFrameMode: CrystalCellFrameMode;
+  /** 是否存在选择：为 true 时显示配位层控件。 */
+  hasSelection: boolean;
+  isolateCoordination: boolean;
   onExitPeriodic: () => void;
   onSupercellSizeChange: (size: CrystalSupercellSize) => void;
   onCellFrameModeChange: (mode: CrystalCellFrameMode) => void;
+  onToggleIsolate: () => void;
+  onClearSelection: () => void;
 };
 
 const SIZES: CrystalSupercellSize[] = [1, 2, 3];
@@ -31,9 +39,13 @@ const FRAME_MODES: { id: CrystalCellFrameMode; label: string; icon: typeof Eye }
 export function CrystalWorkspaceToolbar({
   supercellSize,
   cellFrameMode,
+  hasSelection,
+  isolateCoordination,
   onExitPeriodic,
   onSupercellSizeChange,
   onCellFrameModeChange,
+  onToggleIsolate,
+  onClearSelection,
 }: CrystalWorkspaceToolbarProps) {
   return (
     <div className="chem-control-console">
@@ -87,6 +99,37 @@ export function CrystalWorkspaceToolbar({
           );
         })}
       </div>
+      {/* T-028C：选择存在时的配位层控件，作为独立分组换行显示。 */}
+      {hasSelection ? (
+        <div className="chem-control-grid mt-2 border-t border-border/60 pt-2">
+          <Button
+            aria-pressed={isolateCoordination}
+            className="chem-touch-button"
+            data-testid="workspace-isolate"
+            onClick={onToggleIsolate}
+            size="sm"
+            title="仅显示中心离子及其第一配位层"
+            type="button"
+            variant={isolateCoordination ? "default" : "ghost"}
+          >
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            仅看配位层
+          </Button>
+          <Button
+            aria-label="退出当前离子选择"
+            className="chem-touch-button"
+            data-testid="workspace-clear-selection"
+            onClick={onClearSelection}
+            size="sm"
+            title="退出选择，恢复完整周期结构"
+            type="button"
+            variant="ghost"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+            退出选择
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

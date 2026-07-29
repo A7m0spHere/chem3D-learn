@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Claude Code，T-028B NaCl 周期探索 Viewer）
+> 最后更新：2026-07-29（Claude Code，T-028C NaCl 粒子选择与第一配位层隔离）
 
 ## 一句话定位
 
@@ -141,9 +141,17 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 正在进行
 
-- **Crystal Workspace / 晶体探索工作台（新方向，T-028 系列）**：面向初高中学生与化学爱好者的「数字化结构模型盒 + 科学探索工作台」，支持拆/扩/切/改/比。T-028A（NaCl 周期几何内核）/ T-028A.1（坐标语义修正）/ T-028B（NaCl 周期探索 Viewer）已完成；T-028C（粒子选择与配位环境）/ T-028D（UI、测试、治理收尾）待立项。
+- **Crystal Workspace / 晶体探索工作台（新方向，T-028 系列）**：面向初高中学生与化学爱好者的「数字化结构模型盒 + 科学探索工作台」，支持拆/扩/切/改/比。T-028A（NaCl 周期几何内核）/ T-028A.1（坐标语义修正）/ T-028B（NaCl 周期探索 Viewer）/ T-028C（粒子选择与第一配位层隔离）已完成；T-028D（工作台 UI 收尾、其他晶体接入、保存/分享/截图等高级能力）待立项。
 
 ## 最近完成
+
+- **T-028C NaCl 粒子选择与第一配位层隔离**（2026-07-29 完成，分支 `feat/t-028c-nacl-coordination-selection`）
+  - 在 NaCl 周期探索 Viewer 中新增点击选择：点击任一显示离子选中**被点击的那个显示副本**（身份为 `siteId + periodicImageShift`，非仅 siteId），高亮中心 + 六个最近邻异号离子，六条虚线标示最近邻配位关系（非共价键），超出当前显示超晶胞的邻居用半透明幽灵粒子补齐。支持「仅看配位层」隔离与「退出选择」。
+  - **Commit 1**（`a7fe1c6`）：`naclPeriodicGeometry.ts` 新增 `NaClDisplaySelection` / `NaClCoordinationDisplayAtom` / `NaClCoordinationDisplayCluster` 类型与纯函数 `buildNaClCoordinationDisplayCluster`（在 displayInstances 中精确匹配被点击副本 → `getNaClCoordinationImages` 取 canonical 六邻居 → 叠加 selectedShift 得 combinedShift → 幽灵判定基于「当前 displayInstances 是否含最终显示身份」）。新增 9 项 logic 契约。
+  - **Commit 2**：`NaClPeriodicCell` 重构为完整可点击实例数组（不再用平行数组 + index 对齐，`<Instance>` 用稳定 id 作 key、携带完整身份）+ 聚焦覆盖层（中心放大发光、邻居轻度高亮、幽灵半透明线框、drei 虚线引导）；`useCrystalWorkspaceControls` 扩展 selectedDisplay/isolateCoordination（改尺寸/进出周期/切模块清除选择并关隔离，改边框不清除）；`CrystalWorkspaceToolbar` 选择存在时显示「仅看配位层」+「退出选择」；`NaClPeriodicPanel` 动态选择摘要；`ModuleDetailPage` 页面层 `useMemo` 生成 cluster 供 Viewer 与 Panel 共享；`crystal-workspace.visual.spec.ts` 新增粒子选择交互测试。
+  - **关键区分**：选择身份 = `siteId + periodicImageShift`；被点击显示副本是配位 cluster 的空间中心；邻居最终 shift = selectedShift + neighbor periodic shift；幽灵判定基于当前 displayInstances 是否含最终显示身份（**不用 cellOffset，也不单用 neighbor.periodicImageShift**）；幽灵粒子与虚线不代表额外独立离子或共价键。
+  - **明确未做**：拖动/删除/增加粒子、改晶胞参数、约束/自由模式、能量判断、保存/IndexedDB/分享/截图、晶面切片、相机状态持久化、其他晶体接入、教学 Viewer 改造、T-028D。
+  - build/lint 通过；`test:logic` 149 通过（新增 9 项 cluster 契约）；Chrome `test:production` 3/3、`crystal-workspace` 交互 2/2、NaCl 教学摘要 1/1 通过。详见 D-028 与 HANDOFF。
 
 - **T-028B NaCl 周期探索 Viewer**（2026-07-29 完成，分支 `feat/t-028b-nacl-periodic-viewer`）
   - 在现有 NaCl 教学模块中新增独立「周期探索模式」，与教材教学 Viewer（`NaClCell.tsx`，27 个边界展开位置）并存。教学模式完整保留，零回归（`crystal-viewer` 的 NaCl 文本断言、`module-state-reset` 仍通过）。
@@ -280,10 +288,9 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-当前进行中方向为 **T-028 Crystal Workspace / 晶体探索工作台**。T-028A/A.1/B 已完成，后续子任务（均需用户确认后立项）：
+当前进行中方向为 **T-028 Crystal Workspace / 晶体探索工作台**。T-028A/A.1/B/C 已完成，后续子任务（均需用户确认后立项）：
 
-1. **T-028C**：粒子选择与第一配位层提取。R3F `onClick` 选中粒子、高亮中心+六配位镜像、淡化其他、边界周期补齐幽灵粒子（用 `periodicImageShift !== [0,0,0]` 判断，非 cellOffset）、退出恢复。新建 `useCrystalWorkspaceControls` 扩展（selectedAtomId/isolateCoordination）与 `CrystalContextInspector`。用 `siteId + periodicImageShift` 定位显示实例。
-2. **T-028D**：工作台控件条 UI 收尾 + 完整测试 + 治理收尾。
+1. **T-028D**：工作台控件条 UI 收尾 + 完整测试 + 治理收尾。可选方向包括：配位层视觉打磨、选择状态在相机切换下的持久化、把周期探索能力评估性扩展到 CsCl 等其他晶体（需先确认范围）。
 
 其他方向候选（均未立项，动手前先与用户确认）：
 4. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。

@@ -106,6 +106,13 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCrystalControls } from "@/hooks/useCrystalControls";
 // T-028B：周期探索工作台状态，与教材教学控制状态分离。
 import { useCrystalWorkspaceControls } from "@/hooks/useCrystalWorkspaceControls";
+// T-028C：NaCl 第一配位层纯函数。geometry 模块无 Three.js 依赖，页面层导入不会
+// 让首页提前加载 R3F/Three chunk。cluster 在页面层 useMemo 生成，供 Viewer 与 Panel 共用。
+import {
+  buildNaClCoordinationDisplayCluster,
+  generateNaClDisplayInstances,
+  generateNaClPeriodicSites,
+} from "@/components/three/naclPeriodicGeometry";
 import { useOrganicPlanarControls } from "@/hooks/useOrganicPlanarControls";
 import { useBondingControls } from "@/hooks/useBondingControls";
 import type { OrganicBuilderNavigationState } from "@/types/organicBuilder";
@@ -282,16 +289,40 @@ export function ModuleDetailPage() {
     setShowCrystalLabels,
     handleCrystalModeChange,
   } = useCrystalControls(id);
-  // T-028B：NaCl 周期探索工作台状态。模块切换时自动重置为教学/2/outer。
+  // T-028B/C：NaCl 周期探索工作台状态。模块切换时自动重置为教学/2/outer 并清空选择。
   const {
     workspaceMode,
     supercellSize,
     cellFrameMode,
+    selectedDisplay,
+    isolateCoordination,
     enterPeriodicMode,
     exitPeriodicMode,
     setSupercellSize,
     setCellFrameMode,
+    selectDisplay,
+    clearSelection,
+    toggleIsolateCoordination,
   } = useCrystalWorkspaceControls(id);
+  // T-028C：在页面层用纯函数算出第一配位层 cluster，Viewer 与 Panel 共享同一结果，
+  // 避免在多个组件里各自复制配位算法。selectedDisplay 为 null 时不计算。
+  // 放在任何 early return 之前，遵守 Hooks 规则。
+  const coordinationCluster = useMemo(() => {
+    if (!selectedDisplay) return null;
+    try {
+      const periodicSites = generateNaClPeriodicSites(supercellSize);
+      const displayInstances = generateNaClDisplayInstances(periodicSites, supercellSize);
+      return buildNaClCoordinationDisplayCluster(
+        periodicSites,
+        displayInstances,
+        supercellSize,
+        selectedDisplay,
+      );
+    } catch {
+      // 选择与当前 size 不一致（例如竞态）时安全降级为无选择，不抛给渲染。
+      return null;
+    }
+  }, [selectedDisplay, supercellSize]);
   const {
     organicCoplanarMode,
     organicVinylAligned,
@@ -508,15 +539,24 @@ export function ModuleDetailPage() {
   const naclPeriodicToolbar = (
     <CrystalWorkspaceToolbar
       cellFrameMode={cellFrameMode}
+      hasSelection={coordinationCluster !== null}
+      isolateCoordination={isolateCoordination}
       onCellFrameModeChange={setCellFrameMode}
+      onClearSelection={clearSelection}
       onExitPeriodic={exitPeriodicMode}
       onSupercellSizeChange={setSupercellSize}
+      onToggleIsolate={toggleIsolateCoordination}
       supercellSize={supercellSize}
     />
   );
   const naclPeriodicPanel = (
     <div className="flex-1 min-h-[400px]">
-      <NaClPeriodicPanel cellFrameMode={cellFrameMode} supercellSize={supercellSize} />
+      <NaClPeriodicPanel
+        cellFrameMode={cellFrameMode}
+        cluster={coordinationCluster}
+        isolateCoordination={isolateCoordination}
+        supercellSize={supercellSize}
+      />
     </div>
   );
 
@@ -723,9 +763,14 @@ export function ModuleDetailPage() {
           ? isNaClWorkspace
             ? (
               <NaClPeriodicCell
+                cluster={coordinationCluster}
                 frameMode={cellFrameMode}
+                isolateCoordination={isolateCoordination}
                 loading={viewerLoading}
                 molecule={molecule}
+                onClearSelection={clearSelection}
+                onSelectInstance={selectDisplay}
+                selection={selectedDisplay}
                 size={supercellSize}
               />
             )

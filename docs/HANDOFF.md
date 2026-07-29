@@ -9,53 +9,65 @@
 
 - **Agent**：Claude Code
 - **日期**：2026-07-29
-- **分支**：`feat/t-028b-nacl-periodic-viewer`（由含 `777f468` 的最新 main 切出；T-028A/A.1 已先 ff-merge 到 main）
-- **任务**：T-028B NaCl 周期探索 Viewer。
-- **提交**：`5a44e30`（Commit 1 几何）+ Commit 2（Viewer/接线/交互测试，待推送）
+- **分支**：`feat/t-028c-nacl-coordination-selection`（由含 `73a89c5`（T-028B）的最新 main 切出；T-028B 已先 ff-merge 到 main）
+- **任务**：T-028C NaCl 粒子选择与第一配位层隔离。
+- **提交**：`a7fe1c6`（Commit 1 cluster 纯函数 + logic）+ Commit 2（Viewer 点击/聚焦层/状态/UI/接线/交互测试）
 
 ### 本轮做的事
 
-1. **合并 T-028A**：main 与 origin/main 一致、可安全 ff-merge；`git switch main && pull --ff-only && merge --ff-only feat/t-028a-nacl-periodic-kernel && push origin main`，再切 `feat/t-028b-nacl-periodic-viewer`。main 现 HEAD = `777f468`。
-2. **Commit 1（几何纯函数 + logic）**：`naclPeriodicGeometry.ts` 新增 `generateNaClDisplayInstances(sites, size)` 与 `generateNaClCellFrameSegments(size, mode)`（+ `CrystalCellFrameMode`/`NaClCellFrameSegment` 类型）。新增 20 项 logic 契约。
-3. **Commit 2（Viewer + 接线 + 交互测试）**：
-   - `NaClPeriodicCell.tsx`：Drei `<Instances>` Na⁺/Cl⁻ 双组渲染（343 粒子不创建 343 份 geometry）；相机按 N 动态距离 + Canvas `key={size}` 重置（记录取舍：切尺寸重置观察角度）；消费生成器，不读 nacl.json；保留 siteId+periodicImageShift 映射供 T-028C。
-   - `useCrystalWorkspaceControls` hook：teaching/2/outer 默认 + 模块切换重置；不提前加粒子选择/配位隔离/相机状态。
-   - `CrystalWorkspaceToolbar`：返回教学/N=1·2·3/外边框·全部·隐藏，沿用 chem-touch-button + testid + aria-pressed。
-   - `NaClPeriodicPanel`：状态摘要（晶胞数/化学式单位/独立位点/显示实例），含 testid FactRow；显式注明边界显示副本不计化学组成。
-   - `ModuleDetailPage`：crystal-nacl 按 `workspaceMode` 分发 viewer/toolbar/panel；教学模式在 CrystalModeToolbar 旁加「周期探索」入口按钮（不改 `CrystalViewMode` 联合类型，其他晶体无影响）；NaClPeriodicCell 用 `lazy()` 独立 chunk。
-   - `crystal-workspace.visual.spec.ts`：无截图交互测试 10 验证点（默认教学/旧按钮/入口/N=1·2·3 数量/边框三态/返回恢复/切模块重置/无 pageerror）。
+1. **合并 T-028B**：先用正确的 `$env:PLAYWRIGHT_CHANNEL='chrome'` 补跑 `test:production`（3/3）与 `crystal-workspace`（1/1），确认工作区干净、与远端一致，再 `git switch main && pull --ff-only && merge --ff-only feat/t-028b-nacl-periodic-viewer && push origin main`，切 `feat/t-028c-nacl-coordination-selection`。main 现 HEAD = `73a89c5`。
+2. **Commit 1（cluster 纯函数 + logic）**：`naclPeriodicGeometry.ts` 新增 `NaClDisplaySelection` / `NaClCoordinationDisplayAtom` / `NaClCoordinationDisplayCluster` 类型与 `buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selection)`。新增 9 项 logic 契约（本体/边界副本选择、6 异号邻居、幽灵判定、可重建、不修改输入、结果确定）。
+3. **Commit 2（Viewer + 状态 + UI + 接线 + 交互测试）**：
+   - `NaClPeriodicCell.tsx`：重构为完整 `NaClRenderableInstance` 对象数组（不再用平行数组 + index 对齐），每个 `<Instance>` 用稳定实例 id 作 key 并携带完整身份，`onClick` 回传 `{siteId, periodicImageShift}`；Na⁺/Cl⁻ 仍双组共享 geometry/material。新增聚焦层 `CoordinationOverlay`（中心放大+emissive、邻居轻度高亮、幽灵半透明+线框、六条 Drei `<Line dashed>` 虚线）；背景降权（换低饱和浅色，非透明度，规避排序伪影）/ 隔离时隐藏背景；`InvalidateOnChange` 在选择/隔离变化时主动 `invalidate()` 续帧（`frameloop="demand"`）；`onPointerMissed` 清除选择。
+   - `useCrystalWorkspaceControls`：新增 `selectedDisplay`/`isolateCoordination` 与 `selectDisplay`/`clearSelection`/`setIsolateCoordination`/`toggleIsolateCoordination`；封装 `setSupercellSize` handler，改尺寸/进出周期/切模块都清除选择并关闭隔离；改边框模式不清除。
+   - `CrystalWorkspaceToolbar`：有选择时换行显示「仅看配位层」(`aria-pressed`) 与「退出选择」(`aria-label`)，无选择时不渲染。
+   - `NaClPeriodicPanel`：有选择时顶部「当前选择」区域（选中离子/显示身份/第一配位数 6/最近邻/周期补齐幽灵数/最近邻距离/隔离状态），文案说明 shift=[0,0,0] 本体 vs 边界副本、幽灵来自相邻周期、虚线非共价键、不做能量计算；无选择时显示提示区。cluster 由页面层传入，不重复配位算法。
+   - `ModuleDetailPage`：页面层 `useMemo` 用纯函数算 cluster（`generateNaClPeriodicSites`+`generateNaClDisplayInstances`+`buildNaClCoordinationDisplayCluster`，try/catch 竞态降级），Viewer 与 Panel 共享；放在 early return 之前遵守 Hooks 规则。纯几何模块无 R3F import，不牵动首页预取。
+   - `crystal-workspace.visual.spec.ts`：新增第 2 个测试（10 验证点：默认无选择提示、点击选中、配位数 6、异号邻居、仅看配位层 aria-pressed、退出选择恢复、切尺寸自动清除、退周期、切模块重置、无 pageerror）。
 
 ### 验证结果
 
 - `npm run build` 通过；`npm run lint` 通过（0 warning）。
-- `npm run test:logic`：**140 通过**（T-028B 新增 20 项几何契约）。
-- Chrome `npm run test:production`：**3/3 通过**（首页仍不下载 three/r3f chunk；NaClPeriodicCell 独立懒加载 chunk）。
-- Chrome `crystal-workspace.visual.spec.ts`：**1/1 通过**（10 验证点全绿）。
-- NaCl 既有文本断言零回归：`crystal-viewer` 的「NaCl 配位与计数」用例 + `module-state-reset` 均通过。
-- **Windows 平台限制**：`crystal-viewer` 中 9 个非 NaCl 晶体（石墨/CaF₂/BaTiO₃/FCC-ZnS/MOF-5/MXene/ReN₃）的 Darwin 快照用例失败——这是既有平台限制（无 Darwin 基线 + Chrome 字体/抗锯齿差异），非本轮引入，NaCl 自身用例（纯文本断言）通过。
+- `npm run test:logic`：**149 通过**（T-028C 新增 9 项 cluster 契约）。
+- Chrome `npm run test:production`：**3/3 通过**（首页仍不下载 three/r3f chunk；`ModuleDetailPage` chunk 因引入纯几何模块 291→302 KB，NaClPeriodicCell 仍独立懒加载）。
+- Chrome `crystal-workspace.visual.spec.ts`：**2/2 通过**（原 10 点 + 新 10 点）。
+- NaCl 既有文本断言零回归：`crystal-viewer` 的「NaCl 配位与计数」用例通过。
 
 ### 关键数据语义（教学正确性）
 
-- **8/64/216** = 周期独立离子位点数（`generateNaClPeriodicSites`，8·N³）。
-- **27/125/343** = 显示实例数（`generateNaClDisplayInstances`，(2N+1)³），含为闭合正侧边界绘制的周期镜像副本，**不重复计入化学组成**。状态面板显式注明。
-- 晶胞边框：hidden=0；outer=12（外立方体完整棱）；all=3N(N+1)²（N=1/12、2/54、3/144），共享边去重。
+- **8/64/216** = 周期独立离子位点数；**27/125/343** = 显示实例数（含边界镜像副本，不计化学组成）。
+- **选择身份必须是 `siteId + periodicImageShift`**（不能只存 siteId）：同一 canonical site 可同时显示为本体与边界副本，点击哪个就以哪个为空间中心。
+- **被点击的显示副本是配位 cluster 的空间中心**；每个邻居最终 shift = selectedShift + neighbor.periodicImageShift；坐标 = canonicalNeighbor.cartesian + selectedShift·period。
+- **幽灵判定基于「当前 displayInstances 是否含最终显示身份 siteId+combinedShift」**，不能用 neighbor.periodicImageShift 或 cellOffset 单独判断——中心本身平移后原本在胞内的邻居也可能被推到胞外。幽灵不写回 canonical sites 或常规 displayInstances，不计化学组成，虚线不是共价键。
 
 ### 已知限制与建议
 
-- 相机用 Canvas `key={size}` 重置：切换尺寸会重置观察角度，保存相机状态留待 T-028C/D 改进。
+- 相机仍用 Canvas `key={size}` 重置：切换尺寸会重置观察角度（沿用 T-028B 取舍），相机状态持久化留待 T-028D。
+- `onPointerMissed` 用于空白点击清除选择；主可靠路径仍是「退出选择」按钮。
 - Na-Cl 最近邻距离 a/2 标 `TODO-CHEM-VERIFY`，待化学复核。
-- **Windows 测试后清理教训**：跑带 `toMatchSnapshot` 的 visual 测试会生成 `-win32.png` 新基线，**只删 `-win32.png`，绝不可 `rm -rf` 整个快照目录**（会误删受保护的 Darwin 基线，需 `git checkout HEAD --` 恢复）。
+- **人工边界选择检查**：见下方「人工目视检查」小节。
+- **Windows 测试后清理教训**：跑带 `toMatchSnapshot` 的 visual 测试会生成 `-win32.png` 新基线，**只删 `-win32.png`，绝不可 `rm -rf` 整个快照目录**（会误删受保护的 Darwin 基线）。
 
-### T-028C 接入建议
+### 人工目视检查（本轮）
 
-1. 粒子选择用 `siteId + periodicImageShift` 定位显示实例（`NaClPeriodicCell` 已保留 `groupDisplayInstances` 的 mapping）。
-2. 幽灵配位粒子据 `periodicImageShift !== [0,0,0]` 判断（非 `cellOffset`），用重建公式 `canonical.cartesian + periodicImageShift*size*a` 放置。
-3. `getNaClCoordinationImages` 计算配位镜像，引导线用虚线/`ionic-neighbor` kind，不画共价键。
-4. 扩展 `useCrystalWorkspaceControls` 加 `selectedAtomId`/`isolateCoordination`，新建 `CrystalContextInspector`。
+- N=2 点击 Canvas 中心 Cl⁻：中心放大+发光、六个 Na⁺ 邻居高亮、六条虚线清晰、隔离模式结构完整——由 `crystal-workspace` 交互测试的失败截图（trace）目视确认渲染正确（中心绿球、六蓝邻居、虚线、面板「当前选择 Cl⁻ / 配位数 6 / 6 个 Na⁺ / 幽灵 0」）。
+- **边界显示副本人工点击**：受 WebGL 无法用 DOM locator 精确点击特定边界实例的限制，本轮**未**在浏览器中稳定人工点选边界副本；边界副本中心化、cluster 整体平移、幽灵补齐、combined shift 出现 -1/2 等行为由 logic tests（`边界显示副本案例` 等）完整锁定，如实报告：浏览器层只验证了中心离子选择流转。
+
+### T-028D 接入建议
+
+1. 相机状态持久化：切尺寸/进出选择不再重置观察角度，替换当前 Canvas `key={size}` 方案。
+2. 工作台控件条 UI 收尾（分组、响应式换行）、完整测试补齐、治理收尾。
+3. 若扩展到其他晶体：`buildNaClCoordinationDisplayCluster` 是 NaCl 专用（6 配位、异号子格子），其他晶体需各自的 cluster 生成器。
 
 ---
 
 ## 往期
+
+### 2026-07-29 Claude Code：T-028B NaCl 周期探索 Viewer
+
+- **提交**：`5a44e30`（Commit 1 显示实例 + 晶胞边框几何）+ `73a89c5`（Commit 2 Viewer/工作台状态/UI/接线/交互测试）；已 ff-merge 到 main。
+- Commit 1：`naclPeriodicGeometry.ts` 新增 `generateNaClDisplayInstances`（(2N+1)³=27/125/343 显示实例）与 `generateNaClCellFrameSegments`（hidden=0/outer=12/all=3N(N+1)²）+ 20 项 logic 契约。
+- Commit 2：`NaClPeriodicCell`（Drei `<Instances>` 双组、相机 Canvas key 重置）、`useCrystalWorkspaceControls`、`CrystalWorkspaceToolbar`、`NaClPeriodicPanel`、`ModuleDetailPage` 接线、`crystal-workspace.visual.spec.ts`。教学 Viewer 并存零回归。`test:logic` 120→140。详见 D-027。
 
 ### 2026-07-29 Claude Code：T-028A.1 周期坐标语义修正
 

@@ -116,4 +116,88 @@ test.describe("NaCl 周期探索工作台", () => {
     // 10. 无 pageerror 与非预期 console error。
     expect(errors).toEqual([]);
   });
+
+  // T-028C：粒子选择与第一配位层隔离。
+  // WebGL 实例无法用 DOM locator 定位，故读取 Canvas boundingBox 后点击其中心比例点；
+  // N=2 模型中心恰有一个可见离子（Cl⁻ 位于 [0,0,0]），是稳定的交互目标。
+  // 配位几何正确性由 logic tests 保证，这里只验证 UI 状态流转。
+  test("周期模式粒子选择、仅看配位层、退出选择与切尺寸/切模块自动清除", async ({ page }) => {
+    test.setTimeout(120_000);
+    const errors: string[] = [];
+    page.on("pageerror", (err) => errors.push(err.message));
+    page.on("console", (msg) => {
+      if (msg.type() === "error") errors.push(msg.text());
+    });
+
+    await page.goto("/module/nacl-crystal");
+    await waitForViewerReady(page, "nacl-viewer");
+
+    // 进入周期探索（默认 2×2×2）。
+    await page.getByTestId("workspace-enter-periodic").click();
+    await waitForViewerReady(page, "nacl-periodic-2-viewer");
+
+    // 3. 未选择时面板显示提示区（periodic-selection-hint），且无选择区域。
+    await expect(page.getByTestId("periodic-selection-hint")).toBeVisible();
+    await expect(page.getByTestId("periodic-selection")).toHaveCount(0);
+    // 未选择时不显示配位层控件。
+    await expect(page.getByTestId("workspace-isolate")).toHaveCount(0);
+    await expect(page.getByTestId("workspace-clear-selection")).toHaveCount(0);
+
+    // 4. 点击 Canvas 中心的可见离子。相机 target=[0,0,0]，世界原点恒投影到 Canvas 中心；
+    //    N=2 时 nacl-1-1-1-0（Cl⁻）恰在原点，是稳定的交互目标。用 locator.click() 让
+    //    Playwright 自动滚动入视口并点击元素真实中心，避免手算 boundingBox 忽略页面滚动。
+    const stage = page.getByTestId("nacl-periodic-2-canvas");
+    await expect(stage).toBeVisible();
+    await stage.click();
+
+    // 出现当前选择区域，配位数 6、最近邻为异号离子。
+    await expect(page.getByTestId("periodic-selection")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("selection-coordination")).toContainText("6");
+    // 最近邻为异号离子：中心是 Cl⁻（原点）时最近邻显示「6 个 Na⁺」，反之「6 个 Cl⁻」。
+    await expect(page.getByTestId("selection-neighbors")).toContainText("6 个");
+    // 出现「仅看配位层」与「退出选择」。
+    await expect(page.getByTestId("workspace-isolate")).toBeVisible();
+    await expect(page.getByTestId("workspace-clear-selection")).toBeVisible();
+
+    // 5. 打开「仅看配位层」→ aria-pressed=true，面板隔离状态显示「已开启」。
+    await page.getByTestId("workspace-isolate").click();
+    await expect(page.getByTestId("workspace-isolate")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("selection-isolate-state")).toContainText("已开启");
+
+    // 6. 退出选择 → 恢复无选择状态。
+    await page.getByTestId("workspace-clear-selection").click();
+    await expect(page.getByTestId("periodic-selection")).toHaveCount(0);
+    await expect(page.getByTestId("workspace-isolate")).toHaveCount(0);
+    await expect(page.getByTestId("periodic-selection-hint")).toBeVisible();
+
+    // 7. 再次选择后切换超晶胞尺寸 → 选择自动清除。
+    await stage.click();
+    await expect(page.getByTestId("periodic-selection")).toBeVisible({ timeout: 15_000 });
+    await page.getByTestId("workspace-size-3").click();
+    await waitForViewerReady(page, "nacl-periodic-3-viewer");
+    await expect(page.getByTestId("periodic-selection")).toHaveCount(0);
+    await expect(page.getByTestId("workspace-isolate")).toHaveCount(0);
+
+    // 8. 选择后退出周期模式 → 回到教学模式（选择随之清除）。
+    //    N=3 时 nacl-1-1-1-5（Na⁺）在原点，同样投影到 Canvas 中心。
+    await page.getByTestId("nacl-periodic-3-canvas").click();
+    await page.getByRole("button", { exact: true, name: "返回教学" }).click();
+    await waitForViewerReady(page, "nacl-viewer");
+    await expect(page.getByText("晶胞组成", { exact: true })).toBeVisible();
+
+    // 9. 再进入周期探索并选择，切到其他模块再回 NaCl → 选择与隔离重置为无选择/教学。
+    await page.getByTestId("workspace-enter-periodic").click();
+    await waitForViewerReady(page, "nacl-periodic-2-viewer");
+    await page.getByTestId("nacl-periodic-2-canvas").click();
+    await expect(page.getByTestId("periodic-selection")).toBeVisible({ timeout: 15_000 });
+    await page.goto("/module/sodium-metal-crystal");
+    await expect(page.getByTestId("sodium-metal-viewer")).toBeVisible();
+    await page.goto("/module/nacl-crystal");
+    await waitForViewerReady(page, "nacl-viewer");
+    await expect(page.getByText("晶胞组成", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("periodic-selection")).toHaveCount(0);
+
+    // 10. 无 pageerror 与非预期 console error。
+    expect(errors).toEqual([]);
+  });
 });
