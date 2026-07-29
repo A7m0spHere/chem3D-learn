@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Codex，T-029B macOS Darwin 完整视觉回归审核）
+> 最后更新：2026-07-29（Codex，T-030 v0.1.0-rc.1 发布候选）
 
 ## 一句话定位
 
@@ -25,6 +25,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
 ## 当前工作区状态（重要）
+
+- **T-030 v0.1.0-rc.1 发布候选已完成**（2026-07-29）：仓库发布版本当前以前端主产品为准，`frontend` 已更新到 `0.1.0-rc.1`，backend / video 保持独立版本。新增 CHANGELOG、用户向 Release Notes、README RC 入口、发布候选 QA 清单和 D-032；发布准备提交经完整验证后快进进入 `main`，Pages、annotated tag `v0.1.0-rc.1` 与 GitHub prerelease 对应同一发布提交。发布门禁同时修复了 NaCl 教学 Canvas 尚未完成 R3F 事件连接时快速进入周期探索可能出现的 `connect(null)` 竞态；没有改晶体几何、教学语义或快照。
 
 - **T-029 发布候选验收已完成**（2026-07-29）：T-029A 已固化 NaCl 权威化学依据与课堂语义；T-029B 已在真实 macOS Darwin arm64 环境用 Playwright 默认 Chromium 审核全部 80 张 Darwin 基线。首轮完整视觉测试为 141 / 146，通过产物审查后修复 1 个 BaTiO₃ 标注越界回归、2 处过期测试契约和 Crystal Workspace 的 WebGL 点击 / Canvas-ready 稳定条件；仅更新 3 张已人工批准的 Darwin 快照。完整视觉回归随后连续两轮 146 / 146，`crystal-viewer` 63 / 63、`crystal-workspace` 修正后 12 / 12。没有创建版本 tag 或 Release。
 
@@ -54,6 +56,14 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-29，T-030）
+
+- `npm ci` 成功；frontend package / lockfile 只含 `0.1.0` → `0.1.0-rc.1` 三处预期文本变化，依赖、完整性哈希和平台元数据不变；backend `0.1.0`、video `1.0.0` 不变。
+- `npm run build`、`npm run lint` 通过；logic **149 / 149**、production **3 / 3**、Pages 产物 **3 / 3**、backend **22 / 22**。
+- 完整 Darwin 首轮 / 二轮各为 **145 / 146**，唯一错误均为高压套件下 R3F `<Provider>` 的 `Cannot read properties of null (reading 'addEventListener')`，分别落在 Crystal Workspace 的快速 Canvas 切换路径；145 个其余用例与全部 PNG 均通过。
+- 根因是 `@react-three/fiber@8.18.0` 在 Canvas DOM 已可见但异步 `onCreated` 尚未完成事件连接时被切走，内部 `divRef.current` 可能已清空。入口现只在教学 Canvas `onCreated` 成功后启用，返回教学后重新等待。
+- 修复后 build / lint 通过，Crystal Workspace 五轮压力复跑 **20 / 20**，最终默认 Chromium 完整无更新回归 **146 / 146**；没有更新任何 PNG，也没有保留 test-results / trace。
 
 ## 独立验证结果（2026-07-29，T-029B）
 
@@ -329,7 +339,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-T-029 发布候选验收已经完成。后续工作须由项目所有者单独立项；首个候选是独立核定发布候选版本号与 tag，不在 T-029B 内自动创建。
+`v0.1.0-rc.1` 已作为 prerelease 发布。下一步只收集候选版本的浏览器兼容、教学表述与交互反馈；不得自动发布稳定版 `v0.1.0`，任何阻断问题应先单独复现、修复和重新验收。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。

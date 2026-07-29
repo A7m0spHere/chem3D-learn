@@ -26,6 +26,23 @@
 
 ## 已完成
 
+### T-030 v0.1.0-rc.1 发布候选
+
+- **完成**：2026-07-29（Codex）
+- **分支**：`feat/t-030-release-candidate-rc1`
+- **版本策略**：仓库发布版本以前端主产品为准；`frontend` 使用 SemVer prerelease `0.1.0-rc.1`，backend / video 保持独立版本；tag 使用 annotated tag，GitHub Release 标记 prerelease。
+- **内容**：
+  - 仅把 `frontend/package.json` 与 lockfile 根版本更新为 `0.1.0-rc.1`，没有修改依赖版本、完整性哈希或平台元数据。
+  - 新增根 `CHANGELOG.md` 与用户向 Release Notes `docs/releases/v0.1.0-rc.1.md`；README 增加 RC badge、版本记录、当前状态、Crystal Workspace 简介和化学复核入口。
+  - 新增发布候选 QA 清单与 D-032；版本、文档、README 本地链接和 backend / video 版本边界通过一次性 Node 检查。
+  - 发布门禁首轮发现 R3F 教学 Canvas 尚未完成事件连接时快速进入周期探索会偶发 `connect(null)`。修复为 `onCreated` 成功后才启用入口，返回教学后重新等待；不改晶体几何、教学语义或视觉布局。
+- **验收**：
+  - [x] `npm ci` 成功，package / lockfile 只含 3 处预期版本文本变化。
+  - [x] build / lint 通过；logic **149 / 149**；production **3 / 3**；Pages 产物测试 **3 / 3**；backend **22 / 22**。
+  - [x] 修复后 Crystal Workspace 五轮压力复跑 **20 / 20**；默认 Chromium 完整 Darwin 无更新回归 **146 / 146**；PNG 零变化。
+  - [x] 发布准备提交快进进入 `main` 后，由对应 Pages 成功部署；annotated tag `v0.1.0-rc.1` 与 GitHub prerelease 指向同一发布提交。
+- **明确未做**：正式 `v0.1.0`、`rc.2`、npm 发布、二进制附件、backend / video 版本变更、新功能、化学内容扩展或快照更新。
+
 ### T-029B macOS Darwin 完整视觉回归审核
 
 - **完成**：2026-07-29（Codex）

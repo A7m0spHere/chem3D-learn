@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
@@ -26,6 +26,7 @@ type NaClCellProps = {
   voidStage: CrystalVoidStage;
   showLabels: boolean;
   loading?: boolean;
+  onReadyChange?: (ready: boolean) => void;
 };
 
 const siteLabels: Record<CrystalSiteType, string> = {
@@ -72,6 +73,7 @@ export function NaClCell({
   voidStage,
   showLabels,
   loading = false,
+  onReadyChange,
 }: NaClCellProps) {
   const atomsById = useMemo(
     () => new Map(molecule.atoms.map((atom) => [atom.id, atom])),
@@ -94,6 +96,13 @@ export function NaClCell({
     ? activeStage.bodyZh
     : activeMode?.bodyZh ?? molecule.summaryZh;
 
+  // R3F 的 onCreated 在事件层已经连接后才触发。切走前等待这个信号，可避免旧
+  // Canvas 尚在异步创建时被卸载，导致其内部事件目标 ref 变成 null。
+  useEffect(
+    () => () => onReadyChange?.(false),
+    [onReadyChange],
+  );
+
   return (
     <ThreeViewerFrame
       footerMeta={<CrystalAtomLegend atoms={molecule.atoms} />}
@@ -104,7 +113,12 @@ export function NaClCell({
       title={`${molecule.formula}｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
+        <Canvas
+          camera={{ position: cameraPosition, fov: cameraFov }}
+          frameloop="demand"
+          onCreated={() => onReadyChange?.(true)}
+          style={{ height: "100%", width: "100%" }}
+        >
           <SceneLighting ambient={0.68} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.35} secondaryPosition={[-3, 2, -4]} />
           <group position={groupPosition} rotation={[0.18, -0.45, 0]} scale={groupScale}>
             <CellFrame isMuted={isVoidMode} />

@@ -9,33 +9,31 @@
 
 - **Agent**：Codex
 - **日期**：2026-07-29
-- **分支**：`feat/t-029b-darwin-visual-regression`（由 `main@1435d46` 切出）
-- **任务**：T-029B macOS Darwin 完整视觉回归审核。
+- **分支**：`feat/t-030-release-candidate-rc1`（由 `main@618d929` 切出，发布提交快进合并回 `main`）
+- **任务**：T-030 发布 `v0.1.0-rc.1` 首个公开 Release Candidate。
 
 ### 本轮做的事
 
-1. **固定真实 macOS 基线环境**：在 MacBook Neo / Apple A18 Pro / arm64、macOS 26.5.2（25F84）上安装 Playwright Chromium；快照使用 Playwright 默认 Chromium 149.0.7827.55，系统 Chrome 不作为基线生成器。`npm ci` 后 package / lockfile 哈希不变。
-2. **先跑完整测试再更新**：首次 `npm run test:visual` 为 141 / 146。逐项检查产物后，Modules 与 CaF₂ 是合理但过期的基线；BaTiO₃ 的 `O—O 轮廓 · 非化学键` 确实落到 Canvas 下方，属于真实回归；NaCl / CsCl 图例 UI 正常，但精确文本断言与实际数据驱动标签不一致。
-3. **真实回归先修代码**：只把 BaTiO₃ 引线标签 offset 从 `[0.72,-0.7,0.5]` 收回 `[0.52,-0.33,0.38]`，保持锚点、晶体几何与教学语义不变；人工确认标签位于主说明和下方 Ba 原子之间。
-4. **修稳定条件而非放宽容差**：Crystal Workspace 的固定 Canvas 中心点击会因透视与遮挡命中不同离子，改为归一化网格寻找真实 WebGL 命中；压力复跑又发现只等 Viewer 外壳时快速切换会触发 R3F Provider 空事件目标，ready helper 改为同时等待真实 `<canvas>`。
-5. **只更新审核通过的快照**：定向更新 Modules、CaF₂、BaTiO₃ 3 张 `*-darwin.png`；没有删除快照，没有更新已通过的 T-023 有机拼装基线，没有产生其他平台 PNG。
-6. **治理收口**：T-029A / T-029B 均完成，T-029 整体完成；QA 新增 Darwin 审核清单，D-031 固化默认 Chromium、失败分类、定向更新和三轮稳定性策略。
+1. **冻结前端 RC 版本**：只把 `frontend/package.json` 与 `frontend/package-lock.json` 的项目版本从 `0.1.0` 更新为 `0.1.0-rc.1`；`backend` 仍是 `0.1.0`，`video` 仍是 `1.0.0`，没有改依赖、发布 npm 包或创建稳定版。
+2. **补齐公开发布资料**：新增根 `CHANGELOG.md` 与 `docs/releases/v0.1.0-rc.1.md`；README 增加 RC 徽章、版本状态、版本记录入口和 NaCl 周期工作台说明；D-032 固化 frontend 主版本、SemVer RC、annotated tag 与 GitHub prerelease 策略。
+3. **修复发布门禁暴露的 R3F 生命周期竞态**：Darwin 全量压力测试发现，从 NaCl 教学视图过快进入周期工作台时，R3F 可能尚未完成事件目标连接，切换会触发 `Cannot read properties of null (reading 'addEventListener')`。现在只有 `Canvas.onCreated` 确认事件层 ready 后才开放入口；离开教学视图时同步复位 ready 状态。没有改晶体几何、教学事实或页面布局。
+4. **完成发布级验证**：`npm ci`、build、lint、logic、production、Pages artifact、Darwin 146 项视觉回归、NaCl 工作台五轮压力复跑和 backend 测试全部通过；80 张 Darwin 基线零修改，也没有生成 Windows / Linux PNG。
+5. **按不可变发布对象交付**：发布提交先推送功能分支，再安全快进到 `main`；Pages 对应同一提交成功后，创建 annotated `v0.1.0-rc.1`，并以同名 GitHub Prerelease 和版本化 Release Notes 对外发布。
 
 ### 验证结果
 
-- `npm run build`、`npm run lint` 通过；`npm run test:logic` **149 / 149**；默认 Chromium `npm run test:production` **3 / 3**。
-- 首次完整视觉回归：**141 / 146**；失败 5 项均已分类并检查截图 / diff / trace / console / pageerror。
-- 定向更新后完整视觉回归连续两轮：**146 / 146、146 / 146**。
-- `crystal-viewer.visual.spec.ts --repeat-each=3`：**63 / 63**。
-- `crystal-workspace.visual.spec.ts --repeat-each=3`：压力复跑发现 ready 竞态；修正后 **12 / 12**。
-- snapshot inventory：**80 张 Darwin，0 张 Windows / Linux**。
+- `frontend npm ci` 通过，lockfile 只有根项目与 package 条目的版本字段变化。
+- `npm run build`、`npm run lint` 通过；`npm run test:logic` **149 / 149**。
+- 默认 Chromium `npm run test:production` **3 / 3**，Pages artifact `npm run test:pages` **3 / 3**。
+- 默认 Chromium完整 Darwin 视觉回归 **146 / 146**；修复后 `crystal-workspace.visual.spec.ts --repeat-each=5` **20 / 20**。
+- `backend npm test` **22 / 22**；snapshot inventory **80 张 Darwin、0 张其他平台**，PNG diff 为空。
 
 ### 关键决定与审计结论
 
-- Darwin 快照只由 Playwright 默认 Chromium 生成；系统 Chrome 只作额外行为验证。
-- 失败不能直接用更新快照处理：BaTiO₃ 先修生产 UI，图例断言与 Canvas-ready 分别修测试契约和明确等待条件。
-- Crystal Workspace 的世界原点不等于稳定的屏幕命中目标；真实 WebGL 交互用归一化网格加选中面板状态确认。
-- T-028D / T-029A 的 NaCl 三档周期结构、选择 / 隔离 / ghost、信息层级和移动端布局都通过；本轮没有改 NaCl 几何或化学事实。
+- `frontend` 是产品主版本来源；仓库其他子项目保留独立版本，RC 不联动改号。
+- 发布 tag 必须是 annotated tag，GitHub Release 必须标记 Prerelease；`v0.1.0-rc.1` 不等于稳定版 `v0.1.0`。
+- 版本、tag、Release、Pages 与线上内容必须指向同一发布提交；不为写入运行 ID 或 SHA 再制造一个 tag 之外的文档提交。
+- R3F `Canvas` DOM 出现不代表事件层已经可安全卸载；跨 Viewer 切换应以 `onCreated` 明确信号作为 ready 门禁。
 
 ### 已知限制
 
@@ -43,11 +41,19 @@
 - Playwright 浏览器在受限 sandbox 内会因 macOS Mach port 权限失败，视觉测试需在主机权限下运行；这是执行环境限制，不是产品回归。
 - Vite 仍报告按需 `ThreeViewerFrame` large chunk 非阻断警告；本轮不改分包。
 - BF₃ 缺电子表述、CaF₂ 晶胞参数仍是独立化学待核实项，不在 T-029A 范围内。
-- 本轮未创建版本号、tag 或 Release，也未新增功能。
+- GitHub Pages 深层 URL 的首个 HTTP 响应仍可能是 404，随后由既有 `404.html` SPA 恢复逻辑回到目标路由。
+- 这是预发布版本；下一步只收集 RC 使用反馈，不启动稳定版或 `rc.2`，除非有新的验收结论。
 
 ---
 
 ## 往期
+
+### 2026-07-29 Codex：T-029B macOS Darwin 完整视觉回归审核
+
+- **分支**：`feat/t-029b-darwin-visual-regression`（由 `main@1435d46` 切出）
+- **任务**：T-029B macOS Darwin 完整视觉回归审核。
+- 固定 MacBook Neo / Apple A18 Pro / arm64、macOS 26.5.2（25F84）与 Playwright 默认 Chromium 149.0.7827.55；首次 141 / 146，分类审查全部失败后先修 BaTiO₃ 真实标签回归与测试稳定条件，再只更新 Modules、CaF₂、BaTiO₃ 三张审核通过的 Darwin 基线。
+- 最终 build / lint、logic 149 / 149、production 3 / 3、完整视觉回归连续两轮 146 / 146、晶体 Viewer 63 / 63、工作台 12 / 12；快照库存 80 张 Darwin、0 张其他平台。D-031 固化默认 Chromium、失败分类、定向更新与稳定性策略。
 
 ### 2026-07-29 Codex：T-029A NaCl 化学事实复核与发布候选资料固化
 

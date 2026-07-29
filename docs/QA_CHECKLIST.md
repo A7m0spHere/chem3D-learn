@@ -90,6 +90,17 @@ For documentation-only tasks:
 - [ ] 复核 1280px 课堂展示与 390px 移动端，无 Canvas 裁切、横向溢出、标签遮挡或信息层级破坏。
 - [ ] 最终确认仅有 `*-darwin.png`，没有新增 Windows / Linux 快照，也没有提交 test-results、report 或 trace。
 
+## Release candidate / 发布候选
+
+- [ ] 发布版本与 `frontend/package.json`、`frontend/package-lock.json`、README badge、CHANGELOG 和 Release Notes 一致。
+- [ ] `backend/` 与 `video/` 保持独立 package version，未随前端候选版本改写。
+- [ ] 发布准备提交已进入 `main`，工作区干净，且 Pages workflow 对应同一 release SHA。
+- [ ] 创建 annotated tag 前再次确认同名 tag / Release 不存在，tag 精确指向已验证的 `main` 发布提交。
+- [ ] GitHub Release 使用人工审核的 notes，标记为 prerelease 且不是 draft / latest stable。
+- [ ] 发布前后均检查首页、Modules、代表性分子、NaCl 教学 / 周期模式、Organic Builder、深层 URL、静态资源与 `pageerror`。
+- [ ] Release、tag、Pages 部署与线上站点对应同一 release SHA；README 与 CHANGELOG 发布链接有效。
+- [ ] 未发布 npm package、未经审核的二进制附件、稳定版或额外候选版本。
+
 ## Gemini Draft Review
 
 - [ ] Gemini draft material is treated as reference, not source of architectural truth.

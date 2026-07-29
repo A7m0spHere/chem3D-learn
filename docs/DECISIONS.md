@@ -406,3 +406,17 @@
   - 本轮首测同时发现过期基线、真实标签越界和测试契约问题，证明“失败即更新”会把产品缺陷写进基线。
   - R3F 事件连接发生在 Canvas 挂载阶段，只等待外壳可见会在快速 Viewer 切换时留下空事件目标窗口；等待真实 Canvas 是与用户可交互状态一致的明确条件。
 - **验证与边界**：首次完整视觉 141 / 146；修正并定向更新后连续两轮 146 / 146。`crystal-viewer --repeat-each=3` 63 / 63；`crystal-workspace --repeat-each=3` 暴露 ready 竞态，修正后 12 / 12。只更新 Modules、CaF₂、BaTiO₃ 3 张 Darwin 快照；未删除快照、未建立 Windows/Linux 基线、未创建 tag 或 Release。
+
+## D-032 仓库发布版本以前端主产品为准；RC 使用 SemVer prerelease、annotated tag 与 GitHub prerelease
+
+- **日期**：2026-07-29（Codex，T-030）
+- **决定**：
+  1. 当前仓库对外发布版本以正式部署的 `frontend/` 主产品版本为准；`backend/` 是未接入线上主体验的可选只读 API，`video/` 是独立 Remotion 子项目，二者保持各自 package version。
+  2. 发布候选使用 SemVer prerelease 标识。本次为 `0.1.0-rc.1` / `v0.1.0-rc.1`，明确不是稳定版；只有候选验证与试用反馈通过后才考虑 `v0.1.0`。
+  3. 发布 tag 必须是 annotated tag，精确指向已通过完整验证、已快进进入 `main` 且 Pages build / deploy 成功的发布提交。
+  4. 对应 GitHub Release 必须使用仓库内人工审核的 Release Notes，并标记为 prerelease；不得标记为 latest stable，不用自动生成 notes 替代人工内容。
+- **理由**：
+  - 当前线上可用产品只有前端，强行同步三个子项目版本会制造后端已接入或视频与站点共用发布节奏的错误暗示。
+  - SemVer prerelease 能清楚表达“功能已形成候选，但仍需要兼容性与教学反馈”的状态。
+  - annotated tag 保留发布说明和签发对象；先验证 `main` 与 Pages、再创建不可覆盖的远端 tag，可避免 tag 指向未部署或未验收的提交。
+- **边界**：本决定不引入 Changesets、semantic-release、release-please、npm 发布、二进制附件或自动版本机器人。若未来后端接入主产品或视频形成独立发行物，应另立版本策略，不默认与前端同步。

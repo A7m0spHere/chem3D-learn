@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://a7m0sphere.github.io/chem3D-learn/"><img alt="在线体验" src="https://img.shields.io/badge/%E5%9C%A8%E7%BA%BF%E4%BD%93%E9%AA%8C-%E6%89%93%E5%BC%80%E7%AB%99%E7%82%B9-2A9D8F?style=flat-square"></a>
+  <a href="https://github.com/A7m0spHere/chem3D-learn/releases/tag/v0.1.0-rc.1"><img alt="release v0.1.0-rc.1" src="https://img.shields.io/badge/release-v0.1.0--rc.1-E76F51?style=flat-square"></a>
   <img alt="Vite 6" src="https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white">
   <img alt="React 18" src="https://img.shields.io/badge/React-18-149ECA?style=flat-square&logo=react&logoColor=white">
   <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white">
@@ -18,6 +19,7 @@
   <a href="#核心能力">核心能力</a> ·
   <a href="#快速开始">快速开始</a> ·
   <a href="#项目结构">项目结构</a> ·
+  <a href="./CHANGELOG.md">版本记录</a> ·
   <a href="#验证与测试">验证与测试</a>
 </p>
 
@@ -26,6 +28,8 @@ Chem3D Learn（结构化学 3D 学习站）是一个面向中国高中生和化�
 当前产品以前端实现为准；不需要启动后端，也能完整浏览主要学习体验。
 
 **[立即在线体验 →](https://a7m0sphere.github.io/chem3D-learn/)**
+
+当前版本为 `v0.1.0-rc.1` 发布候选，核心学习体验已完成测试，仍欢迎反馈浏览器兼容、教学表述和交互问题。
 
 ## 真实界面
 
@@ -43,7 +47,7 @@ Chem3D Learn（结构化学 3D 学习站）是一个面向中国高中生和化�
 ## 核心能力
 
 - **分子空间构型**：围绕 CH₄、NH₃、H₂O、CO₂、BF₃ 等典型结构学习 VSEPR、键角、孤对电子与分子极性。
-- **晶体结构观察**：覆盖 NaCl、CsCl、CaF₂、BaTiO₃、金属密堆积、ZnS、石墨、MOF-5、MXene、PBA 等教学模型，可分场景观察晶胞、配位、空隙和计数。
+- **晶体结构观察**：覆盖 NaCl、CsCl、CaF₂、BaTiO₃、金属密堆积、ZnS、石墨、MOF-5、MXene、PBA 等教学模型，可分场景观察晶胞、配位、空隙和计数；NaCl 还可扩展为 1×1×1 至 3×3×3 周期模型，选择离子并观察第一配位层和周期补齐镜像。
 - **化学键与轨道**：通过 σ 键、π 键、杂化轨道与电子云示意理解成键方向和空间重叠。
 - **有机立体结构**：观察乙烯、乙炔、苯与综合共面模型，并在 3D 拼装实验室中拖拽原子或常用片段。
 - **按步骤学习**：模块目录、推荐路径、考试专题和精简中文讲解适合自学，也适合教师投屏演示。
@@ -160,6 +164,8 @@ npm test
 - [`docs/PROJECT_BRIEF.md`](./docs/PROJECT_BRIEF.md)：产品定位与范围
 - [`docs/DESIGN_SYSTEM.md`](./docs/DESIGN_SYSTEM.md)：视觉方向与设计 token
 - [`docs/MOLECULE_DATA_SCHEMA.md`](./docs/MOLECULE_DATA_SCHEMA.md)：手写结构数据规范
+- [`CHANGELOG.md`](./CHANGELOG.md)：面向用户的版本记录
+- [`docs/CHEMISTRY_VERIFICATION.md`](./docs/CHEMISTRY_VERIFICATION.md)：已复核化学事实与来源映射
 - [`docs/PROJECT_STATUS.md`](./docs/PROJECT_STATUS.md)：当前进度、验证结果与已知限制
 - [`AGENTS.md`](./AGENTS.md)：仓库协作、验证与交付规则
 

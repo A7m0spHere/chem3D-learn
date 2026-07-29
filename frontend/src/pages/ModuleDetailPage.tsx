@@ -367,6 +367,7 @@ export function ModuleDetailPage() {
   } = useBondingControls(id);
 
   const [viewerLoading, setViewerLoading] = useState(false);
+  const [naclTeachingReady, setNaClTeachingReady] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isGuidedMode, setIsGuidedMode] = useState(false);
   const [pullingBuilderAtomId, setPullingBuilderAtomId] = useState<string>();
@@ -425,6 +426,7 @@ export function ModuleDetailPage() {
     setPullingBuilderAtomId(undefined);
     setBuilderTransitionPhase("idle");
     setViewerLoading(true);
+    setNaClTeachingReady(false);
     setCompletedSteps(new Set());
     setIsGuidedMode(false);
     const timer = setTimeout(() => setViewerLoading(false), 300);
@@ -526,6 +528,7 @@ export function ModuleDetailPage() {
       <Button
         className="chem-touch-button"
         data-testid="workspace-enter-periodic"
+        disabled={!naclTeachingReady}
         onClick={enterPeriodicMode}
         size="sm"
         title="进入周期探索：1×1×1 / 2×2×2 / 3×3×3 周期结构"
@@ -543,7 +546,10 @@ export function ModuleDetailPage() {
       isolateCoordination={isolateCoordination}
       onCellFrameModeChange={setCellFrameMode}
       onClearSelection={clearSelection}
-      onExitPeriodic={exitPeriodicMode}
+      onExitPeriodic={() => {
+        setNaClTeachingReady(false);
+        exitPeriodicMode();
+      }}
       onSupercellSizeChange={setSupercellSize}
       onToggleIsolate={toggleIsolateCoordination}
       supercellSize={supercellSize}
@@ -779,6 +785,7 @@ export function ModuleDetailPage() {
                 loading={viewerLoading}
                 modelStyle={crystalModelStyle}
                 molecule={molecule}
+                onReadyChange={setNaClTeachingReady}
                 showLabels={showCrystalLabels}
                 voidStage={voidStage}
                 viewMode={activeCrystalViewMode}
