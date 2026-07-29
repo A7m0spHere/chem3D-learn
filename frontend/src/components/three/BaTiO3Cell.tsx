@@ -264,7 +264,7 @@ function OctahedronGuide() {
       ))}
       {/* 锚点落在八面体中心（O—O 棱线轮廓的几何中心，即体心 Ti 原点），
           标签沿右下前方外推到八面体外，引线指回轮廓中心。 */}
-      <CalloutLabel anchor={[0, 0, 0]} offset={[0.72, -0.7, 0.5]} lineColor="#F4A261">
+      <CalloutLabel anchor={[0, 0, 0]} offset={[0.52, -0.33, 0.38]} lineColor="#F4A261">
         <span className={htmlOverlayAmberCompactLabelClass}>O—O 轮廓 · 非化学键</span>
       </CalloutLabel>
     </group>
