@@ -25,32 +25,42 @@ export function MoleculeBackground() {
       {molecules.map((m) => (
         <div
           key={m.id}
-          className="absolute opacity-0"
+          className="absolute"
           style={{
             left: m.left,
             top: m.top,
             transform: `scale(${m.scale})`,
-            animation: `motion-fade-in 4s ease-in-out ${m.animationDelay} forwards, motion-float ${m.animationDuration} ease-in-out ${m.animationDelay} infinite alternate, motion-rotate-slow ${m.animationDuration} linear ${m.animationDelay} infinite alternate`,
+            opacity: 0,
+            animation: `motion-fade-in 4s ease-in-out ${m.animationDelay} forwards`,
           }}
         >
-          {/* Simple H2O SVG (O-H-H angle ~104.5) */}
-          <svg
-            width="60"
-            height="60"
-            viewBox="0 0 100 100"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-primary/10"
+          <div
+            style={{
+              animation: `motion-float ${m.animationDuration} ease-in-out ${m.animationDelay} infinite alternate`,
+            }}
           >
-            {/* O atom */}
-            <circle cx="50" cy="40" r="14" stroke="currentColor" strokeWidth="4" />
-            {/* H atoms */}
-            <circle cx="25" cy="70" r="8" stroke="currentColor" strokeWidth="4" />
-            <circle cx="75" cy="70" r="8" stroke="currentColor" strokeWidth="4" />
-            {/* Bonds */}
-            <line x1="42" y1="50" x2="28" y2="65" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            <line x1="58" y1="50" x2="72" y2="65" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-          </svg>
+            {/* Simple H2O SVG (O-H-H angle ~104.5) */}
+            <svg
+              width="60"
+              height="60"
+              viewBox="0 0 100 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-primary/10"
+              style={{
+                animation: `motion-rotate-slow ${m.animationDuration} linear ${m.animationDelay} infinite alternate`,
+              }}
+            >
+              {/* O atom */}
+              <circle cx="50" cy="40" r="14" stroke="currentColor" strokeWidth="4" />
+              {/* H atoms */}
+              <circle cx="25" cy="70" r="8" stroke="currentColor" strokeWidth="4" />
+              <circle cx="75" cy="70" r="8" stroke="currentColor" strokeWidth="4" />
+              {/* Bonds */}
+              <line x1="42" y1="50" x2="28" y2="65" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              <line x1="58" y1="50" x2="72" y2="65" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+          </div>
         </div>
       ))}
     </div>

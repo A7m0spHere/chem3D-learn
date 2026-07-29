@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function ChemistryCursor() {
-  const [position, setPosition] = useState({ x: -100, y: -100 });
   const [isDesktop, setIsDesktop] = useState(true);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const mouseX = useRef(-100);
+  const mouseY = useRef(-100);
+  const rafId = useRef<number | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -17,20 +20,37 @@ export function ChemistryCursor() {
     if (!isDesktop) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+      mouseX.current = e.clientX;
+      mouseY.current = e.clientY;
+
+      if (rafId.current !== null) return;
+
+      rafId.current = requestAnimationFrame(() => {
+        if (cursorRef.current) {
+          cursorRef.current.style.transform = `translate3d(${mouseX.current}px, ${mouseY.current}px, 0) translate(-50%, -50%)`;
+        }
+        rafId.current = null;
+      });
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
   }, [isDesktop]);
 
   if (!isDesktop) return null;
 
   return (
     <div
-      className="pointer-events-none fixed top-0 left-0 z-[9999] opacity-15 transition-transform duration-300 ease-out"
+      ref={cursorRef}
+      className="pointer-events-none fixed top-0 left-0 z-[9999] opacity-15 transition-transform duration-300 ease-out will-change-transform"
       style={{
-        transform: `translate(${position.x}px, ${position.y}px) translate(-50%, -50%)`,
+        transform: `translate3d(-100px, -100px, 0) translate(-50%, -50%)`,
       }}
     >
       <svg

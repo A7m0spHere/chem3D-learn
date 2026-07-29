@@ -40,8 +40,10 @@ export function ScrollReveal({
     <div
       ref={ref as React.RefObject<HTMLDivElement>}
       className={cn(
-        "motion-scroll-reveal transition-all duration-[1100ms] ease-out-soft will-change-transform",
-        isIntersecting ? "opacity-100 translate-y-0 translate-x-0" : `opacity-0 ${directionClasses[direction]}`,
+        "motion-scroll-reveal transition-[opacity,transform] duration-[1100ms] ease-out-soft",
+        isIntersecting
+          ? "opacity-100 translate-y-0 translate-x-0"
+          : `will-change-[opacity,transform] opacity-0 ${directionClasses[direction]}`,
         className
       )}
       style={{ transitionDelay: `${delay}ms` }}

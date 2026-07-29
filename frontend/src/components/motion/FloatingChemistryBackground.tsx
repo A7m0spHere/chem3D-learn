@@ -26,37 +26,38 @@ export function FloatingChemistryBackground() {
       {elements.map((el) => (
         <div
           key={el.id}
-          className="absolute text-primary animate-float"
+          className="absolute text-primary"
           style={{
             left: `${el.x}%`,
             top: `${el.y}%`,
-            animationDelay: `${el.delay}s`,
             transform: `scale(${el.scale})`,
             opacity: el.type === "water" ? 0.3 : 0.15,
           }}
         >
-          {el.type === "water" && (
-            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4">
-              <circle cx="50" cy="50" r="15" fill="currentColor" />
-              <circle cx="20" cy="80" r="10" />
-              <circle cx="80" cy="80" r="10" />
-              <line x1="40" y1="60" x2="25" y2="75" strokeWidth="4" />
-              <line x1="60" y1="60" x2="75" y2="75" strokeWidth="4" />
-            </svg>
-          )}
-          {el.type === "benzene" && (
-            <svg width="50" height="50" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M50 10 L84.64 30 L84.64 70 L50 90 L15.36 70 L15.36 30 Z" />
-              <circle cx="50" cy="50" r="25" strokeDasharray="4 4" />
-            </svg>
-          )}
-          {el.type === "orbit" && (
-            <svg width="60" height="60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
-              <ellipse cx="50" cy="50" rx="40" ry="15" transform="rotate(30 50 50)" />
-              <ellipse cx="50" cy="50" rx="40" ry="15" transform="rotate(-30 50 50)" />
-              <circle cx="50" cy="50" r="6" fill="currentColor" />
-            </svg>
-          )}
+          <div className="animate-float" style={{ animationDelay: `${el.delay}s` }}>
+            {el.type === "water" && (
+              <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4">
+                <circle cx="50" cy="50" r="15" fill="currentColor" />
+                <circle cx="20" cy="80" r="10" />
+                <circle cx="80" cy="80" r="10" />
+                <line x1="40" y1="60" x2="25" y2="75" strokeWidth="4" />
+                <line x1="60" y1="60" x2="75" y2="75" strokeWidth="4" />
+              </svg>
+            )}
+            {el.type === "benzene" && (
+              <svg width="50" height="50" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M50 10 L84.64 30 L84.64 70 L50 90 L15.36 70 L15.36 30 Z" />
+                <circle cx="50" cy="50" r="25" strokeDasharray="4 4" />
+              </svg>
+            )}
+            {el.type === "orbit" && (
+              <svg width="60" height="60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
+                <ellipse cx="50" cy="50" rx="40" ry="15" transform="rotate(30 50 50)" />
+                <ellipse cx="50" cy="50" rx="40" ry="15" transform="rotate(-30 50 50)" />
+                <circle cx="50" cy="50" r="6" fill="currentColor" />
+              </svg>
+            )}
+          </div>
         </div>
       ))}
       
