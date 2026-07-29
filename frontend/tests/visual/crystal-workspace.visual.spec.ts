@@ -15,7 +15,9 @@ import { expect, test } from "@playwright/test";
 
 // 等待 3D Canvas 与控制台就绪，避免在 chunk 加载前断言。
 async function waitForViewerReady(page: import("@playwright/test").Page, testid: string) {
-  await expect(page.getByTestId(testid)).toBeVisible({ timeout: 30_000 });
+  const viewer = page.getByTestId(testid);
+  await expect(viewer).toBeVisible({ timeout: 30_000 });
+  await expect(viewer.locator("canvas")).toBeVisible({ timeout: 30_000 });
 }
 
 async function clickBoundaryDisplayCopy(page: import("@playwright/test").Page) {
@@ -40,6 +42,32 @@ async function clickBoundaryDisplayCopy(page: import("@playwright/test").Page) {
   }
 
   throw new Error("未能在 NaCl 周期 Viewer 中点击到边界显示副本");
+}
+
+async function clickAnyDisplayInstance(
+  page: import("@playwright/test").Page,
+  stageTestId: string,
+) {
+  const stage = page.getByTestId(stageTestId);
+  const box = await stage.boundingBox();
+  expect(box).not.toBeNull();
+
+  // 透视投影与离子遮挡会让「世界原点 = 可点击球心」的假设随浏览器 / GPU 变化。
+  // 沿用边界副本用例的归一化网格，命中任意真实 WebGL 实例后以面板状态确认选择成功。
+  for (let row = 2; row <= 18; row += 1) {
+    for (let column = 2; column <= 18; column += 1) {
+      await stage.click({
+        force: true,
+        position: {
+          x: (box!.width * column) / 20,
+          y: (box!.height * row) / 20,
+        },
+      });
+      if ((await page.getByTestId("periodic-selection").count()) > 0) return;
+    }
+  }
+
+  throw new Error(`未能在 ${stageTestId} 中点击到可选择的 NaCl 显示实例`);
 }
 
 test.describe("NaCl 周期探索工作台", () => {
@@ -272,8 +300,8 @@ test.describe("NaCl 周期探索工作台", () => {
   });
 
   // T-028C：粒子选择与第一配位层隔离。
-  // WebGL 实例无法用 DOM locator 定位，故读取 Canvas boundingBox 后点击其中心比例点；
-  // N=2 模型中心恰有一个可见离子（Cl⁻ 位于 [0,0,0]），是稳定的交互目标。
+  // WebGL 实例无法用 DOM locator 定位，因此按 Canvas 归一化网格点击任意真实离子；
+  // 不假设世界原点的离子在透视投影与遮挡后仍是最上层命中目标。
   // 配位几何正确性由 logic tests 保证，这里只验证 UI 状态流转。
   test("周期模式粒子选择、仅看配位层、退出选择与切尺寸/切模块自动清除", async ({ page }) => {
     test.setTimeout(120_000);
@@ -297,12 +325,10 @@ test.describe("NaCl 周期探索工作台", () => {
     await expect(page.getByTestId("workspace-isolate")).toHaveCount(0);
     await expect(page.getByTestId("workspace-clear-selection")).toHaveCount(0);
 
-    // 4. 点击 Canvas 中心的可见离子。相机 target=[0,0,0]，世界原点恒投影到 Canvas 中心；
-    //    N=2 时 nacl-1-1-1-0（Cl⁻）恰在原点，是稳定的交互目标。用 locator.click() 让
-    //    Playwright 自动滚动入视口并点击元素真实中心，避免手算 boundingBox 忽略页面滚动。
+    // 4. 在 Canvas 的归一化网格中点击任意真实显示实例。
     const stage = page.getByTestId("nacl-periodic-2-canvas");
     await expect(stage).toBeVisible();
-    await stage.click();
+    await clickAnyDisplayInstance(page, "nacl-periodic-2-canvas");
 
     // 出现当前选择区域，配位数 6、最近邻为异号离子。
     await expect(page.getByTestId("periodic-selection")).toBeVisible({ timeout: 15_000 });
@@ -326,7 +352,7 @@ test.describe("NaCl 周期探索工作台", () => {
     await expect(page.getByTestId("periodic-selection-hint")).toBeVisible();
 
     // 7. 再次选择后切换超晶胞尺寸 → 选择自动清除。
-    await stage.click();
+    await clickAnyDisplayInstance(page, "nacl-periodic-2-canvas");
     await expect(page.getByTestId("periodic-selection")).toBeVisible({ timeout: 15_000 });
     await page.getByTestId("workspace-size-3").click();
     await waitForViewerReady(page, "nacl-periodic-3-viewer");
@@ -334,8 +360,7 @@ test.describe("NaCl 周期探索工作台", () => {
     await expect(page.getByTestId("workspace-isolate")).toHaveCount(0);
 
     // 8. 选择后退出周期模式 → 回到教学模式（选择随之清除）。
-    //    N=3 时 nacl-1-1-1-5（Na⁺）在原点，同样投影到 Canvas 中心。
-    await page.getByTestId("nacl-periodic-3-canvas").click();
+    await clickAnyDisplayInstance(page, "nacl-periodic-3-canvas");
     await page.getByRole("button", { exact: true, name: "返回教学" }).click();
     await waitForViewerReady(page, "nacl-viewer");
     await expect(page.getByText("晶胞组成", { exact: true })).toBeVisible();
@@ -343,7 +368,7 @@ test.describe("NaCl 周期探索工作台", () => {
     // 9. 再进入周期探索并选择，切到其他模块再回 NaCl → 选择与隔离重置为无选择/教学。
     await page.getByTestId("workspace-enter-periodic").click();
     await waitForViewerReady(page, "nacl-periodic-2-viewer");
-    await page.getByTestId("nacl-periodic-2-canvas").click();
+    await clickAnyDisplayInstance(page, "nacl-periodic-2-canvas");
     await expect(page.getByTestId("periodic-selection")).toBeVisible({ timeout: 15_000 });
     await page.goto("/module/sodium-metal-crystal");
     await expect(page.getByTestId("sodium-metal-viewer")).toBeVisible();

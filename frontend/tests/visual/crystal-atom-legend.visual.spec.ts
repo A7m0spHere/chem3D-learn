@@ -10,8 +10,16 @@ import { expect, test } from "@playwright/test";
 // ---------------------------------------------------------------------------
 
 const CASES: { route: string; viewer: string; labels: string[] }[] = [
-  { route: "/module/nacl-crystal", viewer: "nacl-viewer", labels: ["Na⁺", "Cl⁻"] },
-  { route: "/module/cscl-crystal", viewer: "cscl-viewer", labels: ["Cs⁺", "Cl⁻"] },
+  {
+    route: "/module/nacl-crystal",
+    viewer: "nacl-viewer",
+    labels: ["Cl- 顶点", "Na+ 棱心"],
+  },
+  {
+    route: "/module/cscl-crystal",
+    viewer: "cscl-viewer",
+    labels: ["Cl- 顶点", "Cs+ 体心"],
+  },
   { route: "/module/batio3-perovskite", viewer: "batio3-viewer", labels: ["Ba²⁺", "Ti⁴⁺", "O²⁻"] },
   { route: "/module/caf2-fluorite", viewer: "caf2-viewer", labels: ["Ca²⁺", "F⁻"] },
 ];

@@ -8,19 +8,13 @@
 
 ## 进行中
 
-- **T-029 NaCl 发布候选验收**（分阶段实施）
-  - **T-029A**：NaCl 化学事实复核与发布候选资料固化 —— ✅ 已完成（分支 `feat/t-029a-nacl-chemistry-verification`，详见下方「已完成」与 D-030）。
-  - **T-029B**：macOS Darwin 视觉回归审核 —— ⏳ 待办；T-029B 完成前，T-029 整组保持进行中。
+- （暂无。）
 
 ---
 
 ## 待办（按优先级）
 
-- **T-029B macOS Darwin 视觉回归审核**
-  - 在 macOS 环境运行完整 `npm run test:visual`，审核 T-023 的 2 张预期漂移和 T-028D/T-029A NaCl 工作台可见变化。
-  - 只在确认 UI 变化符合预期后更新 `*-darwin.png`；Windows 不创建或改写 Darwin 基线。
-  - 复核窄屏、课堂投影、周期模型三档尺寸、选择/隔离/ghost 文案与旧教学 Viewer。
-  - 不在本任务顺带增加新功能、改化学几何或发布版本标签。
+- （暂无。）
 
 ---
 
@@ -31,6 +25,20 @@
 ---
 
 ## 已完成
+
+### T-029B macOS Darwin 完整视觉回归审核
+
+- **完成**：2026-07-29（Codex）
+- **分支**：`feat/t-029b-darwin-visual-regression`
+- **内容**：
+  - 在 Darwin arm64 上以 Playwright 默认 Chromium 审核完整 80 张 macOS 基线；`npm ci` 未改 package / lockfile。
+  - 首轮 141 / 146：Modules、CaF₂ 为合理但过期的基线；BaTiO₃ `O—O 轮廓 · 非化学键` 标注越出 Canvas，先修偏移再更新；NaCl / CsCl 图例断言与实际数据驱动标签不一致，修测试契约。
+  - Crystal Workspace 不再假设世界原点一定是最上层 WebGL 命中目标，改用归一化网格命中真实实例；Viewer ready helper 同时等待真实 `<canvas>`，消除快速切换时 R3F Provider 的空事件目标竞态。
+  - 仅更新 Modules、CaF₂、BaTiO₃ 3 张 Darwin 快照；没有删除快照，没有更新已通过的有机拼装快照，没有改 NaCl 化学几何。
+- **验收标准达成**：完整视觉无更新模式连续 **146 / 146、146 / 146**；Crystal Viewer 三轮 **63 / 63**；Crystal Workspace 修正后三轮 **12 / 12**；桌面 / 390px、三档周期尺寸、选择 / 隔离 / ghost、旧教学 Viewer 和其余晶体均通过。
+- **验证**：build/lint 通过；logic 149 / 149；production 3 / 3；`git diff --check` 通过。
+- **明确未做**：版本号、Git tag、GitHub Release、新功能、依赖升级、快照容差放宽、Windows/Linux 基线。
+- **T-029 总结**：T-029A 化学依据固化与 T-029B Darwin 视觉审核均完成，T-029 发布候选验收整体完成。
 
 ### T-029A NaCl 化学事实复核与发布候选资料固化
 

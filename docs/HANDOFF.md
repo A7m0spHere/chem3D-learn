@@ -9,44 +9,49 @@
 
 - **Agent**：Codex
 - **日期**：2026-07-29
-- **分支**：`feat/t-029a-nacl-chemistry-verification`（由与 `origin/main` 同步的 `main` 切出）
-- **任务**：T-029A NaCl 化学事实复核与发布候选资料固化。
+- **分支**：`feat/t-029b-darwin-visual-regression`（由 `main@1435d46` 切出）
+- **任务**：T-029B macOS Darwin 完整视觉回归审核。
 
 ### 本轮做的事
 
-1. **先核对来源，不用测试代替化学证据**：查阅 IUCr International Tables / Online Dictionary、IUCr 委员会报告、AFLOW rock-salt 原型、Materials Project / OSTI 与同行评审论文，新增 `docs/CHEMISTRY_VERIFICATION.md` 固化来源—结论—代码—测试映射。
-2. **确认实现没有实际化学错误**：现有 `Fm-3m` FCC 常规胞的 Cl 4a / Na 4b 坐标正确，常规胞为 4 Cl⁻ + 4 Na⁺ = 4 个 NaCl 化学式单位；双方第一配位层均为 6 个异号离子，方向 `±x/±y/±z`，物理最近邻距离为 `a/2`。没有修改几何坐标或计数算法。
-3. **分离物理量与显示算法**：`NACL_LATTICE_PARAMETER=2` 明确为无量纲显示尺度 `a_model`，内部最近邻为 `a_model/2=1`；组成使用 `8N³` canonical 位点，项目显示实例为 `(2N+1)³`（27/125/343），边界副本与 ghost 均不增加化学组成。
-4. **收紧课堂文案**：UI 改说“周期模型中的独立离子位点”“周期补齐镜像（幽灵）”“无量纲显示尺度”；六条虚线与旧 `nacl.json` 的 `ionic-neighbor` 记录明确只是第一配位层引导，不是共价键。NaCl 两处 `TODO-CHEM-VERIFY` 已替换为核验文档引用。
-5. **治理收口**：新增 Chemistry verification QA 清单，追加 D-030，更新 STATUS / TASKS；T-029A 已完成，但 T-029 整组继续进行中，下一项固定为 T-029B macOS Darwin 视觉回归。
+1. **固定真实 macOS 基线环境**：在 MacBook Neo / Apple A18 Pro / arm64、macOS 26.5.2（25F84）上安装 Playwright Chromium；快照使用 Playwright 默认 Chromium 149.0.7827.55，系统 Chrome 不作为基线生成器。`npm ci` 后 package / lockfile 哈希不变。
+2. **先跑完整测试再更新**：首次 `npm run test:visual` 为 141 / 146。逐项检查产物后，Modules 与 CaF₂ 是合理但过期的基线；BaTiO₃ 的 `O—O 轮廓 · 非化学键` 确实落到 Canvas 下方，属于真实回归；NaCl / CsCl 图例 UI 正常，但精确文本断言与实际数据驱动标签不一致。
+3. **真实回归先修代码**：只把 BaTiO₃ 引线标签 offset 从 `[0.72,-0.7,0.5]` 收回 `[0.52,-0.33,0.38]`，保持锚点、晶体几何与教学语义不变；人工确认标签位于主说明和下方 Ba 原子之间。
+4. **修稳定条件而非放宽容差**：Crystal Workspace 的固定 Canvas 中心点击会因透视与遮挡命中不同离子，改为归一化网格寻找真实 WebGL 命中；压力复跑又发现只等 Viewer 外壳时快速切换会触发 R3F Provider 空事件目标，ready helper 改为同时等待真实 `<canvas>`。
+5. **只更新审核通过的快照**：定向更新 Modules、CaF₂、BaTiO₃ 3 张 `*-darwin.png`；没有删除快照，没有更新已通过的 T-023 有机拼装基线，没有产生其他平台 PNG。
+6. **治理收口**：T-029A / T-029B 均完成，T-029 整体完成；QA 新增 Darwin 审核清单，D-031 固化默认 Chromium、失败分类、定向更新和三轮稳定性策略。
 
 ### 验证结果
 
-- `npm run build` 通过；`npm run lint` 通过。
-- `npm run test:logic`：**149/149 通过**。
-- Chrome `npm run test:production`：**3/3 通过**；首页仍不提前下载 three/r3f。
-- Chrome `crystal-workspace.visual.spec.ts`：首次 3/4，边界点击用例出现一次 D-029 已记录的 R3F Provider 空事件目标瞬时错误；随后目标用例连续 **3/3 通过**，完整整组复跑 **4/4 通过**。
-- Chrome `crystal-viewer` 的「NaCl 配位与计数结论位于 Viewer 外壳」：**1/1 通过**。
-- 未运行或更新 Darwin 快照。
+- `npm run build`、`npm run lint` 通过；`npm run test:logic` **149 / 149**；默认 Chromium `npm run test:production` **3 / 3**。
+- 首次完整视觉回归：**141 / 146**；失败 5 项均已分类并检查截图 / diff / trace / console / pageerror。
+- 定向更新后完整视觉回归连续两轮：**146 / 146、146 / 146**。
+- `crystal-viewer.visual.spec.ts --repeat-each=3`：**63 / 63**。
+- `crystal-workspace.visual.spec.ts --repeat-each=3`：压力复跑发现 ready 竞态；修正后 **12 / 12**。
+- snapshot inventory：**80 张 Darwin，0 张 Windows / Linux**。
 
 ### 关键决定与审计结论
 
-- 项目使用的是常规立方晶胞，不是原胞；4+4 个完整位置来自两个被占据的 Wyckoff 轨道，不是 8 个对称学不等价位点。
-- `8N³` 是有限超晶胞不重复组成计数；`(2N+1)³` 只描述当前边界闭合显示算法。以后扩展 Viewer 时不能混用。
-- 测试证明代码符合已确认关系，但不能替代权威化学来源；新增或改动晶体事实时按 `docs/CHEMISTRY_VERIFICATION.md` 与 QA 清单补证据链。
-- 首次浏览器瞬时错误与 T-029A 文案 / 数据无稳定因果，连续复跑通过，因此未扩大为生命周期修复。
+- Darwin 快照只由 Playwright 默认 Chromium 生成；系统 Chrome 只作额外行为验证。
+- 失败不能直接用更新快照处理：BaTiO₃ 先修生产 UI，图例断言与 Canvas-ready 分别修测试契约和明确等待条件。
+- Crystal Workspace 的世界原点不等于稳定的屏幕命中目标；真实 WebGL 交互用归一化网格加选中面板状态确认。
+- T-028D / T-029A 的 NaCl 三档周期结构、选择 / 隔离 / ghost、信息层级和移动端布局都通过；本轮没有改 NaCl 几何或化学事实。
 
 ### 已知限制
 
 - WebGL 离子选择仍需要 pointer；工具栏操作与选中结果已有键盘/辅助技术支持，但本轮没有为 125/343 个空间实例生成隐藏 DOM 控件。
-- 没有在 Viewer 中给出某一温度、压力下的物理晶格参数；`a_model` 不可换算为 Å / nm。
-- 完整 Darwin 视觉回归未运行、未更新；T-029B 必须在 macOS 审核可见文案与既有预期漂移。
+- Playwright 浏览器在受限 sandbox 内会因 macOS Mach port 权限失败，视觉测试需在主机权限下运行；这是执行环境限制，不是产品回归。
+- Vite 仍报告按需 `ThreeViewerFrame` large chunk 非阻断警告；本轮不改分包。
 - BF₃ 缺电子表述、CaF₂ 晶胞参数仍是独立化学待核实项，不在 T-029A 范围内。
-- 本轮未创建版本号或 tag，也未新增功能。
+- 本轮未创建版本号、tag 或 Release，也未新增功能。
 
 ---
 
 ## 往期
+
+### 2026-07-29 Codex：T-029A NaCl 化学事实复核与发布候选资料固化
+
+- 以 IUCr、AFLOW、Materials Project / OSTI 与同行评审资料确认现有 `Fm-3m` 常规胞 4 Cl⁻ + 4 Na⁺、4 个化学式单位、双方六配位、`±x/±y/±z` 最近邻和 `a/2` 关系正确；新增 `docs/CHEMISTRY_VERIFICATION.md`，区分 `a_model`、`8N³` canonical 组成、`(2N+1)³` display instances 与 ghost images。build/lint、logic 149/149、production 3/3、Crystal Workspace 4/4、旧 NaCl 1/1。详见 D-030 与 TASKS T-029A。
 
 ### 2026-07-29 Codex：T-028D Crystal Workspace 稳定化、交互收尾与上线验收
 

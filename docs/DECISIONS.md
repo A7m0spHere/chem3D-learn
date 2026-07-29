@@ -390,3 +390,19 @@
   - 晶体学术语、有限显示算法和课堂简化此前分散在代码注释与交接记录中，容易把“显示了多少个球”误解为“晶胞实际含多少粒子”，或把无量纲渲染长度误当物理晶格参数。
   - 现有 149 项逻辑测试已经完整覆盖 4+4 基元、`8N³`、六配位、`±x/±y/±z`、`a_model/2`、27/125/343 与 ghost 身份；重复实现第二套化学算法会增加漂移风险，因此本轮只补来源、术语和可见语义断言。
 - **验证与边界**：`npm run build`、`npm run lint`、logic 149/149、Chrome production 3/3、Crystal Workspace 最终 4/4、旧 NaCl Viewer 1/1 通过。边界点击用例首次出现一次 D-029 已记录的 R3F Provider 空事件目标瞬时错误，随后定向连续 3/3 与完整整组 4/4 均通过，未做与 T-029A 无关的猜测性生命周期改造。未运行或更新 Darwin 快照；T-029B 继续待办。
+
+## D-031 Darwin 快照固定使用 Playwright 默认 Chromium；视觉失败先分类再定向更新（T-029B）
+
+- **日期**：2026-07-29（Codex）
+- **分支**：`feat/t-029b-darwin-visual-regression`
+- **决定**：
+  1. `*-darwin.png` 由真实 macOS 上的 Playwright 默认 Chromium 生成和验收；`PLAYWRIGHT_CHANNEL=chrome` 只作额外无截图行为回归，不作为快照基线。
+  2. 首次完整视觉测试必须在不更新快照的模式运行。每个失败先检查 expected / actual / diff、trace、console 与 pageerror，再归入合理产品变化、真实回归、WebGL / 时序不稳定或平台天然差异。
+  3. 快照只能按精确测试定向更新；真实 UI 回归先修生产代码，测试契约错误与等待不足分别修断言或明确就绪条件。不得用全局更新、任意长 sleep 或放宽全局容差掩盖问题。
+  4. R3F Viewer 的 ready 条件包含真实 `<canvas>` 可见。WebGL 实例点击按归一化网格寻找真实命中并以 UI 状态确认，不再假设世界原点或 Canvas 中心恒为最上层交互目标。
+  5. 定向更新后完整视觉回归连续通过两次，高风险 `crystal-viewer` 与 `crystal-workspace` 再各自 `--repeat-each=3`；最终确认只保留 Darwin PNG。
+- **理由**：
+  - 系统 Chrome 与 Playwright 打包 Chromium 的版本、字体和 WebGL 输出可能不同；混用会让同一平台基线失去可重复性。
+  - 本轮首测同时发现过期基线、真实标签越界和测试契约问题，证明“失败即更新”会把产品缺陷写进基线。
+  - R3F 事件连接发生在 Canvas 挂载阶段，只等待外壳可见会在快速 Viewer 切换时留下空事件目标窗口；等待真实 Canvas 是与用户可交互状态一致的明确条件。
+- **验证与边界**：首次完整视觉 141 / 146；修正并定向更新后连续两轮 146 / 146。`crystal-viewer --repeat-each=3` 63 / 63；`crystal-workspace --repeat-each=3` 暴露 ready 竞态，修正后 12 / 12。只更新 Modules、CaF₂、BaTiO₃ 3 张 Darwin 快照；未删除快照、未建立 Windows/Linux 基线、未创建 tag 或 Release。

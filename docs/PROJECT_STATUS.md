@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Codex，T-029A NaCl 化学事实复核与发布候选资料固化）
+> 最后更新：2026-07-29（Codex，T-029B macOS Darwin 完整视觉回归审核）
 
 ## 一句话定位
 
@@ -26,7 +26,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
-- **T-029A 已完成并进入发布候选交付**（2026-07-29，分支 `feat/t-029a-nacl-chemistry-verification`）：以 IUCr、AFLOW、Materials Project / OSTI 与同行评审资料核对 NaCl 岩盐型结构，确认现有 `Fm-3m` 常规胞 4 Cl⁻ + 4 Na⁺ 坐标、4 个化学式单位、双方六配位、`±x/±y/±z` 最近邻和物理距离关系 `a/2` 均正确，没有实际化学数据错误。新增 `docs/CHEMISTRY_VERIFICATION.md` 固化来源—结论—代码—测试映射；代码中的 `2` 明确为无量纲显示尺度 `a_model`，并在 UI 区分 `8N³` canonical 组成、`(2N+1)³` display instances 与 ghost images。NaCl 两处 `TODO-CHEM-VERIFY` 已由可追溯引用替换。T-029B Darwin 视觉回归仍待 macOS 环境执行，本轮未更新快照。
+- **T-029 发布候选验收已完成**（2026-07-29）：T-029A 已固化 NaCl 权威化学依据与课堂语义；T-029B 已在真实 macOS Darwin arm64 环境用 Playwright 默认 Chromium 审核全部 80 张 Darwin 基线。首轮完整视觉测试为 141 / 146，通过产物审查后修复 1 个 BaTiO₃ 标注越界回归、2 处过期测试契约和 Crystal Workspace 的 WebGL 点击 / Canvas-ready 稳定条件；仅更新 3 张已人工批准的 Darwin 快照。完整视觉回归随后连续两轮 146 / 146，`crystal-viewer` 63 / 63、`crystal-workspace` 修正后 12 / 12。没有创建版本 tag 或 Release。
 
 - **T-027 已部署并推送**（2026-07-29，`6ada065` / `f31a6e3` / `67f5f94`）：正式公开站点为 `https://a7m0sphere.github.io/chem3D-learn/`。GitHub Pages 已设为 Actions 发布源，`deploy-pages.yml` 在 `main` 变化后安装前端依赖、运行 Pages 专用构建与 3 项产物测试，再发布 `frontend/dist`；首次 run `30400567495` 的 build / deploy 均成功。Vite 用 `/chem3D-learn/` 子路径构建，React Router 从 `%BASE_URL%` 生成的 `<base>` 读取 basename，`404.html` 负责保留并恢复直接访问的深层路由。README 已加入在线体验入口，`index.html` 已补 canonical、Open Graph / Twitter 元信息，社交图为 `frontend/public/og.png`。
 
@@ -54,6 +54,16 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-29，T-029B）
+
+- 环境：MacBook Neo / Apple A18 Pro / arm64，macOS 26.5.2（25F84）；Node v26.0.0、npm 11.12.1、Playwright 1.61.0、Playwright Chromium / Chrome for Testing 149.0.7827.55。
+- `npm ci` 成功且 `package.json` / `package-lock.json` 哈希不变；没有升级依赖或写入平台元数据。
+- 首次默认 Chromium 完整视觉回归：**141 / 146 通过，5 项失败**。A 类 2 项为 Modules 与 CaF₂ 过期基线；B 类 3 项为 BaTiO₃ 标注越界 1 项和 NaCl / CsCl 图例测试契约与现有数据驱动文案不一致 2 项；C 类在后续压力复跑中发现 Crystal Workspace 点击目标与 Canvas-ready 等待不足并已稳定化；D 类平台天然差异 0 项。
+- 更新 3 张 Darwin 快照：Modules 结构库筛选页、CaF₂ 反萤石对比、修复后的 BaTiO₃ TiO₆ 八面体；没有删除快照，也没有更新已通过的 T-023 有机拼装快照。
+- 完整 `npm run test:visual` 无更新模式连续两轮：**146 / 146、146 / 146**；`crystal-viewer.visual.spec.ts --repeat-each=3`：**63 / 63**；`crystal-workspace.visual.spec.ts --repeat-each=3` 在补齐真实 Canvas-ready 条件后：**12 / 12**。
+- `npm run build`、`npm run lint`、logic **149 / 149**、production **3 / 3** 均通过；保留既有按需 `ThreeViewerFrame` large chunk 非阻断警告。
+- 人工复核 NaCl 教学 Viewer、周期探索 1×1×1 / 2×2×2 / 3×3×3、边框三态、选择 / 隔离 / ghost、1280px 与 390px，以及 BaTiO₃ 修复后标签；Canvas、信息层级和移动端均无裁切或横向溢出。
 
 ## 独立验证结果（2026-07-29，T-029A）
 
@@ -152,9 +162,15 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 正在进行
 
-- **T-029 NaCl 发布候选验收**：T-029A（化学事实复核与资料固化）已完成；T-029B（macOS Darwin 视觉回归审核）待执行。T-029B 未完成前不把整组标为完成。
+- 当前无已领取任务。
 
 ## 最近完成
+
+- **T-029B macOS Darwin 完整视觉回归审核**（2026-07-29 完成，分支 `feat/t-029b-darwin-visual-regression`）
+  - 在真实 Darwin arm64 上审核全部 80 张 `*-darwin.png`，以 Playwright 默认 Chromium 作为快照生成器；系统 Chrome 只保留为额外行为回归通道。
+  - 修复 BaTiO₃ `O—O 轮廓 · 非化学键` 引线标签落到 Canvas 外的问题；按当前相机把偏移收回可读区域，没有改晶体几何。
+  - 图例断言改为匹配数据驱动的完整教学标签；Crystal Workspace 用归一化网格点击真实 WebGL 实例，并等待真实 `<canvas>` 可见，避免把世界原点或 Viewer 外壳误当稳定就绪条件。
+  - 仅更新 Modules、CaF₂、BaTiO₃ 3 张已审核 Darwin 快照；完整视觉双跑与两组关键三轮复跑全部通过。
 
 - **T-029A NaCl 化学事实复核与发布候选资料固化**（2026-07-29 完成，分支 `feat/t-029a-nacl-chemistry-verification`）
   - 权威来源确认现有 NaCl 常规胞坐标、4+4 组成、双方六配位、最近邻方向与 `a/2` 关系正确；没有改几何数据。
@@ -313,13 +329,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-T-029A 已完成。下一步只推进已明确的 T-029B；其余仍是未立项候选：
-
-1. **T-029B**：在 macOS 环境运行完整 Darwin 视觉回归，审核 T-023 的 2 张预期漂移与 T-028D/T-029A NaCl 工作台可见文案变化；Windows 不更新基线。
-2. 评估把周期探索能力扩展到 CsCl 等其他晶体；每种晶体必须有自己的配位 cluster 生成器，不能复用 NaCl 的“异号六配位”假设。
-3. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。
-4. 化学待核实项收口：BF₃ 缺电子表述与 CaF₂ 晶胞参数。
-5. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B 推进。
+T-029 发布候选验收已经完成。后续工作须由项目所有者单独立项；首个候选是独立核定发布候选版本号与 tag，不在 T-029B 内自动创建。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
