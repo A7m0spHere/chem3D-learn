@@ -608,3 +608,152 @@ export function generateNaClCellFrameSegments(
   }
   return outer;
 }
+
+// ---------------------------------------------------------------------------
+// 第一配位层显示模型（T-028C）
+//
+// 用户点击一个显示实例（canonical 本体或正侧边界镜像副本）后，围绕**被点击的那个
+// 具体显示副本**展开第一配位层：中心 + 六个最近邻异号离子。
+//
+// 关键区分（教学正确性 + 空间正确性）：
+//   - 选择身份是 `siteId + periodicImageShift`，不是单个 siteId：同一 canonical site
+//     可以同时以 shift=[0,0,0] 本体和 shift 非零的边界副本出现，点击哪个就以哪个为中心。
+//   - 中心可能本身是边界显示副本（selectedShift 非零），因此每个邻居的最终显示位置要
+//     叠加 selectedShift：combinedShift = selectedShift + neighbor.periodicImageShift。
+//   - 幽灵判定基于「当前 displayInstances 是否已包含最终显示身份 siteId+combinedShift」，
+//     **不能**用 neighbor.periodicImageShift 或 cellOffset 单独判断——中心本身平移后，
+//     原本在超晶胞内的邻居也可能被推到显示模型外，反之亦然。
+//   - 幽灵粒子只是当前配位观察的临时周期镜像，不写回 canonical sites，也不写回
+//     generateNaClDisplayInstances 的常规显示实例，不重复计入化学组成。
+// ---------------------------------------------------------------------------
+
+/** 精确显示实例选择身份：canonical siteId + 该副本的超晶胞周期平移。 */
+export type NaClDisplaySelection = {
+  siteId: string;
+  periodicImageShift: Vec3;
+};
+
+/** 配位显示模型中的一个原子（中心或最近邻）。 */
+export type NaClCoordinationDisplayAtom = {
+  /** 稳定唯一 id：`${siteId}@${periodicImageShift.join(",")}`。 */
+  id: string;
+  siteId: string;
+  element: "Na+" | "Cl-";
+  /** 该原子在显示空间中的最终超晶胞周期平移（中心=selectedShift，邻居=combinedShift）。 */
+  periodicImageShift: Vec3;
+  cartesian: Vec3;
+  role: "center" | "neighbor";
+  /** true 表示该原子不在当前 displayInstances 中，是为补齐配位而临时绘制的周期镜像。 */
+  isGhost: boolean;
+  /** 中心→该邻居的单位方向（仅 neighbor 有）。 */
+  direction?: Vec3;
+  /** 中心→该邻居的距离（仅 neighbor 有，等于 NACL_NEAREST_DISTANCE）。 */
+  distance?: number;
+};
+
+/** 以被点击显示副本为中心的第一配位层。 */
+export type NaClCoordinationDisplayCluster = {
+  center: NaClCoordinationDisplayAtom;
+  neighbors: NaClCoordinationDisplayAtom[];
+};
+
+/** 显示实例身份键：siteId + shift。用于幽灵判定与选择匹配。 */
+function displayIdentityKey(siteId: string, shift: Vec3): string {
+  return `${siteId}@${shift.join(",")}`;
+}
+
+/**
+ * 构建以被点击显示副本为中心的第一配位层显示模型。
+ *
+ * 算法：
+ * 1. 在 displayInstances 中精确匹配被点击副本（siteId 与 periodicImageShift 三轴都相同）；
+ *    找不到则抛错。
+ * 2. 调用 getNaClCoordinationImages(selection.siteId, ...) 取 canonical 中心的六个周期邻居。
+ * 3. 中心本身可能是边界副本：selectedShift = selection.periodicImageShift。
+ *    每个邻居最终周期平移 combinedShift = selectedShift + neighbor.periodicImageShift；
+ *    最终坐标 = neighbor.cartesian + selectedShift * (size * a)
+ *            = canonicalNeighbor.cartesian + combinedShift * (size * a)。
+ * 4. 幽灵判定：displayInstances 中存在 `neighbor.siteId + combinedShift` → 非幽灵；否则幽灵。
+ * 5. 返回精确中心 + 六个异号最近邻（六个 siteId+combinedShift 唯一，距离均为 a/2）。
+ *
+ * 不修改输入 sites / displayInstances；不创建新的 canonical site；相同输入结果确定。
+ */
+export function buildNaClCoordinationDisplayCluster(
+  sites: NaClPeriodicSite[],
+  displayInstances: NaClDisplayInstance[],
+  size: number,
+  selection: NaClDisplaySelection,
+): NaClCoordinationDisplayCluster {
+  if (!Number.isInteger(size) || size < 1) {
+    throw new Error(`buildNaClCoordinationDisplayCluster: size 必须是 >=1 的整数，收到 ${size}`);
+  }
+
+  // 1. 精确匹配被点击的显示副本（siteId + periodicImageShift 三轴相同）。
+  const selectedInstance = displayInstances.find(
+    (inst) =>
+      inst.siteId === selection.siteId &&
+      inst.periodicImageShift[0] === selection.periodicImageShift[0] &&
+      inst.periodicImageShift[1] === selection.periodicImageShift[1] &&
+      inst.periodicImageShift[2] === selection.periodicImageShift[2],
+  );
+  if (!selectedInstance) {
+    throw new Error(
+      `buildNaClCoordinationDisplayCluster: 找不到显示副本 ${displayIdentityKey(selection.siteId, selection.periodicImageShift)}`,
+    );
+  }
+
+  const centerSite = sites.find((s) => s.id === selection.siteId);
+  if (!centerSite) {
+    throw new Error(`buildNaClCoordinationDisplayCluster: 找不到 canonical 中心位点 ${selection.siteId}`);
+  }
+
+  // 当前显示模型的身份集合，用于幽灵判定。
+  const displayKeySet = new Set(
+    displayInstances.map((inst) => displayIdentityKey(inst.siteId, inst.periodicImageShift)),
+  );
+
+  const period = size * NACL_LATTICE_PARAMETER;
+  const selectedShift = selection.periodicImageShift;
+
+  // 中心显示副本本身。
+  const center: NaClCoordinationDisplayAtom = {
+    id: displayIdentityKey(centerSite.id, selectedShift),
+    siteId: centerSite.id,
+    element: centerSite.element,
+    periodicImageShift: [...selectedShift] as Vec3,
+    cartesian: [...selectedInstance.cartesian] as Vec3,
+    role: "center",
+    isGhost: false,
+  };
+
+  // 2. canonical 中心的六个周期邻居。
+  const canonicalNeighbors = getNaClCoordinationImages(selection.siteId, sites, size);
+
+  // 3-4. 叠加 selectedShift，判定幽灵。
+  const neighbors: NaClCoordinationDisplayAtom[] = canonicalNeighbors.map((neighbor) => {
+    const combinedShift: Vec3 = [
+      selectedShift[0] + neighbor.periodicImageShift[0],
+      selectedShift[1] + neighbor.periodicImageShift[1],
+      selectedShift[2] + neighbor.periodicImageShift[2],
+    ];
+    const cartesian: Vec3 = [
+      neighbor.cartesian[0] + selectedShift[0] * period,
+      neighbor.cartesian[1] + selectedShift[1] * period,
+      neighbor.cartesian[2] + selectedShift[2] * period,
+    ];
+    const key = displayIdentityKey(neighbor.siteId, combinedShift);
+    return {
+      id: key,
+      siteId: neighbor.siteId,
+      element: neighbor.element,
+      periodicImageShift: combinedShift,
+      cartesian,
+      role: "neighbor" as const,
+      isGhost: !displayKeySet.has(key),
+      direction: [...neighbor.direction] as Vec3,
+      distance: neighbor.distance,
+    };
+  });
+
+  return { center, neighbors };
+}

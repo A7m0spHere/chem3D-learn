@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   NACL_LATTICE_PARAMETER,
   NACL_NEAREST_DISTANCE,
+  buildNaClCoordinationDisplayCluster,
   centerFractional,
   fractionalToCartesian,
   generateNaClCellFrameSegments,
@@ -11,6 +12,7 @@ import {
   naclConventionalBasis,
   wrapPeriodicFractional,
   type CrystalCellFrameMode,
+  type NaClDisplaySelection,
   type NaClPeriodicSite,
   type Vec3,
 } from "../../src/components/three/naclPeriodicGeometry";
@@ -792,6 +794,258 @@ test("generateNaClCellFrameSegments：all 中每段长度等于 a=2", () => {
     for (const seg of segs) {
       const len = distance(seg.start as Vec3Tuple, seg.end as Vec3Tuple);
       expect(len).toBeCloseTo(NACL_LATTICE_PARAMETER, 6);
+    }
+  }
+});
+
+// === 配位显示 cluster（T-028C 新增）====================================
+
+/** 在 displayInstances 中构造一个精确 selection（默认取 shift=[0,0,0] 本体）。 */
+function selectionOf(siteId: string, shift: Vec3 = [0, 0, 0]): NaClDisplaySelection {
+  return { siteId, periodicImageShift: shift };
+}
+
+test("buildNaClCoordinationDisplayCluster：可选择 canonical 本体（shift=[0,0,0]）", () => {
+  const size = 2;
+  const sites = generateNaClPeriodicSites(size);
+  const displayInstances = generateNaClDisplayInstances(sites, size);
+  const cluster = buildNaClCoordinationDisplayCluster(
+    sites,
+    displayInstances,
+    size,
+    selectionOf("nacl-1-1-1-0"),
+  );
+  expect(cluster.center.siteId).toBe("nacl-1-1-1-0");
+  expect(cluster.center.periodicImageShift).toEqual([0, 0, 0]);
+  expect(cluster.center.role).toBe("center");
+  expect(cluster.center.isGhost).toBe(false);
+  // 该 canonical 本体在显示实例中的坐标应与 center 完全一致。
+  const inst = displayInstances.find(
+    (i) => i.siteId === "nacl-1-1-1-0" && i.periodicImageShift.every((c) => c === 0),
+  )!;
+  expect(vec3Equal(cluster.center.cartesian, inst.cartesian)).toBe(true);
+});
+
+test("buildNaClCoordinationDisplayCluster：可选择正侧边界显示副本（shift 非零）", () => {
+  const size = 2;
+  const sites = generateNaClPeriodicSites(size);
+  const displayInstances = generateNaClDisplayInstances(sites, size);
+  // nacl-0-0-0-0：Cl⁻ fractional [0,0,0]，三轴均为下边界 → 存在 [1,0,0] 边界副本。
+  const selection = selectionOf("nacl-0-0-0-0", [1, 0, 0]);
+  const cluster = buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selection);
+  expect(cluster.center.siteId).toBe("nacl-0-0-0-0");
+  expect(cluster.center.periodicImageShift).toEqual([1, 0, 0]);
+  // center 坐标 = 被点击边界副本坐标，而非 canonical 本体。
+  const boundaryInst = displayInstances.find(
+    (i) =>
+      i.siteId === "nacl-0-0-0-0" &&
+      i.periodicImageShift[0] === 1 &&
+      i.periodicImageShift[1] === 0 &&
+      i.periodicImageShift[2] === 0,
+  )!;
+  expect(vec3Equal(cluster.center.cartesian, boundaryInst.cartesian)).toBe(true);
+  // canonical 本体在 [-2,-2,-2]，边界副本沿 +x 平移一个超晶胞（period=size·a=4）。
+  const canonical = sites.find((s) => s.id === "nacl-0-0-0-0")!;
+  expect(cluster.center.cartesian[0]).toBeCloseTo(canonical.cartesian[0] + 1 * size * NACL_LATTICE_PARAMETER, 6);
+});
+
+test("buildNaClCoordinationDisplayCluster：同 siteId 不同 shift 是不同显示实例（中心不同）", () => {
+  const size = 2;
+  const sites = generateNaClPeriodicSites(size);
+  const displayInstances = generateNaClDisplayInstances(sites, size);
+  const bodyCluster = buildNaClCoordinationDisplayCluster(
+    sites,
+    displayInstances,
+    size,
+    selectionOf("nacl-0-0-0-0", [0, 0, 0]),
+  );
+  const copyCluster = buildNaClCoordinationDisplayCluster(
+    sites,
+    displayInstances,
+    size,
+    selectionOf("nacl-0-0-0-0", [1, 0, 0]),
+  );
+  // 相同 siteId，但中心坐标与身份不同。
+  expect(bodyCluster.center.siteId).toBe(copyCluster.center.siteId);
+  expect(bodyCluster.center.id).not.toBe(copyCluster.center.id);
+  expect(vec3Equal(bodyCluster.center.cartesian, copyCluster.center.cartesian)).toBe(false);
+});
+
+test("buildNaClCoordinationDisplayCluster：不存在的 selection 抛明确错误", () => {
+  const size = 2;
+  const sites = generateNaClPeriodicSites(size);
+  const displayInstances = generateNaClDisplayInstances(sites, size);
+  // nacl-0-0-0-0 的 x 轴是下边界，但 shift=[0,1,1] 组合仍存在；用一个不可能的 shift。
+  // Na⁺ 基元 nacl-0-0-0-4 fractional [0.5,0,0]，x 轴非 0，[1,0,0] 副本不存在。
+  expect(() =>
+    buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selectionOf("nacl-0-0-0-4", [1, 0, 0])),
+  ).toThrow();
+  // 完全不存在的 siteId。
+  expect(() =>
+    buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selectionOf("nope", [0, 0, 0])),
+  ).toThrow();
+  // 非法 size。
+  expect(() =>
+    buildNaClCoordinationDisplayCluster(sites, displayInstances, 0, selectionOf("nacl-0-0-0-0")),
+  ).toThrow();
+});
+
+test("buildNaClCoordinationDisplayCluster：N=1/2/3 本体选择 → 6 个异号最近邻，身份唯一、距离与方向正确", () => {
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const displayInstances = generateNaClDisplayInstances(sites, size);
+    for (const element of ["Na+", "Cl-"] as const) {
+      const centerSite = sites.find((s) => s.element === element)!;
+      const cluster = buildNaClCoordinationDisplayCluster(
+        sites,
+        displayInstances,
+        size,
+        selectionOf(centerSite.id, [0, 0, 0]),
+      );
+      // 中心坐标与所选显示实例完全一致。
+      const centerInst = displayInstances.find(
+        (i) => i.siteId === centerSite.id && i.periodicImageShift.every((c) => c === 0),
+      )!;
+      expect(vec3Equal(cluster.center.cartesian, centerInst.cartesian)).toBe(true);
+      // 恰好 6 个邻居，元素与中心相反。
+      expect(cluster.neighbors).toHaveLength(6);
+      const oppositeElement = element === "Na+" ? "Cl-" : "Na+";
+      expect(cluster.neighbors.every((n) => n.element === oppositeElement)).toBe(true);
+      expect(cluster.neighbors.every((n) => n.role === "neighbor")).toBe(true);
+      // 6 个 siteId+periodicImageShift 唯一。
+      const keys = new Set(cluster.neighbors.map((n) => `${n.siteId}|${n.periodicImageShift.join(",")}`));
+      expect(keys.size).toBe(6);
+      // 6 个距离均为最近邻距离；6 个方向覆盖 ±x/±y/±z。
+      for (const n of cluster.neighbors) {
+        expect(n.distance).toBeCloseTo(NACL_NEAREST_DISTANCE, 6);
+        expect(distance(cluster.center.cartesian as Vec3Tuple, n.cartesian as Vec3Tuple)).toBeCloseTo(
+          NACL_NEAREST_DISTANCE,
+          6,
+        );
+      }
+      const dirKeys = new Set(cluster.neighbors.map((n) => vec3Round(n.direction!).join(",")));
+      expect(dirKeys).toEqual(
+        new Set(["1,0,0", "-1,0,0", "0,1,0", "0,-1,0", "0,0,1", "0,0,-1"]),
+      );
+    }
+  }
+});
+
+test("buildNaClCoordinationDisplayCluster：不修改输入 sites / displayInstances，且结果确定", () => {
+  const size = 2;
+  const sites = generateNaClPeriodicSites(size);
+  const displayInstances = generateNaClDisplayInstances(sites, size);
+  const sitesLen = sites.length;
+  const instLen = displayInstances.length;
+  const first = buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selectionOf("nacl-1-1-1-0"));
+  const second = buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selectionOf("nacl-1-1-1-0"));
+  // 输入未被修改。
+  expect(sites.length).toBe(sitesLen);
+  expect(displayInstances.length).toBe(instLen);
+  // 结果确定。
+  expect(second.center.id).toBe(first.center.id);
+  expect(second.neighbors.length).toBe(first.neighbors.length);
+  for (let i = 0; i < first.neighbors.length; i += 1) {
+    expect(second.neighbors[i].id).toBe(first.neighbors[i].id);
+    expect(second.neighbors[i].periodicImageShift).toEqual(first.neighbors[i].periodicImageShift);
+    expect(vec3Equal(second.neighbors[i].cartesian, first.neighbors[i].cartesian)).toBe(true);
+  }
+});
+
+test("buildNaClCoordinationDisplayCluster：canonical 中心案例——邻居 cellOffset 非零但最终非幽灵，ghost 不依赖 cellOffset", () => {
+  const size = 2;
+  const sites = generateNaClPeriodicSites(size);
+  const displayInstances = generateNaClDisplayInstances(sites, size);
+  // nacl-1-1-1-0：Cl⁻ 位于超晶胞中心（cartesian 恰为 [0,0,0]），六邻居全在超晶胞内。
+  const centerSite = sites.find((s) => s.id === "nacl-1-1-1-0")!;
+  expect(centerSite.cartesian).toEqual([0, 0, 0]);
+  const cluster = buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selectionOf(centerSite.id));
+
+  // 所有邻居均在当前显示模型内 → 全部非幽灵。
+  expect(cluster.neighbors.every((n) => n.isGhost === false)).toBe(true);
+
+  // 取 canonical 邻居（含 cellOffset）验证：至少一个 cellOffset 非零但 periodicImageShift=0。
+  const canonicalNeighbors = getNaClCoordinationImages(centerSite.id, sites, size);
+  const cellOffsetNonZeroInternal = canonicalNeighbors.filter(
+    (n) => n.cellOffset.some((c) => c !== 0) && n.periodicImageShift.every((c) => c === 0),
+  );
+  expect(cellOffsetNonZeroInternal.length).toBeGreaterThan(0);
+  // 这些 cellOffset 非零的内部邻居在 cluster 中最终 isGhost=false（ghost 不看 cellOffset）。
+  for (const cn of cellOffsetNonZeroInternal) {
+    const match = cluster.neighbors.find(
+      (n) => n.siteId === cn.siteId && n.periodicImageShift.every((c) => c === 0),
+    )!;
+    expect(match.isGhost).toBe(false);
+  }
+});
+
+test("buildNaClCoordinationDisplayCluster：边界显示副本案例——cluster 整体平移，出现幽灵邻居", () => {
+  const size = 2;
+  const sites = generateNaClPeriodicSites(size);
+  const displayInstances = generateNaClDisplayInstances(sites, size);
+  const selectedShift: Vec3 = [1, 0, 0];
+  const selection = selectionOf("nacl-0-0-0-0", selectedShift);
+  const cluster = buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selection);
+
+  // 中心为被点击的边界副本位置。
+  const boundaryInst = displayInstances.find(
+    (i) =>
+      i.siteId === "nacl-0-0-0-0" &&
+      i.periodicImageShift.join(",") === selectedShift.join(","),
+  )!;
+  expect(vec3Equal(cluster.center.cartesian, boundaryInst.cartesian)).toBe(true);
+
+  // 邻居 cluster 整体随 selectedShift 平移：每个邻居 = canonical 邻居 + selectedShift·period。
+  const period = size * NACL_LATTICE_PARAMETER;
+  const canonicalNeighbors = getNaClCoordinationImages("nacl-0-0-0-0", sites, size);
+  for (const cn of canonicalNeighbors) {
+    const combined: Vec3 = [
+      selectedShift[0] + cn.periodicImageShift[0],
+      selectedShift[1] + cn.periodicImageShift[1],
+      selectedShift[2] + cn.periodicImageShift[2],
+    ];
+    const match = cluster.neighbors.find(
+      (n) => n.siteId === cn.siteId && n.periodicImageShift.join(",") === combined.join(","),
+    )!;
+    expect(match).toBeTruthy();
+    for (let axis = 0; axis < 3; axis += 1) {
+      expect(match.cartesian[axis]).toBeCloseTo(cn.cartesian[axis] + selectedShift[axis] * period, 6);
+    }
+  }
+
+  // 至少一个邻居为幽灵。
+  const ghosts = cluster.neighbors.filter((n) => n.isGhost);
+  expect(ghosts.length).toBeGreaterThan(0);
+  // 幽灵的 combined periodicImageShift 可以超出 0/1（这里出现 -1）。
+  const hasNegativeShift = ghosts.some((n) => n.periodicImageShift.some((c) => c < 0));
+  expect(hasNegativeShift).toBe(true);
+  // 幽灵不在常规 displayInstances 中。
+  const displayKeys = new Set(displayInstances.map((i) => `${i.siteId}|${i.periodicImageShift.join(",")}`));
+  for (const g of ghosts) {
+    expect(displayKeys.has(`${g.siteId}|${g.periodicImageShift.join(",")}`)).toBe(false);
+    // 幽灵 siteId 仍是 canonical site，不创建新位点。
+    expect(sites.some((s) => s.id === g.siteId)).toBe(true);
+  }
+});
+
+test("buildNaClCoordinationDisplayCluster：邻居满足 canonical + combined shift 重建公式", () => {
+  const a = NACL_LATTICE_PARAMETER;
+  for (const size of [1, 2, 3]) {
+    const sites = generateNaClPeriodicSites(size);
+    const displayInstances = generateNaClDisplayInstances(sites, size);
+    const siteById = new Map(sites.map((s) => [s.id, s]));
+    // 取一个边界副本中心（若存在）与一个本体中心分别验证。
+    const bodySelections: NaClDisplaySelection[] = [selectionOf(sites[0].id, [0, 0, 0])];
+    if (size >= 2) bodySelections.push(selectionOf("nacl-0-0-0-0", [1, 0, 0]));
+    for (const selection of bodySelections) {
+      const cluster = buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selection);
+      for (const n of cluster.neighbors) {
+        const canonical = siteById.get(n.siteId)!;
+        for (let axis = 0; axis < 3; axis += 1) {
+          const expected = canonical.cartesian[axis] + n.periodicImageShift[axis] * size * a;
+          expect(n.cartesian[axis]).toBeCloseTo(expected, 6);
+        }
+      }
     }
   }
 });
