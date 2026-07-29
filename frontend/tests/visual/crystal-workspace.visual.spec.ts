@@ -82,8 +82,14 @@ test.describe("NaCl 周期探索工作台", () => {
     // 4. 默认 2×2×2：晶胞 8 / 化学式单位 32 / 独立位点 64 / 显示实例 125。
     await expect(page.getByTestId("periodic-fact-cells")).toContainText("8");
     await expect(page.getByTestId("periodic-fact-formula-units")).toContainText("32");
+    await expect(page.getByTestId("periodic-fact-independent")).toContainText(
+      "周期模型中的独立离子位点",
+    );
     await expect(page.getByTestId("periodic-fact-independent")).toContainText("64");
     await expect(page.getByTestId("periodic-fact-display")).toContainText("125");
+    await expect(page.getByTestId("nacl-periodic-summary-copy")).toContainText(
+      "不重复计入化学组成",
+    );
     // 2×2×2 按钮选中。
     await expect(page.getByTestId("workspace-size-2")).toHaveAttribute("aria-pressed", "true");
 
@@ -301,6 +307,7 @@ test.describe("NaCl 周期探索工作台", () => {
     // 出现当前选择区域，配位数 6、最近邻为异号离子。
     await expect(page.getByTestId("periodic-selection")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("selection-coordination")).toContainText("6");
+    await expect(page.getByTestId("selection-distance")).toContainText("无量纲显示尺度");
     // 最近邻为异号离子：中心是 Cl⁻（原点）时最近邻显示「6 个 Na⁺」，反之「6 个 Cl⁻」。
     await expect(page.getByTestId("selection-neighbors")).toContainText("6 个");
     // 出现「仅看配位层」与「退出选择」。

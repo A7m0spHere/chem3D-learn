@@ -25,7 +25,7 @@ import type { MoleculeRecord } from "@/types/molecule";
 // 纯函数内核。
 //
 // 关键区分（教学正确性）：
-//   - 8·N³（8/64/216）是「周期独立离子位点」数；
+//   - 8·N³（8/64/216）是「周期模型中的独立离子位点」数，不是对称学不等价位点数；
 //   - (2N+1)³（27/125/343）是「当前画面中的显示实例」数，含为闭合正侧边界而绘制的
 //     显示副本（NaClDisplayInstance）。边界显示副本不重复计入化学组成。
 //   - T-028C 的幽灵邻居（isGhost）只是当前配位观察的临时周期镜像，不计入以上任何统计，
@@ -158,9 +158,9 @@ export function NaClPeriodicCell({
       summary={(
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span className="min-w-0" data-testid="nacl-periodic-summary-copy">
-            周期独立位点 {independentSites} 个（Na⁺ 与 Cl⁻ 各 {independentSites / 2} 个）；
+            周期模型中的独立离子位点 {independentSites} 个（Na⁺ 与 Cl⁻ 各 {independentSites / 2} 个）；
             显示实例 {displayInstances} 个，含闭合正侧边界的周期镜像副本，不重复计入化学组成。
-            点击任一离子可高亮其六个最近邻，虚线仅表示最近邻配位关系，不是共价键。
+            点击任一离子可高亮其第一配位层的六个最近邻，虚线是最近邻配位引导线，不是共价键。
           </span>
           <div className="shrink-0">
             <CrystalAtomLegend atoms={molecule.atoms} />
@@ -319,7 +319,7 @@ function FocusIon({ atom }: { atom: NaClCoordinationDisplayAtom }) {
   const scale = isCenter ? CENTER_SCALE : NEIGHBOR_SCALE;
 
   if (atom.isGhost) {
-    // 幽灵邻居：半透明本色 + 线框轮廓，明确区别于当前显示模型中的实体粒子。
+    // 周期补齐镜像（幽灵邻居）：半透明本色 + 线框轮廓，区别于常规显示实例。
     return (
       <group position={atom.cartesian}>
         <mesh scale={scale}>

@@ -3,8 +3,8 @@
 //
 // 这里只放无 React / R3F / Three.js 副作用的坐标、位点与配位计算，方便单测覆盖。
 // 本内核不读取、不修改 frontend/src/data/manual/nacl.json；现有 NaClCell.tsx 的
-// 单晶胞教学模式（27 个边界展开位置、均摊计数 4:4、siteType 显示属性）保持不变，
-// 本轮不接入旧 Viewer，不实现显示边界副本、点击选择与幽灵粒子。
+// 单晶胞教学模式（27 个边界展开位置、均摊计数 4:4、siteType 显示属性）与
+// NaClPeriodicCell.tsx 的周期探索模式保持数据源分离。
 //
 // 晶体学约定：
 //   - 使用 NaCl「常规立方晶胞」（conventional cubic cell），不是原胞（primitive cell）。
@@ -16,7 +16,7 @@
 //   - 区分两类对象：
 //       * NaClPeriodicSite  —— N×N×N 超晶胞中的独立离子位点（8·N³ 个）；
 //       * NaClDisplayInstance —— 为补齐外边界而显示的同一周期位点的镜像副本。
-//     本轮只实现前者与配位镜像计算；后者仅预留类型边界，不实现其填充逻辑。
+//     配位观察另有临时 ghost 镜像；三者均保持独立的数据身份与计数语义。
 //
 // basisIndex 约定：
 //   全局索引 0..7，跨两个子格子在一个常规晶胞内唯一：Cl⁻ 子格子 0..3，Na⁺ 子格子 4..7。
@@ -92,8 +92,7 @@ export type NaClPeriodicNeighbor = {
  * 超晶胞周期平移，非零值表示它来自当前超晶胞外的周期镜像。T-028B 依据此字段
  * （而非 cellOffset）判断幽灵粒子。
  *
- * 本轮（T-028A）只预留类型边界，不实现其生成逻辑；后续 T-028B/C 在渲染层
- * 需要时再填充，且必须与 NaClPeriodicSite 明确区分。
+ * 由 generateNaClDisplayInstances 生成，且必须与 NaClPeriodicSite 明确区分。
  */
 export type NaClDisplayInstance = {
   id: string;
@@ -108,8 +107,7 @@ export type NaClDisplayInstance = {
  * Cl⁻ 子格子构成面心立方（FCC）骨架；Na⁺ 子格子 = Cl⁻ 子格子整体平移 (1/2,0,0)
  * （等价于沿任一基矢平移 a/2），填入八面体空隙。两类子格子各 4 个位点。
  *
- * 来源：标准 NaCl 结构（Cl⁻ 面心立方，Na⁺ 填全部八面体空隙）。
- * TODO-CHEM-VERIFY：基元位点取自 NaCl 标准晶体学表示，沿用高中教材常规立方晶胞画法。
+ * 已完成化学复核：见 docs/CHEMISTRY_VERIFICATION.md 的「常规晶胞与分数坐标」。
  */
 export const naclConventionalBasis: {
   chloride: Vec3[];
@@ -129,7 +127,10 @@ export const naclConventionalBasis: {
   ],
 };
 
-/** 常规立方晶胞边长 a。取 2 使坐标系与现有 nacl.json 的 ±1 尺度量级一致（本内核不读 nacl.json）。 */
+/**
+ * 常规胞的无量纲显示尺度 a_model。
+ * 取 2 使坐标系与现有 nacl.json 的 ±1 尺度量级一致；它不是 Å、nm 等物理晶格常数。
+ */
 export const NACL_LATTICE_PARAMETER = 2;
 
 /**
@@ -137,7 +138,7 @@ export const NACL_LATTICE_PARAMETER = 2;
  *
  * NaCl 中 Na⁺ 位于 (1/2,0,0)，其最近邻 Cl⁻ 位于 (0,0,0)，位移 (−1/2,0,0)，
  * 距离 a/2。六个最近邻方向为 ±x、±y、±z（每方向各 ±a/2）。
- * TODO-CHEM-VERIFY：Na-Cl 最近邻距离 a/2、方向沿三轴 ±，为 NaCl 标准结构结果。
+ * 已完成化学复核：见 docs/CHEMISTRY_VERIFICATION.md 的「配位数与最近邻距离」。
  */
 export const NACL_NEAREST_DISTANCE = NACL_LATTICE_PARAMETER / 2;
 

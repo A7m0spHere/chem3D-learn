@@ -8,17 +8,19 @@
 
 ## 进行中
 
-- **T-028 Crystal Workspace / 晶体探索工作台**（新方向，分阶段实施）
-  - **T-028A**：NaCl 周期几何纯函数内核 + 逻辑测试 —— ✅ 已完成（合并入 main，commit `a48d65d` + `777f468`，详见 D-026）。
-  - **T-028B**：NaCl 周期探索 Viewer —— ✅ 已完成（分支 `feat/t-028b-nacl-periodic-viewer`，commit `5a44e30` + Commit 2，详见下方「已完成」与 D-027）。
-  - **T-028C**：粒子选择与第一配位层隔离 —— ✅ 已完成（分支 `feat/t-028c-nacl-coordination-selection`，commit `a7fe1c6` + Commit 2，详见下方「已完成」与 D-028）。
-  - **T-028D**：稳定化、交互收尾与上线验收 —— ✅ 已完成（分支 `feat/t-028d-crystal-workspace-stabilization`，详见下方「已完成」与 D-029）。
+- **T-029 NaCl 发布候选验收**（分阶段实施）
+  - **T-029A**：NaCl 化学事实复核与发布候选资料固化 —— ✅ 已完成（分支 `feat/t-029a-nacl-chemistry-verification`，详见下方「已完成」与 D-030）。
+  - **T-029B**：macOS Darwin 视觉回归审核 —— ⏳ 待办；T-029B 完成前，T-029 整组保持进行中。
 
 ---
 
 ## 待办（按优先级）
 
-（暂无。T-028 系列 A—D 已全部收口；下一阶段由用户从 PROJECT_STATUS 候选方向中确认。）
+- **T-029B macOS Darwin 视觉回归审核**
+  - 在 macOS 环境运行完整 `npm run test:visual`，审核 T-023 的 2 张预期漂移和 T-028D/T-029A NaCl 工作台可见变化。
+  - 只在确认 UI 变化符合预期后更新 `*-darwin.png`；Windows 不创建或改写 Darwin 基线。
+  - 复核窄屏、课堂投影、周期模型三档尺寸、选择/隔离/ghost 文案与旧教学 Viewer。
+  - 不在本任务顺带增加新功能、改化学几何或发布版本标签。
 
 ---
 
@@ -29,6 +31,21 @@
 ---
 
 ## 已完成
+
+### T-029A NaCl 化学事实复核与发布候选资料固化
+
+- **完成**：2026-07-29（Codex）
+- **分支**：`feat/t-029a-nacl-chemistry-verification`
+- **内容**：
+  - 以 IUCr International Tables / Online Dictionary、IUCr 委员会报告、AFLOW、Materials Project / OSTI 与同行评审论文核对 NaCl 岩盐型结构。
+  - 确认现有 `Fm-3m` FCC 常规胞的 Cl 4a / Na 4b 分数坐标、4+4 离子、4 个 NaCl 化学式单位、双方六配位、`±x/±y/±z` 与物理最近邻距离 `a/2` 均正确；没有修改几何数据。
+  - 新增 `docs/CHEMISTRY_VERIFICATION.md`，把来源、结论、代码与测试逐项对应；两处 NaCl `TODO-CHEM-VERIFY` 已替换为该文档引用。
+  - 明确 `NACL_LATTICE_PARAMETER=2` 是无量纲 `a_model`；区分 `8N³` canonical 组成、项目算法的 `(2N+1)³` display instances（27/125/343）和临时 ghost images。
+  - 收紧周期 Viewer 与 `nacl.json` 的课堂文案：六条虚线 / `ionic-neighbor` 记录只表示第一配位层最近邻，不是共价键；离子晶体不描述为离散 NaCl 分子。
+- **验收标准达成**：结构、坐标、组成、配位和尺度均有权威来源；实现与 149 项逻辑测试对应；UI 可见语义有浏览器断言；T-029B 明确保留、没有在 Windows 更新快照。
+- **验证**：build/lint 通过；logic 149/149；Chrome production 3/3；Crystal Workspace 最终 4/4（既知 R3F 瞬时错误首次出现一次，随后定向 3/3 与整组 4/4）；旧 NaCl Viewer 1/1。
+- **明确未做**：T-029B Darwin 快照审核、版本号 / tag、其他化学条目、几何重写、新功能。
+- **下一步**：T-029B macOS Darwin 视觉回归审核。
 
 ### T-028D Crystal Workspace 稳定化、交互收尾与上线验收
 

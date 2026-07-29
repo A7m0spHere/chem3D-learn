@@ -67,6 +67,18 @@ For documentation-only tasks:
 - [ ] Uncertain facts are marked `TODO-CHEM-VERIFY`.
 - [ ] Protected manual IDs are not overwritten accidentally.
 
+## Chemistry verification / 化学内容复核
+
+- [ ] 结构类型、空间群、Wyckoff 位置、配位数等事实引用 IUCr、同行评审论文或可追溯晶体结构数据库，而不是只引用项目测试。
+- [ ] 常规晶胞、原胞、化学式单位与对称学不等价位点没有混用。
+- [ ] 手写分数坐标逐项映射到权威结构记录，并说明采用的原点与晶胞选择。
+- [ ] 配位数、第一配位层方向和最近邻距离关系同时有来源依据与代码测试。
+- [ ] 模型显示尺度与带 Å / nm 单位的物理晶格常数明确区分。
+- [ ] canonical 组成计数、边界 display instance 与临时 ghost image 明确区分。
+- [ ] 配位引导线不写成共价键，离子晶体不暗示为离散分子。
+- [ ] 已核实的 `TODO-CHEM-VERIFY` 替换为可追溯说明；仍不确定的事实继续保留标记。
+- [ ] 涉及可见文案或布局变化时，在 macOS 审核 Darwin 快照；Windows 不更新基线（NaCl 本轮对应 T-029B）。
+
 ## Gemini Draft Review
 
 - [ ] Gemini draft material is treated as reference, not source of architectural truth.

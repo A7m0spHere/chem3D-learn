@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Codex，T-028D Crystal Workspace 稳定化与上线验收）
+> 最后更新：2026-07-29（Codex，T-029A NaCl 化学事实复核与发布候选资料固化）
 
 ## 一句话定位
 
@@ -25,6 +25,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
 ## 当前工作区状态（重要）
+
+- **T-029A 已完成并进入发布候选交付**（2026-07-29，分支 `feat/t-029a-nacl-chemistry-verification`）：以 IUCr、AFLOW、Materials Project / OSTI 与同行评审资料核对 NaCl 岩盐型结构，确认现有 `Fm-3m` 常规胞 4 Cl⁻ + 4 Na⁺ 坐标、4 个化学式单位、双方六配位、`±x/±y/±z` 最近邻和物理距离关系 `a/2` 均正确，没有实际化学数据错误。新增 `docs/CHEMISTRY_VERIFICATION.md` 固化来源—结论—代码—测试映射；代码中的 `2` 明确为无量纲显示尺度 `a_model`，并在 UI 区分 `8N³` canonical 组成、`(2N+1)³` display instances 与 ghost images。NaCl 两处 `TODO-CHEM-VERIFY` 已由可追溯引用替换。T-029B Darwin 视觉回归仍待 macOS 环境执行，本轮未更新快照。
 
 - **T-027 已部署并推送**（2026-07-29，`6ada065` / `f31a6e3` / `67f5f94`）：正式公开站点为 `https://a7m0sphere.github.io/chem3D-learn/`。GitHub Pages 已设为 Actions 发布源，`deploy-pages.yml` 在 `main` 变化后安装前端依赖、运行 Pages 专用构建与 3 项产物测试，再发布 `frontend/dist`；首次 run `30400567495` 的 build / deploy 均成功。Vite 用 `/chem3D-learn/` 子路径构建，React Router 从 `%BASE_URL%` 生成的 `<base>` 读取 basename，`404.html` 负责保留并恢复直接访问的深层路由。README 已加入在线体验入口，`index.html` 已补 canonical、Open Graph / Twitter 元信息，社交图为 `frontend/public/og.png`。
 
@@ -52,6 +54,15 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-07-29，T-029A）
+
+- `frontend npm run build`：**通过**；保留按需 `ThreeViewerFrame` 837.71 KB / gzip 225.32 KB 的既有非阻断 large chunk 警告。
+- `frontend npm run lint`：**通过**；`frontend npm run test:logic`：**149 / 149 通过**。
+- 设置 `$env:PLAYWRIGHT_CHANNEL='chrome'` 后运行 `npm run test:production`：**3 / 3 通过**。
+- Chrome `crystal-workspace.visual.spec.ts`：首次 3 / 4，通过项包含全部新增语义断言；边界点击用例出现一次 D-029 已记录的 R3F Provider 空事件目标瞬时错误。随后该用例连续 **3 / 3 通过**，完整整组复跑 **4 / 4 通过**。
+- Chrome 旧 NaCl Viewer 定向用例：**1 / 1 通过**。
+- `git diff --check` 在最终提交前复核；未运行完整 Darwin 视觉回归，未更新任何快照。
 
 ## 独立验证结果（2026-07-29，T-027）
 
@@ -141,9 +152,15 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 正在进行
 
-- **Crystal Workspace / 晶体探索工作台（T-028 系列）**：面向初高中学生与化学爱好者的「数字化结构模型盒 + 科学探索工作台」。T-028A（NaCl 周期几何内核）/ A.1（坐标语义修正）/ B（周期 Viewer）/ C（粒子选择与第一配位层）/ D（稳定化、交互收尾与上线验收）均已完成；其他晶体接入、保存/分享/截图等高级能力未立项。
+- **T-029 NaCl 发布候选验收**：T-029A（化学事实复核与资料固化）已完成；T-029B（macOS Darwin 视觉回归审核）待执行。T-029B 未完成前不把整组标为完成。
 
 ## 最近完成
+
+- **T-029A NaCl 化学事实复核与发布候选资料固化**（2026-07-29 完成，分支 `feat/t-029a-nacl-chemistry-verification`）
+  - 权威来源确认现有 NaCl 常规胞坐标、4+4 组成、双方六配位、最近邻方向与 `a/2` 关系正确；没有改几何数据。
+  - 新增 `docs/CHEMISTRY_VERIFICATION.md`，明确常规胞 / 原胞、两个 Wyckoff 轨道 / 8 个完整位置、`8N³` 组成 / `(2N+1)³` 显示实例，以及 ghost / 配位虚线的教学边界。
+  - `NACL_LATTICE_PARAMETER=2` 改以 `a_model` 解释；课堂文案使用“周期模型中的独立离子位点”“周期补齐镜像”“无量纲显示尺度”，不把显示副本说成新增离子、不把配位线说成共价键。
+  - 验证：build/lint 通过；logic 149/149；Chrome production 3/3、Crystal Workspace 最终 4/4、旧 NaCl Viewer 1/1。未运行或更新 Darwin 快照。
 
 - **T-028D Crystal Workspace 稳定化、交互收尾与上线验收**（2026-07-29 完成，分支 `feat/t-028d-crystal-workspace-stabilization`）
   - 保留 `Canvas key={size}` 与现有 `onPointerMissed`：系统 Chrome 实测证明尺寸切换能可靠重置相机、OrbitControls 拖拽不会误清选择；显式「退出选择」仍是清除主路径，不为本轮引入相机持久化。
@@ -296,12 +313,12 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-T-028A/A.1/B/C/D 已全部完成。本轮不擅自选择下一阶段；以下候选均未立项，动手前由用户确认：
+T-029A 已完成。下一步只推进已明确的 T-029B；其余仍是未立项候选：
 
-1. 评估把周期探索能力扩展到 CsCl 等其他晶体；每种晶体必须有自己的配位 cluster 生成器，不能复用 NaCl 的“异号六配位”假设。
-2. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。
-3. 在 macOS 环境跑完整 Darwin 视觉回归，审核 T-023 的 2 张预期漂移与 T-028D 工作台视觉变化；Windows 不更新基线。
-4. 化学待核实项收口：BF₃ 缺电子表述、CaF₂ 晶胞参数，以及 NaCl 最近邻距离/方向的 `TODO-CHEM-VERIFY`。
+1. **T-029B**：在 macOS 环境运行完整 Darwin 视觉回归，审核 T-023 的 2 张预期漂移与 T-028D/T-029A NaCl 工作台可见文案变化；Windows 不更新基线。
+2. 评估把周期探索能力扩展到 CsCl 等其他晶体；每种晶体必须有自己的配位 cluster 生成器，不能复用 NaCl 的“异号六配位”假设。
+3. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。
+4. 化学待核实项收口：BF₃ 缺电子表述与 CaF₂ 晶胞参数。
 5. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B 推进。
 
 已收口的历史优先项（仅供追溯）：

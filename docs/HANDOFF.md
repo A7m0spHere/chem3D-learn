@@ -9,47 +9,48 @@
 
 - **Agent**：Codex
 - **日期**：2026-07-29
-- **分支**：`feat/t-028d-crystal-workspace-stabilization`（由已 ff-merge T-028C 的 `main` 切出）
-- **任务**：T-028D Crystal Workspace 稳定化、交互收尾与上线验收。
+- **分支**：`feat/t-029a-nacl-chemistry-verification`（由与 `origin/main` 同步的 `main` 切出）
+- **任务**：T-029A NaCl 化学事实复核与发布候选资料固化。
 
 ### 本轮做的事
 
-1. **先完成 T-028C 对接**：在干净且与远端一致的工作区上完成 T-028C 全量验证，将 `feat/t-028c-nacl-coordination-selection` fast-forward 合并到 `main` 并推送，再创建本分支。
-2. **真实浏览器审计**：用系统 Chrome 在 1440×900、1280×720、768×900、390×844 检查 Viewer、工具栏、右侧面板、边界显示副本、隔离模式与 OrbitControls。四档均无横向溢出；通过归一化 Canvas 网格稳定点击到边界显示副本，验证幽灵邻居非零、没有异常长线、拖拽不会误清选择。
-3. **交互与 UI 收尾**：
-   - `CrystalWorkspaceToolbar.tsx`：用 `fieldset/legend` 分组「观察范围 / 晶胞边框 / 当前选择」；移动端各组换行；按钮显式锁定 44px 高度，保留 `aria-pressed` 与键盘 Enter。
-   - `NaClPeriodicCell.tsx`：Canvas 外层语义容器增加辅助名称；实例 hover 显示 pointer 并轻度放大；晶胞边框使用稳定 `segment.id` key；移动端摘要与原子图例上下堆叠，桌面仍左右并排。保留 `Canvas key={size}`、`frameloop="demand"` 和 `onPointerMissed`。
-   - `NaClPeriodicPanel.tsx`：增加精简 `aria-live` 选中播报、aside 名称与正确标题层级；显示身份移到摘要末位并改为课堂友好文案，配位数/最近邻/幽灵数量继续突出。
-4. **回归测试**：`crystal-workspace.visual.spec.ts` 由 2 项扩为 4 项，新增真实边界副本点击、hover、幽灵邻居、隔离后拖拽保持、四档无溢出、44px 触控目标、390px 摘要宽度与键盘切换。测试不含截图，不触碰 Darwin 基线。
-5. **范围控制**：未修改 `naclPeriodicGeometry.ts`、`useCrystalWorkspaceControls.ts`、`ModuleDetailPage.tsx` 或化学数据；未新增依赖；未做相机持久化、其他晶体接入、保存/分享/截图等扩展。
+1. **先核对来源，不用测试代替化学证据**：查阅 IUCr International Tables / Online Dictionary、IUCr 委员会报告、AFLOW rock-salt 原型、Materials Project / OSTI 与同行评审论文，新增 `docs/CHEMISTRY_VERIFICATION.md` 固化来源—结论—代码—测试映射。
+2. **确认实现没有实际化学错误**：现有 `Fm-3m` FCC 常规胞的 Cl 4a / Na 4b 坐标正确，常规胞为 4 Cl⁻ + 4 Na⁺ = 4 个 NaCl 化学式单位；双方第一配位层均为 6 个异号离子，方向 `±x/±y/±z`，物理最近邻距离为 `a/2`。没有修改几何坐标或计数算法。
+3. **分离物理量与显示算法**：`NACL_LATTICE_PARAMETER=2` 明确为无量纲显示尺度 `a_model`，内部最近邻为 `a_model/2=1`；组成使用 `8N³` canonical 位点，项目显示实例为 `(2N+1)³`（27/125/343），边界副本与 ghost 均不增加化学组成。
+4. **收紧课堂文案**：UI 改说“周期模型中的独立离子位点”“周期补齐镜像（幽灵）”“无量纲显示尺度”；六条虚线与旧 `nacl.json` 的 `ionic-neighbor` 记录明确只是第一配位层引导，不是共价键。NaCl 两处 `TODO-CHEM-VERIFY` 已替换为核验文档引用。
+5. **治理收口**：新增 Chemistry verification QA 清单，追加 D-030，更新 STATUS / TASKS；T-029A 已完成，但 T-029 整组继续进行中，下一项固定为 T-029B macOS Darwin 视觉回归。
 
 ### 验证结果
 
-- `npm run build` 通过；`npm run lint` 通过（0 warning）。
+- `npm run build` 通过；`npm run lint` 通过。
 - `npm run test:logic`：**149/149 通过**。
 - Chrome `npm run test:production`：**3/3 通过**；首页仍不提前下载 three/r3f。
-- Chrome `crystal-workspace.visual.spec.ts`：**4/4 通过**。
-- Chrome `module-state-reset.visual.spec.ts`：**5/5 通过**。
+- Chrome `crystal-workspace.visual.spec.ts`：首次 3/4，边界点击用例出现一次 D-029 已记录的 R3F Provider 空事件目标瞬时错误；随后目标用例连续 **3/3 通过**，完整整组复跑 **4/4 通过**。
 - Chrome `crystal-viewer` 的「NaCl 配位与计数结论位于 Viewer 外壳」：**1/1 通过**。
-- 改前/改后四档截图已在 Codex 可视化目录目检；没有更新仓库视觉快照。
+- 未运行或更新 Darwin 快照。
 
 ### 关键决定与审计结论
 
-- 完整身份 `siteId + periodicImageShift`、combined shift 与 ghost 判定未改；真实边界点击证明浏览器层与纯函数契约一致。
-- `Canvas key={size}` 继续保留：切尺寸重置观察角度是有意取舍，用来保证不同尺寸完整入画。本轮没有实现相机持久化。
-- `onPointerMissed` 保留；OrbitControls 拖拽测试证明不会误清。主可靠清除路径仍是「退出选择」。
-- 审计首次运行曾捕获一次 R3F Provider 对空事件目标调用 `addEventListener` 的瞬时错误；同一链立即通过，随后 `--repeat-each=3` 连续 3 次全通过，无法复现，因此未做猜测性生命周期修改。详见 D-029。
+- 项目使用的是常规立方晶胞，不是原胞；4+4 个完整位置来自两个被占据的 Wyckoff 轨道，不是 8 个对称学不等价位点。
+- `8N³` 是有限超晶胞不重复组成计数；`(2N+1)³` 只描述当前边界闭合显示算法。以后扩展 Viewer 时不能混用。
+- 测试证明代码符合已确认关系，但不能替代权威化学来源；新增或改动晶体事实时按 `docs/CHEMISTRY_VERIFICATION.md` 与 QA 清单补证据链。
+- 首次浏览器瞬时错误与 T-029A 文案 / 数据无稳定因果，连续复跑通过，因此未扩大为生命周期修复。
 
 ### 已知限制
 
 - WebGL 离子选择仍需要 pointer；工具栏操作与选中结果已有键盘/辅助技术支持，但本轮没有为 125/343 个空间实例生成隐藏 DOM 控件。
-- 完整 Darwin 视觉回归未运行、未更新；当前 Windows 环境只运行系统 Chrome 无截图测试与人工截图目检。
-- Na-Cl 最近邻距离 a/2 标 `TODO-CHEM-VERIFY`，待化学复核。
-- T-028D 后不自动立项；下一阶段由用户从 PROJECT_STATUS 候选方向中选择。
+- 没有在 Viewer 中给出某一温度、压力下的物理晶格参数；`a_model` 不可换算为 Å / nm。
+- 完整 Darwin 视觉回归未运行、未更新；T-029B 必须在 macOS 审核可见文案与既有预期漂移。
+- BF₃ 缺电子表述、CaF₂ 晶胞参数仍是独立化学待核实项，不在 T-029A 范围内。
+- 本轮未创建版本号或 tag，也未新增功能。
 
 ---
 
 ## 往期
+
+### 2026-07-29 Codex：T-028D Crystal Workspace 稳定化、交互收尾与上线验收
+
+- 保留相机重置与显式清除策略，完成 toolbar 分组、44px 触控、Canvas/面板可访问性、移动摘要及真实边界副本交互验收。build/lint、logic 149/149、Chrome production 3/3、工作台 4/4、模块复位 5/5、旧 NaCl 1/1。详见 D-029 与 TASKS T-028D。
 
 ### 2026-07-29 Claude Code：T-028C NaCl 粒子选择与第一配位层隔离
 

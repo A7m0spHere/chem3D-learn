@@ -34,7 +34,7 @@ export function NaClPeriodicPanel({
   const N = supercellSize;
   const cellCount = N ** 3; // 常规晶胞数
   const formulaUnits = 4 * N ** 3; // NaCl 化学式单位
-  const independentSites = 8 * N ** 3; // 周期独立位点
+  const independentSites = 8 * N ** 3; // 周期模型中不重复计数的离子位点
   const ionPerType = 4 * N ** 3; // Na⁺ 或 Cl⁻ 各自
   const displayInstances = (2 * N + 1) ** 3; // 显示实例
 
@@ -111,14 +111,14 @@ export function NaClPeriodicPanel({
                 value={`6 个 ${selection.neighborElement}`}
               />
               <FactRow
-                label="周期补齐（幽灵）"
+                label="周期补齐镜像（幽灵）"
                 testid="selection-ghosts"
                 value={`${selection.ghostCount} 个来自相邻周期`}
               />
               <FactRow
                 label="最近邻距离"
                 testid="selection-distance"
-                value="当前模型尺度下 1"
+                value="a_model/2 = 1（无量纲显示尺度）"
               />
               <FactRow
                 label="仅看配位层"
@@ -137,7 +137,7 @@ export function NaClPeriodicPanel({
                 ? "这是当前超晶胞内的显示本体。"
                 : "这是为闭合正侧边界而绘制的显示副本；配位中心保留在你实际点击的位置。"}
               {selection.ghostCount > 0
-                ? " 其中部分最近邻位于当前超晶胞外，用半透明幽灵粒子临时补齐，来自相邻周期。"
+                ? " 其中部分最近邻位于当前超晶胞外，用半透明周期补齐镜像（幽灵粒子）临时补齐。"
                 : " 六个最近邻都已存在于当前显示模型内。"}
             </p>
             <p className="mt-2 text-xs leading-6 text-text-secondary">
@@ -167,9 +167,9 @@ export function NaClPeriodicPanel({
             <FactRow label="当前范围" testid="periodic-fact-range" value={`${N}×${N}×${N} 超晶胞`} />
             <FactRow label="常规晶胞数" testid="periodic-fact-cells" value={`${cellCount}`} />
             <FactRow label="NaCl 化学式单位" testid="periodic-fact-formula-units" value={`${formulaUnits}`} strong />
-            <FactRow label="周期独立位点" testid="periodic-fact-independent" value={`${independentSites}`} strong />
-            <FactRow label="Na⁺ 独立位点" testid="periodic-fact-na" value={`${ionPerType}`} />
-            <FactRow label="Cl⁻ 独立位点" testid="periodic-fact-cl" value={`${ionPerType}`} />
+            <FactRow label="周期模型中的独立离子位点" testid="periodic-fact-independent" value={`${independentSites}`} strong />
+            <FactRow label="Na⁺ 组成位点" testid="periodic-fact-na" value={`${ionPerType}`} />
+            <FactRow label="Cl⁻ 组成位点" testid="periodic-fact-cl" value={`${ionPerType}`} />
             <FactRow label="当前显示实例" testid="periodic-fact-display" value={`${displayInstances}`} />
           </dl>
         </section>
@@ -183,7 +183,8 @@ export function NaClPeriodicPanel({
             外边界上的显示副本用于闭合周期模型，不代表额外的独立离子，也不重复计入化学组成。
           </p>
           <p className="mt-2 text-sm leading-6 text-text-secondary">
-            {independentSites} 个周期独立位点才是真实的离子数量（Na⁺ 与 Cl⁻ 各 {ionPerType} 个）；
+            {independentSites} 个周期模型位点是当前 {N}×{N}×{N} 超晶胞的不重复组成计数
+            （Na⁺ 与 Cl⁻ 各 {ionPerType} 个），不是对称学不等价位点数；
             {displayInstances} 个显示实例中多出的部分，是为了让正侧边界视觉闭合而绘制的周期镜像副本。
           </p>
         </section>

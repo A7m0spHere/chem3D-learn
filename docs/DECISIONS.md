@@ -375,3 +375,18 @@
   - 一次审计中出现过 `Provider` 对空事件目标调用 `addEventListener` 的瞬时错误，但同一完整链随后单次通过，并连续复跑 3 次全部通过，无法稳定复现；按“只修可复现问题”原则不做猜测性生命周期改造。
   - 可访问性改动应准确表达能力。工具栏动作均可键盘操作；选中结果可播报。为 WebGL 实例伪造大量隐藏控件既难与空间位置对应，也会显著增加认知与维护成本。
 - **验证与边界**：build/lint 通过；logic 149/149；Chrome production 3/3、Crystal Workspace 4/4、模块状态重置 5/5、旧 NaCl Viewer 1/1。1440×900、1280×720、768×900、390×844 均无横向溢出，按钮高度 ≥44px；边界显示副本真实点击、幽灵配位与 OrbitControls 拖拽保持已覆盖。Windows 未运行或更新 Darwin 快照。
+
+## D-030 NaCl 化学事实以来源—实现—测试映射固化；物理晶格常数与显示尺度严格分离（T-029A）
+
+- **日期**：2026-07-29（Codex）
+- **分支**：`feat/t-029a-nacl-chemistry-verification`
+- **决定**：
+  1. 新增 `docs/CHEMISTRY_VERIFICATION.md` 作为 NaCl 教学模型的化学核验入口，优先引用 IUCr、同行评审论文、AFLOW 与 Materials Project / OSTI，并把每条结论映射到代码和测试；项目测试只验证实现符合已确认关系，不充当化学来源。
+  2. 保留 `naclConventionalBasis` 的 4 Cl⁻（4a）+ 4 Na⁺（4b）坐标。核对确认它是 `Fm-3m` 岩盐型的 FCC 常规立方晶胞，含 4 个 NaCl 化学式单位；没有实际坐标错误，也不把 8 个位置称为 8 个对称学不等价位点。
+  3. 把 `NACL_LATTICE_PARAMETER = 2` 定义为无量纲显示尺度 `a_model`，最近邻内部距离为 `a_model/2 = 1`。物理最近邻关系仍写作 `a/2`；没有温压与单位信息时，不把显示数值冒充 Å 或 nm。
+  4. 组成只按半开周期区间中的 canonical sites 统计：N×N×N 常规胞有 `8N³` 个离子位点、Na⁺:Cl⁻=1:1。项目算法产生的 `(2N+1)³` 个 display instances（27/125/343）以及选择时临时补出的 ghost images 都不增加化学组成。
+  5. 周期 Viewer 的六条虚线只表示第一配位层最近邻关系，不写入 `molecule.bonds`、不称共价键；旧教学 Viewer 为通用 schema 保存的 `kind: "ionic-neighbor"` 记录也只作教学引导。
+- **理由**：
+  - 晶体学术语、有限显示算法和课堂简化此前分散在代码注释与交接记录中，容易把“显示了多少个球”误解为“晶胞实际含多少粒子”，或把无量纲渲染长度误当物理晶格参数。
+  - 现有 149 项逻辑测试已经完整覆盖 4+4 基元、`8N³`、六配位、`±x/±y/±z`、`a_model/2`、27/125/343 与 ghost 身份；重复实现第二套化学算法会增加漂移风险，因此本轮只补来源、术语和可见语义断言。
+- **验证与边界**：`npm run build`、`npm run lint`、logic 149/149、Chrome production 3/3、Crystal Workspace 最终 4/4、旧 NaCl Viewer 1/1 通过。边界点击用例首次出现一次 D-029 已记录的 R3F Provider 空事件目标瞬时错误，随后定向连续 3/3 与完整整组 4/4 均通过，未做与 T-029A 无关的猜测性生命周期改造。未运行或更新 Darwin 快照；T-029B 继续待办。

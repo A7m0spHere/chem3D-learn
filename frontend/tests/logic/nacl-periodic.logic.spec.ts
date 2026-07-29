@@ -565,7 +565,7 @@ test("getNaClCoordinationImages：相同输入结果顺序与内容确定", () =
 
 // === NACL_NEAREST_DISTANCE 常量一致性 ===================================
 
-test("NACL_NEAREST_DISTANCE = a/2 = 1（a=2）", () => {
+test("NACL_NEAREST_DISTANCE = a_model/2 = 1（a_model=2，无量纲显示尺度）", () => {
   expect(NACL_NEAREST_DISTANCE).toBe(1);
   expect(NACL_NEAREST_DISTANCE).toBe(NACL_LATTICE_PARAMETER / 2);
 });
