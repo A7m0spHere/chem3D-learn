@@ -9,10 +9,10 @@
 ## 进行中
 
 - **T-028 Crystal Workspace / 晶体探索工作台**（新方向，分阶段实施）
-  - **T-028A**：NaCl 周期几何纯函数内核 + 逻辑测试 —— ✅ 已完成（分支 `feat/t-028a-nacl-periodic-kernel`，详见下方「已完成」与 D-026）。
-  - **T-028B**：NaCl Viewer 周期扩展渲染 —— 待立项（需用户确认）。
-  - **T-028C**：粒子选择与第一配位层提取 —— 待立项。
-  - **T-028D**：工作台控件条 UI + 完整测试 + 治理收尾 —— 待立项。
+  - **T-028A**：NaCl 周期几何纯函数内核 + 逻辑测试 —— ✅ 已完成（合并入 main，commit `a48d65d` + `777f468`，详见 D-026）。
+  - **T-028B**：NaCl 周期探索 Viewer —— ✅ 已完成（分支 `feat/t-028b-nacl-periodic-viewer`，commit `5a44e30` + Commit 2，详见下方「已完成」与 D-027）。
+  - **T-028C**：粒子选择与第一配位层提取 —— 待立项（需用户确认）。
+  - **T-028D**：工作台控件条 UI 收尾 + 完整测试 + 治理收尾 —— 待立项。
 
 ---
 
@@ -29,6 +29,19 @@
 ---
 
 ## 已完成
+
+### T-028B NaCl 周期探索 Viewer
+
+- **完成**：2026-07-29（Claude Code）
+- **分支**：`feat/t-028b-nacl-periodic-viewer`（由含 `777f468` 的 main 切出；T-028A 已先 ff-merge 到 main）
+- **提交**：`5a44e30 feat(t-028b): add NaCl display and cell-frame geometry` + Commit 2 `feat(t-028b): add NaCl periodic exploration viewer`
+- **内容**：
+  - **Commit 1**：`naclPeriodicGeometry.ts` 新增 `generateNaClDisplayInstances`（闭合正侧边界显示副本，按 fractional=0 轴非空组合生成 +1 周期镜像，数量 (2N+1)³=27/125/343，不创新 NaClPeriodicSite）与 `CrystalCellFrameMode` 类型 + `generateNaClCellFrameSegments`（hidden=0/outer=12/all=3N(N+1)²=12/54/144，共享边去重，每段长 a=2）。新增 20 项 logic 契约。
+  - **Commit 2**：`NaClPeriodicCell.tsx`（Drei `<Instances>` Na⁺/Cl⁻ 双组渲染，相机按 N 动态距离 + Canvas `key={size}` 重置记录取舍）、`useCrystalWorkspaceControls` hook（teaching/2/outer 默认 + 模块切换重置）、`CrystalWorkspaceToolbar`（返回教学/N=1·2·3/外边框·全部·隐藏，沿用 chem-touch-button）、`NaClPeriodicPanel`（状态摘要含 testid FactRow）、`ModuleDetailPage` 接线（crystal-nacl 按 workspaceMode 分发 viewer/toolbar/panel，教学模式加「周期探索」入口按钮不改 CrystalViewMode 联合类型）、`crystal-workspace.visual.spec.ts`（无截图交互测试 10 验证点）。
+  - **关键区分**：8/64/216 是周期独立位点；27/125/343 是显示实例（含闭合正侧边界周期镜像副本，不重复计入化学组成）。状态面板显式注明。
+  - **明确未做**：不实现粒子点击选择/配位线/幽灵配位粒子/自由拖动/T-028C/D；不改 nacl.json；不改其他晶体；不加依赖；不更新 Darwin 快照。
+- **验证**：build/lint 通过；`test:logic` 140 通过；Chrome `test:production` 3/3、`crystal-workspace` 交互 1/1 通过；NaCl 既有文本断言零回归。Windows 其他晶体 Darwin 快照用例因无基线失败（既有平台限制）。详见 D-027、D-026 与 HANDOFF。
+- **下一步**：T-028C 用 `siteId + periodicImageShift` 定位显示实例做粒子选择。
 
 ### T-028A NaCl 周期几何纯函数内核 + 逻辑测试
 

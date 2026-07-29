@@ -320,3 +320,21 @@
 - **修正3（周期镜像可重建契约）**：新增测试断言 `neighbor.cartesian[axis] ≈ canonicalSite.cartesian[axis] + periodicImageShift[axis] * size * NACL_LATTICE_PARAMETER`，三轴都成立，保证 T-028B 能据 canonical site + periodicImageShift 正确放置幽灵粒子。
 - **修正4（API 一致性）**：`getNaClCoordinationImages` 收到 `sites.length !== 8*size³` 时抛错，避免悄悄生成不存在的 canonical siteId。
 - **验证**：build/lint 通过；`test:logic` 109 → 120 通过（删除重心断言、改写旧 imageShift 断言，新增晶胞体积居中/cellOffset/periodicImageShift/重建/API 一致性契约）。无 UI 改动，未运行 Darwin 视觉回归。
+
+## D-027 NaCl 周期探索 Viewer 与教学 Viewer 并存；周期显示副本与独立位点区分；相机用 Canvas key 重置（T-028B）
+
+- **日期**：2026-07-29（Claude Code）
+- **分支**：`feat/t-028b-nacl-periodic-viewer`（由含 `777f468` 的 main 切出；T-028A/A.1 已 ff-merge 到 main）
+- **提交**：`5a44e30`（Commit 1 几何）+ Commit 2（Viewer/接线/交互测试）
+- **决定**：
+  1. **Viewer 并存，不重写教学 Viewer**：现有 `NaClCell.tsx`（27 个边界展开位置、晶胞/六配位/均摊计数/八面体空隙模式、现有标签与测试）完整保留；周期探索用新 `NaClPeriodicCell.tsx`，几何全部来自 `naclPeriodicGeometry.ts` 纯内核，不读 `nacl.json` 作周期数据源。两者在 `ModuleDetailPage` 按 `workspaceMode` 分发，教学模式加「周期探索」入口按钮，**不改 `CrystalViewMode` 联合类型**（其他晶体无影响）。
+  2. **周期独立位点 vs 显示副本严格区分**：`generateNaClPeriodicSites` 输出 8·N³ 个周期独立位点（8/64/216）；`generateNaClDisplayInstances` 输出 (2N+1)³ 个显示实例（27/125/343），含为闭合正侧边界绘制的周期镜像副本（按 fractional=0 轴非空组合生成 +1 平移）。**显示副本不创建新 `NaClPeriodicSite`，不重复计入化学组成**。状态面板 `NaClPeriodicPanel` 显式注明此区分。
+  3. **Drei `<Instances>` 双组渲染**：Na⁺ 与 Cl⁻ 各一组 `<Instances>` 共享 `sphereGeometry`/`material`，343 个粒子不创建 343 份 geometry（沿用 `MetalClosePackingCell`/`ZincMetalCell` 范式）。不为每粒子独立 geometry，不引新依赖。
+  4. **相机用 Canvas `key={size}` 重置**：N=1/2/3 尺寸差异大，用 size 作 Canvas key 重新初始化相机，保证完整结构入画。**取舍**：切换尺寸会重置观察角度；保存相机状态留待 T-028C/D 改进。不引入大型相机状态系统。
+  5. **晶胞边框纯函数**：`generateNaClCellFrameSegments(size, mode)`：hidden=0；outer=12（外立方体完整棱，端点 ±N）；all=3N(N+1)²（共享边去重，每段长 a=2）。
+  6. **状态分离**：`useCrystalWorkspaceControls` hook 只管周期探索专属状态（workspaceMode/supercellSize/cellFrameMode），与教材教学的 `useCrystalControls` 分离；模块切换自动重置 teaching/2/outer。不提前加粒子选择/配位隔离/相机状态。
+- **理由**：
+  - 教学模式是受保护资产（nacl.json 27 原子 + siteType 均摊教学 + Darwin 快照文本断言），重写会破坏既有教学逻辑与测试。并存而非合并是新功能的安全做法。
+  - 区分独立位点与显示副本是晶体学正确性要求：边界显示副本只是视觉闭合手段，不是额外离子。混同会让学生误以为边界离子重复计数。
+  - Canvas key 重置是最简可靠方案，避免复杂相机状态系统；角度重置可接受，因用户主动切尺寸时本就期望重新观察。
+- **验证与边界**：build/lint 通过；`test:logic` 140 通过（新增 20 项几何契约）；Chrome `test:production` 3/3（首页不下载 3D chunk，NaClPeriodicCell 独立懒加载 chunk）；Chrome `crystal-workspace` 交互 1/1（10 验证点）；NaCl 既有文本断言零回归。Windows 其他晶体 Darwin 快照用例因无基线失败（既有平台限制）。相机重置取舍与状态分离边界已记录供 T-028C/D 续接。

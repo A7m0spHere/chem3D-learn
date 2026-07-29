@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Claude Code，T-028A.1 周期坐标语义修正）
+> 最后更新：2026-07-29（Claude Code，T-028B NaCl 周期探索 Viewer）
 
 ## 一句话定位
 
@@ -141,9 +141,17 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 正在进行
 
-- **Crystal Workspace / 晶体探索工作台（新方向，T-028 系列）**：面向初高中学生与化学爱好者的「数字化结构模型盒 + 科学探索工作台」，支持拆/扩/切/改/比。T-028A（NaCl 周期几何纯函数内核）已完成；T-028B（NaCl Viewer 周期扩展渲染）/ T-028C（粒子选择与配位环境）/ T-028D（UI、测试、治理收尾）待立项。
+- **Crystal Workspace / 晶体探索工作台（新方向，T-028 系列）**：面向初高中学生与化学爱好者的「数字化结构模型盒 + 科学探索工作台」，支持拆/扩/切/改/比。T-028A（NaCl 周期几何内核）/ T-028A.1（坐标语义修正）/ T-028B（NaCl 周期探索 Viewer）已完成；T-028C（粒子选择与配位环境）/ T-028D（UI、测试、治理收尾）待立项。
 
 ## 最近完成
+
+- **T-028B NaCl 周期探索 Viewer**（2026-07-29 完成，分支 `feat/t-028b-nacl-periodic-viewer`）
+  - 在现有 NaCl 教学模块中新增独立「周期探索模式」，与教材教学 Viewer（`NaClCell.tsx`，27 个边界展开位置）并存。教学模式完整保留，零回归（`crystal-viewer` 的 NaCl 文本断言、`module-state-reset` 仍通过）。
+  - **Commit 1**（`5a44e30`）：`naclPeriodicGeometry.ts` 新增 `generateNaClDisplayInstances`（闭合正侧边界显示副本，数量 (2N+1)³ = 27/125/343）与 `generateNaClCellFrameSegments`（晶胞边框 hidden=0/outer=12/all=3N(N+1)²）；新增 20 项 logic 契约。
+  - **Commit 2**：`NaClPeriodicCell.tsx`（Drei `<Instances>` 双组渲染，相机按 N 动态距离 + Canvas key 重置）、`useCrystalWorkspaceControls` hook、`CrystalWorkspaceToolbar`、`NaClPeriodicPanel`、`ModuleDetailPage` 接线（crystal-nacl 按 workspaceMode 分发 viewer/toolbar/panel，教学模式加「周期探索」入口不改 CrystalViewMode 联合类型）、`crystal-workspace.visual.spec.ts`（无截图交互测试 10 验证点）。
+  - **关键区分**：8/64/216 是周期独立位点；27/125/343 是显示实例（含闭合正侧边界的周期镜像副本，不重复计入化学组成）。状态面板显式注明此区分。
+  - 首页仍不下载 three/r3f chunk（`test:production` 3/3 通过，NaClPeriodicCell 独立懒加载 chunk）。
+  - build/lint 通过；`test:logic` 140 通过；Chrome `test:production` 3/3、`crystal-workspace` 交互 1/1 通过。Windows 下其他晶体 Darwin 快照用例因无基线+Chrome 差异失败（既有平台限制，非本轮引入）。详见 D-027、D-026 与 HANDOFF。
 
 - **T-028A.1 周期坐标语义修正**（2026-07-29 完成，分支 `feat/t-028a-nacl-periodic-kernel`，follow-up commit 不 amend/force push）
   - 修正 T-028A 两个影响 T-028B 晶胞边框与幽灵粒子的接口问题：
@@ -272,11 +280,10 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-当前进行中方向为 **T-028 Crystal Workspace / 晶体探索工作台**。T-028A 已完成，后续子任务（均需用户确认后立项）：
+当前进行中方向为 **T-028 Crystal Workspace / 晶体探索工作台**。T-028A/A.1/B 已完成，后续子任务（均需用户确认后立项）：
 
-1. **T-028B**：NaCl Viewer 周期扩展渲染。在 NaClCell.tsx 增 `supercellSize` prop，N=1 沿用 `nacl.json` 27 原子 + 现有渲染（零破坏现有测试），N≥2 用 `naclPeriodicGeometry.ts` 生成器数据走新渲染分支；cellFrame 三态（单晶胞/全部/隐藏）。必须遵守 T-028A 接口约束（见 HANDOFF）。
-2. **T-028C**：粒子选择与第一配位层提取。R3F `onClick` 选中粒子、高亮中心+六配位镜像、淡化其他、边界周期补齐幽灵粒子、退出恢复。新建 `useCrystalWorkspaceControls` hook 与 `CrystalContextInspector`。
-3. **T-028D**：工作台控件条 UI + 完整测试 + 治理收尾。
+1. **T-028C**：粒子选择与第一配位层提取。R3F `onClick` 选中粒子、高亮中心+六配位镜像、淡化其他、边界周期补齐幽灵粒子（用 `periodicImageShift !== [0,0,0]` 判断，非 cellOffset）、退出恢复。新建 `useCrystalWorkspaceControls` 扩展（selectedAtomId/isolateCoordination）与 `CrystalContextInspector`。用 `siteId + periodicImageShift` 定位显示实例。
+2. **T-028D**：工作台控件条 UI 收尾 + 完整测试 + 治理收尾。
 
 其他方向候选（均未立项，动手前先与用户确认）：
 4. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。

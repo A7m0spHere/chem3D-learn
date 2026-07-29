@@ -9,62 +9,64 @@
 
 - **Agent**：Claude Code
 - **日期**：2026-07-29
-- **分支**：`feat/t-028a-nacl-periodic-kernel`（仍在该分支，follow-up commit，**不 amend `a48d65d`、不 force push**）
-- **任务**：T-028A.1 周期坐标语义修正（修正 T-028A 两个影响 T-028B 晶胞边框与幽灵粒子的接口问题）。
-- **修改文件**：`frontend/src/components/three/naclPeriodicGeometry.ts`、`frontend/tests/logic/nacl-periodic.logic.spec.ts` + 治理文档。
+- **分支**：`feat/t-028b-nacl-periodic-viewer`（由含 `777f468` 的最新 main 切出；T-028A/A.1 已先 ff-merge 到 main）
+- **任务**：T-028B NaCl 周期探索 Viewer。
+- **提交**：`5a44e30`（Commit 1 几何）+ Commit 2（Viewer/接线/交互测试，待推送）
 
 ### 本轮做的事
 
-1. **居中语义修正**：删除 `generateNaClPeriodicSites` 私有 `centerOffset = 1/4+(size-1)/2`（原使 canonical 平均值为零，但导致晶胞体积偏离原点）。改用 `centerFractional(fractional, size)`（size/2 偏移），居中晶胞空间范围（N=1 `[-1,+1]`、N=2 `[-2,+2]`、N=3 `[-3,+3]`）。`getNaClCoordinationImages` 内也改用 `centerFractional`，只维护一套居中公式。canonical 位点平均值不再要求为零。
-2. **cellOffset 与 periodicImageShift 拆分**：`NaClPeriodicNeighbor` 删除旧 `imageShift`/`fractional`，改为：
-   - `cellOffset = neighborCell - center.cell`（局部晶胞偏移，可非零但仍在当前超晶胞内）；
-   - `periodicImageShift = (neighborCell - canonicalCell)/size`（超晶胞周期平移，整数，非零=来自超晶胞外）；
-   - `absoluteFractional`（未居中绝对分数，可超 `[0,size)`）；`cartesian`（晶胞体积居中后）。
-   `NaClDisplayInstance.imageShift` 同步重命名为 `periodicImageShift`。
-3. **周期镜像可重建契约**：新增测试断言 `neighbor.cartesian[axis] ≈ canonicalSite.cartesian[axis] + periodicImageShift[axis]*size*a`（三轴成立）。
-4. **API 一致性**：`getNaClCoordinationImages` 收到 `sites.length !== 8*size³` 时抛错。
-5. 测试改写：删除「canonical 平均值为原点」与旧 imageShift 断言；新增晶胞体积居中、cellOffset/periodicImageShift 区分（N=2 内部相邻 cellOffset≠0/periodic=0、越界 periodic=±1）、整数性、重建契约、API 一致性、siteId 存在性、顺序确定等。
+1. **合并 T-028A**：main 与 origin/main 一致、可安全 ff-merge；`git switch main && pull --ff-only && merge --ff-only feat/t-028a-nacl-periodic-kernel && push origin main`，再切 `feat/t-028b-nacl-periodic-viewer`。main 现 HEAD = `777f468`。
+2. **Commit 1（几何纯函数 + logic）**：`naclPeriodicGeometry.ts` 新增 `generateNaClDisplayInstances(sites, size)` 与 `generateNaClCellFrameSegments(size, mode)`（+ `CrystalCellFrameMode`/`NaClCellFrameSegment` 类型）。新增 20 项 logic 契约。
+3. **Commit 2（Viewer + 接线 + 交互测试）**：
+   - `NaClPeriodicCell.tsx`：Drei `<Instances>` Na⁺/Cl⁻ 双组渲染（343 粒子不创建 343 份 geometry）；相机按 N 动态距离 + Canvas `key={size}` 重置（记录取舍：切尺寸重置观察角度）；消费生成器，不读 nacl.json；保留 siteId+periodicImageShift 映射供 T-028C。
+   - `useCrystalWorkspaceControls` hook：teaching/2/outer 默认 + 模块切换重置；不提前加粒子选择/配位隔离/相机状态。
+   - `CrystalWorkspaceToolbar`：返回教学/N=1·2·3/外边框·全部·隐藏，沿用 chem-touch-button + testid + aria-pressed。
+   - `NaClPeriodicPanel`：状态摘要（晶胞数/化学式单位/独立位点/显示实例），含 testid FactRow；显式注明边界显示副本不计化学组成。
+   - `ModuleDetailPage`：crystal-nacl 按 `workspaceMode` 分发 viewer/toolbar/panel；教学模式在 CrystalModeToolbar 旁加「周期探索」入口按钮（不改 `CrystalViewMode` 联合类型，其他晶体无影响）；NaClPeriodicCell 用 `lazy()` 独立 chunk。
+   - `crystal-workspace.visual.spec.ts`：无截图交互测试 10 验证点（默认教学/旧按钮/入口/N=1·2·3 数量/边框三态/返回恢复/切模块重置/无 pageerror）。
 
 ### 验证结果
 
-- `npm run build` **通过**；`npm run lint` **通过**（0 warning）。
-- `npm run test:logic`：109 → **120 通过**。
-- 未运行 Darwin 视觉回归（无 UI 改动）；未更新任何快照。
+- `npm run build` 通过；`npm run lint` 通过（0 warning）。
+- `npm run test:logic`：**140 通过**（T-028B 新增 20 项几何契约）。
+- Chrome `npm run test:production`：**3/3 通过**（首页仍不下载 three/r3f chunk；NaClPeriodicCell 独立懒加载 chunk）。
+- Chrome `crystal-workspace.visual.spec.ts`：**1/1 通过**（10 验证点全绿）。
+- NaCl 既有文本断言零回归：`crystal-viewer` 的「NaCl 配位与计数」用例 + `module-state-reset` 均通过。
+- **Windows 平台限制**：`crystal-viewer` 中 9 个非 NaCl 晶体（石墨/CaF₂/BaTiO₃/FCC-ZnS/MOF-5/MXene/ReN₃）的 Darwin 快照用例失败——这是既有平台限制（无 Darwin 基线 + Chrome 字体/抗锯齿差异），非本轮引入，NaCl 自身用例（纯文本断言）通过。
 
-### 关键案例（供 T-028B 参考）
+### 关键数据语义（教学正确性）
 
-- **N=2 内部相邻晶胞**：Na⁺ 中心 `nacl-0-0-0-4`（frac [0.5,0,0]）的 +x 最近邻 Cl⁻ 在 cell(1,0,0)——`cellOffset=[1,0,0]`、`periodicImageShift=[0,0,0]`（仍在超晶胞内，**非**幽灵粒子）。
-- **N=2 越界周期镜像**：同一中心的 -x 最近邻 Cl⁻ 在 cell(-1,0,0)，wrap 回 canonical cell(1,0,0)——`cellOffset=[-1,0,0]`、`periodicImageShift=[-1,0,0]`（来自超晶胞外，**是**幽灵粒子）。
-- **重建公式**：`neighbor.cartesian[axis] = canonicalSite.cartesian[axis] + periodicImageShift[axis] * size * NACL_LATTICE_PARAMETER`。
-
-### T-028B 接入须知（最终接口约束）
-
-下一个 Agent 实施 T-028B（NaCl Viewer 周期扩展渲染）时**必须遵守**：
-
-1. **N=1 沿用旧数据**：现有 NaCl 教学模式继续完整使用 `nacl.json` 27 个边界展开位置，保持现有 ID、高亮逻辑、教学计数和视觉测试不变。**不采用「N=1 旧/N≥2 新」永久混合语义**——「周期探索模式」内部 N=1/2/3 全用新生成器。T-028B 为 NaClCell 增设独立「周期探索」入口，与教学模式并存。
-2. **不读 nacl.json**：内核不依赖 `nacl.json`，T-028B 渲染 N≥2 时直接消费 `generateNaClPeriodicSites` 输出，不把 siteType 强加到周期位点。
-3. **居中已处理**：`cartesian` 已按晶胞体积居中（`size/2` 偏移，边界关于原点对称），Viewer 相机 `target=[0,0,0]` 即对准晶胞体积中心；晶胞边框也用同一空间中心。
-4. **幽灵粒子判据**：只能用 `periodicImageShift !== [0,0,0]` 判断来自超晶胞外的镜像，**不得用 `cellOffset !== 0`**（内部相邻晶胞邻居 cellOffset 非零但 periodicImageShift=0）。
-5. **显示实例与位点区分**：补齐外边界用 `NaClDisplayInstance`（`periodicImageShift` 字段），不得当成新的 `NaClPeriodicSite`。可用重建公式 `canonical.cartesian + periodicImageShift*size*a` 放置幽灵粒子。
-6. **配位引导线非共价键**：`getNaClCoordinationImages` 返回的邻居用虚线/`ionic-neighbor`/`visual-guide` kind，不得画成普通共价键。
-7. **性能**：N=2 → 64 位点、N=3 → 216 位点。评估 Drei `Instances`（ZincMetalCell/MetalClosePackingCell 范式），无性能证据前不提前复杂化；N=1 走旧渲染不涉及。
-8. **不破坏现有测试**：`crystal-viewer.visual.spec.ts` 的 NaCl 配位/计数断言必须继续通过；1×1×1 视觉与现有完全一致。
+- **8/64/216** = 周期独立离子位点数（`generateNaClPeriodicSites`，8·N³）。
+- **27/125/343** = 显示实例数（`generateNaClDisplayInstances`，(2N+1)³），含为闭合正侧边界绘制的周期镜像副本，**不重复计入化学组成**。状态面板显式注明。
+- 晶胞边框：hidden=0；outer=12（外立方体完整棱）；all=3N(N+1)²（N=1/12、2/54、3/144），共享边去重。
 
 ### 已知限制与建议
 
-- T-028A/A.1 是纯内核，**无可见 UI 变化**；用户实际看到周期扩展效果需等 T-028B。
-- Na-Cl 最近邻距离 a/2、方向沿三轴 ± 标注 `TODO-CHEM-VERIFY`，属标准 NaCl 结构结果，待化学复核。
-- `naclPeriodicGeometry.ts` 当前只服务 NaCl；CsCl（简单立方基元）、金刚石（FCC+四基元）后续可参照同一范式另建，不要强行统一到未经验证的通用抽象。
+- 相机用 Canvas `key={size}` 重置：切换尺寸会重置观察角度，保存相机状态留待 T-028C/D 改进。
+- Na-Cl 最近邻距离 a/2 标 `TODO-CHEM-VERIFY`，待化学复核。
+- **Windows 测试后清理教训**：跑带 `toMatchSnapshot` 的 visual 测试会生成 `-win32.png` 新基线，**只删 `-win32.png`，绝不可 `rm -rf` 整个快照目录**（会误删受保护的 Darwin 基线，需 `git checkout HEAD --` 恢复）。
+
+### T-028C 接入建议
+
+1. 粒子选择用 `siteId + periodicImageShift` 定位显示实例（`NaClPeriodicCell` 已保留 `groupDisplayInstances` 的 mapping）。
+2. 幽灵配位粒子据 `periodicImageShift !== [0,0,0]` 判断（非 `cellOffset`），用重建公式 `canonical.cartesian + periodicImageShift*size*a` 放置。
+3. `getNaClCoordinationImages` 计算配位镜像，引导线用虚线/`ionic-neighbor` kind，不画共价键。
+4. 扩展 `useCrystalWorkspaceControls` 加 `selectedAtomId`/`isolateCoordination`，新建 `CrystalContextInspector`。
 
 ---
 
 ## 往期
 
+### 2026-07-29 Claude Code：T-028A.1 周期坐标语义修正
+
+- **提交**：`777f468 fix(t-028a): correct supercell centering and periodic image semantics`（follow-up，不 amend/force push）
+- 居中改为晶胞体积居中（`centerFractional`/size/2），删除私有 centerOffset；`NaClPeriodicNeighbor` 拆分 `cellOffset`（局部晶胞偏移）+ `periodicImageShift`（超晶胞周期平移，整数）；`fractional`→`absoluteFractional`；新增周期镜像可重建契约与 sites/size 一致性校验。`test:logic` 109→120 通过。详见 D-026 修正记录。
+
 ### 2026-07-29 Claude Code：T-028A NaCl 周期几何纯函数内核 + 逻辑测试
 
 - **提交**：`a48d65d feat(t-028a): add NaCl periodic geometry kernel and logic tests`
 - 新增 `naclPeriodicGeometry.ts`（常规立方晶胞 4 Cl⁻+4 Na⁺ 基元，N×N×N 独立周期位点 8·N³ 个，候选枚举法六配位）与 26 项 logic 测试。
-- 居中 `centerOffset = 1/4+(size-1)/2`、邻居 `imageShift`/`fractional` 字段——**此两项已由 T-028A.1 修正**（见上方「最近一次交接」）。
+- 居中 `centerOffset = 1/4+(size-1)/2`、邻居 `imageShift`/`fractional` 字段——**此两项已由 T-028A.1 修正**。
 - `test:logic` 83 → 109 通过。详见 D-026。
 
 ### 2026-07-29 Codex：T-027 正式部署、SPA history fallback 与 README 在线入口

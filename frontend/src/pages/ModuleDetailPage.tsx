@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import { ChevronRight, Home, LayoutList } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // 3D viewers 按需懒加载：使 three.js / R3F 不进入首页、考试页等非 3D 页面的初始包。
 const MoleculeViewer = lazy(() =>
@@ -8,6 +9,10 @@ const MoleculeViewer = lazy(() =>
 );
 const NaClCell = lazy(() =>
   import("@/components/three/NaClCell").then((m) => ({ default: m.NaClCell })),
+);
+// T-028B：NaCl 周期探索 Viewer 与教学 Viewer 并存，同样按需懒加载，避免首页下载 3D chunk。
+const NaClPeriodicCell = lazy(() =>
+  import("@/components/three/NaClPeriodicCell").then((m) => ({ default: m.NaClPeriodicCell })),
 );
 const CsClCell = lazy(() =>
   import("@/components/three/CsClCell").then((m) => ({ default: m.CsClCell })),
@@ -75,6 +80,9 @@ const MolecularPolarityCell = lazy(() =>
 import { ModulePlaceholderViewer } from "@/components/three/ModulePlaceholderViewer";
 import { CrystalKnowledgePanel } from "@/components/learning/CrystalKnowledgePanel";
 import { CrystalModeToolbar } from "@/components/learning/CrystalModeToolbar";
+// T-028B：NaCl 周期探索 UI 与教学 panel 分离。
+import { CrystalWorkspaceToolbar } from "@/components/learning/CrystalWorkspaceToolbar";
+import { NaClPeriodicPanel } from "@/components/learning/NaClPeriodicPanel";
 import { OrganicCoplanarPanel } from "@/components/learning/OrganicCoplanarPanel";
 import { OrganicCoplanarToolbar } from "@/components/learning/OrganicCoplanarToolbar";
 import { EthylenePlanarPanel } from "@/components/learning/EthylenePlanarPanel";
@@ -96,6 +104,8 @@ import { ViewerErrorBoundary } from "@/components/common/ViewerErrorBoundary";
 import { getModuleById } from "@/data/learningModules";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCrystalControls } from "@/hooks/useCrystalControls";
+// T-028B：周期探索工作台状态，与教材教学控制状态分离。
+import { useCrystalWorkspaceControls } from "@/hooks/useCrystalWorkspaceControls";
 import { useOrganicPlanarControls } from "@/hooks/useOrganicPlanarControls";
 import { useBondingControls } from "@/hooks/useBondingControls";
 import type { OrganicBuilderNavigationState } from "@/types/organicBuilder";
@@ -272,6 +282,16 @@ export function ModuleDetailPage() {
     setShowCrystalLabels,
     handleCrystalModeChange,
   } = useCrystalControls(id);
+  // T-028B：NaCl 周期探索工作台状态。模块切换时自动重置为教学/2/outer。
+  const {
+    workspaceMode,
+    supercellSize,
+    cellFrameMode,
+    enterPeriodicMode,
+    exitPeriodicMode,
+    setSupercellSize,
+    setCellFrameMode,
+  } = useCrystalWorkspaceControls(id);
   const {
     organicCoplanarMode,
     organicVinylAligned,
@@ -465,6 +485,40 @@ export function ModuleDetailPage() {
       />
     </div>
   ) : null;
+
+  // T-028B：NaCl 专属的「教学模式 toolbar（含周期入口）」与「周期模式 toolbar/panel」。
+  // 其他晶体继续用 crystalToolbar / crystalPanel，不受影响。
+  const isNaClWorkspace = viewerKind === "crystal-nacl" && workspaceMode === "periodic";
+  const naclTeachingToolbar = crystalToolbar ? (
+    <div className="flex flex-wrap items-center gap-2">
+      {crystalToolbar}
+      <Button
+        className="chem-touch-button"
+        data-testid="workspace-enter-periodic"
+        onClick={enterPeriodicMode}
+        size="sm"
+        title="进入周期探索：1×1×1 / 2×2×2 / 3×3×3 周期结构"
+        type="button"
+        variant="ghost"
+      >
+        周期探索
+      </Button>
+    </div>
+  ) : null;
+  const naclPeriodicToolbar = (
+    <CrystalWorkspaceToolbar
+      cellFrameMode={cellFrameMode}
+      onCellFrameModeChange={setCellFrameMode}
+      onExitPeriodic={exitPeriodicMode}
+      onSupercellSizeChange={setSupercellSize}
+      supercellSize={supercellSize}
+    />
+  );
+  const naclPeriodicPanel = (
+    <div className="flex-1 min-h-[400px]">
+      <NaClPeriodicPanel cellFrameMode={cellFrameMode} supercellSize={supercellSize} />
+    </div>
+  );
 
   // 注册表：每个 kind 对应 viewer / toolbar / panel 三个渲染函数。函数体与重构前
   // 三段 ternary 中的 JSX 逐字一致，仅收敛分发逻辑。
@@ -665,18 +719,29 @@ export function ModuleDetailPage() {
     },
     "crystal-nacl": {
       viewer: () =>
-        molecule ? (
-          <NaClCell
-            loading={viewerLoading}
-            modelStyle={crystalModelStyle}
-            molecule={molecule}
-            showLabels={showCrystalLabels}
-            voidStage={voidStage}
-            viewMode={activeCrystalViewMode}
-          />
-        ) : null,
-      toolbar: () => crystalToolbar,
-      panel: () => crystalPanel,
+        molecule
+          ? isNaClWorkspace
+            ? (
+              <NaClPeriodicCell
+                frameMode={cellFrameMode}
+                loading={viewerLoading}
+                molecule={molecule}
+                size={supercellSize}
+              />
+            )
+            : (
+              <NaClCell
+                loading={viewerLoading}
+                modelStyle={crystalModelStyle}
+                molecule={molecule}
+                showLabels={showCrystalLabels}
+                voidStage={voidStage}
+                viewMode={activeCrystalViewMode}
+              />
+            )
+          : null,
+      toolbar: () => (isNaClWorkspace ? naclPeriodicToolbar : naclTeachingToolbar),
+      panel: () => (isNaClWorkspace ? naclPeriodicPanel : crystalPanel),
     },
     "crystal-cscl": {
       viewer: () =>
