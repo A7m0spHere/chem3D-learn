@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-29（Claude Code，T-028C NaCl 粒子选择与第一配位层隔离）
+> 最后更新：2026-07-29（Codex，T-028D Crystal Workspace 稳定化与上线验收）
 
 ## 一句话定位
 
@@ -141,9 +141,17 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 正在进行
 
-- **Crystal Workspace / 晶体探索工作台（新方向，T-028 系列）**：面向初高中学生与化学爱好者的「数字化结构模型盒 + 科学探索工作台」，支持拆/扩/切/改/比。T-028A（NaCl 周期几何内核）/ T-028A.1（坐标语义修正）/ T-028B（NaCl 周期探索 Viewer）/ T-028C（粒子选择与第一配位层隔离）已完成；T-028D（工作台 UI 收尾、其他晶体接入、保存/分享/截图等高级能力）待立项。
+- **Crystal Workspace / 晶体探索工作台（T-028 系列）**：面向初高中学生与化学爱好者的「数字化结构模型盒 + 科学探索工作台」。T-028A（NaCl 周期几何内核）/ A.1（坐标语义修正）/ B（周期 Viewer）/ C（粒子选择与第一配位层）/ D（稳定化、交互收尾与上线验收）均已完成；其他晶体接入、保存/分享/截图等高级能力未立项。
 
 ## 最近完成
+
+- **T-028D Crystal Workspace 稳定化、交互收尾与上线验收**（2026-07-29 完成，分支 `feat/t-028d-crystal-workspace-stabilization`）
+  - 保留 `Canvas key={size}` 与现有 `onPointerMissed`：系统 Chrome 实测证明尺寸切换能可靠重置相机、OrbitControls 拖拽不会误清选择；显式「退出选择」仍是清除主路径，不为本轮引入相机持久化。
+  - `CrystalWorkspaceToolbar` 用 `fieldset/legend` 明确「观察范围 / 晶胞边框 / 当前选择」三组，窄屏独立换行；所有工作台按钮锁定 44px 触控高度，保留 `aria-pressed` 与原生键盘操作。
+  - `NaClPeriodicCell` 为 R3F Canvas 外层语义容器增加辅助名称，为实例增加指针光标与轻度放大 hover 反馈；晶胞边框改用几何段稳定 id 作 key。移动端 Viewer 摘要与离子图例改为上下堆叠，390px 正文不再被图例挤窄。
+  - `NaClPeriodicPanel` 增加受控 `aria-live` 精简播报、aside 名称与正确标题层级；第一配位数/最近邻/幽灵数量保持高优先级，内部显示身份降到摘要末位并改为课堂友好文案。
+  - 浏览器回归新增真实 WebGL 边界副本网格点击、非零幽灵邻居、hover 命中、隔离后 OrbitControls 拖拽保持选择、四档无横向溢出、44px 触控目标、390px 摘要宽度与键盘切换。完整 Darwin 快照未运行、未更新。
+  - 验证：build/lint 通过；logic 149/149；Chrome production 3/3、Crystal Workspace 4/4、模块状态重置 5/5、旧 NaCl Viewer 1/1。Pages 与线上深层路由结果见本轮最终交付报告。
 
 - **T-028C NaCl 粒子选择与第一配位层隔离**（2026-07-29 完成，分支 `feat/t-028c-nacl-coordination-selection`）
   - 在 NaCl 周期探索 Viewer 中新增点击选择：点击任一显示离子选中**被点击的那个显示副本**（身份为 `siteId + periodicImageShift`，非仅 siteId），高亮中心 + 六个最近邻异号离子，六条虚线标示最近邻配位关系（非共价键），超出当前显示超晶胞的邻居用半透明幽灵粒子补齐。支持「仅看配位层」隔离与「退出选择」。
@@ -288,16 +296,13 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-当前进行中方向为 **T-028 Crystal Workspace / 晶体探索工作台**。T-028A/A.1/B/C 已完成，后续子任务（均需用户确认后立项）：
+T-028A/A.1/B/C/D 已全部完成。本轮不擅自选择下一阶段；以下候选均未立项，动手前由用户确认：
 
-1. **T-028D**：工作台控件条 UI 收尾 + 完整测试 + 治理收尾。可选方向包括：配位层视觉打磨、选择状态在相机切换下的持久化、把周期探索能力评估性扩展到 CsCl 等其他晶体（需先确认范围）。
-
-其他方向候选（均未立项，动手前先与用户确认）：
-4. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。
-5. macOS 环境跑一次完整 Darwin 视觉回归：审核 T-023 预期内的 2 张拼装页快照漂移（`organic-builder-ethylene` / `organic-builder-mobile-info`，因分子式下标），并确认键圆柱单位长度化与全站动画 wrapper 无非预期布局漂移。
-6. 化学待核实项收口：`mockMolecules.ts` 的 BF₃ 缺电子表述、`caf2.json` 约 5.46 Å 晶胞参数（两处 `TODO-CHEM-VERIFY` 类）；以及 T-028A 内核中 Na-Cl 最近邻距离 a/2、方向沿三轴 ± 的标注（标准 NaCl 结构结果，待复核）。
-7. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B（构建期从前端 JSON 生成后端数据）推进。
-8. 前端 / 视频 Node `engines` 声明仍待确认；正式部署与 SPA history fallback 已由 T-027 收口。
+1. 评估把周期探索能力扩展到 CsCl 等其他晶体；每种晶体必须有自己的配位 cluster 生成器，不能复用 NaCl 的“异号六配位”假设。
+2. 针对受限设备下 CH₄ 直达 Canvas 中位约 4.38 秒，先评估最小加载反馈或预取时机调整；不要仅为消除 Vite 警告恢复对象式 vendor 拆分。
+3. 在 macOS 环境跑完整 Darwin 视觉回归，审核 T-023 的 2 张预期漂移与 T-028D 工作台视觉变化；Windows 不更新基线。
+4. 化学待核实项收口：BF₃ 缺电子表述、CaF₂ 晶胞参数，以及 NaCl 最近邻距离/方向的 `TODO-CHEM-VERIFY`。
+5. 若要彻底单源前后端数据，按 `docs/BACKEND_DATA_SYNC.md` 方案 B 推进。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。

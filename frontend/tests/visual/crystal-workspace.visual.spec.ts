@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 // ---------------------------------------------------------------------------
-// T-028B：NaCl 周期探索工作台浏览器交互测试（无截图）。
+// T-028B—T-028D：NaCl 周期探索工作台浏览器交互测试（无截图）。
 //
 // 只用 DOM / 文本 / aria / testid 断言，不触碰 Darwin 视觉基线，可在 Windows 系统
 // Chrome 通道下运行（设置 $env:PLAYWRIGHT_CHANNEL='chrome'）。
@@ -9,12 +9,37 @@ import { expect, test } from "@playwright/test";
 // 覆盖：
 //   1. 默认仍是旧教学模式；2. 旧按钮仍可用；3. 入口进入周期 Viewer；
 //   4-6. N=2/1/3 的晶胞数/化学式单位/独立位点/显示实例；
-//   7. 边框三态可切换；8. 返回恢复；9. 切模块重置；10. 无 pageerror。
+//   7. 边框三态可切换；8. 返回恢复；9. 切模块重置；10. 无 pageerror；
+//   11. 边界显示副本可点击且 OrbitControls 拖拽不清选择；12. 四档断点无横向溢出。
 // ---------------------------------------------------------------------------
 
 // 等待 3D Canvas 与控制台就绪，避免在 chunk 加载前断言。
 async function waitForViewerReady(page: import("@playwright/test").Page, testid: string) {
   await expect(page.getByTestId(testid)).toBeVisible({ timeout: 30_000 });
+}
+
+async function clickBoundaryDisplayCopy(page: import("@playwright/test").Page) {
+  const stage = page.getByTestId("nacl-periodic-2-canvas");
+  const box = await stage.boundingBox();
+  expect(box).not.toBeNull();
+
+  // WebGL 实例没有 DOM locator。按稳定的归一化网格寻找边界副本；相机或响应式尺寸
+  // 小幅调整时不依赖单个绝对像素坐标，仍然验证的是浏览器里的真实 pointer click。
+  for (let row = 2; row <= 18; row += 1) {
+    for (let column = 2; column <= 18; column += 1) {
+      const position = {
+        x: (box!.width * column) / 20,
+        y: (box!.height * row) / 20,
+      };
+      await stage.click({ force: true, position });
+      const identity = page.getByTestId("selection-identity");
+      if ((await identity.count()) > 0 && (await identity.textContent())?.includes("边界显示副本")) {
+        return position;
+      }
+    }
+  }
+
+  throw new Error("未能在 NaCl 周期 Viewer 中点击到边界显示副本");
 }
 
 test.describe("NaCl 周期探索工作台", () => {
@@ -48,6 +73,11 @@ test.describe("NaCl 周期探索工作台", () => {
 
     // 周期模式下右侧是 NaClPeriodicPanel（含「当前模型状态」）。
     await expect(page.getByText("当前模型状态", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("workspace-size-group")).toContainText("观察范围");
+    await expect(page.getByTestId("workspace-frame-group")).toContainText("晶胞边框");
+    await expect(
+      page.getByTestId("nacl-periodic-2-canvas").getByRole("img"),
+    ).toHaveAttribute("aria-label", /NaCl 2×2×2 周期超晶胞三维视图/);
 
     // 4. 默认 2×2×2：晶胞 8 / 化学式单位 32 / 独立位点 64 / 显示实例 125。
     await expect(page.getByTestId("periodic-fact-cells")).toContainText("8");
@@ -114,6 +144,124 @@ test.describe("NaCl 周期探索工作台", () => {
     await expect(page.getByText("当前模型状态", { exact: true })).toHaveCount(0);
 
     // 10. 无 pageerror 与非预期 console error。
+    expect(errors).toEqual([]);
+  });
+
+  test("T-028D：边界副本可真实点击，隔离配位层后拖拽不误清选择", async ({ page }) => {
+    test.setTimeout(120_000);
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+
+    await page.setViewportSize({ height: 900, width: 1440 });
+    await page.goto("/module/nacl-crystal");
+    await page.getByTestId("workspace-enter-periodic").click();
+    await waitForViewerReady(page, "nacl-periodic-2-viewer");
+
+    const stage = page.getByTestId("nacl-periodic-2-canvas");
+    const boundaryPosition = await clickBoundaryDisplayCopy(page);
+    await expect(page.getByTestId("selection-identity")).toContainText("边界显示副本");
+    await expect(page.getByTestId("selection-ghosts")).not.toContainText("0 个");
+    await expect(page.getByTestId("periodic-selection-announcement")).toContainText(
+      /已选择(Na⁺|Cl⁻)，第一配位数 6/,
+    );
+    await expect(page.getByTestId("workspace-selection-group")).toContainText("当前选择");
+
+    // 清除后回到同一显示副本，验证 hover 命中反馈。
+    await page.getByTestId("workspace-clear-selection").click();
+    await stage.hover({ force: true, position: boundaryPosition });
+    await expect.poll(() => page.evaluate(() => document.body.style.cursor)).toBe("pointer");
+    await stage.click({ force: true, position: boundaryPosition });
+
+    const selectedIdentity = await page.getByTestId("selection-identity").textContent();
+    await page.getByTestId("workspace-isolate").click();
+    await expect(page.getByTestId("workspace-isolate")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("selection-isolate-state")).toContainText("已开启");
+
+    const box = await stage.boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.move(box!.x + box!.width * 0.42, box!.y + box!.height * 0.42);
+    await page.mouse.down();
+    await page.mouse.move(box!.x + box!.width * 0.58, box!.y + box!.height * 0.51, {
+      steps: 8,
+    });
+    await page.mouse.up();
+    await expect(page.getByTestId("selection-identity")).toHaveText(selectedIdentity ?? "");
+
+    // 显式按钮是可靠的清除主路径。
+    await page.getByTestId("workspace-clear-selection").click();
+    await expect(page.getByTestId("periodic-selection")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  test("T-028D：1440/1280/768/390 四档布局无横向溢出且工具栏可键盘操作", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+
+    for (const viewport of [
+      { height: 900, width: 1440 },
+      { height: 720, width: 1280 },
+      { height: 900, width: 768 },
+      { height: 844, width: 390 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/module/nacl-crystal");
+      await page.getByTestId("workspace-enter-periodic").click();
+      const viewer = page.getByTestId("nacl-periodic-2-viewer");
+      await waitForViewerReady(page, "nacl-periodic-2-viewer");
+
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > window.innerWidth + 1,
+        ),
+      ).toBe(false);
+      expect(
+        await viewer.evaluate((element) => element.scrollWidth > element.clientWidth + 1),
+      ).toBe(false);
+
+      for (const buttonId of [
+        "workspace-size-1",
+        "workspace-size-2",
+        "workspace-size-3",
+        "workspace-frame-outer",
+        "workspace-frame-all",
+        "workspace-frame-hidden",
+      ]) {
+        const box = await page.getByTestId(buttonId).boundingBox();
+        expect(box).not.toBeNull();
+        expect(box!.height).toBeGreaterThanOrEqual(44);
+      }
+
+      if (viewport.width === 390) {
+        const summary = await page
+          .getByTestId("nacl-periodic-2-viewer-summary")
+          .boundingBox();
+        const summaryCopy = await page.getByTestId("nacl-periodic-summary-copy").boundingBox();
+        expect(summary).not.toBeNull();
+        expect(summaryCopy).not.toBeNull();
+        expect(summaryCopy!.width).toBeGreaterThan(summary!.width * 0.75);
+      }
+    }
+
+    // 在最窄断点通过键盘激活切换，确认 focus 与 pressed 状态正常流转。
+    const sizeOne = page.getByTestId("workspace-size-1");
+    await sizeOne.focus();
+    await expect(sizeOne).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(sizeOne).toHaveAttribute("aria-pressed", "true");
+    const sizeTwo = page.getByTestId("workspace-size-2");
+    await sizeTwo.focus();
+    await page.keyboard.press("Enter");
+    await expect(sizeTwo).toHaveAttribute("aria-pressed", "true");
+
     expect(errors).toEqual([]);
   });
 

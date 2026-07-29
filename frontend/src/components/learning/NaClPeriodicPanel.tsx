@@ -11,9 +11,9 @@ import type { NaClCoordinationDisplayCluster } from "@/components/three/naclPeri
 // 不是步骤式教学面板，而是当前模型状态摘要。周期模式下用它替代 CrystalKnowledgePanel。
 // 返回教学模式后由 ModuleDetailPage 恢复原 CrystalKnowledgePanel。
 //
-// T-028C：存在选择（cluster 非 null）时增加「当前选择」区域，说明选中离子、显示身份
-// （本体 / 边界显示副本）、第一配位数、周期补齐（幽灵）数量等。幽灵数量与配位信息全部
-// 来自页面层传入的纯函数 cluster，不在本组件重复配位算法。
+// T-028C：存在选择（cluster 非 null）时增加「当前选择」区域，说明选中离子、显示身份、
+// 第一配位数、周期补齐（幽灵）数量等。幽灵数量与配位信息全部来自页面层传入的纯函数
+// cluster，不在本组件重复配位算法。T-028D 只播报一条精简状态，避免整个面板反复朗读。
 // ---------------------------------------------------------------------------
 
 type NaClPeriodicPanelProps = {
@@ -57,7 +57,20 @@ export function NaClPeriodicPanel({
     : null;
 
   return (
-    <aside className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/60 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+    <aside
+      aria-label="NaCl 周期探索状态"
+      className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/60 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+    >
+      <p
+        aria-atomic="true"
+        aria-live="polite"
+        className="sr-only"
+        data-testid="periodic-selection-announcement"
+      >
+        {selection
+          ? `已选择${selection.centerElement}，第一配位数 6，${selection.ghostCount} 个邻居由相邻周期补齐。`
+          : "当前未选择离子。"}
+      </p>
       <div className="border-b border-white/40 bg-white/40 px-6 py-5 backdrop-blur-sm">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-semibold tracking-wider text-primary">周期探索模式</p>
@@ -65,9 +78,9 @@ export function NaClPeriodicPanel({
             {N}×{N}×{N}
           </span>
         </div>
-        <h1 className="mt-2 text-2xl font-bold leading-tight text-text-primary">
+        <h2 className="mt-2 text-2xl font-bold leading-tight text-text-primary">
           NaCl 周期超晶胞
-        </h1>
+        </h2>
         <p className="mt-2 text-sm leading-6 text-text-secondary">
           从单晶胞扩展为有限周期结构，观察 NaCl 的离子在三维空间的周期排布。当前边框：{frameModeLabel[cellFrameMode]}。
         </p>
@@ -91,16 +104,11 @@ export function NaClPeriodicPanel({
                 value={selection.centerElement}
                 strong
               />
-              <FactRow
-                label="显示身份"
-                testid="selection-identity"
-                value={selection.isBodyCopy ? "canonical 显示本体" : "边界显示副本"}
-              />
               <FactRow label="第一配位数" testid="selection-coordination" value="6" strong />
               <FactRow
                 label="最近邻"
                 testid="selection-neighbors"
-                value={`6 个${selection.neighborElement}`}
+                value={`6 个 ${selection.neighborElement}`}
               />
               <FactRow
                 label="周期补齐（幽灵）"
@@ -117,11 +125,17 @@ export function NaClPeriodicPanel({
                 testid="selection-isolate-state"
                 value={isolateCoordination ? "已开启" : "未开启"}
               />
+              <FactRow
+                label="显示身份"
+                muted
+                testid="selection-identity"
+                value={selection.isBodyCopy ? "显示本体" : "边界显示副本"}
+              />
             </dl>
             <p className="mt-3 text-xs leading-6 text-text-secondary">
               {selection.isBodyCopy
-                ? "periodicImageShift=[0,0,0] 是 canonical 显示本体。"
-                : "非零 periodicImageShift 表示这是为闭合正侧边界而绘制的边界显示副本，选中的是被点击的那个副本本身。"}
+                ? "这是当前超晶胞内的显示本体。"
+                : "这是为闭合正侧边界而绘制的显示副本；配位中心保留在你实际点击的位置。"}
               {selection.ghostCount > 0
                 ? " 其中部分最近邻位于当前超晶胞外，用半透明幽灵粒子临时补齐，来自相邻周期。"
                 : " 六个最近邻都已存在于当前显示模型内。"}
@@ -181,15 +195,24 @@ export function NaClPeriodicPanel({
 type FactRowProps = {
   label: string;
   value: string;
+  muted?: boolean;
   strong?: boolean;
   testid?: string;
 };
 
-function FactRow({ label, value, strong = false, testid }: FactRowProps) {
+function FactRow({ label, value, muted = false, strong = false, testid }: FactRowProps) {
   return (
     <div className="flex items-start justify-between gap-3" data-testid={testid}>
       <span className="shrink-0 text-text-secondary">{label}</span>
-      <span className={`text-right ${strong ? "font-semibold text-primary-dark" : "text-text-primary"}`}>
+      <span
+        className={`text-right ${
+          strong
+            ? "font-semibold text-primary-dark"
+            : muted
+              ? "text-xs text-text-secondary"
+              : "text-text-primary"
+        }`}
+      >
         {value}
       </span>
     </div>

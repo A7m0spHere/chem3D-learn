@@ -7,61 +7,53 @@
 
 ## 最近一次交接
 
-- **Agent**：Claude Code
+- **Agent**：Codex
 - **日期**：2026-07-29
-- **分支**：`feat/t-028c-nacl-coordination-selection`（由含 `73a89c5`（T-028B）的最新 main 切出；T-028B 已先 ff-merge 到 main）
-- **任务**：T-028C NaCl 粒子选择与第一配位层隔离。
-- **提交**：`a7fe1c6`（Commit 1 cluster 纯函数 + logic）+ Commit 2（Viewer 点击/聚焦层/状态/UI/接线/交互测试）
+- **分支**：`feat/t-028d-crystal-workspace-stabilization`（由已 ff-merge T-028C 的 `main` 切出）
+- **任务**：T-028D Crystal Workspace 稳定化、交互收尾与上线验收。
 
 ### 本轮做的事
 
-1. **合并 T-028B**：先用正确的 `$env:PLAYWRIGHT_CHANNEL='chrome'` 补跑 `test:production`（3/3）与 `crystal-workspace`（1/1），确认工作区干净、与远端一致，再 `git switch main && pull --ff-only && merge --ff-only feat/t-028b-nacl-periodic-viewer && push origin main`，切 `feat/t-028c-nacl-coordination-selection`。main 现 HEAD = `73a89c5`。
-2. **Commit 1（cluster 纯函数 + logic）**：`naclPeriodicGeometry.ts` 新增 `NaClDisplaySelection` / `NaClCoordinationDisplayAtom` / `NaClCoordinationDisplayCluster` 类型与 `buildNaClCoordinationDisplayCluster(sites, displayInstances, size, selection)`。新增 9 项 logic 契约（本体/边界副本选择、6 异号邻居、幽灵判定、可重建、不修改输入、结果确定）。
-3. **Commit 2（Viewer + 状态 + UI + 接线 + 交互测试）**：
-   - `NaClPeriodicCell.tsx`：重构为完整 `NaClRenderableInstance` 对象数组（不再用平行数组 + index 对齐），每个 `<Instance>` 用稳定实例 id 作 key 并携带完整身份，`onClick` 回传 `{siteId, periodicImageShift}`；Na⁺/Cl⁻ 仍双组共享 geometry/material。新增聚焦层 `CoordinationOverlay`（中心放大+emissive、邻居轻度高亮、幽灵半透明+线框、六条 Drei `<Line dashed>` 虚线）；背景降权（换低饱和浅色，非透明度，规避排序伪影）/ 隔离时隐藏背景；`InvalidateOnChange` 在选择/隔离变化时主动 `invalidate()` 续帧（`frameloop="demand"`）；`onPointerMissed` 清除选择。
-   - `useCrystalWorkspaceControls`：新增 `selectedDisplay`/`isolateCoordination` 与 `selectDisplay`/`clearSelection`/`setIsolateCoordination`/`toggleIsolateCoordination`；封装 `setSupercellSize` handler，改尺寸/进出周期/切模块都清除选择并关闭隔离；改边框模式不清除。
-   - `CrystalWorkspaceToolbar`：有选择时换行显示「仅看配位层」(`aria-pressed`) 与「退出选择」(`aria-label`)，无选择时不渲染。
-   - `NaClPeriodicPanel`：有选择时顶部「当前选择」区域（选中离子/显示身份/第一配位数 6/最近邻/周期补齐幽灵数/最近邻距离/隔离状态），文案说明 shift=[0,0,0] 本体 vs 边界副本、幽灵来自相邻周期、虚线非共价键、不做能量计算；无选择时显示提示区。cluster 由页面层传入，不重复配位算法。
-   - `ModuleDetailPage`：页面层 `useMemo` 用纯函数算 cluster（`generateNaClPeriodicSites`+`generateNaClDisplayInstances`+`buildNaClCoordinationDisplayCluster`，try/catch 竞态降级），Viewer 与 Panel 共享；放在 early return 之前遵守 Hooks 规则。纯几何模块无 R3F import，不牵动首页预取。
-   - `crystal-workspace.visual.spec.ts`：新增第 2 个测试（10 验证点：默认无选择提示、点击选中、配位数 6、异号邻居、仅看配位层 aria-pressed、退出选择恢复、切尺寸自动清除、退周期、切模块重置、无 pageerror）。
+1. **先完成 T-028C 对接**：在干净且与远端一致的工作区上完成 T-028C 全量验证，将 `feat/t-028c-nacl-coordination-selection` fast-forward 合并到 `main` 并推送，再创建本分支。
+2. **真实浏览器审计**：用系统 Chrome 在 1440×900、1280×720、768×900、390×844 检查 Viewer、工具栏、右侧面板、边界显示副本、隔离模式与 OrbitControls。四档均无横向溢出；通过归一化 Canvas 网格稳定点击到边界显示副本，验证幽灵邻居非零、没有异常长线、拖拽不会误清选择。
+3. **交互与 UI 收尾**：
+   - `CrystalWorkspaceToolbar.tsx`：用 `fieldset/legend` 分组「观察范围 / 晶胞边框 / 当前选择」；移动端各组换行；按钮显式锁定 44px 高度，保留 `aria-pressed` 与键盘 Enter。
+   - `NaClPeriodicCell.tsx`：Canvas 外层语义容器增加辅助名称；实例 hover 显示 pointer 并轻度放大；晶胞边框使用稳定 `segment.id` key；移动端摘要与原子图例上下堆叠，桌面仍左右并排。保留 `Canvas key={size}`、`frameloop="demand"` 和 `onPointerMissed`。
+   - `NaClPeriodicPanel.tsx`：增加精简 `aria-live` 选中播报、aside 名称与正确标题层级；显示身份移到摘要末位并改为课堂友好文案，配位数/最近邻/幽灵数量继续突出。
+4. **回归测试**：`crystal-workspace.visual.spec.ts` 由 2 项扩为 4 项，新增真实边界副本点击、hover、幽灵邻居、隔离后拖拽保持、四档无溢出、44px 触控目标、390px 摘要宽度与键盘切换。测试不含截图，不触碰 Darwin 基线。
+5. **范围控制**：未修改 `naclPeriodicGeometry.ts`、`useCrystalWorkspaceControls.ts`、`ModuleDetailPage.tsx` 或化学数据；未新增依赖；未做相机持久化、其他晶体接入、保存/分享/截图等扩展。
 
 ### 验证结果
 
 - `npm run build` 通过；`npm run lint` 通过（0 warning）。
-- `npm run test:logic`：**149 通过**（T-028C 新增 9 项 cluster 契约）。
-- Chrome `npm run test:production`：**3/3 通过**（首页仍不下载 three/r3f chunk；`ModuleDetailPage` chunk 因引入纯几何模块 291→302 KB，NaClPeriodicCell 仍独立懒加载）。
-- Chrome `crystal-workspace.visual.spec.ts`：**2/2 通过**（原 10 点 + 新 10 点）。
-- NaCl 既有文本断言零回归：`crystal-viewer` 的「NaCl 配位与计数」用例通过。
+- `npm run test:logic`：**149/149 通过**。
+- Chrome `npm run test:production`：**3/3 通过**；首页仍不提前下载 three/r3f。
+- Chrome `crystal-workspace.visual.spec.ts`：**4/4 通过**。
+- Chrome `module-state-reset.visual.spec.ts`：**5/5 通过**。
+- Chrome `crystal-viewer` 的「NaCl 配位与计数结论位于 Viewer 外壳」：**1/1 通过**。
+- 改前/改后四档截图已在 Codex 可视化目录目检；没有更新仓库视觉快照。
 
-### 关键数据语义（教学正确性）
+### 关键决定与审计结论
 
-- **8/64/216** = 周期独立离子位点数；**27/125/343** = 显示实例数（含边界镜像副本，不计化学组成）。
-- **选择身份必须是 `siteId + periodicImageShift`**（不能只存 siteId）：同一 canonical site 可同时显示为本体与边界副本，点击哪个就以哪个为空间中心。
-- **被点击的显示副本是配位 cluster 的空间中心**；每个邻居最终 shift = selectedShift + neighbor.periodicImageShift；坐标 = canonicalNeighbor.cartesian + selectedShift·period。
-- **幽灵判定基于「当前 displayInstances 是否含最终显示身份 siteId+combinedShift」**，不能用 neighbor.periodicImageShift 或 cellOffset 单独判断——中心本身平移后原本在胞内的邻居也可能被推到胞外。幽灵不写回 canonical sites 或常规 displayInstances，不计化学组成，虚线不是共价键。
+- 完整身份 `siteId + periodicImageShift`、combined shift 与 ghost 判定未改；真实边界点击证明浏览器层与纯函数契约一致。
+- `Canvas key={size}` 继续保留：切尺寸重置观察角度是有意取舍，用来保证不同尺寸完整入画。本轮没有实现相机持久化。
+- `onPointerMissed` 保留；OrbitControls 拖拽测试证明不会误清。主可靠清除路径仍是「退出选择」。
+- 审计首次运行曾捕获一次 R3F Provider 对空事件目标调用 `addEventListener` 的瞬时错误；同一链立即通过，随后 `--repeat-each=3` 连续 3 次全通过，无法复现，因此未做猜测性生命周期修改。详见 D-029。
 
-### 已知限制与建议
+### 已知限制
 
-- 相机仍用 Canvas `key={size}` 重置：切换尺寸会重置观察角度（沿用 T-028B 取舍），相机状态持久化留待 T-028D。
-- `onPointerMissed` 用于空白点击清除选择；主可靠路径仍是「退出选择」按钮。
+- WebGL 离子选择仍需要 pointer；工具栏操作与选中结果已有键盘/辅助技术支持，但本轮没有为 125/343 个空间实例生成隐藏 DOM 控件。
+- 完整 Darwin 视觉回归未运行、未更新；当前 Windows 环境只运行系统 Chrome 无截图测试与人工截图目检。
 - Na-Cl 最近邻距离 a/2 标 `TODO-CHEM-VERIFY`，待化学复核。
-- **人工边界选择检查**：见下方「人工目视检查」小节。
-- **Windows 测试后清理教训**：跑带 `toMatchSnapshot` 的 visual 测试会生成 `-win32.png` 新基线，**只删 `-win32.png`，绝不可 `rm -rf` 整个快照目录**（会误删受保护的 Darwin 基线）。
-
-### 人工目视检查（本轮）
-
-- N=2 点击 Canvas 中心 Cl⁻：中心放大+发光、六个 Na⁺ 邻居高亮、六条虚线清晰、隔离模式结构完整——由 `crystal-workspace` 交互测试的失败截图（trace）目视确认渲染正确（中心绿球、六蓝邻居、虚线、面板「当前选择 Cl⁻ / 配位数 6 / 6 个 Na⁺ / 幽灵 0」）。
-- **边界显示副本人工点击**：受 WebGL 无法用 DOM locator 精确点击特定边界实例的限制，本轮**未**在浏览器中稳定人工点选边界副本；边界副本中心化、cluster 整体平移、幽灵补齐、combined shift 出现 -1/2 等行为由 logic tests（`边界显示副本案例` 等）完整锁定，如实报告：浏览器层只验证了中心离子选择流转。
-
-### T-028D 接入建议
-
-1. 相机状态持久化：切尺寸/进出选择不再重置观察角度，替换当前 Canvas `key={size}` 方案。
-2. 工作台控件条 UI 收尾（分组、响应式换行）、完整测试补齐、治理收尾。
-3. 若扩展到其他晶体：`buildNaClCoordinationDisplayCluster` 是 NaCl 专用（6 配位、异号子格子），其他晶体需各自的 cluster 生成器。
+- T-028D 后不自动立项；下一阶段由用户从 PROJECT_STATUS 候选方向中选择。
 
 ---
 
 ## 往期
+
+### 2026-07-29 Claude Code：T-028C NaCl 粒子选择与第一配位层隔离
+
+- 提交 `a7fe1c6` + `549b9e2`；引入完整显示身份选择、纯函数配位 cluster、背景降权/隔离/幽灵覆盖层、选择状态与交互测试。`test:logic` 149/149、Chrome production 3/3、工作台 2/2。详见 D-028 与 TASKS T-028C。
 
 ### 2026-07-29 Claude Code：T-028B NaCl 周期探索 Viewer
 

@@ -1,6 +1,6 @@
 import { Canvas, type ThreeEvent, useThree } from "@react-three/fiber";
-import { Instances, Instance, Line, OrbitControls } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { Instances, Instance, Line, OrbitControls, useCursor } from "@react-three/drei";
+import { useEffect, useMemo, useState } from "react";
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
@@ -152,26 +152,38 @@ export function NaClPeriodicCell({
 
   return (
     <ThreeViewerFrame
-      footerMeta={<CrystalAtomLegend atoms={molecule.atoms} />}
       loading={loading}
       meta={`周期探索 · ${size}×${size}×${size} · 拖拽旋转${metaSuffix}`}
       stageTestId={`nacl-periodic-${size}-canvas`}
-      summary={`周期独立位点 ${independentSites} 个（Na⁺ 与 Cl⁻ 各 ${independentSites / 2} 个）；显示实例 ${displayInstances} 个，含闭合正侧边界的周期镜像副本，不重复计入化学组成。点击任一离子可高亮其六个最近邻，虚线仅表示最近邻配位关系，不是共价键。`}
+      summary={(
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <span className="min-w-0" data-testid="nacl-periodic-summary-copy">
+            周期独立位点 {independentSites} 个（Na⁺ 与 Cl⁻ 各 {independentSites / 2} 个）；
+            显示实例 {displayInstances} 个，含闭合正侧边界的周期镜像副本，不重复计入化学组成。
+            点击任一离子可高亮其六个最近邻，虚线仅表示最近邻配位关系，不是共价键。
+          </span>
+          <div className="shrink-0">
+            <CrystalAtomLegend atoms={molecule.atoms} />
+          </div>
+        </div>
+      )}
       title={`${molecule.formula}｜周期探索 · ${size}×${size}×${size}`}
       viewerTestId={`nacl-periodic-${size}-viewer`}
     >
       {/* 切换尺寸时用 size 作 Canvas key 重新初始化相机，保证完整结构入画。
-          取舍：切换尺寸会重置观察角度；相机状态持久化留待后续 T-028D。 */}
+          取舍：切换尺寸会重置观察角度；当前工作台不持久化相机状态。 */}
       {/* onPointerMissed：点击空白处清除选择。R3F 只在「按下与抬起为同一次点击」
           时触发，拖拽旋转不会误触发；因此不需要不可见大平面遮挡 OrbitControls。
           可靠主路径仍是工具栏「退出选择」按钮。 */}
       <Canvas
+        aria-label={`NaCl ${size}×${size}×${size} 周期超晶胞三维视图。拖拽旋转，滚轮缩放，点击离子查看第一配位层。`}
         camera={{ position: camera.position, fov: camera.fov }}
         frameloop="demand"
         key={`nacl-periodic-canvas-${size}`}
         onPointerMissed={() => {
           if (hasSelection) onClearSelection();
         }}
+        role="img"
         style={{ height: "100%", width: "100%" }}
       >
         {/* 选择 / 隔离变化时在 demand frameloop 下主动续帧，保证覆盖层正确刷新。 */}
@@ -245,6 +257,9 @@ type IonInstancesProps = {
  * 每个 <Instance> 用稳定实例 id 作 key，并携带完整身份供点击回传。
  */
 function IonInstances({ color, idPrefix, instances, onSelect }: IonInstancesProps) {
+  const [hoveredInstanceId, setHoveredInstanceId] = useState<string | null>(null);
+  useCursor(hoveredInstanceId !== null);
+
   if (instances.length === 0) return null;
   return (
     <Instances limit={instances.length} range={instances.length}>
@@ -257,7 +272,16 @@ function IonInstances({ color, idPrefix, instances, onSelect }: IonInstancesProp
             event.stopPropagation();
             onSelect({ siteId: inst.siteId, periodicImageShift: inst.periodicImageShift });
           }}
+          onPointerOut={(event: ThreeEvent<PointerEvent>) => {
+            event.stopPropagation();
+            setHoveredInstanceId((current) => (current === inst.id ? null : current));
+          }}
+          onPointerOver={(event: ThreeEvent<PointerEvent>) => {
+            event.stopPropagation();
+            setHoveredInstanceId(inst.id);
+          }}
           position={inst.cartesian}
+          scale={hoveredInstanceId === inst.id ? 1.08 : 1}
         />
       ))}
     </Instances>
@@ -341,11 +365,11 @@ function CellFrame({ segments, dim = false }: CellFrameProps) {
   const opacityScale = dim ? 0.5 : 1;
   return (
     <>
-      {segments.map((segment, index) => (
+      {segments.map((segment) => (
         <StickCylinder
           color={segment.kind === "outer" ? "#7A8F8A" : "#B7C6C3"}
           end={segment.end}
-          key={`frame-${index}`}
+          key={segment.id}
           material="standard"
           opacity={(segment.kind === "outer" ? 0.62 : 0.4) * opacityScale}
           radius={segment.kind === "outer" ? 0.007 : 0.004}

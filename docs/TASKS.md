@@ -12,13 +12,13 @@
   - **T-028A**：NaCl 周期几何纯函数内核 + 逻辑测试 —— ✅ 已完成（合并入 main，commit `a48d65d` + `777f468`，详见 D-026）。
   - **T-028B**：NaCl 周期探索 Viewer —— ✅ 已完成（分支 `feat/t-028b-nacl-periodic-viewer`，commit `5a44e30` + Commit 2，详见下方「已完成」与 D-027）。
   - **T-028C**：粒子选择与第一配位层隔离 —— ✅ 已完成（分支 `feat/t-028c-nacl-coordination-selection`，commit `a7fe1c6` + Commit 2，详见下方「已完成」与 D-028）。
-  - **T-028D**：工作台控件条 UI 收尾 + 完整测试 + 治理收尾 —— 待立项。
+  - **T-028D**：稳定化、交互收尾与上线验收 —— ✅ 已完成（分支 `feat/t-028d-crystal-workspace-stabilization`，详见下方「已完成」与 D-029）。
 
 ---
 
 ## 待办（按优先级）
 
-（暂无。T-028B/C/D 待用户确认范围后再立项；其他历史 backlog 已全部收口。）
+（暂无。T-028 系列 A—D 已全部收口；下一阶段由用户从 PROJECT_STATUS 候选方向中确认。）
 
 ---
 
@@ -29,6 +29,21 @@
 ---
 
 ## 已完成
+
+### T-028D Crystal Workspace 稳定化、交互收尾与上线验收
+
+- **完成**：2026-07-29（Codex）
+- **分支**：`feat/t-028d-crystal-workspace-stabilization`（由已合并 T-028C 的 `main` 切出）
+- **内容**：
+  - 保留 `Canvas key={size}`、`frameloop="demand"` 与现有清除策略；真实 Chrome 证明 OrbitControls 拖拽不误清选择，尺寸切换、退出周期、切模块仍按原规则重置。
+  - 工具栏用 `fieldset/legend` 分出「观察范围 / 晶胞边框 / 当前选择」，窄屏换行；按钮统一 44px 高并保持 `aria-pressed`、键盘 Enter 操作。
+  - Canvas 增加辅助名称；离子 hover 增加 pointer 与 1.08 倍命中反馈；边框线段使用稳定 `segment.id` key。移动端摘要与离子图例上下堆叠。
+  - 面板增加精简 `aria-live` 播报、aside 名称与标题层级；内部显示身份降权，配位数/最近邻/幽灵数保持优先。
+  - 浏览器测试补真实边界显示副本点击、幽灵邻居、hover、隔离后拖拽保持、显式清除、1440/1280/768/390 无溢出、触控尺寸、移动摘要宽度与键盘切换。
+- **验收标准达成**：完整身份 `siteId + periodicImageShift` 未被破坏；边界点击可在真实 Canvas 稳定命中；配位中心、六个异号邻居、幽灵与虚线不产生异常长线；工具栏与右侧面板在四档断点可读；无可复现 page/console error；未更新 Darwin 快照。
+- **验证**：build/lint 通过；logic 149/149；Chrome production 3/3、Crystal Workspace 4/4、模块状态重置 5/5、旧 NaCl Viewer 1/1。上线结果见本轮最终交付报告。
+- **明确未做**：相机状态持久化、其他晶体接入、拖动/删除/增添离子、改晶胞参数、约束/自由模式、能量判断、保存/分享/截图、晶面切片、后端或数据库。
+- **下一步**：不自动立项，由用户选择 PROJECT_STATUS 中的下一阶段候选。
 
 ### T-028C NaCl 粒子选择与第一配位层隔离
 

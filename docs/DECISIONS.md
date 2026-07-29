@@ -358,3 +358,20 @@
   - 幽灵判定必须看「最终显示身份是否在当前模型内」这一唯一正确判据：D-026 已明确 `cellOffset !== 0` 不能判幽灵，本轮进一步明确「中心自身平移后 periodicImageShift 也不够」——只有 combined 身份查 `displayInstances` 才对。
   - 低饱和浅色而非低透明度降权背景，避免 343 个半透明球的深度排序伪影（沿用项目既有「退场残影不用透明材质」的同类取舍）。
 - **验证与边界**：build/lint 通过（0 warning）；`test:logic` 140 → **149 通过**（新增 9 项 cluster 契约：本体/边界副本选择、同 siteId 不同 shift 区分、不存在 selection 抛错、N=1/2/3 六邻居身份唯一+距离+方向、不修改输入+确定性、canonical 中心 cellOffset≠0 非幽灵、边界副本整体平移+出现负 shift 幽灵、combined shift 重建公式）；Chrome `test:production` 3/3；Chrome `crystal-workspace` 交互（含新增选择用例）通过；NaCl 既有文本断言零回归。人工边界选择检查见 HANDOFF。相机状态持久化仍留 T-028D。
+
+## D-029 T-028D 保留尺寸切换相机重置；以显式清除为主路径，稳定化聚焦可复现交互与可访问性问题
+
+- **日期**：2026-07-29（Codex）
+- **分支**：`feat/t-028d-crystal-workspace-stabilization`
+- **决定**：
+  1. **保留 `Canvas key={size}`，不实现相机状态持久化**：尺寸切换继续重新初始化相机，确保 N=1/2/3 完整入画；本轮没有证据表明角度重置阻碍核心教学任务。
+  2. **保留 `onPointerMissed`，但「退出选择」是可靠清除主路径**：系统 Chrome 真实拖拽后选择身份保持不变，未复现 OrbitControls 与空白点击清除冲突；不新增不可见拦截平面。
+  3. **工具栏用原生 `fieldset/legend` 分组并锁定 44px 高度**：观察范围、晶胞边框、当前选择三组在窄屏独立换行；保留按钮、`aria-pressed` 与键盘 Enter，不引入新的控件系统。
+  4. **Canvas 只补合理的辅助描述，不伪造 DOM 粒子控件**：R3F Canvas 外层语义容器提供名称；选中态由精简 `aria-live` 播报。WebGL 离子仍通过 pointer 命中，未在本轮生成 125/343 个隐藏 DOM 按钮。
+  5. **边界实例可点性用真实 Canvas 网格探测锁定**：浏览器测试按归一化坐标扫描并点击实际 WebGL 实例，断言命中边界显示副本、幽灵数非零、hover 光标、隔离后拖拽不清选择；不添加测试专用 UI 或绕过选择状态。
+  6. **移动端只在 NaCl 周期 Viewer 内调整摘要**：说明与离子图例在手机上下堆叠、桌面左右并排，避免把局部问题扩成全站 `ThreeViewerFrame` 视觉改动。
+- **理由**：
+  - T-028D 是稳定化与收尾，不是相机/跨晶体能力扩张。已有相机重置策略在三种尺寸下稳定，持久化会引入额外 camera/controls 同步状态与新的回归面。
+  - 一次审计中出现过 `Provider` 对空事件目标调用 `addEventListener` 的瞬时错误，但同一完整链随后单次通过，并连续复跑 3 次全部通过，无法稳定复现；按“只修可复现问题”原则不做猜测性生命周期改造。
+  - 可访问性改动应准确表达能力。工具栏动作均可键盘操作；选中结果可播报。为 WebGL 实例伪造大量隐藏控件既难与空间位置对应，也会显著增加认知与维护成本。
+- **验证与边界**：build/lint 通过；logic 149/149；Chrome production 3/3、Crystal Workspace 4/4、模块状态重置 5/5、旧 NaCl Viewer 1/1。1440×900、1280×720、768×900、390×844 均无横向溢出，按钮高度 ≥44px；边界显示副本真实点击、幽灵配位与 OrbitControls 拖拽保持已覆盖。Windows 未运行或更新 Darwin 快照。
