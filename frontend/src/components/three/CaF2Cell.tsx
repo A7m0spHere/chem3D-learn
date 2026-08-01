@@ -152,6 +152,7 @@ export function CaF2Cell({
     >
       <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
         <SceneLighting ambient={0.72} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
+        {/* 1.78 只用于课堂可见性，不代表 5.463 Å 的物理晶格常数。 */}
         <group position={[0, -0.04, 0]} rotation={[0.2, -0.5, 0]} scale={1.78}>
           <CellFrame isMuted={viewMode === "counting" || viewMode === "comparison" || isVoidMode} />
           {showContactLinks

@@ -56,5 +56,12 @@ test.describe("普通分子 Viewer 自由探索与按需讲解", () => {
         { exact: true },
       ),
     ).toBeVisible();
+
+    await page.getByRole("button", { name: /观察 120° 键角/ }).click();
+    await expect(
+      viewer.getByText(/中心 B 周围计入 6 个价层电子，未满足八隅体；它可以接受电子对，因此 BF₃ 表现为路易斯酸/),
+    ).toBeVisible();
+    await expect(page.getByText("缺电子分子", { exact: true })).toHaveCount(0);
+    await expect(page.getByText(/TODO-CHEM-VERIFY/)).toHaveCount(0);
   });
 });

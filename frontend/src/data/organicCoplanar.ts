@@ -16,7 +16,7 @@ export const organicCoplanarModes: OrganicCoplanarModeInfo[] = [
     id: "overview",
     labelZh: "总览",
     titleZh: "多取代苯综合模型",
-    bodyZh: "在同一个苯环上连接甲基、乙烯基、乙炔基和胺基，先建立整体空间图像，再分别判断不同片段的共面或共线特点。",
+    bodyZh: "在同一个苯环上连接甲基、乙烯基、乙炔基和胺基，先建立整体空间图像，再分别判断不同片段的共面或共线特点。这是理想化综合模型，不是单纯苯乙烯。",
     facts: [
       { label: "示例结构", value: "C6H2(CH3)(CH=CH2)(C≡CH)(NH2)" },
       { label: "学习目标", value: "用一个 3D 模型串联平面、四面体、直线和单键旋转" },
@@ -24,10 +24,10 @@ export const organicCoplanarModes: OrganicCoplanarModeInfo[] = [
     notes: [
       "苯环本身是平面结构。",
       "取代基后续原子不能一概认为都与苯环共面。",
-      "本模型只做高中共线共面判断的定性示意。",
+      "本模型只做高中共线共面判断的定性示意，默认姿态是代表性构象，不是唯一稳定构象。",
     ],
     viewerTitle: "多取代苯｜先建立整体空间图像",
-    viewerSummary: "苯环、甲基、乙烯基、乙炔基和胺基具有不同的空间特征，需要分片段判断。",
+    viewerSummary: "这是理想化综合模型，不是单纯苯乙烯；各片段具有不同的空间特征，需要分片段判断。",
   },
   {
     id: "benzenePlane",
@@ -65,17 +65,18 @@ export const organicCoplanarModes: OrganicCoplanarModeInfo[] = [
     id: "sp2Fragment",
     labelZh: "sp² 片段",
     titleZh: "乙烯基自身是平面片段",
-    bodyZh: "乙烯基中的 C=C 双键使该片段自身保持平面；默认示例中，乙烯基平面与苯环平面约成 45° 夹角。",
+    bodyZh: "乙烯基中的 C=C 双键使该片段自身近似平面；本模型人为把它与苯环固定为约 45°，只是用于展示连接单键可旋转的代表性教学姿态。",
     facts: [
       { label: "片段", value: "ringC2 - CH=CH2" },
-      { label: "默认关系", value: "乙烯基平面与苯环平面有夹角" },
+      { label: "默认关系", value: "理想化示意：乙烯基平面与苯环平面约成 45°" },
     ],
     notes: [
       "乙烯基自身平面，不等于默认就与苯环共面。",
-      "芳环与乙烯基之间的连接单键可以旋转。",
+      "芳环与乙烯基之间的连接单键可以发生扭转。",
+      "45° 不是最低能计算结果；实际取向会受取代基、相态、环境与热运动影响。",
     ],
     viewerTitle: "sp² 片段｜乙烯基自身保持平面",
-    viewerSummary: "乙烯基自身共面，但它与苯环平面之间可以存在夹角。",
+    viewerSummary: "乙烯基自身近似共面；当前 45° 是理想化代表姿态，不是所有苯乙烯类结构的唯一构象。",
   },
   {
     id: "spFragment",
@@ -113,7 +114,7 @@ export const organicCoplanarModes: OrganicCoplanarModeInfo[] = [
     id: "rotation",
     labelZh: "单键旋转",
     titleZh: "只旋转 ringC2 → vinylC1 单键",
-    bodyZh: "点击“对齐平面”后，只让乙烯基片段绕 ringC2 → vinylC1 轴旋转到苯环 xy 平面，不改变甲基、乙炔基和胺基结构。",
+    bodyZh: "点击“对齐平面”后，只让乙烯基片段绕 ringC2 → vinylC1 轴旋转到苯环 xy 平面，不改变甲基、乙炔基和胺基结构。这是几何教学操作，不是在预测最低能构象。",
     facts: [
       { label: "旋转轴", value: "ringC2 → vinylC1" },
       { label: "对齐效果", value: "苯环平面与乙烯基平面重合" },

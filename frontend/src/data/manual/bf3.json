@@ -90,7 +90,7 @@
     {
       "id": "bond-angle",
       "titleZh": "观察 120° 键角",
-      "bodyZh": "显示 F-B-F 键角后，可以看到平面三角形结构的典型键角约为 120°。硼原子价层电子数不足 8，可作为高中拓展理解。",
+      "bodyZh": "显示 F-B-F 键角后，可以看到平面三角形结构的典型键角约为 120°。在常用中性路易斯结构中，中心 B 周围计入 6 个价层电子，未满足八隅体；它可以接受电子对，因此 BF₃ 表现为路易斯酸。",
       "focusAngleIds": ["f1-b1-f2"],
       "showAngles": true
     }
@@ -105,8 +105,8 @@
   },
   "metadata": {
     "level": "high-school",
-    "source": "hand-authored teaching model",
-    "notesZh": "BF3 平面三角形教学模型，坐标用于课堂可视化，不作为实验键长数据。",
+    "source": "hand-authored teaching model; chemistry sources mapped in docs/CHEMISTRY_VERIFICATION.md",
+    "notesZh": "BF₃ 平面三角形教学模型，坐标用于课堂可视化，不作为实验键长数据。B—F 键可表现出一定多键或电子离域特征，但基础页不据此把 BF₃ 说成“所有原子都缺电子”或“不稳定”。",
     "verified": true
   }
 }

@@ -347,7 +347,8 @@ export const mockMolecules: MockMoleculeRecord[] = [
     centralAtomZh: "B，三组电子区域",
     lonePairsTextZh: "中心原子 0 对",
     summaryZh: "三氟化硼中三个 B-F 键位于同一平面，形成平面三角形结构。",
-    commonMistakeZh: "注意中心硼原子周围是三个方向，不是四面体结构。TODO-CHEM-VERIFY：缺电子表述后续复核。",
+    commonMistakeZh:
+      "中心 B 周围是三个成键方向，不是四面体结构；不要把“中心 B 未满足八隅体”说成“所有原子都缺电子”或“BF₃ 不稳定”。",
     atoms: [
       { id: "b1", element: "B", label: "B", position: [0, 0, 0], color: "#0D9488" },
       { id: "f1", element: "F", label: "F", position: [0, 1.25, 0], color: "#10B981" },

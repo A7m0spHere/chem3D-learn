@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-01（Codex，T-032 产品完备度审计与下一阶段拆解）
+> 最后更新：2026-08-01（Codex，T-033 三处化学内容核验）
 
 ## 一句话定位
 
@@ -26,7 +26,9 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
-- **T-032 产品完备度审计已完成**（2026-08-01）：正式站点已有 32 个可交互结构模块、3 条参考顺序和 6 个考试专题详情，公开模块均由真实结构数据或专题 Viewer 承接；产品的主要缺口不再是 3D 模型数量，而是 3 处化学待核实项、考试专题缺少站内作答反馈，以及能力扩展页仍展示不可进入的 XeO“建设中”卡片。新增 `docs/PRODUCT_COMPLETENESS_AUDIT.md`，主线改为“化学准确 → 清理公开占位 → 自测样板 → 扩展自测 → 小范围 Alpha”。
+- **T-033 三处化学内容核验已完成**（2026-08-01）：以 IUPAC、OpenStax、AFLOW、NIST、IUCr 与同行评审论文核实 BF₃、CaF₂ 和芳环—乙烯基构象边界，扩展 `docs/CHEMISTRY_VERIFICATION.md` 建立来源—结论—文案—代码—测试矩阵。BF₃ 现聚焦中心 B 的 6 电子 / 八隅体例外与 Lewis 酸；CaF₂ 现注明 `Fm-3m`、常规胞 4 Ca + 8 F、8:4 配位、室温附近常压约 5.463 Å 及非 Å 显示尺度；有机页明确实际是 `C₁₁H₁₁N` 四取代苯理想化综合模型，固定 45° 不是最低能或唯一构象。3 处 `TODO-CHEM-VERIFY` 已清理。
+
+- **T-032 产品完备度审计已完成**（2026-08-01）：正式站点已有 32 个可交互结构模块、3 条参考顺序和 6 个考试专题详情，公开模块均由真实结构数据或专题 Viewer 承接；审计当时确认的主要缺口不是 3D 模型数量，而是 3 处化学待核实项（现已由 T-033 收口）、考试专题缺少站内作答反馈，以及能力扩展页仍展示不可进入的 XeO“建设中”卡片。新增 `docs/PRODUCT_COMPLETENESS_AUDIT.md`，主线改为“化学准确 → 清理公开占位 → 自测样板 → 扩展自测 → 小范围 Alpha”。
 
 - **T-031 v0.1.0-rc.1 真实反馈收集与问题分级已暂停**（2026-08-01）：反馈表单、指南、P0–P3 和台账仍保留，但产品所有者确认当前产品尚未完善，试用者主要为本人和少量朋友。现阶段不做广泛 RC 反馈目标；待 T-033～T-035 完成后，以少量真实使用者开展 Alpha，不设置人数 KPI。真实反馈仍为 0，稳定版决策未开始；`v0.1.0-rc.1` tag 与 GitHub Prerelease 不变。
 
@@ -60,6 +62,14 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-08-01，T-033）
+
+- `npm run test:logic`：**152 / 152 通过**，新增 3 条化学内容契约，覆盖 BF₃ 旧绝对化表述清理、CaF₂ 4:8 / 8:4 / 分数坐标显示尺度，以及综合有机模型身份和构象边界。
+- 设置 `$env:PLAYWRIGHT_CHANNEL='chrome'` 后运行 3 条无截图定向测试：BF₃ 1 / 1、CaF₂ 1 / 1、有机共面 1 / 1 通过。首次有机测试发现 overview 边界仅存在数据、未进入可见 UI，随后把“理想化综合模型，不是单纯苯乙烯”加入 Viewer 摘要并复跑通过。
+- `npm run build`、`npm run lint` 通过；构建仅保留按需 `ThreeViewerFrame` 837.71 KB 的既有非阻断 large chunk 警告。
+- `backend npm test`：**22 / 22 通过**，确认 BF₃ 前后端结构核心防漂移契约仍成立；后端不复制本轮教学文案。
+- `frontend/src` 与 `backend/src` 的 `TODO-CHEM-VERIFY` 复核为 0；治理文档保留任务历史文字。未运行或更新 Darwin 视觉快照。
 
 ## 独立验证结果（2026-08-01，T-032）
 
@@ -360,7 +370,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-立即执行 **T-033：收口 3 处化学待核实项**。之后清理 Exam 公开“建设中”入口，并为晶胞均摊专题建立轻量自测样板。达到 `docs/PRODUCT_COMPLETENESS_AUDIT.md` 的最低门槛后，恢复 T-031，由维护者和少量朋友先验证样板；根据反馈修正后，再由 T-036 扩展到其余专题。不得把人数少视为无效，也不得把零 Issue 当作稳定版证据。
+立即执行 **T-034：清理能力扩展页公开的 XeO“建设中”入口**。之后由 T-035 为晶胞均摊专题建立轻量自测样板。达到 `docs/PRODUCT_COMPLETENESS_AUDIT.md` 的最低门槛后，恢复 T-031，由维护者和少量朋友先验证样板；根据反馈修正后，再由 T-036 扩展到其余专题。不得把人数少视为无效，也不得把零 Issue 当作稳定版证据。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
@@ -376,10 +386,6 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 - `backend/src/molecules.js` 与前端 6 个核心 JSON 重复。T-005（commit `fd67aca`）已加防漂移契约测试：5 个 VSEPR 分子的结构核心逐字锁定，漂移即测试变红；教学文案与 nacl 简化胞的差异是**有意保留**的（见 `docs/BACKEND_DATA_SYNC.md`），未做构建期单源生成。
 - GitHub Pages 不提供可配置的服务端 history rewrite；当前 `404.html` 会在真实浏览器中保留原路径并跳转回 SPA，因此用户直达可用，但非 JavaScript 客户端看到的首个深层 URL HTTP 响应仍是 404。若未来需要所有深层 URL 原生返回 200 或更强 SEO，应改用支持服务器 rewrite 的公开托管。
 - 自动分包后的按需 `ThreeViewerFrame` chunk 约 845.42 KB（gzip 227.97 KB），仍触发 Vite large chunk 警告；首页已不下载它，但受限设备直接进入 CH₄ 的 Canvas 中位约 4.38 秒，略高于 4 秒目标。
-- 当前有三处显式化学待核实项：
-  - `mockMolecules.ts` 的 BF₃ 缺电子表述。
-  - `caf2.json` 的约 5.46 Å 晶胞参数。
-  - `organicBuilderSeeds.ts` 的苯乙烯类乙烯基与苯环近共面构象说明。
 - HANDOFF 曾记录 npm 安装报告 4 个漏洞（1 中危、3 高危），本轮未联网重跑 `npm audit`，所以该数字仍为**待确认**。
 
 ## 其他待确认

@@ -171,9 +171,8 @@ function createOrganicCoplanarSeed(): BuilderSeed {
 
   const vinylDirection = radial(1);
   const vinylTangent = tangent(vinylDirection);
-  // TODO-CHEM-VERIFY：苯乙烯类分子因共轭，优势构象是乙烯基与苯环近共面；
-  // 此处刻意混入 45° z 分量展示"单键可旋转"的扭转构象，用于共面性教学时需要说明
-  // 这不是最低能量构象，避免误导"最多共面原子数"类考题的直觉。
+  // 45° 是为展示芳环—乙烯基连接单键可改变两平面关系而选的代表性教学姿态，
+  // 不是对这个四取代综合模型所做的最低能构象计算，也不代表气相、溶液或晶体中的唯一姿态。
   const vinylPlaneVector = normalize(add(scale(vinylTangent, Math.cos(Math.PI / 4)), [0, 0, Math.sin(Math.PI / 4)]));
   const vinylC1 = add(positions[1], scale(vinylDirection, 0.86));
   const vinylC2 = add(vinylC1, scale(vinylDirection, 0.78));
@@ -217,7 +216,8 @@ function createOrganicCoplanarSeed(): BuilderSeed {
     moduleId: "organic-coplanar",
     nameZh: "有机共面分析综合模型",
     formula: "C₁₁H₁₁N",
-    noteZh: "这是用于比较 sp³、sp²、sp 与胺基空间结构的教学综合模型。",
+    noteZh:
+      "这是用于比较 sp³、sp²、sp 与胺基空间结构的理想化综合模型。默认把乙烯基与苯环固定为约 45°，只为展示单键旋转；它不是单纯苯乙烯，也不代表气相最低能、固态晶体或室温下的唯一构象。",
     atoms,
     bonds,
   };

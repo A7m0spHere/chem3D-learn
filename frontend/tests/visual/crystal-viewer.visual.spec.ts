@@ -243,6 +243,23 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     await expectCanvasAreaHasDetail(canvasArea);
   });
 
+  test("CaF₂ 页面公开晶胞计数、双配位与显示尺度边界", async ({ page }) => {
+    await page.goto("/module/caf2-fluorite");
+
+    const viewer = page.getByTestId("caf2-viewer");
+    await expect(viewer.getByText(/不按约 5\.463 Å 的晶格常数直接缩放/)).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "晶胞计数" }).click();
+    await expect(viewer.getByText(/Ca : F = 4 : 8 = 1 : 2/)).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "Ca²⁺ 8配位" }).click();
+    await expect(viewer.getByText("CaF₂｜Ca²⁺ 的立方体 8 配位", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { exact: true, name: "F⁻ 4配位" }).click();
+    await expect(viewer.getByText("CaF₂｜F⁻ 的四面体 4 配位", { exact: true })).toBeVisible();
+    await expect(page.getByText(/TODO-CHEM-VERIFY/)).toHaveCount(0);
+  });
+
   test("CaF₂ 支持双配位、四面体空隙三阶段和反萤石对比模式", async ({ page }) => {
     await page.goto("/module/caf2-fluorite");
 

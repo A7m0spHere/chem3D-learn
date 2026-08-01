@@ -229,7 +229,8 @@ function buildOrganicCoplanarScene(vinylAligned: boolean): SceneData {
     addBond(`methylC-H${index + 1}`, "methylC", `methylH${index + 1}`, 1, "sp3");
   });
 
-  // ringC2 -> -CH=CH2. Its own plane is rotated around ringC2 -> vinylC1.
+  // ringC2 -> -CH=CH2。默认 45° 是演示连接单键扭转的代表性教学姿态，
+  // 不是这个四取代综合模型的最低能计算结果；vinylAligned 也只表示几何对齐。
   const vinylDirection = radial(1);
   const vinylTangent = tangent(vinylDirection);
   const vinylPlaneTilt = vinylAligned ? 0 : Math.PI / 4;

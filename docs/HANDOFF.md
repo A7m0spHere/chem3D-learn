@@ -9,44 +9,44 @@
 
 - **Agent**：Codex
 - **日期**：2026-08-01
-- **分支**：`codex/t-032-product-completeness-audit`（由 `main@b634839` 切出）
-- **任务**：T-032 审计产品真实完成度，暂停过早的广泛 RC 反馈主线并重建可执行 backlog。
+- **分支**：`codex/t-032-product-completeness-audit`
+- **任务**：T-033 核实 BF₃、CaF₂ 与芳环—乙烯基构象边界，并建立来源—结论—文案—代码—测试映射。
 
 ### 本轮做的事
 
-1. **重新校准阶段判断**：产品所有者明确指出当前项目尚未完善，能参与试用的主要是本人和少量朋友。结论是 T-031 反馈机制有价值，但不应继续作为当前开发主线。
-2. **线上产品审计**：检查 Home、Modules、Paths、Exam、About、6 个 ExamTopicDetail 与 CH₄ / 离子键 / NaCl / 有机共面代表模块。结构库有 32 个公开模块；Exam 有 6 个可进入专题和 1 个 XeO“建设中”卡片。
-3. **源码完成度核对**：核对 23 个手写 JSON、专题模块分支、`deriveViewerKind` 与 `viewerRegistry`。现有公开模块均有真实或专题 Viewer，`ModulePlaceholderViewer` 只保留为防御性 fallback。
-4. **确定真正缺口**：源码仍有 BF₃、CaF₂、苯乙烯构象 3 处 `TODO-CHEM-VERIFY`；6 个 ExamTopicDetail 都是静态讲义，没有站内作答、即时反馈、错误解释和重试。
-5. **重建 backlog**：新增 `docs/PRODUCT_COMPLETENESS_AUDIT.md` 与 D-034；T-033～T-035 依次覆盖化学核实、清理 XeO 建设中入口和自测样板。T-031 暂停，达到门槛后用小范围 Alpha 验证样板；T-036 再根据反馈扩展其余专题。
+1. **全仓定位**：检查页面文案、23 个手写 JSON 注册、CaF₂ Viewer 几何、综合有机模型坐标、目录 / 考试专题、前后端副本、测试与治理文档；确认 backend BF₃ 只复制结构，不复制争议教学结论。
+2. **来源核验**：BF₃ 使用 IUPAC / OpenStax / ACS；CaF₂ 使用 AFLOW、常压衍射论文与 Scientific Reports；苯乙烯使用 NIST CCCBDB、气相光谱、83 K IUCr 单晶和液相 NMR 论文。
+3. **最小文案修正**：BF₃ 聚焦中心 B 六电子 / 八隅体例外 / Lewis 酸；CaF₂ 增加 `Fm-3m`、约 5.463 Å 的温压条件和非 Å 显示尺度；有机页明确是 `C₁₁H₁₁N` 四取代苯理想化综合模型，45° 只是代表姿态。
+4. **映射与测试**：扩展 `docs/CHEMISTRY_VERIFICATION.md`；新增 `chemistry-content.logic.spec.ts`，并给 BF₃、CaF₂、有机共面补无截图页面断言。3D 坐标与 Darwin PNG 均未改。
+5. **任务治理**：T-033 移入已完成，新增 D-035，产品审计 P0 改为已收口；下一任务为 T-034。
 
 ### 验证结果
 
-- 开工前 `git fetch origin`；`main` 与 `origin/main` 为 0 / 0，工作区干净。
-- GitHub Issues 实时查询：开放 0，2026-07-30 以来近期关闭 0。
-- 正式站点和源码完成只读审计；确认 32 个公开模块没有当前 placeholder route。
-- 检查 6 个考试专题详情，均无 `button/input/select/textarea` 作答控件。
-- 本任务仅改文档，按规则未运行 frontend build、lint 或视觉回归。
+- 开工前 `git fetch origin`；当前分支与 upstream 为 0 / 0，工作区仅有本任务改动。
+- `npm run test:logic`：152 / 152；新增 3 条化学内容契约。
+- 系统 Chrome 无截图定向测试：BF₃ 1 / 1、CaF₂ 1 / 1、有机共面 1 / 1。
+- `npm run build`、`npm run lint` 通过；仅有既有 ThreeViewerFrame large chunk 警告。
+- backend 22 / 22 通过，BF₃ 结构核心 parity 契约未漂移。
+- `frontend/src` 与 `backend/src` 的 `TODO-CHEM-VERIFY` 为 0；治理文档保留任务历史文字。未运行完整 Windows 视觉测试，未更新 Darwin 快照。
 
 ### 关键决定
 
-- 工程 RC 可运行不等于学习产品已完善；下一阶段用学习闭环衡量完成度，而不是继续堆模型数量。
-- 少量朋友足以承担 Alpha，但应在化学事实、公开占位和至少一个自测闭环收口之后再邀请。
-- 自测必须保持前端本地、轻量、可复用；不引入账号、数据库或大型题库。
-- `v0.1.0-rc.1` 继续作为历史 Prerelease 保留，不自动推进新 RC 或稳定版。
+- 测试不是化学证据；来源、结论和最终可见文案必须逐项可追溯。
+- 物理参数必须带条件和单位，模型显示尺度必须显式与物理量分离。
+- 综合教学模型必须按实际组成命名；固定构象若未经能量计算，只能称理想化 / 代表性姿态。
 
 ### 已知限制
 
-- T-032 只完成审计与任务拆解，没有实现 T-033～T-036 的业务改动。
-- 3 处 `TODO-CHEM-VERIFY` 仍在源码，必须逐项查证，不能仅删除标记。
-- Exam 的自测题数量、答案和解释尚未设计；后续实现需要严格控制为小型能力检查，而非题库扩张。
-- Windows 不能更新 Darwin 快照；T-035/T-036 的 UI 变化最终仍需 macOS 审核。
+- BF₃ 的 B—F π 回馈 / 酸性顺序解释在不同理论分析中仍有争论，本轮刻意不把某一解释写入基础主结论。
+- CaF₂ 的 5.463 Å 是室温附近、常压约值，不覆盖高压相、热膨胀、缺陷或掺杂样品。
+- 综合有机模型没有对应具体化合物的构象搜索；45° 只保证教学可见性。
+- Windows 未执行 Darwin 截图回归；本轮只增加不产生截图的 Chrome 行为断言。
 
 ### 给下一个 Agent 的建议
 
-- 直接接 T-033。化学事实会随材料、温度、相态和上下文变化，必须联网查权威或原始来源。
-- 分成 3 个独立结论核实，但可在同一任务中共享 `CHEMISTRY_VERIFICATION.md` 的来源—实现—测试格式。
-- 若来源只支持“近似 / 特定条件下”，教学文案要明确条件；不要用一个无上下文精确值冒充普适结论。
+- 直接接 T-034：从 Exam 公开目录移除 XeO“建设中”入口，并锁专题数量与链接一致性。
+- 不删除 `docs/CHEMISTRY_VERIFICATION.md` 的条件边界，也不要把 5.463 Å 引入 Three.js 缩放。
+- T-035 自测样板仍应等 T-034 完成后实施；保持本地、轻量、可复用。
 
 ---
 
