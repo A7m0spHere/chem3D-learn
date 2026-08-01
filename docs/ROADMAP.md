@@ -55,6 +55,15 @@
 - Reduce misleading placeholders where real 3D data is absent.
 - Review Chinese teaching copy and visual hierarchy.
 
+## Current - Product Completeness and Alpha Readiness
+
+- Close the three remaining `TODO-CHEM-VERIFY` items with traceable sources.
+- Remove public “under construction” entries until the corresponding learning content exists.
+- Add a small, reusable self-check loop to the existing exam topics: answer, immediate feedback, explanation, and retry.
+- Keep the self-check local and lightweight; do not add accounts, a database, or a large question bank.
+- After the minimum readiness gate passes, use the maintainer and a small group of friends for Alpha feedback. Do not require a large tester cohort.
+- Treat `docs/PRODUCT_COMPLETENESS_AUDIT.md` and `docs/TASKS.md` as the detailed execution order.
+
 ## v1.0 - Frontend Release Candidate
 
 - Verify current frontend pages.

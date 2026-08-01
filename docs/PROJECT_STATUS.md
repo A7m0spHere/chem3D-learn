@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-07-30（Codex，T-031 RC 反馈入口与分诊机制）
+> 最后更新：2026-08-01（Codex，T-032 产品完备度审计与下一阶段拆解）
 
 ## 一句话定位
 
@@ -26,7 +26,9 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
-- **T-031 v0.1.0-rc.1 真实反馈收集与问题分级进行中**（2026-07-30）：已审计 GitHub Issues、默认标签、Issue config 与私密漏洞报告设置；审计时 Issues 为 0，不能据此推断 RC 已通过真实用户验证。仓库新增 Bug、化学内容、体验 / 可访问性三类 Issue Form，RC 试用指南、P0–P3 分级、`v0.1.0` / `rc.2` 门槛与只记录真实反馈的台账；README 和仓库内 Release Notes 增加入口。反馈入口建设已完成，真实用户反馈仍为 0，稳定版决策未开始；`v0.1.0-rc.1` tag 与已发布 GitHub Prerelease 保持不变。
+- **T-032 产品完备度审计已完成**（2026-08-01）：正式站点已有 32 个可交互结构模块、3 条参考顺序和 6 个考试专题详情，公开模块均由真实结构数据或专题 Viewer 承接；产品的主要缺口不再是 3D 模型数量，而是 3 处化学待核实项、考试专题缺少站内作答反馈，以及能力扩展页仍展示不可进入的 XeO“建设中”卡片。新增 `docs/PRODUCT_COMPLETENESS_AUDIT.md`，主线改为“化学准确 → 清理公开占位 → 自测样板 → 扩展自测 → 小范围 Alpha”。
+
+- **T-031 v0.1.0-rc.1 真实反馈收集与问题分级已暂停**（2026-08-01）：反馈表单、指南、P0–P3 和台账仍保留，但产品所有者确认当前产品尚未完善，试用者主要为本人和少量朋友。现阶段不做广泛 RC 反馈目标；待 T-033～T-035 完成后，以少量真实使用者开展 Alpha，不设置人数 KPI。真实反馈仍为 0，稳定版决策未开始；`v0.1.0-rc.1` tag 与 GitHub Prerelease 不变。
 
 - **T-030 v0.1.0-rc.1 发布候选已完成**（2026-07-29）：仓库发布版本当前以前端主产品为准，`frontend` 已更新到 `0.1.0-rc.1`，backend / video 保持独立版本。新增 CHANGELOG、用户向 Release Notes、README RC 入口、发布候选 QA 清单和 D-032；发布准备提交经完整验证后快进进入 `main`，Pages、annotated tag `v0.1.0-rc.1` 与 GitHub prerelease 对应同一发布提交。发布门禁同时修复了 NaCl 教学 Canvas 尚未完成 R3F 事件连接时快速进入周期探索可能出现的 `connect(null)` 竞态；没有改晶体几何、教学语义或快照。
 
@@ -58,6 +60,15 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-08-01，T-032）
+
+- 开工前 `git fetch origin`；本地 `main` 与 `origin/main` 为 0 / 0，工作区干净，从 `main@b634839` 创建 `codex/t-032-product-completeness-audit`。
+- 正式站点只读审计：首页、Modules、Paths、Exam、About、6 个 ExamTopicDetail 和 CH₄ / 离子键 / NaCl / 有机共面 4 个代表性模块均可进入。
+- Modules 页面列出 32 个模块；源码核对 `learningModules.ts`、23 个手写 JSON、专题分支和 `deriveViewerKind` 后，确认当前公开模块没有落入 `placeholder` viewer。
+- 6 个考试专题详情均有说明、步骤、误区、自查和 3D 关联，但 DOM 中没有作答控件；Exam 页面另有一个不可进入的 XeO“建设中”卡片。
+- 源码检索确认 3 处 `TODO-CHEM-VERIFY`：BF₃ 缺电子、CaF₂ 晶胞参数、苯乙烯类近共面构象。
+- GitHub Issues 实时查询仍为 0。T-032 仅修改治理文档，按规则未运行前端 build、lint 或视觉回归。
 
 ## 独立验证结果（2026-07-30，T-031）
 
@@ -349,7 +360,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-使用 `docs/RC_FEEDBACK.md` 邀请真实学生、教师和目标设备使用者试用 `v0.1.0-rc.1`，把实际反馈写入 `docs/RC_FEEDBACK_LOG.md` 并按 P0–P3 分诊。不得把“当前零 Issue”当作稳定版证据；不得自动发布 `v0.1.0` 或 `rc.2`。任何阻断问题应先单独复现、修复和重新验收。
+立即执行 **T-033：收口 3 处化学待核实项**。之后清理 Exam 公开“建设中”入口，并为晶胞均摊专题建立轻量自测样板。达到 `docs/PRODUCT_COMPLETENESS_AUDIT.md` 的最低门槛后，恢复 T-031，由维护者和少量朋友先验证样板；根据反馈修正后，再由 T-036 扩展到其余专题。不得把人数少视为无效，也不得把零 Issue 当作稳定版证据。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
@@ -365,13 +376,14 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 - `backend/src/molecules.js` 与前端 6 个核心 JSON 重复。T-005（commit `fd67aca`）已加防漂移契约测试：5 个 VSEPR 分子的结构核心逐字锁定，漂移即测试变红；教学文案与 nacl 简化胞的差异是**有意保留**的（见 `docs/BACKEND_DATA_SYNC.md`），未做构建期单源生成。
 - GitHub Pages 不提供可配置的服务端 history rewrite；当前 `404.html` 会在真实浏览器中保留原路径并跳转回 SPA，因此用户直达可用，但非 JavaScript 客户端看到的首个深层 URL HTTP 响应仍是 404。若未来需要所有深层 URL 原生返回 200 或更强 SEO，应改用支持服务器 rewrite 的公开托管。
 - 自动分包后的按需 `ThreeViewerFrame` chunk 约 845.42 KB（gzip 227.97 KB），仍触发 Vite large chunk 警告；首页已不下载它，但受限设备直接进入 CH₄ 的 Canvas 中位约 4.38 秒，略高于 4 秒目标。
-- 当前有两处显式化学待核实项：
+- 当前有三处显式化学待核实项：
   - `mockMolecules.ts` 的 BF₃ 缺电子表述。
   - `caf2.json` 的约 5.46 Å 晶胞参数。
+  - `organicBuilderSeeds.ts` 的苯乙烯类乙烯基与苯环近共面构象说明。
 - HANDOFF 曾记录 npm 安装报告 4 个漏洞（1 中危、3 高危），本轮未联网重跑 `npm audit`，所以该数字仍为**待确认**。
 
 ## 其他待确认
 
-- `docs/ROADMAP.md` 的 v1.0 RC 计划与实际实现如何对应。
+- `docs/ROADMAP.md` 已补“Product Completeness and Alpha Readiness”当前阶段；历史 v0.x / v1.0 章节与已发布 `v0.1.0-rc.1` 的版本命名仍需在未来稳定版任务中统一，不在 T-032 改写历史。
 - 前端与视频未声明 Node `engines`，最低支持版本待确认。
 - GitHub Pages 已作为正式公开部署平台；自定义域名尚未配置。

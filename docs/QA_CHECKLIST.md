@@ -44,6 +44,14 @@ For documentation-only tasks:
 - [ ] UI follows the light education style from `docs/DESIGN_SYSTEM.md`.
 - [ ] UI avoids dark dashboard, cyberpunk, purple-blue AI template, and overcrowding.
 
+## Product completeness / 产品完备度
+
+- [ ] 公开目录不展示无法进入的“建设中”内容；规划项保留在治理文档中。
+- [ ] 当前公开模块均有真实或专题 Viewer，不把防御性 placeholder 当作已交付内容。
+- [ ] 核心考试专题至少支持一次“作答—反馈—解释—重试”闭环，而不只是静态讲义。
+- [ ] 小范围 Alpha 前已收口发布范围内的 `TODO-CHEM-VERIFY`，并完成适用自动化验证。
+- [ ] Alpha 可以由维护者和少量朋友开展，不设置人数 KPI，也不把零 Issue 解释为稳定。
+
 ## 3D Interaction
 
 - [ ] Model can rotate when a real 3D viewer is shown.

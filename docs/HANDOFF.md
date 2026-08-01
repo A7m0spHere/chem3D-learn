@@ -8,39 +8,45 @@
 ## 最近一次交接
 
 - **Agent**：Codex
-- **日期**：2026-07-30
-- **分支**：`docs/t-031-rc-feedback-loop`（由 `main@8d3e16f` 切出）
-- **任务**：T-031 为 `v0.1.0-rc.1` 建立真实反馈收集与 P0–P3 分诊闭环。
+- **日期**：2026-08-01
+- **分支**：`codex/t-032-product-completeness-audit`（由 `main@b634839` 切出）
+- **任务**：T-032 审计产品真实完成度，暂停过早的广泛 RC 反馈主线并重建可执行 backlog。
 
 ### 本轮做的事
 
-1. **审计发布与反馈现状**：开工时 `main` / `origin/main` 为 `8d3e16f`，annotated tag 与 GitHub Prerelease 对应同一提交；Issues 为 0，只有 GitHub 默认标签，私密漏洞报告未启用。
-2. **建立结构化反馈入口**：新增 Bug、化学内容、体验 / 可访问性三类 Issue Form 和 `config.yml`；远端创建 `rc-feedback`、`chemistry`、`ux`、`accessibility` 标签。安全入口明确禁止公开披露，但不伪造未启用的私密报告通道。
-3. **建立真实试用与分诊规则**：新增 `docs/RC_FEEDBACK.md`，覆盖核心分子、NaCl 教学 / 周期工作台、有机拼装、响应式、课堂和可访问性测试路径；固化 P0–P3、`v0.1.0` 与 `rc.2` 门槛。
-4. **建立零虚构台账**：新增 `docs/RC_FEEDBACK_LOG.md`，当前真实反馈为 0；台账只允许写入可追溯 Issue / 实际反馈，不以示例填充，也不把零 Issue 当作“无问题”。
-5. **补齐入口和治理**：README、仓库内 RC Release Notes、QA、PROJECT_STATUS、TASKS、DECISIONS 已同步。已发布 GitHub Release body、tag、版本号、前端源码和快照均未修改。
+1. **重新校准阶段判断**：产品所有者明确指出当前项目尚未完善，能参与试用的主要是本人和少量朋友。结论是 T-031 反馈机制有价值，但不应继续作为当前开发主线。
+2. **线上产品审计**：检查 Home、Modules、Paths、Exam、About、6 个 ExamTopicDetail 与 CH₄ / 离子键 / NaCl / 有机共面代表模块。结构库有 32 个公开模块；Exam 有 6 个可进入专题和 1 个 XeO“建设中”卡片。
+3. **源码完成度核对**：核对 23 个手写 JSON、专题模块分支、`deriveViewerKind` 与 `viewerRegistry`。现有公开模块均有真实或专题 Viewer，`ModulePlaceholderViewer` 只保留为防御性 fallback。
+4. **确定真正缺口**：源码仍有 BF₃、CaF₂、苯乙烯构象 3 处 `TODO-CHEM-VERIFY`；6 个 ExamTopicDetail 都是静态讲义，没有站内作答、即时反馈、错误解释和重试。
+5. **重建 backlog**：新增 `docs/PRODUCT_COMPLETENESS_AUDIT.md` 与 D-034；T-033～T-035 依次覆盖化学核实、清理 XeO 建设中入口和自测样板。T-031 暂停，达到门槛后用小范围 Alpha 验证样板；T-036 再根据反馈扩展其余专题。
 
 ### 验证结果
 
-- Ruby YAML 解析：4 / 4 通过。
-- Issue Form 深层校验：Bug 11、Chemistry 10、UX 11 个内容块；必需字段、body 类型、字段 ID 与 `rc-feedback` 标签全部通过。
-- 远端标签：`rc-feedback` / `chemistry` / `ux` / `accessibility` 已确认；GitHub Issues 二次审计仍为 0。
-- `frontend npm run build`、`npm run lint` 通过；保留既有按需 `ThreeViewerFrame` large chunk 非阻断警告。
-- 本任务没有 UI / 3D / 逻辑改动，按范围未运行视觉回归，也没有更新快照。
+- 开工前 `git fetch origin`；`main` 与 `origin/main` 为 0 / 0，工作区干净。
+- GitHub Issues 实时查询：开放 0，2026-07-30 以来近期关闭 0。
+- 正式站点和源码完成只读审计；确认 32 个公开模块没有当前 placeholder route。
+- 检查 6 个考试专题详情，均无 `button/input/select/textarea` 作答控件。
+- 本任务仅改文档，按规则未运行 frontend build、lint 或视觉回归。
 
-### 关键决定与审计结论
+### 关键决定
 
-- Bug、化学、体验反馈使用不同表单，因为复现证据、事实来源和使用场景要求不同；提交者不需要自报 P0–P3。
-- P0–P3 由影响范围、教学风险和复现证据决定，不按措辞强烈程度排序。
-- P0 / P1 修复、核心交互 / 教学内容变化、测试或快照变化、需要重新试用时，必须从新提交发布 `rc.2`。
-- 当前真实反馈不足，继续保留 `v0.1.0-rc.1`；不发布 `rc.2`，稳定版 `v0.1.0` 决策也未开始。
+- 工程 RC 可运行不等于学习产品已完善；下一阶段用学习闭环衡量完成度，而不是继续堆模型数量。
+- 少量朋友足以承担 Alpha，但应在化学事实、公开占位和至少一个自测闭环收口之后再邀请。
+- 自测必须保持前端本地、轻量、可复用；不引入账号、数据库或大型题库。
+- `v0.1.0-rc.1` 继续作为历史 Prerelease 保留，不自动推进新 RC 或稳定版。
 
 ### 已知限制
 
-- 当前没有真实用户反馈，不能判断 RC 是否已达到稳定版门槛。
-- GitHub 私密漏洞报告未启用；公开入口只能提醒不要披露细节，不能替代维护者的私下联系渠道。
-- `accessibility` 需要维护者在 UX 表单选择对应类别后分诊追加；GitHub Issue Form 不支持按下拉选项条件化自动标签。
-- T-031 必须保持进行中，直到真实试用、P0 / P1 清零、P2 决策和发布门槛复核完成。
+- T-032 只完成审计与任务拆解，没有实现 T-033～T-036 的业务改动。
+- 3 处 `TODO-CHEM-VERIFY` 仍在源码，必须逐项查证，不能仅删除标记。
+- Exam 的自测题数量、答案和解释尚未设计；后续实现需要严格控制为小型能力检查，而非题库扩张。
+- Windows 不能更新 Darwin 快照；T-035/T-036 的 UI 变化最终仍需 macOS 审核。
+
+### 给下一个 Agent 的建议
+
+- 直接接 T-033。化学事实会随材料、温度、相态和上下文变化，必须联网查权威或原始来源。
+- 分成 3 个独立结论核实，但可在同一任务中共享 `CHEMISTRY_VERIFICATION.md` 的来源—实现—测试格式。
+- 若来源只支持“近似 / 特定条件下”，教学文案要明确条件；不要用一个无上下文精确值冒充普适结论。
 
 ---
 
