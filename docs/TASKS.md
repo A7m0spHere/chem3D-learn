@@ -68,7 +68,7 @@
   - 根路由增加中文 `errorElement`，动态导入失败提示网站可能刚刚更新，其他错误使用通用文案；生产环境不显示内部错误信息。
   - 保留 `/module/:id` 与 Organic Builder 的路由级懒加载，没有清缓存、Service Worker、固定旧 hash 或禁用 hash。
 - **验证**：build / lint 通过；logic **158 / 158**；Pages 产物 **4 / 4**；系统 Chrome production **4 / 4**。生产测试真实拦截 `ModuleDetailPage-[hash].js`，确认自定义错误页、URL 保留、无默认开发者文案且无 `pageerror`；首页仍不提前下载页面 chunk 或重型 3D chunk。
-- **部署提示**：本修复只有重新部署后才会进入新的入口 bundle。已经停留在旧 bundle 的测试用户需要先强制刷新一次；后续部署更新将由一次自动刷新恢复。
+- **部署结果**：已 fast-forward 合入 `main@4eb3738`；GitHub Actions `Deploy frontend to GitHub Pages` run `30689464952` 的 build / deploy 均成功。线上首页、Modules、CH₄ 详情、动态 chunk 路径与控制台基础验证通过。已在浏览器保留 `/modules` 标签页，跨版本“一次自动刷新并保留目标 URL”待下一次真实前端部署验证；本次部署前已打开旧 bundle 的测试用户仍需先强制刷新一次。
 
 ### T-033 收口 3 处化学待核实项
 

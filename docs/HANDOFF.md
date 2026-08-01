@@ -9,8 +9,8 @@
 
 - **Agent**：Codex
 - **日期**：2026-08-01
-- **分支**：`codex/t-032-product-completeness-audit`
-- **任务**：T-037 修复 GitHub Pages 部署更新后的动态 import 旧 chunk 失效，并增加根路由错误兜底。
+- **分支**：`main`
+- **任务**：T-037 修复 GitHub Pages 部署更新后的动态 import 旧 chunk 失效，安全合入 main、完成 Pages 部署与线上基础验证。
 
 ### 本轮做的事
 
@@ -28,6 +28,8 @@
 - `npm run test:pages`：4 / 4；确认 Pages base 与带 hash 动态 chunk 产物。
 - 设置 `PLAYWRIGHT_CHANNEL=chrome` 后 `npm run test:production`：4 / 4；3 项既有 lazy/prefetch 契约与 1 项 chunk 失败注入均通过。
 - 系统 Chrome 额外检查 1280×720、390×844：焦点、链接、URL、按钮和无横向溢出通过。未运行或更新 Darwin 快照。
+- `main` 由 `b634839` fast-forward 到 `4eb3738` 并正常推送；Pages workflow run `30689464952` 对应完整 SHA `4eb3738e616a6cde35348c2b1ff7280906e64783`，build / deploy 均成功。
+- 线上首页、Modules 与 CH₄ 详情通过；CH₄ 有 1 个 Canvas，实际请求 `ModuleDetailPage-CvKCMIxF.js`、`MoleculeViewer-DPzpmdy0.js`、`ThreeViewerFrame-CdDH7oZW.js`，均位于 `/chem3D-learn/assets/`；控制台错误 / 警告为空。
 
 ### 关键决定
 
@@ -38,12 +40,13 @@
 ### 已知限制
 
 - 本次部署之前已经打开的旧入口 bundle 不含新监听器，无法被新代码远程修补；测试用户需在新版本上线后先强制刷新一次。
-- Pages workflow 的真实线上部署与旧标签页跨版本人工复现需要提交进入 `main` 并重新部署后验证；本轮已验证本地 Pages artifact 和生产预览。
+- Pages 真实部署和基础线上验证已完成；跨版本旧标签页自动刷新仍必须等下一次真实前端部署才能形成“旧入口 → 新资源”窗口，不能在同一次部署后伪造完成。
 - Windows 未运行 Darwin 完整视觉回归，也未更新任何视觉基线。
+- workflow 有 GitHub 官方 action 的 Node.js 20 弃用提示，但 runner 已自动使用 Node 24，build / deploy 未受影响；它不是本次发布阻断项。
 
 ### 给下一个 Agent 的建议
 
-- 合并并重新部署后，用一个部署前已打开的模块列表标签页验证跨版本：部署新构建后点击模块，应只自动刷新一次并进入原目标 URL。
+- 下一次真实前端部署后，用本轮保留的模块列表标签页点击 CH₄：确认只自动刷新一次、地址保持 `/module/tetrahedral-ch4`，并成功进入新版本模块。
 - 若当前报告问题的测试用户仍停在旧 bundle，让其先强制刷新；之后再验证新保护是否生效。
 - 产品主线下一项仍是 T-034，不要因本修复扩张为缓存系统或 Service Worker。
 

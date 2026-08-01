@@ -26,7 +26,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
-- **T-037 GitHub Pages 动态导入失败恢复已完成**（2026-08-01）：确认 `/chem3D-learn/` base、Router basename 和 Pages 产物路径正确；故障来自新部署删除旧 hash chunk 后，旧标签页仍引用 `ModuleDetailPage-[hash].js`。入口现监听 `vite:preloadError`，以 sessionStorage + history.state 降级记录 60 秒冷却状态，首次自动刷新当前 URL，持续失败则进入根路由中文错误页。保留路由级 lazy、文件 hash 和首页不加载 3D chunk 的性能边界；已打开旧 bundle 的用户仍需在本次部署后强制刷新一次。
+- **T-037 GitHub Pages 动态导入失败恢复已部署**（2026-08-01）：确认 `/chem3D-learn/` base、Router basename 和 Pages 产物路径正确；故障来自新部署删除旧 hash chunk 后，旧标签页仍引用 `ModuleDetailPage-[hash].js`。入口现监听 `vite:preloadError`，以 sessionStorage + history.state 降级记录 60 秒冷却状态，首次自动刷新当前 URL，持续失败则进入根路由中文错误页。修复随 `main@4eb3738` 的 Pages workflow run `30689464952` 完成 build / deploy；线上首页、Modules 与 CH₄ 详情基础验证通过，实际按需请求 `ModuleDetailPage-[hash].js` 和 3D chunk，控制台无错误。保留路由级 lazy、文件 hash 和首页不加载 3D chunk 的性能边界；跨版本旧标签页自动恢复需等下一次真实前端部署验证，当前测试用户仍需强制刷新一次。
 
 - **T-033 三处化学内容核验已完成**（2026-08-01）：以 IUPAC、OpenStax、AFLOW、NIST、IUCr 与同行评审论文核实 BF₃、CaF₂ 和芳环—乙烯基构象边界，扩展 `docs/CHEMISTRY_VERIFICATION.md` 建立来源—结论—文案—代码—测试矩阵。BF₃ 现聚焦中心 B 的 6 电子 / 八隅体例外与 Lewis 酸；CaF₂ 现注明 `Fm-3m`、常规胞 4 Ca + 8 F、8:4 配位、室温附近常压约 5.463 Å 及非 Å 显示尺度；有机页明确实际是 `C₁₁H₁₁N` 四取代苯理想化综合模型，固定 45° 不是最低能或唯一构象。3 处 `TODO-CHEM-VERIFY` 已清理。
 
@@ -72,6 +72,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `npm run test:pages`：**4 / 4 通过**；确认 `/chem3D-learn/` base、带 hash 的独立 ModuleDetailPage chunk、入口引用与 `vite:preloadError` 监听均进入 Pages 产物。
 - 设置 `$env:PLAYWRIGHT_CHANNEL='chrome'` 后运行 `npm run test:production`：**4 / 4 通过**；既有 3 项首页/预取/lazy 契约继续通过，新增 1 项真实 chunk 失败注入确认自定义错误页、保留 URL、无框架默认文案及无 `pageerror`。
 - 系统 Chrome 额外检查 1280×720 与 390×844：标题焦点、按钮、首页链接、URL 保留和无横向溢出均通过；未运行或更新 Darwin 快照。
+- GitHub Actions `Deploy frontend to GitHub Pages` run `30689464952`：`build` / `deploy` 均成功，部署 SHA 为 `4eb3738e616a6cde35348c2b1ff7280906e64783`；线上首页、Modules、CH₄ 详情与动态 chunk 请求验证通过。跨版本旧标签页验证保留到下一次真实前端部署。
 
 ## 独立验证结果（2026-08-01，T-033）
 
