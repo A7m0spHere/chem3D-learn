@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-01（Codex，T-033 三处化学内容核验）
+> 最后更新：2026-08-01（Codex，T-037 Pages 动态导入失败恢复）
 
 ## 一句话定位
 
@@ -25,6 +25,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
 ## 当前工作区状态（重要）
+
+- **T-037 GitHub Pages 动态导入失败恢复已完成**（2026-08-01）：确认 `/chem3D-learn/` base、Router basename 和 Pages 产物路径正确；故障来自新部署删除旧 hash chunk 后，旧标签页仍引用 `ModuleDetailPage-[hash].js`。入口现监听 `vite:preloadError`，以 sessionStorage + history.state 降级记录 60 秒冷却状态，首次自动刷新当前 URL，持续失败则进入根路由中文错误页。保留路由级 lazy、文件 hash 和首页不加载 3D chunk 的性能边界；已打开旧 bundle 的用户仍需在本次部署后强制刷新一次。
 
 - **T-033 三处化学内容核验已完成**（2026-08-01）：以 IUPAC、OpenStax、AFLOW、NIST、IUCr 与同行评审论文核实 BF₃、CaF₂ 和芳环—乙烯基构象边界，扩展 `docs/CHEMISTRY_VERIFICATION.md` 建立来源—结论—文案—代码—测试矩阵。BF₃ 现聚焦中心 B 的 6 电子 / 八隅体例外与 Lewis 酸；CaF₂ 现注明 `Fm-3m`、常规胞 4 Ca + 8 F、8:4 配位、室温附近常压约 5.463 Å 及非 Å 显示尺度；有机页明确实际是 `C₁₁H₁₁N` 四取代苯理想化综合模型，固定 45° 不是最低能或唯一构象。3 处 `TODO-CHEM-VERIFY` 已清理。
 
@@ -62,6 +64,14 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-08-01，T-037）
+
+- `npm run build`、`npm run lint`：通过；仅保留既有按需 `ThreeViewerFrame` large chunk 警告。
+- `npm run test:logic`：**158 / 158 通过**；新增 6 项恢复契约，覆盖单次刷新、冷却阻断、过期/清理、storage 降级、重复安装和 Pages 首页地址。
+- `npm run test:pages`：**4 / 4 通过**；确认 `/chem3D-learn/` base、带 hash 的独立 ModuleDetailPage chunk、入口引用与 `vite:preloadError` 监听均进入 Pages 产物。
+- 设置 `$env:PLAYWRIGHT_CHANNEL='chrome'` 后运行 `npm run test:production`：**4 / 4 通过**；既有 3 项首页/预取/lazy 契约继续通过，新增 1 项真实 chunk 失败注入确认自定义错误页、保留 URL、无框架默认文案及无 `pageerror`。
+- 系统 Chrome 额外检查 1280×720 与 390×844：标题焦点、按钮、首页链接、URL 保留和无横向溢出均通过；未运行或更新 Darwin 快照。
 
 ## 独立验证结果（2026-08-01，T-033）
 

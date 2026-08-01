@@ -57,6 +57,19 @@
 
 ## 已完成
 
+### T-037 GitHub Pages 动态导入失败恢复与路由错误兜底
+
+- **完成**：2026-08-01（Codex）
+- **根因**：GitHub Pages 新部署会替换带内容 hash 的构建产物；已经打开的旧页面仍可能引用已被删除的 `ModuleDetailPage-[hash].js`，因此路由级动态 import 失败。现有 `/chem3D-learn/` base、Router basename 与构建产物路径均正确，不是 base 配置错误。
+- **内容**：
+  - 应用初始化时在 React 树外注册 `vite:preloadError`；首次失败记录恢复时间并刷新当前 URL。
+  - `sessionStorage` 写入失败时回退到不改变地址栏的 `history.state`；两者都不可用时不自动刷新，直接进入错误页，避免循环。
+  - 60 秒冷却期内再次失败不再自动刷新；用户可通过“刷新并重试”清理保护标记后主动重试。
+  - 根路由增加中文 `errorElement`，动态导入失败提示网站可能刚刚更新，其他错误使用通用文案；生产环境不显示内部错误信息。
+  - 保留 `/module/:id` 与 Organic Builder 的路由级懒加载，没有清缓存、Service Worker、固定旧 hash 或禁用 hash。
+- **验证**：build / lint 通过；logic **158 / 158**；Pages 产物 **4 / 4**；系统 Chrome production **4 / 4**。生产测试真实拦截 `ModuleDetailPage-[hash].js`，确认自定义错误页、URL 保留、无默认开发者文案且无 `pageerror`；首页仍不提前下载页面 chunk 或重型 3D chunk。
+- **部署提示**：本修复只有重新部署后才会进入新的入口 bundle。已经停留在旧 bundle 的测试用户需要先强制刷新一次；后续部署更新将由一次自动刷新恢复。
+
 ### T-033 收口 3 处化学待核实项
 
 - **完成**：2026-08-01（Codex）

@@ -1,7 +1,7 @@
 /* global Buffer */
 
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 import { URL } from "node:url";
 
@@ -30,4 +30,31 @@ test("includes the social preview image in the Pages artifact", async () => {
 
   assert.ok(socialImage.length > 100_000);
   assert.deepEqual(socialImage.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+});
+
+test("keeps hashed route chunks lazy and addressable under the Pages base", async () => {
+  const assetsDirectory = new URL("../../dist/assets/", import.meta.url);
+  const assetNames = await readdir(assetsDirectory);
+  const moduleDetailChunks = assetNames.filter((name) =>
+    /^ModuleDetailPage-[A-Za-z0-9_-]+\.js$/.test(name),
+  );
+
+  assert.equal(moduleDetailChunks.length, 1);
+
+  const indexHtml = await readFile(new URL("../../dist/index.html", import.meta.url), "utf8");
+  const entryMatch = indexHtml.match(/<script[^>]+src="([^"]+\/assets\/index-[^"]+\.js)"/);
+  assert.ok(entryMatch);
+
+  const entrySource = await readFile(
+    new URL(`../../dist${entryMatch[1].slice(pagesBase.length - 1)}`, import.meta.url),
+    "utf8",
+  );
+  const moduleDetailChunk = moduleDetailChunks[0];
+
+  assert.ok(entrySource.includes(moduleDetailChunk));
+  assert.ok(entrySource.includes("vite:preloadError"));
+  assert.equal(
+    new URL(`assets/${moduleDetailChunk}`, productionUrl).pathname,
+    `${pagesBase}assets/${moduleDetailChunk}`,
+  );
 });

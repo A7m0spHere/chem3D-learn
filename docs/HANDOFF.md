@@ -10,47 +10,52 @@
 - **Agent**：Codex
 - **日期**：2026-08-01
 - **分支**：`codex/t-032-product-completeness-audit`
-- **任务**：T-033 核实 BF₃、CaF₂ 与芳环—乙烯基构象边界，并建立来源—结论—文案—代码—测试映射。
+- **任务**：T-037 修复 GitHub Pages 部署更新后的动态 import 旧 chunk 失效，并增加根路由错误兜底。
 
 ### 本轮做的事
 
-1. **全仓定位**：检查页面文案、23 个手写 JSON 注册、CaF₂ Viewer 几何、综合有机模型坐标、目录 / 考试专题、前后端副本、测试与治理文档；确认 backend BF₃ 只复制结构，不复制争议教学结论。
-2. **来源核验**：BF₃ 使用 IUPAC / OpenStax / ACS；CaF₂ 使用 AFLOW、常压衍射论文与 Scientific Reports；苯乙烯使用 NIST CCCBDB、气相光谱、83 K IUCr 单晶和液相 NMR 论文。
-3. **最小文案修正**：BF₃ 聚焦中心 B 六电子 / 八隅体例外 / Lewis 酸；CaF₂ 增加 `Fm-3m`、约 5.463 Å 的温压条件和非 Å 显示尺度；有机页明确是 `C₁₁H₁₁N` 四取代苯理想化综合模型，45° 只是代表姿态。
-4. **映射与测试**：扩展 `docs/CHEMISTRY_VERIFICATION.md`；新增 `chemistry-content.logic.spec.ts`，并给 BF₃、CaF₂、有机共面补无截图页面断言。3D 坐标与 Darwin PNG 均未改。
-5. **任务治理**：T-033 移入已完成，新增 D-035，产品审计 P0 改为已收口；下一任务为 T-034。
+1. **根因与配置审计**：`build:pages`、`<base>`、Router basename 和 workflow 都正确使用 `/chem3D-learn/`；Pages 构建继续生成 `ModuleDetailPage-[hash].js`。问题是新 artifact 删除旧 hash 后，旧标签页仍持有旧入口映射。
+2. **一次自动恢复**：新增 `preloadRecovery.ts`，应用初始化时监听 `vite:preloadError`。首次失败写入时间戳并刷新原 URL；同一页面的重复事件只触发一次 reload。
+3. **防循环与降级**：60 秒内再次失败不自动刷新；sessionStorage 不可用时回退到不改变 URL 的 `history.state`，两者都不可用时直接进入错误页。时间戳过期或用户主动清理后允许未来再次恢复。
+4. **根路由错误页**：`router.tsx` 配置 `errorElement`；页面提供“刷新并重试”和“返回首页”，动态导入与未知错误使用不同中文文案，生产环境不展示内部错误，标题挂载后获得焦点。
+5. **回归覆盖**：逻辑测试覆盖恢复控制器与 `/chem3D-learn/` 首页 href；Pages 产物测试锁定独立带 hash chunk、入口引用和监听器；生产 Playwright 真实拦截 ModuleDetailPage chunk，验证自定义错误页并保留原 URL。既有首页不下载 3D chunk 的三项测试继续执行。
 
 ### 验证结果
 
-- 开工前 `git fetch origin`；当前分支与 upstream 为 0 / 0，工作区仅有本任务改动。
-- `npm run test:logic`：152 / 152；新增 3 条化学内容契约。
-- 系统 Chrome 无截图定向测试：BF₃ 1 / 1、CaF₂ 1 / 1、有机共面 1 / 1。
-- `npm run build`、`npm run lint` 通过；仅有既有 ThreeViewerFrame large chunk 警告。
-- backend 22 / 22 通过，BF₃ 结构核心 parity 契约未漂移。
-- `frontend/src` 与 `backend/src` 的 `TODO-CHEM-VERIFY` 为 0；治理文档保留任务历史文字。未运行完整 Windows 视觉测试，未更新 Darwin 快照。
+- 开工前 `git fetch origin`；当前分支与 upstream 为 0 / 0，工作区干净。
+- `npm run build`、`npm run lint` 通过；仅有既有按需 ThreeViewerFrame large chunk 警告。
+- `npm run test:logic`：158 / 158；新增 6 项恢复、降级、过期、重复安装与 basename 契约。
+- `npm run test:pages`：4 / 4；确认 Pages base 与带 hash 动态 chunk 产物。
+- 设置 `PLAYWRIGHT_CHANNEL=chrome` 后 `npm run test:production`：4 / 4；3 项既有 lazy/prefetch 契约与 1 项 chunk 失败注入均通过。
+- 系统 Chrome 额外检查 1280×720、390×844：焦点、链接、URL、按钮和无横向溢出通过。未运行或更新 Darwin 快照。
 
 ### 关键决定
 
-- 测试不是化学证据；来源、结论和最终可见文案必须逐项可追溯。
-- 物理参数必须带条件和单位，模型显示尺度必须显式与物理量分离。
-- 综合教学模型必须按实际组成命名；固定构象若未经能量计算，只能称理想化 / 代表性姿态。
+- 保留路由级 lazy 与文件 hash；不用取消懒加载、长期保留旧构建或 Service Worker 规避版本交叉窗口。
+- 自动恢复必须先持久化再 reload；无法持久化时不自动刷新，安全失败到用户可操作页面。
+- 自动冷却只阻止无人干预的循环；用户点击“刷新并重试”会清除标记并明确重试。
 
 ### 已知限制
 
-- BF₃ 的 B—F π 回馈 / 酸性顺序解释在不同理论分析中仍有争论，本轮刻意不把某一解释写入基础主结论。
-- CaF₂ 的 5.463 Å 是室温附近、常压约值，不覆盖高压相、热膨胀、缺陷或掺杂样品。
-- 综合有机模型没有对应具体化合物的构象搜索；45° 只保证教学可见性。
-- Windows 未执行 Darwin 截图回归；本轮只增加不产生截图的 Chrome 行为断言。
+- 本次部署之前已经打开的旧入口 bundle 不含新监听器，无法被新代码远程修补；测试用户需在新版本上线后先强制刷新一次。
+- Pages workflow 的真实线上部署与旧标签页跨版本人工复现需要提交进入 `main` 并重新部署后验证；本轮已验证本地 Pages artifact 和生产预览。
+- Windows 未运行 Darwin 完整视觉回归，也未更新任何视觉基线。
 
 ### 给下一个 Agent 的建议
 
-- 直接接 T-034：从 Exam 公开目录移除 XeO“建设中”入口，并锁专题数量与链接一致性。
-- 不删除 `docs/CHEMISTRY_VERIFICATION.md` 的条件边界，也不要把 5.463 Å 引入 Three.js 缩放。
-- T-035 自测样板仍应等 T-034 完成后实施；保持本地、轻量、可复用。
+- 合并并重新部署后，用一个部署前已打开的模块列表标签页验证跨版本：部署新构建后点击模块，应只自动刷新一次并进入原目标 URL。
+- 若当前报告问题的测试用户仍停在旧 bundle，让其先强制刷新；之后再验证新保护是否生效。
+- 产品主线下一项仍是 T-034，不要因本修复扩张为缓存系统或 Service Worker。
 
 ---
 
 ## 往期
+
+### 2026-08-01 Codex：T-033 三处化学内容核验
+
+- 使用 IUPAC、OpenStax、AFLOW、NIST、IUCr 与同行评审资料核实 BF₃、CaF₂ 和芳环—乙烯基构象边界，清理 3 处 `TODO-CHEM-VERIFY`。
+- 扩展 `docs/CHEMISTRY_VERIFICATION.md`，建立来源—结论—文案—代码—测试矩阵；不改 3D 坐标或 Darwin 快照。
+- build / lint、logic 152 / 152、系统 Chrome 定向 3 / 3、backend 22 / 22 通过。详见 T-033 与 D-035。
 
 ### 2026-07-29 Codex：T-030 v0.1.0-rc.1 发布候选
 

@@ -98,6 +98,17 @@ For documentation-only tasks:
 - [ ] 复核 1280px 课堂展示与 390px 移动端，无 Canvas 裁切、横向溢出、标签遮挡或信息层级破坏。
 - [ ] 最终确认仅有 `*-darwin.png`，没有新增 Windows / Linux 快照，也没有提交 test-results、report 或 trace。
 
+## GitHub Pages dynamic route recovery / 动态路由恢复
+
+- [ ] Pages 构建继续使用 `/chem3D-learn/` base，Router basename 与 `<base>` 一致。
+- [ ] `/module/:id` 等重页面保持路由级 lazy；首页不提前下载 ModuleDetailPage 或重型 3D chunk。
+- [ ] `vite:preloadError` 首次发生时只刷新当前 URL 一次，短时间内重复失败不形成循环。
+- [ ] sessionStorage 不可用时使用不改变 URL 的降级状态；所有持久化手段都不可用时不自动刷新。
+- [ ] 冷却状态过期或用户主动清理后，未来部署仍可再次自动恢复。
+- [ ] 根路由使用中文自定义错误页；生产环境不显示堆栈、资源 hash、内部路径或 React Router 默认开发者文案。
+- [ ] 错误页提供“刷新并重试”和“返回首页”，按钮可键盘操作、标题获得焦点，Pages basename 下首页链接正确。
+- [ ] Pages 产物继续生成带 hash 的独立动态 chunk；不保留全部历史产物，不禁用 hash，不清站点缓存，不引入 Service Worker。
+
 ## Release candidate / 发布候选
 
 - [ ] 发布版本与 `frontend/package.json`、`frontend/package-lock.json`、README badge、CHANGELOG 和 Release Notes 一致。

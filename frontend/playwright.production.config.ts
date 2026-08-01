@@ -7,7 +7,10 @@ const testBaseUrl = `http://127.0.0.1:${testPort}`;
 
 export default defineConfig({
   testDir: "./tests/visual",
-  testMatch: "prefetch-viewer-chunks.visual.spec.ts",
+  testMatch: [
+    "prefetch-viewer-chunks.visual.spec.ts",
+    "route-error-recovery.visual.spec.ts",
+  ],
   timeout: 60_000,
   workers: 1,
   expect: {

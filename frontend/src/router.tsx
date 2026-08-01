@@ -1,17 +1,20 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "@/App";
+import { requireLoadedRouteModule } from "@/lib/preloadRecovery";
 import { AboutPage } from "@/pages/AboutPage";
 import { ExamPage } from "@/pages/ExamPage";
 import { ExamTopicDetailPage } from "@/pages/ExamTopicDetailPage";
 import { HomePage } from "@/pages/HomePage";
 import { ModulesPage } from "@/pages/ModulesPage";
 import { PathsPage } from "@/pages/PathsPage";
+import { RouteErrorPage } from "@/pages/RouteErrorPage";
 
 const routerBaseName = new URL(document.baseURI).pathname.replace(/\/$/, "") || "/";
 
 export const appRouter = createBrowserRouter([
   {
     element: <App />,
+    errorElement: <RouteErrorPage />,
     hydrateFallbackElement: <RouteHydrateFallback />,
     children: [
       { path: "/", element: <HomePage /> },
@@ -20,14 +23,20 @@ export const appRouter = createBrowserRouter([
       {
         path: "/module/:id",
         lazy: async () => {
-          const { ModuleDetailPage } = await import("@/pages/ModuleDetailPage");
+          const routeModule = requireLoadedRouteModule(
+            await import("@/pages/ModuleDetailPage"),
+          );
+          const { ModuleDetailPage } = routeModule;
           return { Component: ModuleDetailPage };
         },
       },
       {
         path: "/lab/organic-builder/:seedId",
         lazy: async () => {
-          const { OrganicBuilderPage } = await import("@/pages/OrganicBuilderPage");
+          const routeModule = requireLoadedRouteModule(
+            await import("@/pages/OrganicBuilderPage"),
+          );
+          const { OrganicBuilderPage } = routeModule;
           return { Component: OrganicBuilderPage };
         },
       },
