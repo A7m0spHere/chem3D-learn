@@ -197,15 +197,6 @@ export const examTopics: ExamTopic[] = [
     status: "ready",
     route: "/module/ren3-high-pressure-nitride",
   },
-  {
-    id: "exam-xeo",
-    title: "XeO 特殊晶体结构",
-    description: "稀有气体氧化物在高压或极端条件下的分子晶体或共价骨架结构。",
-    domain: "晶体化学",
-    difficulty: "竞赛挑战",
-    partition: "竞赛视野",
-    status: "planned",
-  },
 ];
 
 export const examTopicDetails: ExamTopicDetail[] = [

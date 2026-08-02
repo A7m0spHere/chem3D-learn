@@ -8,6 +8,47 @@
 ## 最近一次交接
 
 - **Agent**：Codex
+- **日期**：2026-08-02
+- **分支**：`main`
+- **任务**：T-034 清理能力扩展页公开的 XeO“建设中”入口。
+
+### 本轮做的事
+
+1. **确认公开数据链**：`examTopics.ts` 是 Exam 目录真源；`ExamPage` 按 partition 无条件渲染，`ExamTopicCard` 会把 planned / 无 route 条目显示为“建设中”。
+2. **最小清理**：只从公开 `examTopics` 删除 `exam-xeo`。未实现 XeO，未调整其余 16 个专题、分组、路由、3D 模型或发布版本。
+3. **回归保护**：新增 logic 契约，要求公开条目全部 ready 且有 `/exam/` 或 `/module/` route，并锁定 5 / 4 / 7 分组；Exam 页面无截图测试确认 16 张卡片全部可进入，XeO / “建设中”不存在。
+4. **治理同步**：T-034 转为已完成；STATUS、产品完备度审计与 D-037 同步公开目录边界。
+
+### 验证结果
+
+- 开工前 `git fetch origin`；`main` / `origin/main` 为 0 / 0，工作区干净。
+- `npm run lint`、`npm run build` 通过；仅有既有按需 `ThreeViewerFrame` 837.71 KB large chunk 警告。
+- `npm run test:logic`：160 / 160 通过。
+- `PLAYWRIGHT_CHANNEL=chrome` 下 `exam-topics.visual.spec.ts`：8 / 8 通过。
+- 未运行或更新 Darwin 快照；未修改 lockfile、版本或 3D 数据。
+
+### 关键决定
+
+- 公开 `examTopics` 只承载可进入内容；规划项保留在治理文档，真正实现且有 route 后才重新公开。
+- 保留卡片组件的防御性 fallback，但由数据和页面测试阻止它成为公开产品状态。
+
+### 已知限制
+
+- T-035 尚未开始；6 个考试专题详情仍是静态讲义，没有站内作答、即时反馈或重试闭环。
+- Windows 未运行 Darwin 完整视觉回归；本次只做无截图行为验证。
+
+### 给下一个 Agent 的建议
+
+- 下一项按主线接 T-035，只为“晶胞均摊与化学式推导”做可复用轻量自测样板，不提前扩展到其余 5 个专题。
+- 设计自测数据结构前先复核 T-035 验收标准与相关化学答案，继续避免账号、数据库和大型题库。
+
+---
+
+## 往期
+
+### 2026-08-01 Codex：T-037 Pages 动态导入失败恢复
+
+- **Agent**：Codex
 - **日期**：2026-08-01
 - **分支**：`main`
 - **任务**：T-037 修复 GitHub Pages 部署更新后的动态 import 旧 chunk 失效，安全合入 main、完成 Pages 部署与线上基础验证。
@@ -49,10 +90,6 @@
 - 下一次真实前端部署后，用本轮保留的模块列表标签页点击 CH₄：确认只自动刷新一次、地址保持 `/module/tetrahedral-ch4`，并成功进入新版本模块。
 - 若当前报告问题的测试用户仍停在旧 bundle，让其先强制刷新；之后再验证新保护是否生效。
 - 产品主线下一项仍是 T-034，不要因本修复扩张为缓存系统或 Service Worker。
-
----
-
-## 往期
 
 ### 2026-08-01 Codex：T-033 三处化学内容核验
 

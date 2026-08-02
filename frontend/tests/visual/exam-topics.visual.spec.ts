@@ -1,6 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("能力扩展专题接线", () => {
+  test("公开目录只展示可进入专题，不显示 XeO 建设中占位", async ({ page }) => {
+    await page.goto("/exam");
+
+    await expect(page.locator("article")).toHaveCount(16);
+    await expect(page.getByRole("link", { name: /进入专题/ })).toHaveCount(16);
+    await expect(page.getByText("XeO 特殊晶体结构", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("建设中", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("5 个专题", { exact: true })).toBeVisible();
+    await expect(page.getByText("4 个专题", { exact: true })).toBeVisible();
+    await expect(page.getByText("7 个专题", { exact: true })).toBeVisible();
+  });
+
   test("金属晶体密堆积卡片已开放并直达 FCC/HCP 3D 模块", async ({ page }) => {
     await page.goto("/exam");
 

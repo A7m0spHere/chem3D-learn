@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-01（Codex，T-037 Pages 动态导入失败恢复）
+> 最后更新：2026-08-02（Codex，T-034 清理能力扩展公开占位）
 
 ## 一句话定位
 
@@ -25,6 +25,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
 ## 当前工作区状态（重要）
+
+- **T-034 能力扩展公开占位已清理**（2026-08-02）：`exam-xeo` 已从公开 `examTopics` 数据移除，Exam 页面不再展示 XeO 卡片或“建设中”按钮。现有 16 个公开专题仍按 5 / 4 / 7 分组，全部为已开放状态并具有可进入的 `/exam/` 或 `/module/` 链接。新增数据契约与系统 Chrome 页面行为回归；未实现 XeO、未开发 T-035、未改 3D 模型、版本或 Darwin 快照。
 
 - **T-037 GitHub Pages 动态导入失败恢复已部署**（2026-08-01）：确认 `/chem3D-learn/` base、Router basename 和 Pages 产物路径正确；故障来自新部署删除旧 hash chunk 后，旧标签页仍引用 `ModuleDetailPage-[hash].js`。入口现监听 `vite:preloadError`，以 sessionStorage + history.state 降级记录 60 秒冷却状态，首次自动刷新当前 URL，持续失败则进入根路由中文错误页。修复随 `main@4eb3738` 的 Pages workflow run `30689464952` 完成 build / deploy；线上首页、Modules 与 CH₄ 详情基础验证通过，实际按需请求 `ModuleDetailPage-[hash].js` 和 3D chunk，控制台无错误。保留路由级 lazy、文件 hash 和首页不加载 3D chunk 的性能边界；跨版本旧标签页自动恢复需等下一次真实前端部署验证，当前测试用户仍需强制刷新一次。
 
@@ -64,6 +66,14 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-08-02，T-034）
+
+- 开工前 `git fetch origin`；当前分支为 `main`，upstream 为 `origin/main`，双方为 0 / 0，工作区干净。
+- `npm run build`、`npm run lint`：通过；仅保留既有按需 `ThreeViewerFrame` 837.71 KB large chunk 警告。
+- `npm run test:logic`：**160 / 160 通过**；新增 2 项公开专题数据契约，锁定 16 个条目均为 ready、有有效 route，分组为 5 / 4 / 7。
+- 设置 `PLAYWRIGHT_CHANNEL=chrome` 后运行 `exam-topics.visual.spec.ts`：**8 / 8 通过**；确认 XeO / “建设中”不存在、16 张卡片均可进入，既有代表性模块和详情导航仍工作。
+- 未运行或更新 Darwin 完整视觉回归；未修改视觉基线、lockfile、发布版本、3D 数据或 T-035。
 
 ## 独立验证结果（2026-08-01，T-037）
 
@@ -381,7 +391,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-立即执行 **T-034：清理能力扩展页公开的 XeO“建设中”入口**。之后由 T-035 为晶胞均摊专题建立轻量自测样板。达到 `docs/PRODUCT_COMPLETENESS_AUDIT.md` 的最低门槛后，恢复 T-031，由维护者和少量朋友先验证样板；根据反馈修正后，再由 T-036 扩展到其余专题。不得把人数少视为无效，也不得把零 Issue 当作稳定版证据。
+下一项是 **T-035：为晶胞均摊专题建立轻量自测样板**。达到 `docs/PRODUCT_COMPLETENESS_AUDIT.md` 的最低门槛后，恢复 T-031，由维护者和少量朋友先验证样板；根据反馈修正后，再由 T-036 扩展到其余专题。不得把人数少视为无效，也不得把零 Issue 当作稳定版证据。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
