@@ -1,9 +1,7 @@
 import { ArrowRight, ChevronRight, ClipboardList, Home, Lightbulb, TriangleAlert } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { ExamTopicQuiz } from "@/components/exam/ExamTopicQuiz";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
-import { getExamTopicQuizByTopicId } from "@/data/examTopicQuizzes";
 import { getExamTopicById, getExamTopicDetailById } from "@/data/examTopics";
 import { getModuleById, type LearningModule } from "@/data/learningModules";
 
@@ -11,7 +9,6 @@ export function ExamTopicDetailPage() {
   const { id } = useParams<{ id: string }>();
   const topic = id ? getExamTopicById(id) : undefined;
   const detail = id ? getExamTopicDetailById(id) : undefined;
-  const quiz = id ? getExamTopicQuizByTopicId(id) : undefined;
 
   if (!topic || !detail || topic.status !== "ready") {
     return (
@@ -131,12 +128,6 @@ export function ExamTopicDetailPage() {
           </aside>
         </ScrollReveal>
       </div>
-
-      {quiz && (
-        <ScrollReveal>
-          <ExamTopicQuiz quiz={quiz} />
-        </ScrollReveal>
-      )}
 
       {relatedModules.length > 0 && (
         <ScrollReveal>

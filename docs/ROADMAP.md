@@ -57,11 +57,11 @@
 
 ## Current - Product Completeness and Alpha Readiness
 
-- Close the three remaining `TODO-CHEM-VERIFY` items with traceable sources.
-- Remove public “under construction” entries until the corresponding learning content exists.
-- Add a small, reusable self-check loop to the existing exam topics: answer, immediate feedback, explanation, and retry.
-- Keep the self-check local and lightweight; do not add accounts, a database, or a large question bank.
-- After the minimum readiness gate passes, use the maintainer and a small group of friends for Alpha feedback. Do not require a large tester cohort.
+- Keep the completed chemistry verification and public-placeholder cleanup as product quality gates.
+- Build one lightweight guided-observation sample around an existing core 3D viewer: observation goal, 3D operation, visible structural change, explanation, and comparison.
+- Treat rotate, zoom, click, highlight, isolate, compare, and step animation as the primary learning actions.
+- Do not use quizzes, grading, scores, retries, or question-bank scale as the core learning path.
+- After the single 3D sample passes its engineering checks, use the maintainer and a small group of friends for Alpha observation. Do not require a large tester cohort.
 - Treat `docs/PRODUCT_COMPLETENESS_AUDIT.md` and `docs/TASKS.md` as the detailed execution order.
 
 ## v1.0 - Frontend Release Candidate

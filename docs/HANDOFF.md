@@ -10,48 +10,53 @@
 - **Agent**：Codex
 - **日期**：2026-08-03
 - **分支**：`main`
-- **任务**：T-035 为“晶胞均摊与化学式推导”建立轻量自测样板。
+- **任务**：撤销 T-035 在线自测并纠正产品方向。
 
 ### 本轮做的事
 
-1. **分离数据与机制**：新增 `types/examQuiz.ts`、`data/examTopicQuizzes.ts`、`lib/examQuiz.ts`、`hooks/useExamTopicQuiz.ts` 与通用 `components/exam/ExamTopicQuiz.tsx`。题目、纯判定、本地状态和 UI 不互相内嵌。
-2. **只做一个样板**：仅为 `exam-crystal-formula` 注册 3 题，覆盖棱心 `1/4`、8 顶点 + 1 体心平均 `2`、8 顶点 A + 6 面心 B 得 `AB₃`；其余五个详情页不显示 quiz。
-3. **即时闭环与可访问性**：原生 radio 选择后立即显示“回答正确 / 错误”及原因；支持逐题重试、改答和整组重置。使用 fieldset / legend、`role=status` / `aria-live`，44px 触控，390px 无溢出，不只靠颜色。
-4. **化学核验**：三题明确限定立方晶胞，A / B 只作抽象粒子；共享规则由 OpenStax 与 Chemistry LibreTexts 交叉核对并写入 `CHEMISTRY_VERIFICATION.md`。
-5. **治理同步**：T-035 转已完成，T-031 恢复为下一项小范围 Alpha；D-038 固化“先验证一个样板再扩展”的边界。
+1. **依赖审计**：开工时 `main` / `origin/main` 同为 `1c958be`，工作区干净；`1c958be` 是 HEAD，之后没有提交或功能依赖，父提交 `a705ba4` 正是必须保留的 T-034。
+2. **原生安全撤销**：使用 `git revert --no-commit 1c958be`，无冲突删除自测类型、题目数据、判题函数、React hook、`ExamTopicQuiz`、详情页接线及两项测试；没有手工拼凑逆向代码。
+3. **方向纠偏**：Chem3D Learn 明确不是在线答题或题库网站。产品核心回到旋转、缩放、点击、突出、拆解、比较和分步动画驱动的 3D 观察与结构解释。
+4. **后续拆解**：T-036 已取消；新增 T-038“3D 引导观察与结构解释样板”，但本轮没有实现新模块或大型功能。
+5. **治理同步**：TASKS、STATUS、审计和 D-039 均注明 D-034 自测路线被取代；D-038 按 append-only 规则保留并标记失效，T-034 的 XeO 清理及其数据 / 页面回归完整保留。
 
 ### 验证结果
 
-- 网络恢复后 `git fetch origin` 成功；开工时 `main` / `origin/main` 为 0 / 0，工作区干净。
 - `npm run lint`、`npm run build` 通过；仅有既有按需 `ThreeViewerFrame` 837.71 KB large chunk 警告。
-- `npm run test:logic`：164 / 164 通过。
-- 系统 Chrome Exam 相关回归：10 / 10；production：4 / 4。
-- `webapp-testing` 的 Python Playwright 桌面键盘 + 390px 探针通过，临时脚本已删除。
-- 未运行或更新 Darwin 快照；未修改 lockfile、版本、3D 模型或其他专题数据。
+- `npm run test:logic`：160 / 160 通过，确认 T-035 的 4 项 quiz logic 已随撤销消失。
+- 系统 Chrome `exam-topics.visual.spec.ts`：8 / 8，通过并确认 16 张卡片、无 XeO / “建设中”、关联 3D 路由正常。
+- 系统 Chrome production：4 / 4；Python Playwright 独立探针确认晶胞详情无 quiz、radio 或“动手自测”，且“进入 3D 观察”链接保留。
+- `git diff --check` 与最终同步状态在提交前复核。
+- 未运行或更新 Darwin 快照；未修改 lockfile、版本、3D 模型或化学结构。
 
 ### 关键决定
 
-- 自测用 typed 数据 + 纯判定 + 本地 hook + 通用 UI；详情页只按 topic id 选择性挂载。
-- 不做整卷提交、持久化成绩或题库框架；选择即反馈，真实 Alpha 后再决定扩展。
+- D-039 取代 D-034 中“自测样板 → 扩展自测”的路线并撤销 D-038；化学准确、公开内容诚实和小范围真实反馈原则继续有效。
+- Exam 详情继续作为结构说明、解题思路和关联 3D 入口；不以是否有选择题或评分判断页面完成度。
 
 ### 已知限制
 
-- 其余五个考试专题仍是静态讲义，这是等待 Alpha 反馈的有意边界，不是本轮遗漏。
-- Windows 未运行 Darwin 完整视觉回归；本次只做无截图行为和布局断言。
+- T-038 目前只是任务拆解，尚未选择代表 Viewer 或实现样板，这是本轮“只撤销、不顺带开发”的明确边界。
+- Windows 不运行 Darwin 完整视觉回归；本轮只做无截图行为验证。
 
 ### 给下一个 Agent 的建议
 
-- 下一项恢复 T-031 小范围 Alpha：让维护者和少量朋友真实完成样板与代表性 3D 路径，记录卡点，不设置人数 KPI。
-- 先根据反馈判断是否修正 `ExamTopicQuiz` 契约或交互，再启动 T-036；不要直接复制到其余五个专题。
+- 下一项只做 T-038 的第一步：审计已有 Viewer，推荐一个最适合建立“观察目标—操作—变化—解释—对比”路径的代表模块，并明确为什么；不要直接开始批量实现。
+- 评估重点是 3D 操作是否帮助学生看到结构关系，不要重新引入选择题、判题、分数或重试。
 
 ---
 
 ## 往期
 
+### 2026-08-03 Codex：T-035 在线自测（随后因方向纠偏撤销）
+
+- `1c958be` 曾为晶胞均摊专题实现三道选择题、即时判定、重试和通用自测维护层。
+- 同日产品方向确认网站核心是 3D 观察与结构解释；该提交已由后续独立 revert / product-direction 提交完整撤销，不作为当前产品能力。
+
 ### 2026-08-02 Codex：T-034 清理公开 XeO 占位
 
 - 从公开 `examTopics` 删除未实现、无 route 的 `exam-xeo`；现有 16 个专题保持 5 / 4 / 7 分组且全部可进入。
-- 新增数据与页面行为测试，阻止 XeO / “建设中”重新公开。build / lint、logic 160 / 160、系统 Chrome Exam 8 / 8 通过；详见 T-034 与 D-037。
+- 新增数据与页面行为测试，阻止 XeO / “建设中”重新公开。该成果未被 T-035 撤销影响。
 
 ### 2026-08-01 Codex：T-037 Pages 动态导入失败恢复
 
