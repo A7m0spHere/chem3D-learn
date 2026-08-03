@@ -489,3 +489,16 @@
   4. XeO 等未来设想只保留在 TASKS、审计和决策历史等治理记录中；专题真正完成并有可进入路由后，才能作为公开产品内容重新加入。
 - **理由**：公开目录的数据会被 `ExamPage` 无条件渲染。把未实现条目放入该数组会让路线设想伪装成已交付能力，也会造成页面专题计数与实际可用入口不一致。
 - **验证与边界**：build / lint、logic 160 / 160、系统 Chrome Exam 专题 8 / 8 通过；不实现 XeO、不开发 T-035、不修改其余专题链接、3D 模型、视觉基线、lockfile 或发布版本。
+
+## D-038 自测采用“typed 数据 + 纯判定 + 本地 hook + 通用 UI”，先验证一个样板再扩展
+
+- **日期**：2026-08-03（Codex，T-035）
+- **决定**：
+  1. `ExamTopicQuiz` 的数据契约独立放在 `types/examQuiz.ts`，题目放在 `data/examTopicQuizzes.ts`；`evaluateExamQuizAnswer` 只做纯判定，`useExamTopicQuiz` 只管理当前页面答案，UI 组件不内嵌题目或化学答案。
+  2. T-035 只注册 `exam-crystal-formula`，三题固定覆盖位置贡献、平均占有数和最简比。其余五个详情页没有 quiz 数据时不渲染自测，必须等待 T-031 真实反馈后再由 T-036 扩展。
+  3. 选择 radio 后立即判定，不设置额外“提交整卷”步骤；反馈必须同时包含“回答正确 / 回答错误”文本、状态图标和原因。每题可清空重试，整组可重置，不锁死错题后的改答。
+  4. 交互使用原生 radio / fieldset / legend，保留浏览器 Tab、方向键和 Space 语义；反馈用 `role=status` / `aria-live=polite`。选项和操作按钮至少 44px，移动端单列，不依赖颜色表达状态。
+  5. 只保存 React 内存状态；不接 localStorage、后端、账号、排行榜、跨页成绩或大型题库抽象。
+- **理由**：样板的首要目标是验证学生是否能从讲解迁移到作答，而不是建设考试平台。分离数据、判定、状态和 UI 能让 T-036 复用明确边界，同时保留在小范围 Alpha 后修正交互的空间。
+- **化学边界**：三题明确限定立方晶胞；A / B 是抽象粒子符号。顶点、棱心、面心和内部贡献由 OpenStax 与 Chemistry LibreTexts 交叉核对，来源—运算—代码—测试映射见 `docs/CHEMISTRY_VERIFICATION.md`。
+- **验证与边界**：build / lint、logic 164 / 164、系统 Chrome Exam 10 / 10、production 4 / 4、Python Playwright 探针通过；未扩展其他专题，未改 3D、视觉基线、lockfile 或版本。

@@ -8,43 +8,50 @@
 ## 最近一次交接
 
 - **Agent**：Codex
-- **日期**：2026-08-02
+- **日期**：2026-08-03
 - **分支**：`main`
-- **任务**：T-034 清理能力扩展页公开的 XeO“建设中”入口。
+- **任务**：T-035 为“晶胞均摊与化学式推导”建立轻量自测样板。
 
 ### 本轮做的事
 
-1. **确认公开数据链**：`examTopics.ts` 是 Exam 目录真源；`ExamPage` 按 partition 无条件渲染，`ExamTopicCard` 会把 planned / 无 route 条目显示为“建设中”。
-2. **最小清理**：只从公开 `examTopics` 删除 `exam-xeo`。未实现 XeO，未调整其余 16 个专题、分组、路由、3D 模型或发布版本。
-3. **回归保护**：新增 logic 契约，要求公开条目全部 ready 且有 `/exam/` 或 `/module/` route，并锁定 5 / 4 / 7 分组；Exam 页面无截图测试确认 16 张卡片全部可进入，XeO / “建设中”不存在。
-4. **治理同步**：T-034 转为已完成；STATUS、产品完备度审计与 D-037 同步公开目录边界。
+1. **分离数据与机制**：新增 `types/examQuiz.ts`、`data/examTopicQuizzes.ts`、`lib/examQuiz.ts`、`hooks/useExamTopicQuiz.ts` 与通用 `components/exam/ExamTopicQuiz.tsx`。题目、纯判定、本地状态和 UI 不互相内嵌。
+2. **只做一个样板**：仅为 `exam-crystal-formula` 注册 3 题，覆盖棱心 `1/4`、8 顶点 + 1 体心平均 `2`、8 顶点 A + 6 面心 B 得 `AB₃`；其余五个详情页不显示 quiz。
+3. **即时闭环与可访问性**：原生 radio 选择后立即显示“回答正确 / 错误”及原因；支持逐题重试、改答和整组重置。使用 fieldset / legend、`role=status` / `aria-live`，44px 触控，390px 无溢出，不只靠颜色。
+4. **化学核验**：三题明确限定立方晶胞，A / B 只作抽象粒子；共享规则由 OpenStax 与 Chemistry LibreTexts 交叉核对并写入 `CHEMISTRY_VERIFICATION.md`。
+5. **治理同步**：T-035 转已完成，T-031 恢复为下一项小范围 Alpha；D-038 固化“先验证一个样板再扩展”的边界。
 
 ### 验证结果
 
-- 开工前 `git fetch origin`；`main` / `origin/main` 为 0 / 0，工作区干净。
+- 网络恢复后 `git fetch origin` 成功；开工时 `main` / `origin/main` 为 0 / 0，工作区干净。
 - `npm run lint`、`npm run build` 通过；仅有既有按需 `ThreeViewerFrame` 837.71 KB large chunk 警告。
-- `npm run test:logic`：160 / 160 通过。
-- `PLAYWRIGHT_CHANNEL=chrome` 下 `exam-topics.visual.spec.ts`：8 / 8 通过。
-- 未运行或更新 Darwin 快照；未修改 lockfile、版本或 3D 数据。
+- `npm run test:logic`：164 / 164 通过。
+- 系统 Chrome Exam 相关回归：10 / 10；production：4 / 4。
+- `webapp-testing` 的 Python Playwright 桌面键盘 + 390px 探针通过，临时脚本已删除。
+- 未运行或更新 Darwin 快照；未修改 lockfile、版本、3D 模型或其他专题数据。
 
 ### 关键决定
 
-- 公开 `examTopics` 只承载可进入内容；规划项保留在治理文档，真正实现且有 route 后才重新公开。
-- 保留卡片组件的防御性 fallback，但由数据和页面测试阻止它成为公开产品状态。
+- 自测用 typed 数据 + 纯判定 + 本地 hook + 通用 UI；详情页只按 topic id 选择性挂载。
+- 不做整卷提交、持久化成绩或题库框架；选择即反馈，真实 Alpha 后再决定扩展。
 
 ### 已知限制
 
-- T-035 尚未开始；6 个考试专题详情仍是静态讲义，没有站内作答、即时反馈或重试闭环。
-- Windows 未运行 Darwin 完整视觉回归；本次只做无截图行为验证。
+- 其余五个考试专题仍是静态讲义，这是等待 Alpha 反馈的有意边界，不是本轮遗漏。
+- Windows 未运行 Darwin 完整视觉回归；本次只做无截图行为和布局断言。
 
 ### 给下一个 Agent 的建议
 
-- 下一项按主线接 T-035，只为“晶胞均摊与化学式推导”做可复用轻量自测样板，不提前扩展到其余 5 个专题。
-- 设计自测数据结构前先复核 T-035 验收标准与相关化学答案，继续避免账号、数据库和大型题库。
+- 下一项恢复 T-031 小范围 Alpha：让维护者和少量朋友真实完成样板与代表性 3D 路径，记录卡点，不设置人数 KPI。
+- 先根据反馈判断是否修正 `ExamTopicQuiz` 契约或交互，再启动 T-036；不要直接复制到其余五个专题。
 
 ---
 
 ## 往期
+
+### 2026-08-02 Codex：T-034 清理公开 XeO 占位
+
+- 从公开 `examTopics` 删除未实现、无 route 的 `exam-xeo`；现有 16 个专题保持 5 / 4 / 7 分组且全部可进入。
+- 新增数据与页面行为测试，阻止 XeO / “建设中”重新公开。build / lint、logic 160 / 160、系统 Chrome Exam 8 / 8 通过；详见 T-034 与 D-037。
 
 ### 2026-08-01 Codex：T-037 Pages 动态导入失败恢复
 

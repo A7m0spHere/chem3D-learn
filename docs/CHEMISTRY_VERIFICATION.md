@@ -1,8 +1,31 @@
 # Chemistry Verification / 化学事实复核
 
-> 最后复核：2026-08-01（T-033）
-> 复核对象：BF₃ 缺电子边界、CaF₂ 萤石晶胞、芳环—乙烯基共面教学模型，以及既有 NaCl 周期模型
-> 结论状态：T-033 的“来源—结论—文案—代码—测试”映射已建立；旧 NaCl 核验记录继续保留。
+> 最后复核：2026-08-03（T-035）
+> 复核对象：晶胞均摊自测、BF₃ 缺电子边界、CaF₂ 萤石晶胞、芳环—乙烯基共面教学模型，以及既有 NaCl 周期模型
+> 结论状态：T-035 的三道晶胞均摊题已完成来源—运算—数据—测试映射；T-033 与旧 NaCl 核验记录继续保留。
+
+## T-035：晶胞均摊轻量自测核验
+
+### 来源与适用边界
+
+- [OpenStax Chemistry 2e §10.6, Lattice Structures in Crystalline Solids](https://openstax.org/books/chemistry/pages/10-6-lattice-structures-in-crystalline-solids)：立方晶胞顶点粒子由 8 个相邻晶胞共享，因此每个顶点对一个晶胞贡献 `1/8`；FCC 的 `8 × 1/8 + 6 × 1/2 = 4` 示例同时核对顶点和面心计数。
+- [Chemistry LibreTexts 6.1, Unit Cells](https://chem.libretexts.org/Courses/Colorado_College/CH275%3A_Foundations_of_Inorganic_Chemistry/06%3A_Ionic_Compounds/6.01%3A_Unit_Cells)：对立方晶胞明确列出顶点 `1/8`、棱心 `1/4`、面心 `1/2`、晶胞中心 `1`。
+- 本轮三题均明确限定为**立方晶胞**。六方晶胞边界共享关系不同，不把本样板规则无条件推广到所有晶系。
+- A / B 是抽象粒子符号，用于练习位置均摊和最简整数比，不声称 `AB₃` 对应某个具体真实化合物或结构原型。
+
+### 三题核验矩阵
+
+| 学习目标 | 题目条件 | 运算与答案 | 数据位置 | 测试位置 |
+| --- | --- | --- | --- | --- |
+| 位置贡献 | 一个粒子位于立方晶胞棱心 | 棱心由 4 个晶胞共享，贡献 `1/4` | `frontend/src/data/examTopicQuizzes.ts`：`edge-contribution` | `exam-topic-quiz.logic.spec.ts` + Chrome 键盘行为测试 |
+| 平均占有数 | A 位于 8 个顶点和 1 个体心 | `8 × 1/8 + 1 × 1 = 2`，平均 2 个 A | 同上：`average-occupancy` | logic 锁定运算文本；Chrome 锁定错误原因与改答 |
+| 化学式最简比 | A 位于 8 顶点，B 位于 6 面心 | A=`1`，B=`3`，A:B=`1:3`，最简式 `AB₃` | 同上：`simplest-formula` | logic 锁定 `ab3` 与 `1:3`；Chrome 锁定即时反馈 |
+
+### 实现边界
+
+- 测试只证明实现仍与上述已核实的共享和算术关系一致，不反向充当化学来源。
+- 结果只保存在 React 页面状态；不记录持久化成绩，不建立账号、排行榜或题库系统。
+- T-035 只注册 `exam-crystal-formula`；其余五个详情页必须等待 T-031 小范围 Alpha，再由 T-036 决定是否复用。
 
 ## T-033：三处化学内容核验
 

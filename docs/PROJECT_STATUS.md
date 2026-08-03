@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-02（Codex，T-034 清理能力扩展公开占位）
+> 最后更新：2026-08-03（Codex，T-035 晶胞均摊轻量自测样板）
 
 ## 一句话定位
 
@@ -26,6 +26,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 ## 当前工作区状态（重要）
 
+- **T-035 晶胞均摊轻量自测样板已完成**（2026-08-03）：新增独立 typed quiz 数据、纯判定函数、本地状态 hook 与通用 `ExamTopicQuiz` UI；只为 `exam-crystal-formula` 注册 3 题，覆盖位置贡献、平均占有数和 AB₃ 最简比。原生 radio 支持键盘，选择后立即用文字 + 图标 + 原因反馈，可逐题或整组重试；状态不持久化，390px 无横向溢出。未扩展其余五个专题，也未改 3D、版本或视觉基线。
+
 - **T-034 能力扩展公开占位已清理**（2026-08-02）：`exam-xeo` 已从公开 `examTopics` 数据移除，Exam 页面不再展示 XeO 卡片或“建设中”按钮。现有 16 个公开专题仍按 5 / 4 / 7 分组，全部为已开放状态并具有可进入的 `/exam/` 或 `/module/` 链接。新增数据契约与系统 Chrome 页面行为回归；未实现 XeO、未开发 T-035、未改 3D 模型、版本或 Darwin 快照。
 
 - **T-037 GitHub Pages 动态导入失败恢复已部署**（2026-08-01）：确认 `/chem3D-learn/` base、Router basename 和 Pages 产物路径正确；故障来自新部署删除旧 hash chunk 后，旧标签页仍引用 `ModuleDetailPage-[hash].js`。入口现监听 `vite:preloadError`，以 sessionStorage + history.state 降级记录 60 秒冷却状态，首次自动刷新当前 URL，持续失败则进入根路由中文错误页。修复随 `main@4eb3738` 的 Pages workflow run `30689464952` 完成 build / deploy；线上首页、Modules 与 CH₄ 详情基础验证通过，实际按需请求 `ModuleDetailPage-[hash].js` 和 3D chunk，控制台无错误。保留路由级 lazy、文件 hash 和首页不加载 3D chunk 的性能边界；跨版本旧标签页自动恢复需等下一次真实前端部署验证，当前测试用户仍需强制刷新一次。
@@ -34,7 +36,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 - **T-032 产品完备度审计已完成**（2026-08-01）：正式站点已有 32 个可交互结构模块、3 条参考顺序和 6 个考试专题详情，公开模块均由真实结构数据或专题 Viewer 承接；审计当时确认的主要缺口不是 3D 模型数量，而是 3 处化学待核实项（现已由 T-033 收口）、考试专题缺少站内作答反馈，以及能力扩展页仍展示不可进入的 XeO“建设中”卡片。新增 `docs/PRODUCT_COMPLETENESS_AUDIT.md`，主线改为“化学准确 → 清理公开占位 → 自测样板 → 扩展自测 → 小范围 Alpha”。
 
-- **T-031 v0.1.0-rc.1 真实反馈收集与问题分级已暂停**（2026-08-01）：反馈表单、指南、P0–P3 和台账仍保留，但产品所有者确认当前产品尚未完善，试用者主要为本人和少量朋友。现阶段不做广泛 RC 反馈目标；待 T-033～T-035 完成后，以少量真实使用者开展 Alpha，不设置人数 KPI。真实反馈仍为 0，稳定版决策未开始；`v0.1.0-rc.1` tag 与 GitHub Prerelease 不变。
+- **T-031 已满足小范围 Alpha 恢复条件**（2026-08-03）：T-033 化学核验、T-034 公开占位清理和 T-035 自测样板均完成并通过相应验证。反馈表单、指南、P0–P3 和台账继续沿用；下一步由维护者和少量朋友走自测样板与代表性 3D 路径，不设置人数 KPI、不把零 Issue 当作稳定证据，也不自动发布 `v0.1.0` 或 `rc.2`。
 
 - **T-030 v0.1.0-rc.1 发布候选已完成**（2026-07-29）：仓库发布版本当前以前端主产品为准，`frontend` 已更新到 `0.1.0-rc.1`，backend / video 保持独立版本。新增 CHANGELOG、用户向 Release Notes、README RC 入口、发布候选 QA 清单和 D-032；发布准备提交经完整验证后快进进入 `main`，Pages、annotated tag `v0.1.0-rc.1` 与 GitHub prerelease 对应同一发布提交。发布门禁同时修复了 NaCl 教学 Canvas 尚未完成 R3F 事件连接时快速进入周期探索可能出现的 `connect(null)` 竞态；没有改晶体几何、教学语义或快照。
 
@@ -66,6 +68,16 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
 - `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+
+## 独立验证结果（2026-08-03，T-035）
+
+- 开工前首次 `git fetch origin` 因 GitHub 连接重置 / 443 超时连续失败；网络恢复后 fetch 成功，确认 `main`、`origin/main` 同为 `a705ba4`，差异 0 / 0，工作区干净。
+- 题目规则使用立方晶胞边界共享关系，并由 OpenStax 与 Chemistry LibreTexts 交叉核对：顶点 `1/8`、棱心 `1/4`、面心 `1/2`、晶胞内部 `1`；测试锁定三题的运算与答案。
+- `npm run build`、`npm run lint`：通过；仅保留既有按需 `ThreeViewerFrame` 837.71 KB large chunk 警告。
+- `npm run test:logic`：**164 / 164 通过**；新增 4 项 quiz 数据、答案、反馈与异常选项契约。
+- 系统 Chrome 运行 `exam-topic-quiz.visual.spec.ts` + `exam-topics.visual.spec.ts`：**10 / 10 通过**；覆盖原生键盘选择、即时正确/错误文字、逐题重试、整组重置、只在目标专题出现、44px 触控和 390px 无溢出。
+- `PLAYWRIGHT_CHANNEL=chrome npm run test:production`：**4 / 4 通过**；首页按需加载、模块预取与路由错误恢复零回归。技能要求的 Python Playwright 桌面键盘 + 移动端探针也通过，临时脚本已删除。
+- 未运行或更新 Darwin 快照；未修改 3D 模型、化学结构、其他五个专题数据、lockfile 或发布版本。
 
 ## 独立验证结果（2026-08-02，T-034）
 
@@ -391,7 +403,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-下一项是 **T-035：为晶胞均摊专题建立轻量自测样板**。达到 `docs/PRODUCT_COMPLETENESS_AUDIT.md` 的最低门槛后，恢复 T-031，由维护者和少量朋友先验证样板；根据反馈修正后，再由 T-036 扩展到其余专题。不得把人数少视为无效，也不得把零 Issue 当作稳定版证据。
+下一项是 **恢复 T-031 小范围 Alpha**：由维护者和少量朋友实际走一遍晶胞均摊自测样板与代表性 3D 路径，记录真实卡点并判断样板是否需要修正。完成这一步后，再决定是否启动 T-036 扩展其余五个专题；不得把人数少视为无效，也不得把零 Issue 当作稳定版证据。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
