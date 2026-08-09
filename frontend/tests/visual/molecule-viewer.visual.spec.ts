@@ -8,11 +8,11 @@ test.describe("普通分子 Viewer 自由探索与按需讲解", () => {
     await expect(viewer.getByText("NH3｜自由探索", { exact: true })).toBeVisible();
     await expect(page.getByText("先旋转模型，观察原子在空间中的相对位置；需要提示时再打开下方讲解。", { exact: true })).toBeVisible();
 
-    await page.getByRole("button", { name: /识别孤电子对/ }).click();
-    await expect(viewer.getByText("NH3｜识别孤电子对", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: /显示并识别孤电子对/ }).click();
+    await expect(viewer.getByText("NH3｜显示并识别孤电子对", { exact: true })).toBeVisible();
     await expect(
       viewer.getByTestId("molecule-viewer-summary").getByText(
-        "氮原子上方有一对孤电子对。它参与电子对空间排布，但不是一个原子。",
+        "显示 N 上方的孤电子对：电子对空间排布为四面体形；只按原子核判断时，分子构型仍是三角锥形。",
         { exact: true },
       ),
     ).toBeVisible();

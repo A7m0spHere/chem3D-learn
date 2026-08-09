@@ -11,6 +11,7 @@ type ExplorerPanelProps = {
   activeStepIndex: number;
   completedStepIndices: Set<number>;
   isGuidedMode: boolean;
+  onExitGuided: () => void;
   onPrevious: () => void;
   onNext: () => void;
   onSelectStep: (index: number) => void;
@@ -23,6 +24,7 @@ export function ExplorerPanel({
   activeStepIndex,
   completedStepIndices,
   isGuidedMode,
+  onExitGuided,
   onPrevious,
   onNext,
   onSelectStep,
@@ -69,12 +71,14 @@ export function ExplorerPanel({
 
               return (
                 <button
+                  aria-current={selected ? "step" : undefined}
                   key={step.id}
-                  className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
+                  className={`flex min-h-11 w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
                     selected
                       ? "border-primary bg-primary text-white"
                       : "border-border bg-white text-text-primary hover:border-primary/40 hover:bg-primary/[0.03]"
                   }`}
+                  data-testid={`lesson-step-${step.id}`}
                   onClick={() => onSelectStep(index)}
                   type="button"
                 >
@@ -85,7 +89,10 @@ export function ExplorerPanel({
                   >
                     {completed && !selected ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : index + 1}
                   </span>
-                  <span className="min-w-0 font-medium leading-5">{step.titleZh}</span>
+                  <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                    <span className="min-w-0 font-medium leading-5">{step.titleZh}</span>
+                    {selected ? <span className="shrink-0 text-xs font-semibold">当前</span> : null}
+                  </span>
                 </button>
               );
             })}
@@ -93,28 +100,163 @@ export function ExplorerPanel({
         </section>
 
         {isGuidedMode ? (
-          <section className="rounded-xl border border-accent/30 bg-accent/10 p-4" aria-live="polite">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary-dark">当前观察</p>
-            <h3 className="mt-1 text-base font-bold text-text-primary">{activeStep.titleZh}</h3>
-            <p className="mt-2 text-sm leading-6 text-text-secondary">{activeStep.bodyZh}</p>
-          </section>
+          <CurrentObservation activeStep={activeStep} moleculeId={molecule.id} />
         ) : null}
       </div>
 
       {isGuidedMode ? (
-        <div className="flex items-center justify-between border-t border-border bg-white px-5 py-4">
-          <Button aria-label="上一步" disabled={activeStepIndex === 0} onClick={onPrevious} variant="secondary">
-            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-            上一步
+        <div className="border-t border-border bg-white px-5 py-4">
+          <Button
+            className="h-11 w-full"
+            data-testid="guided-exit"
+            onClick={onExitGuided}
+            type="button"
+            variant="secondary"
+          >
+            <Compass className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            回到自由探索
           </Button>
-          <span className="text-sm font-medium text-text-secondary">{activeStepIndex + 1} / {lessonSteps.length}</span>
-          <Button aria-label="下一步" disabled={activeStepIndex === lessonSteps.length - 1} onClick={onNext}>
-            下一步
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
-          </Button>
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <Button
+              aria-label="上一步"
+              className="h-11"
+              disabled={activeStepIndex === 0}
+              onClick={onPrevious}
+              type="button"
+              variant="secondary"
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              上一步
+            </Button>
+            <span className="text-sm font-medium text-text-secondary" aria-live="polite">
+              {activeStepIndex + 1} / {lessonSteps.length}
+            </span>
+            <Button
+              aria-label="下一步"
+              className="h-11"
+              disabled={activeStepIndex === lessonSteps.length - 1}
+              onClick={onNext}
+              type="button"
+            >
+              下一步
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </div>
         </div>
       ) : null}
     </aside>
+  );
+}
+
+type CurrentObservationProps = {
+  activeStep: LessonStep;
+  moleculeId: string;
+};
+
+function CurrentObservation({ activeStep, moleculeId }: CurrentObservationProps) {
+  const guidedObservation = activeStep.guidedObservation;
+
+  if (!guidedObservation) {
+    return (
+      <section className="rounded-xl border border-accent/30 bg-accent/10 p-4" aria-live="polite">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary-dark">当前观察</p>
+        <h3 className="mt-1 text-base font-bold text-text-primary">{activeStep.titleZh}</h3>
+        <p className="mt-2 text-sm leading-6 text-text-secondary">{activeStep.bodyZh}</p>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      aria-live="polite"
+      className="rounded-xl border border-accent/30 bg-accent/10 p-4"
+      data-testid="guided-observation-panel"
+    >
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary-dark">当前观察</p>
+      <h3 className="mt-1 text-base font-bold text-text-primary">{activeStep.titleZh}</h3>
+
+      <dl className="mt-3 divide-y divide-accent/20 border-y border-accent/20">
+        <ObservationRow
+          label="观察目标"
+          testId="guided-observation-goal"
+          value={guidedObservation.observationGoalZh}
+        />
+        <ObservationRow
+          label="操作提示"
+          testId="guided-observation-operation"
+          value={guidedObservation.operationHintZh}
+        />
+        <ObservationRow
+          label="可见变化"
+          testId="guided-observation-change"
+          value={guidedObservation.visibleChangeZh}
+        />
+        <ObservationRow
+          label="原因解释"
+          testId="guided-observation-reason"
+          value={guidedObservation.reasonZh}
+        />
+      </dl>
+
+      {guidedObservation.comparison ? (
+        <section
+          aria-labelledby={`guided-comparison-${activeStep.id}`}
+          className="mt-4 border-t border-accent/30 pt-4"
+          data-testid="guided-observation-comparison"
+        >
+          <h4 className="text-sm font-bold text-text-primary" id={`guided-comparison-${activeStep.id}`}>
+            {guidedObservation.comparison.titleZh}
+          </h4>
+          <p className="mt-1 text-sm leading-6 text-text-secondary">{guidedObservation.comparison.summaryZh}</p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[280px] border-collapse text-left text-xs">
+              <caption className="sr-only">{guidedObservation.comparison.titleZh}</caption>
+              <thead className="border-y border-accent/20 text-text-secondary">
+                <tr>
+                  <th className="px-2 py-2 font-semibold" scope="col">结构</th>
+                  <th className="px-2 py-2 font-semibold" scope="col">中心孤电子对</th>
+                  <th className="px-2 py-2 font-semibold" scope="col">典型键角</th>
+                </tr>
+              </thead>
+              <tbody>
+                {guidedObservation.comparison.items.map((item) => {
+                  const isCurrentMolecule = item.moleculeId === moleculeId;
+
+                  return (
+                    <tr
+                      className={isCurrentMolecule ? "bg-primary/[0.07] text-primary-dark" : "text-text-primary"}
+                      key={item.moleculeId}
+                    >
+                      <th className="px-2 py-2.5 font-semibold" scope="row">
+                        <span className="font-serif">{item.formula}</span>
+                        {isCurrentMolecule ? <span className="ml-1.5 text-[11px]">当前</span> : null}
+                      </th>
+                      <td className="px-2 py-2.5">{item.centralLonePairCount} 对</td>
+                      <td className="px-2 py-2.5">{item.bondAngleDeg}°</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+type ObservationRowProps = {
+  label: string;
+  testId: string;
+  value: string;
+};
+
+function ObservationRow({ label, testId, value }: ObservationRowProps) {
+  return (
+    <div className="py-3" data-testid={testId}>
+      <dt className="text-xs font-semibold text-primary-dark">{label}</dt>
+      <dd className="mt-1 text-sm leading-6 text-text-primary">{value}</dd>
+    </div>
   );
 }
 

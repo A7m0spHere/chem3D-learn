@@ -179,6 +179,27 @@ export type AngleSpec = {
   descriptionZh: string;
 };
 
+export type GuidedObservationComparisonItem = {
+  moleculeId: string;
+  formula: string;
+  centralLonePairCount: number;
+  bondAngleDeg: number;
+};
+
+export type GuidedObservationComparison = {
+  titleZh: string;
+  summaryZh: string;
+  items: GuidedObservationComparisonItem[];
+};
+
+export type GuidedObservation = {
+  observationGoalZh: string;
+  operationHintZh: string;
+  visibleChangeZh: string;
+  reasonZh: string;
+  comparison?: GuidedObservationComparison;
+};
+
 export type LessonStep = {
   id: string;
   titleZh: string;
@@ -188,6 +209,7 @@ export type LessonStep = {
   focusAngleIds?: string[];
   showLonePairs?: boolean;
   showAngles?: boolean;
+  guidedObservation?: GuidedObservation;
 };
 
 export type MoleculeRecord = {

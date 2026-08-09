@@ -83,27 +83,84 @@
   ],
   "lessonSteps": [
     {
-      "id": "lone-pair",
-      "titleZh": "识别孤电子对",
-      "bodyZh": "氮原子上方有一对孤电子对。它参与电子对空间排布，但不是一个原子。",
-      "focusAtomIds": ["n1"],
-      "showLonePairs": true
+      "id": "trigonal-pyramidal",
+      "titleZh": "旋转确认三角锥",
+      "bodyZh": "拖动模型到侧面观察：三个 N—H 键并不共面，NH3 是三角锥形，不是平面三角形。",
+      "focusAtomIds": ["n1", "h1", "h2", "h3"],
+      "focusBondIds": ["n1-h1", "n1-h2", "n1-h3"],
+      "guidedObservation": {
+        "observationGoalZh": "确认三个氢原子与氮原子构成的是三角锥形，而非平面三角形。",
+        "operationHintZh": "拖拽旋转模型，从侧面比较三个 H 原子的前后位置。",
+        "visibleChangeZh": "N—H 骨架被突出；旋转后可看见至少一个 H 不与其余原子落在同一平面。",
+        "reasonZh": "三个 N—H 键在空间中指向不同方向，因此分子构型是三角锥形。"
+      }
     },
     {
-      "id": "trigonal-pyramidal",
-      "titleZh": "判断三角锥形",
-      "bodyZh": "分子构型只看原子核位置。三个氢原子围绕氮原子形成三角锥形，而不是正四面体形。",
-      "focusAtomIds": ["h1", "h2", "h3"],
-      "focusBondIds": ["n1-h1", "n1-h2", "n1-h3"],
-      "showLonePairs": true
+      "id": "lone-pair",
+      "titleZh": "显示并识别孤电子对",
+      "bodyZh": "显示 N 上方的孤电子对：电子对空间排布为四面体形；只按原子核判断时，分子构型仍是三角锥形。",
+      "focusAtomIds": ["n1"],
+      "showLonePairs": true,
+      "guidedObservation": {
+        "observationGoalZh": "找到氮原子上方没有原子占据的第四个方向。",
+        "operationHintZh": "观察已自动显示的孤电子对；可用“孤电子对”开关手动隐藏或再次显示。",
+        "visibleChangeZh": "氮原子上方出现一对孤电子对；它不作为一个原子计入分子构型。",
+        "reasonZh": "三个成键电子对和一对孤电子对共同占据四个空间方向；分子构型只统计原子核位置。"
+      }
     },
     {
       "id": "bond-angle",
-      "titleZh": "观察键角压缩",
-      "bodyZh": "显示 H-N-H 键角后，可以看到氨气的典型键角约为 107°，略小于正四面体角 109.5°。",
+      "titleZh": "显示约 107° 键角",
+      "bodyZh": "显示 H—N—H 键角后，可以看到氨气的典型键角约为 107°，小于 CH4 的 109.5°。",
+      "focusAtomIds": ["n1", "h1", "h2"],
       "focusAngleIds": ["h1-n1-h2"],
       "showLonePairs": true,
-      "showAngles": true
+      "showAngles": true,
+      "guidedObservation": {
+        "observationGoalZh": "读出 H—N—H 键角约为 107°，并判断它比正四面体角小。",
+        "operationHintZh": "观察已自动显示的 H—N—H 角弧与“约 107°”标签；可用“键角”开关手动隐藏或再次显示。",
+        "visibleChangeZh": "H—N—H 角弧和“约 107°”出现；孤电子对仍在 N 上方可见。",
+        "reasonZh": "孤电子对占据的空间较大、排斥较强，会把三个 N—H 成键电子对挤近。"
+      }
+    },
+    {
+      "id": "compare-bond-angles",
+      "titleZh": "总结键角递变",
+      "bodyZh": "比较 CH4、NH3 和 H2O：中心原子孤电子对由 0 对增至 2 对，典型键角由 109.5° 依次减小到约 107°、104.5°。",
+      "focusAtomIds": ["n1", "h1", "h2"],
+      "focusAngleIds": ["h1-n1-h2"],
+      "showLonePairs": true,
+      "showAngles": true,
+      "guidedObservation": {
+        "observationGoalZh": "用 CH4、NH3、H2O 的键角变化总结孤电子对的影响。",
+        "operationHintZh": "阅读下方 CH₄ / NH₃ / H₂O 对比表，比较中心孤电子对数与典型键角的递变。",
+        "visibleChangeZh": "同一条对比数据列出 CH4 109.5° → NH3 约 107° → H2O 104.5°，无需同时打开三个画布。",
+        "reasonZh": "中心原子的孤电子对数增加时，对成键电子对的排斥总体增强，键角总体减小。",
+        "comparison": {
+          "titleZh": "孤电子对与键角",
+          "summaryZh": "中心原子孤电子对由 0 对增至 2 对时，成键电子对夹角总体减小。",
+          "items": [
+            {
+              "moleculeId": "ch4",
+              "formula": "CH₄",
+              "centralLonePairCount": 0,
+              "bondAngleDeg": 109.5
+            },
+            {
+              "moleculeId": "nh3",
+              "formula": "NH₃",
+              "centralLonePairCount": 1,
+              "bondAngleDeg": 107
+            },
+            {
+              "moleculeId": "h2o",
+              "formula": "H₂O",
+              "centralLonePairCount": 2,
+              "bondAngleDeg": 104.5
+            }
+          ]
+        }
+      }
     }
   ],
   "rendering": {

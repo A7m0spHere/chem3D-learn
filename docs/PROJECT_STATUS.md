@@ -1,11 +1,18 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-06（Codex，完成 T-038 Viewer 引导观察审计）
+> 最后更新：2026-08-09（Codex，完成 T-038D NH₃ 引导观察样板验收）
 
 ## 一句话定位
 
 Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学教师课堂演示的前端优先 3D 结构化学学习网站。详见 `docs/PROJECT_BRIEF.md`。
+
+## T-038D 验收结果（2026-08-09）
+
+- NH₃ 单一样板已通过系统 Chrome 的四步引导、键盘 Enter、手动键角 / 孤电子对开关、自由探索退出 / 重入，以及 H₂O / BF₃ 正文回退复核。
+- 新增无截图断言覆盖 1280×720 与 390×844：页面无横向溢出；步骤、上一步 / 下一步、退出和普通分子四个工具栏按钮均至少 44×44；`prefers-reduced-motion: reduce` 下四段解释与 CH₄ → NH₃ → H₂O 比较结论直接可见。
+- 验收中发现普通分子工具栏的 `size="sm"` 将实际按钮高度压到 36px；仅在 `FloatingToolbar` 四个按钮增加 `!h-11`，未修改 3D 几何、路由、Viewer 内核、预取策略、版本或视觉快照。
+- `npm.cmd run lint`、`npm.cmd run build`、`npm.cmd run test:logic`（163/163）、系统 Chrome 引导 spec（5/5）与 production（4/4）通过。Windows 未运行或更新 Darwin 快照；build 仅保留既有按需 `ThreeViewerFrame` large chunk 警告。
 
 ## 技术栈（已核实）
 
@@ -31,6 +38,10 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - **T-034 能力扩展公开占位已清理**（2026-08-02）：`exam-xeo` 已从公开 `examTopics` 数据移除，Exam 页面不再展示 XeO 卡片或“建设中”按钮。现有 16 个公开专题仍按 5 / 4 / 7 分组，全部为已开放状态并具有可进入的 `/exam/` 或 `/module/` 链接。新增数据契约与系统 Chrome 页面行为回归；未实现 XeO、未开发 T-035、未改 3D 模型、版本或 Darwin 快照。
 
 - **T-038 Viewer 引导观察审计已完成**（2026-08-06）：只读比较普通分子 Viewer、NaCl 周期工作台、有机平面专题和有机拼装实验室，推荐 NH₃ 作为首个“观察目标—操作—结构变化—原因解释—对比总结”样板。四条路由均完成系统 Chrome 行为抽查；没有修改 UI、3D 几何、化学数据、测试快照、发布版本或在线自测。证据与后续边界见 `docs/guided-observation/T038_VIEWER_AUDIT.md`。
+
+- **T-038B NH₃ 引导观察内容与状态设计已完成**（2026-08-07）：`LessonStep` 新增可选嵌套 `guidedObservation` 契约，仅 NH₃ 从三步冻结为四步，完整提供观察目标、操作提示、可见变化、原因解释；第四步以轻量数据表达 CH₄ 109.5° → NH₃ 107° → H₂O 104.5° 及中心孤电子对数递变。新增纯逻辑契约测试，现有其他手写结构保持无需迁移；未修改 UI、3D 几何、坐标/键、快照、版本或 lockfile。
+
+- **T-038C NH₃ 引导观察 UI 消费已完成**（2026-08-07）：普通分子 `ExplorerPanel` 会在 `guidedObservation` 存在时，以单一区域依次显示观察目标、操作提示、可见变化、原因解释；第四步渲染 CH₄ / NH₃ / H₂O 的轻量语义表格（0 / 1 / 2 对孤电子对，109.5° / 107° / 104.5°），未创建额外 Canvas。没有该字段的 H₂O、BF₃ 等普通分子仍显示原有 `titleZh` / `bodyZh`。补充“回到自由探索”入口，保留既有步骤聚焦、孤电子对 / 键角开关、手动旋转和缩放；工具栏用文本、`aria-pressed` 和 44px 控件表达状态。系统 Chrome 无截图定向测试 3 / 3 通过，覆盖四步文案 / 对比、键盘前后步、退出重入、手动开关、旧数据回退和窄屏触控高度。未更新快照、未改 3D 几何、版本或 lockfile。该条记录描述 C 阶段当时完成状态；T-038D 已于 2026-08-09 完成后续跨断点、production 与视觉边界验收。
 
 - **T-037 GitHub Pages 动态导入失败恢复已部署**（2026-08-01）：确认 `/chem3D-learn/` base、Router basename 和 Pages 产物路径正确；故障来自新部署删除旧 hash chunk 后，旧标签页仍引用 `ModuleDetailPage-[hash].js`。入口现监听 `vite:preloadError`，以 sessionStorage + history.state 降级记录 60 秒冷却状态，首次自动刷新当前 URL，持续失败则进入根路由中文错误页。修复随 `main@4eb3738` 的 Pages workflow run `30689464952` 完成 build / deploy；线上首页、Modules 与 CH₄ 详情基础验证通过，实际按需请求 `ModuleDetailPage-[hash].js` 和 3D chunk，控制台无错误。保留路由级 lazy、文件 hash 和首页不加载 3D chunk 的性能边界；跨版本旧标签页自动恢复需等下一次真实前端部署验证，当前测试用户仍需强制刷新一次。
 
@@ -403,7 +414,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-下一项仍是 **T-038：3D 引导观察与结构解释样板**，但代表模块已由审计确定为 NH₃。下一步只定义并实现 NH₃ 的最小引导观察契约，再做不依赖截图的键盘 / 移动端行为验证；完成后再恢复 T-031 小范围 Alpha。不要重新引入选择题、判题、分数、重试或题库路线，也不要在没有单个样板证据时批量扩展所有模块。
+下一项是 **T-039：小范围 Alpha（待启动）**。T-038D 已通过，但本轮不开展 Alpha；后续仅在维护者与少量朋友范围观察首次访问者能否找到目标、完成 NH₃ 四步并说出原因。不要重新引入选择题、判题、分数、重试或题库路线，也不要批量扩展其他模块。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。
