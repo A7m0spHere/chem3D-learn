@@ -156,6 +156,7 @@ type LessonStep = {
   focusAngleIds?: string[];
   showLonePairs?: boolean;
   showAngles?: boolean;
+  guidedObservation?: GuidedObservation;
 };
 ```
 
@@ -168,6 +169,32 @@ Field semantics:
 - `focusAngleIds`: optional angles to highlight.
 - `showLonePairs`: whether this step should emphasize lone pairs.
 - `showAngles`: whether this step should emphasize key angles.
+- `guidedObservation`: optional structured copy for a guided-observation sample. It is absent from existing records unless that module has been deliberately upgraded.
+
+### GuidedObservation
+
+```ts
+type GuidedObservation = {
+  observationGoalZh: string;
+  operationHintZh: string;
+  visibleChangeZh: string;
+  reasonZh: string;
+  comparison?: {
+    titleZh: string;
+    summaryZh: string;
+    items: Array<{
+      moleculeId: string;
+      formula: string;
+      centralLonePairCount: number;
+      bondAngleDeg: number;
+    }>;
+  };
+};
+```
+
+- The four required strings respectively answer: what to observe, how to operate, what becomes visible, and why the structure behaves that way.
+- `comparison` is optional and only needed for a concluding step. It carries display-ready comparison data so a UI can render one lightweight row or table without creating additional 3D canvases.
+- Keep `guidedObservation` optional for backward compatibility. Existing `titleZh`, `bodyZh`, focus IDs, and visibility flags remain the baseline data contract for all other hand-authored structures.
 
 ## MoleculeRendering
 

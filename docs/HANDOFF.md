@@ -8,41 +8,46 @@
 ## 最近一次交接
 
 - **Agent**：Codex
-- **日期**：2026-08-06
-- **分支**：`main`
-- **任务**：T-038 四类 Viewer 只读审计与首个引导观察样板推荐。
+- **日期**：2026-08-09
+- **分支**：`HEAD (detached) @ 6b7f256`
+- **任务**：T-038D NH₃ 引导观察样板行为、响应式、production 与视觉边界验收。
 
 ### 本轮做的事
 
-1. **基线确认**：执行 `git fetch origin`；`main` / `origin/main` 均为 `ed1f6fd`，工作区干净且无分叉。
-2. **静态审计**：比较普通分子 Viewer（重点 NH₃）、NaCl 周期工作台、有机平面专题和有机拼装实验室在“观察目标—操作提示—结构变化—原因解释—对比总结”五个维度的支持程度。
-3. **运行时抽查**：使用系统 Chrome 和临时 Vite 服务器验证四条路由。NH₃ 三个步骤、NaCl 周期尺寸 / 边界选择 / 配位隔离、有机平面对齐切换、有机拼装添加原子反馈均真实可见。
-4. **审计结论**：推荐 NH₃ 作为首个样板；它已有最短、最清楚的三步因果链，且不需要新增 3D 几何。完整证据写入 `docs/guided-observation/T038_VIEWER_AUDIT.md`。
-5. **范围控制**：没有修改 UI、3D 几何、化学数据、测试快照、发布版本，也没有重新引入在线自测或实现 T-038 样板。
+1. **继承并复核 T-038B/C**：未改 `LessonStep.guidedObservation`、NH₃ 四步数据、几何、坐标或键；`ExplorerPanel` 只在字段存在时消费它，其他普通分子继续走原 `titleZh` / `bodyZh`。
+2. **补齐最小验收护栏**：在 `guided-observation.visual.spec.ts` 增加 1280×720 / 390×844 无横向溢出与 44×44 触控断言，并增加 reduced-motion 下四段引导与比较结论直接可见的断言；没有新增截图或更新视觉基线。
+3. **修复一个真实阻断**：系统 Chrome 390×844 实测发现 `FloatingToolbar` 的 `size="sm"` 将四个普通分子工具栏按钮压为 36px；仅为这四个按钮增加 `!h-11`，不改共享工具栏、3D 内核或其他专题。
+4. **只读目检两个断点**：1280×720 下 3D Viewer 保持左侧主视觉，右侧信息层级清楚；390×844 下 Viewer 仍为首屏主视觉，步骤、操作提示和比较表纵向可读；临时截图已删除。
+5. **范围控制**：未迁移其他结构、未实现 NaCl 第二样板或 T-039，未更新 Darwin 快照、版本、lockfile、几何数据、预取策略，也未提交、推送或创建 PR。
 
 ### 验证结果
 
-- `git fetch origin`：通过；`git status --short --branch`：`main...origin/main`，工作区干净。
-- 静态源码、教学数据与既有行为测试：完成只读审计。
-- 系统 Chrome 运行时抽查：四条路由目标操作通过，未出现 `pageerror`；唯一控制台请求错误是临时 Vite 地址的 `/favicon.ico` 404。
-- 未运行 build / lint / logic / 视觉回归：本轮没有前端代码变更，且不修改测试快照；文档审计使用针对性浏览器抽查。
-- `git diff --check`：文档变更后复核通过。
+- `npm.cmd ci --cache <worktree>/.tmp-npm-cache`：通过；为当前独立 worktree 恢复前端依赖，临时 cache 已删除，未改 lockfile。
+- `npm.cmd run lint`：通过。
+- `npm.cmd run build`：通过；仅保留既有的 `ThreeViewerFrame` 大 chunk 警告。
+- `npm.cmd run test:logic`：163 / 163 通过（含 T-038B 的 3 项契约测试）。
+- `PLAYWRIGHT_CHANNEL=chrome` 下运行 `npm.cmd run test:visual -- tests/visual/guided-observation.visual.spec.ts`：5 / 5 通过，无截图更新。
+- `PLAYWRIGHT_CHANNEL=chrome` 下运行 `npm.cmd run test:production`：4 / 4 通过；首页不提前下载重型 3D chunk，production 预取 / 懒加载与路由恢复无回归。
+- 系统 Chrome 只读目检：1280×720、390×844 均通过；未运行或更新 Darwin 快照。
+- 最终治理复核（2026-08-09）：`git diff --check` 通过，`git status --short --branch` 已复核；未发现 lockfile、版本、几何、快照、缓存或测试产物变更。
+- 交接中此前“`git diff --check` 与最终 status 待复核”的表述仅是治理更新前的临时状态，现已由上一条最终复核结果覆盖。
+- `git diff --check` 与最终 `git status` 待本轮治理更新后复核；不应出现 lockfile、快照、缓存或测试产物。
 
 ### 关键决定
 
-- NH₃ 是 T-038 的首个代表模块；NaCl 周期工作台、有机平面专题和有机拼装实验室保留为后续比较对象，不批量扩展。
-- 下一步只定义并实现 NH₃ 的最小引导观察契约，覆盖目标、操作提示、结构变化、原因解释和比较出口；不引入选择题、判题、分数、重试或持久化状态。
-- D-039 关于产品核心回到 3D 观察与结构解释的决定继续有效；T-034 的 XeO 清理保持不变。
+- 保持 `guidedObservation` 可选：结构化样板不是全站数据迁移，已有手写结构和课堂正文不受影响。
+- 把退出设计为只切换引导层：教学步骤可以突出结构，但不能接管 OrbitControls 或覆盖学生手动开关的所有权。
+- 把跨分子结论限制在表格数据中：不创建多 Canvas 对比系统，也不提前抽象通用教程引擎。D-042 记录本轮决定。
+- 将 T-038D 的触控门槛锁在普通分子 `FloatingToolbar` 的四个按钮上，用局部 `!h-11` 解决 `size="sm"` 覆盖，不把修复扩展成全站工具栏重构。
 
 ### 已知限制
 
-- NH₃ 当前步骤仍没有显式 `operationHint` / `comparison` 字段；本轮只记录缺口，没有提前实现契约。
-- 浏览器抽查未更新 Darwin 截图；控制台 favicon 404 属于临时本地服务器资源缺失，未扩大为无关修复。
+- Windows 未运行完整 Darwin 视觉回归，也没有更新任何视觉基线；本轮只执行无截图系统 Chrome 行为与临时目检。
+- 当前比较表是数据呈现，不会同时打开或同步 CH₄ / NH₃ / H₂O 三个 3D Viewer；这符合本样板的范围。
 
 ### 给下一个 Agent 的建议
 
-- 下一项只做 T-038 的第二步：为 NH₃ 定义最小 typed 引导观察契约并实现单个样板；先补键盘 / 移动端无截图行为测试，再决定是否提炼通用契约。
-- 评估重点仍是 3D 操作是否帮助学生看到结构关系，不要重新引入选择题、判题、分数或重试。
+- 下一项为 T-039 小范围 Alpha（待启动）；本轮不要提前开展 Alpha，也不要迁移其他模块、更新 Windows 上的 Darwin 快照，或引入作答 / 评分状态。
 
 ---
 

@@ -1037,6 +1037,7 @@ export function ModuleDetailPage() {
               activeStepIndex={activeStepIndex}
               completedStepIndices={completedSteps}
               isGuidedMode={isGuidedMode}
+              onExitGuided={() => setIsGuidedMode(false)}
               onPrevious={() => goToStep(activeStepIndex - 1)}
               onNext={() => goToStep(activeStepIndex + 1)}
               onSelectStep={goToStep}
