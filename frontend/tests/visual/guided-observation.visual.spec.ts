@@ -22,7 +22,7 @@ const nh3GuidedSteps: GuidedStepExpectation[] = [
     id: "lone-pair",
     title: "显示并识别孤电子对",
     goal: "找到氮原子上方没有原子占据的第四个方向。",
-    operation: "点击“孤电子对”，再观察氮原子上方出现的标记。",
+    operation: "观察已自动显示的孤电子对；可用“孤电子对”开关手动隐藏或再次显示。",
     change: "氮原子上方出现一对孤电子对；它不作为一个原子计入分子构型。",
     reason: "三个成键电子对和一对孤电子对共同占据四个空间方向；分子构型只统计原子核位置。",
   },
@@ -30,7 +30,7 @@ const nh3GuidedSteps: GuidedStepExpectation[] = [
     id: "bond-angle",
     title: "显示约 107° 键角",
     goal: "读出 H—N—H 键角约为 107°，并判断它比正四面体角小。",
-    operation: "点击“键角”，保持孤电子对可见，再查看 H—N—H 的角弧标签。",
+    operation: "观察已自动显示的 H—N—H 角弧与“约 107°”标签；可用“键角”开关手动隐藏或再次显示。",
     change: "H—N—H 角弧和“约 107°”出现；孤电子对仍在 N 上方可见。",
     reason: "孤电子对占据的空间较大、排斥较强，会把三个 N—H 成键电子对挤近。",
   },
@@ -38,7 +38,7 @@ const nh3GuidedSteps: GuidedStepExpectation[] = [
     id: "compare-bond-angles",
     title: "总结键角递变",
     goal: "用 CH4、NH3、H2O 的键角变化总结孤电子对的影响。",
-    operation: "阅读轻量对比条；可按需跳转到 CH4 或 H2O 模块复看模型。",
+    operation: "阅读下方 CH₄ / NH₃ / H₂O 对比表，比较中心孤电子对数与典型键角的递变。",
     change: "同一条对比数据列出 CH4 109.5° → NH3 约 107° → H2O 104.5°，无需同时打开三个画布。",
     reason: "中心原子的孤电子对数增加时，对成键电子对的排斥总体增强，键角总体减小。",
   },
@@ -50,6 +50,8 @@ test.describe("NH₃ 引导观察样板", () => {
 
     const viewer = page.getByTestId("molecule-viewer");
     const canvasArea = page.getByTestId("molecule-viewer-canvas");
+    const angleToggle = page.getByTestId("molecule-toggle-angles");
+    const lonePairToggle = page.getByTestId("molecule-toggle-lone-pairs");
     await expect(viewer.getByText("NH3｜自由探索", { exact: true })).toBeVisible();
     await expect(page.getByTestId("guided-observation-panel")).toHaveCount(0);
 
@@ -64,6 +66,14 @@ test.describe("NH₃ 引导观察样板", () => {
       await expect(panel.getByTestId("guided-observation-operation")).toContainText(step.operation);
       await expect(panel.getByTestId("guided-observation-change")).toContainText(step.change);
       await expect(panel.getByTestId("guided-observation-reason")).toContainText(step.reason);
+
+      if (step.id === "lone-pair") {
+        await expect(lonePairToggle).toHaveAttribute("aria-pressed", "true");
+      }
+      if (step.id === "bond-angle") {
+        await expect(lonePairToggle).toHaveAttribute("aria-pressed", "true");
+        await expect(angleToggle).toHaveAttribute("aria-pressed", "true");
+      }
     }
 
     await expect(canvasArea.getByText("约 107°", { exact: true })).toBeVisible();
@@ -83,8 +93,6 @@ test.describe("NH₃ 引导观察样板", () => {
     await expect(comparisonRows.nth(2)).toContainText("2 对");
     await expect(comparisonRows.nth(2)).toContainText("104.5°");
 
-    const angleToggle = page.getByTestId("molecule-toggle-angles");
-    const lonePairToggle = page.getByTestId("molecule-toggle-lone-pairs");
     await expect(angleToggle).toHaveAttribute("aria-pressed", "true");
     await expect(lonePairToggle).toHaveAttribute("aria-pressed", "true");
 
@@ -240,7 +248,9 @@ test.describe("NH₃ 引导观察样板", () => {
     const panel = page.getByTestId("guided-observation-panel");
     await expect(panel).toBeVisible();
     await expect(panel.getByTestId("guided-observation-goal")).toContainText("CH4、NH3、H2O");
-    await expect(panel.getByTestId("guided-observation-operation")).toContainText("轻量对比条");
+    await expect(panel.getByTestId("guided-observation-operation")).toContainText(
+      "下方 CH₄ / NH₃ / H₂O 对比表",
+    );
     await expect(panel.getByTestId("guided-observation-change")).toContainText("109.5° → NH3 约 107° → H2O 104.5°");
     await expect(panel.getByTestId("guided-observation-reason")).toContainText("孤电子对数增加");
     await expect(panel.getByTestId("guided-observation-comparison")).toContainText("孤电子对与键角");

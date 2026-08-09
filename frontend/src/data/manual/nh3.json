@@ -103,7 +103,7 @@
       "showLonePairs": true,
       "guidedObservation": {
         "observationGoalZh": "找到氮原子上方没有原子占据的第四个方向。",
-        "operationHintZh": "点击“孤电子对”，再观察氮原子上方出现的标记。",
+        "operationHintZh": "观察已自动显示的孤电子对；可用“孤电子对”开关手动隐藏或再次显示。",
         "visibleChangeZh": "氮原子上方出现一对孤电子对；它不作为一个原子计入分子构型。",
         "reasonZh": "三个成键电子对和一对孤电子对共同占据四个空间方向；分子构型只统计原子核位置。"
       }
@@ -118,7 +118,7 @@
       "showAngles": true,
       "guidedObservation": {
         "observationGoalZh": "读出 H—N—H 键角约为 107°，并判断它比正四面体角小。",
-        "operationHintZh": "点击“键角”，保持孤电子对可见，再查看 H—N—H 的角弧标签。",
+        "operationHintZh": "观察已自动显示的 H—N—H 角弧与“约 107°”标签；可用“键角”开关手动隐藏或再次显示。",
         "visibleChangeZh": "H—N—H 角弧和“约 107°”出现；孤电子对仍在 N 上方可见。",
         "reasonZh": "孤电子对占据的空间较大、排斥较强，会把三个 N—H 成键电子对挤近。"
       }
@@ -133,7 +133,7 @@
       "showAngles": true,
       "guidedObservation": {
         "observationGoalZh": "用 CH4、NH3、H2O 的键角变化总结孤电子对的影响。",
-        "operationHintZh": "阅读轻量对比条；可按需跳转到 CH4 或 H2O 模块复看模型。",
+        "operationHintZh": "阅读下方 CH₄ / NH₃ / H₂O 对比表，比较中心孤电子对数与典型键角的递变。",
         "visibleChangeZh": "同一条对比数据列出 CH4 109.5° → NH3 约 107° → H2O 104.5°，无需同时打开三个画布。",
         "reasonZh": "中心原子的孤电子对数增加时，对成键电子对的排斥总体增强，键角总体减小。",
         "comparison": {
