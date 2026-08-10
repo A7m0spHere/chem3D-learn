@@ -114,7 +114,6 @@ export function mergeMoleculeData(
     crystal: real.crystal,
     lonePairs: real.lonePairs,
     keyAngles: real.keyAngles,
-    lessonSteps: real.lessonSteps,
     rendering: real.rendering,
     metadata: real.metadata,
     crystalTeaching: real.crystalTeaching,
@@ -156,27 +155,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
         descriptionZh: "四个 C-H 键尽量远离，形成正四面体构型。",
       },
     ],
-    lessonSteps: [
-      {
-        id: "center",
-        titleZh: "找到中心原子",
-        bodyZh: "先确认中心碳原子，再观察四个 C-H 键从中心伸向不同方向。",
-        focusAtomIds: ["c1"],
-      },
-      {
-        id: "shape",
-        titleZh: "观察空间构型",
-        bodyZh: "四个氢原子不在同一平面内，而是形成正四面体的四个顶点。",
-        focusBondIds: ["c1-h1", "c1-h2", "c1-h3", "c1-h4"],
-      },
-      {
-        id: "angle",
-        titleZh: "理解键角",
-        bodyZh: "显示键角后，重点记住正四面体中 H-C-H 键角约为 109.5°。",
-        focusAngleIds: ["h-c-h"],
-        showAngles: true,
-      },
-    ],
   },
   {
     id: "nh3",
@@ -210,26 +188,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
         valueDeg: 107,
         label: "约 107°",
         descriptionZh: "孤电子对排斥较强，使 H-N-H 键角小于 109.5°。",
-      },
-    ],
-    lessonSteps: [
-      {
-        id: "lone-pair",
-        titleZh: "识别孤电子对",
-        bodyZh: "氮原子上有一对孤电子对，它会影响周围 N-H 键的方向。",
-        showLonePairs: true,
-      },
-      {
-        id: "shape",
-        titleZh: "判断构型",
-        bodyZh: "只看原子核位置，三个氢原子围绕氮原子形成三角锥形。",
-      },
-      {
-        id: "angle",
-        titleZh: "比较键角",
-        bodyZh: "与甲烷相比，氨的键角略小，原因是孤电子对排斥更强。",
-        showAngles: true,
-        focusAngleIds: ["h-n-h"],
       },
     ],
   },
@@ -266,26 +224,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
         descriptionZh: "两对孤电子对排斥更强，使 H-O-H 键角继续减小。",
       },
     ],
-    lessonSteps: [
-      {
-        id: "lone-pairs",
-        titleZh: "看到两对孤电子对",
-        bodyZh: "氧原子上有两对孤电子对，它们占据空间并影响 O-H 键方向。",
-        showLonePairs: true,
-      },
-      {
-        id: "shape",
-        titleZh: "判断 V 形",
-        bodyZh: "分子构型只看原子位置，两个氢原子和氧原子形成 V 形。",
-      },
-      {
-        id: "angle",
-        titleZh: "观察键角收缩",
-        bodyZh: "水的键角比氨更小，高中阶段重点理解孤电子对数量增加带来的影响。",
-        showAngles: true,
-        focusAngleIds: ["h-o-h"],
-      },
-    ],
   },
   {
     id: "co2",
@@ -315,25 +253,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
         valueDeg: 180,
         label: "180°",
         descriptionZh: "两个 C=O 双键方向相反，形成直线形结构。",
-      },
-    ],
-    lessonSteps: [
-      {
-        id: "center",
-        titleZh: "确定中心碳原子",
-        bodyZh: "碳原子在中间，两侧各连接一个氧原子。",
-      },
-      {
-        id: "line",
-        titleZh: "观察直线形",
-        bodyZh: "两个氧原子位于碳原子两侧，三个原子在一条直线上。",
-      },
-      {
-        id: "angle",
-        titleZh: "显示 180° 键角",
-        bodyZh: "显示键角时，重点观察 O-C-O 为 180°。",
-        showAngles: true,
-        focusAngleIds: ["o-c-o"],
       },
     ],
   },
@@ -368,25 +287,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
         valueDeg: 120,
         label: "约 120°",
         descriptionZh: "三个 B-F 键在同一平面内，相邻键夹角约为 120°。",
-      },
-    ],
-    lessonSteps: [
-      {
-        id: "plane",
-        titleZh: "确认同一平面",
-        bodyZh: "三个氟原子围绕中心硼原子展开，整体位于同一平面。",
-      },
-      {
-        id: "shape",
-        titleZh: "判断平面三角形",
-        bodyZh: "三个方向均匀分布，形成平面三角形结构。",
-      },
-      {
-        id: "angle",
-        titleZh: "观察 120°",
-        bodyZh: "显示键角后，观察相邻 B-F 键夹角约为 120°。",
-        showAngles: true,
-        focusAngleIds: ["f-b-f"],
       },
     ],
   },
@@ -428,25 +328,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
         descriptionZh: "简化配位示意中，相邻方向近似垂直。",
       },
     ],
-    lessonSteps: [
-      {
-        id: "center",
-        titleZh: "观察晶胞组成",
-        bodyZh: "先看 Cl- 的顶点和面心位置，再看 Na+ 的棱心和体心位置。",
-      },
-      {
-        id: "coordination",
-        titleZh: "理解六配位",
-        bodyZh: "体心 Na+ 周围有 6 个最近邻 Cl-；反过来，每个 Cl- 周围也有 6 个 Na+。",
-      },
-      {
-        id: "limit",
-        titleZh: "完成粒子计数",
-        bodyZh: "Cl-：8 × 1/8 + 6 × 1/2 = 4；Na+：12 × 1/4 + 1 = 4。",
-        showAngles: true,
-        focusAngleIds: ["cl-na-cl"],
-      },
-    ],
   },
   {
     id: "cscl",
@@ -473,23 +354,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
     bonds: [],
     lonePairs: [],
     keyAngles: [],
-    lessonSteps: [
-      {
-        id: "cell",
-        titleZh: "观察 CsCl 晶胞",
-        bodyZh: "Cl- 位于立方体 8 个顶点，Cs+ 位于体心。",
-      },
-      {
-        id: "coordination",
-        titleZh: "理解八配位",
-        bodyZh: "体心 Cs+ 与 8 个顶点 Cl- 最近邻，形成 8 : 8 配位。",
-      },
-      {
-        id: "counting",
-        titleZh: "完成晶胞计数",
-        bodyZh: "Cl-：8 × 1/8 = 1；Cs+：1，所以化学式为 CsCl。",
-      },
-    ],
   },
   {
     id: "sodium-metal",
@@ -516,23 +380,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
     bonds: [],
     lonePairs: [],
     keyAngles: [],
-    lessonSteps: [
-      {
-        id: "cell",
-        titleZh: "观察 BCC 晶胞",
-        bodyZh: "金属钠晶体可用体心立方结构表示：Na 原子位于 8 个顶点和 1 个体心。",
-      },
-      {
-        id: "coordination",
-        titleZh: "理解最近邻关系",
-        bodyZh: "体心 Na 周围最近的 Na 原子有 8 个，可按最近邻关系理解为 8 配位。",
-      },
-      {
-        id: "counting",
-        titleZh: "完成晶胞计数",
-        bodyZh: "顶点 Na：8 × 1/8 = 1；体心 Na：1，所以一个 BCC 晶胞中实际含有 2 个 Na 原子。",
-      },
-    ],
   },
   {
     id: "diamond",
@@ -566,23 +413,6 @@ export const mockMolecules: MockMoleculeRecord[] = [
         valueDeg: 109.5,
         label: "约 109.5°",
         descriptionZh: "金刚石中 C-C-C 键角约为 109.5°。",
-      },
-    ],
-    lessonSteps: [
-      {
-        id: "cell",
-        titleZh: "观察金刚石晶胞",
-        bodyZh: "常规晶胞中可以看到顶点 C、面心 C 和晶胞内部 C。",
-      },
-      {
-        id: "coordination",
-        titleZh: "理解四面体配位",
-        bodyZh: "每个 C 原子与周围 4 个 C 原子形成共价键，空间构型接近正四面体。",
-      },
-      {
-        id: "counting",
-        titleZh: "完成晶胞计数",
-        bodyZh: "顶点、面心和内部 C 需要按共享关系计数，一个常规晶胞中实际含有 8 个 C 原子。",
       },
     ],
   },

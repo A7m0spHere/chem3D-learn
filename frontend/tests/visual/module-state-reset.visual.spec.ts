@@ -56,25 +56,23 @@ test.describe("跨模块 SPA 切换后专题状态复位", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
-  test("普通分子（VSEPR）：切到另一分子后退出引导讲解态（页面自留状态复位）", async ({
+  test("普通分子（VSEPR）：切到另一分子后键角开关与折叠信息恢复默认", async ({
     page,
   }) => {
     test.setTimeout(60_000);
     await page.goto("/module/tetrahedral-ch4");
 
-    // 点一个讲解步骤进入引导模式（isGuidedMode / activeStepIndex，属页面自留状态）。
-    // 步骤文案来自合并后的真实 JSON（ch4.json 首步为「识别中心原子」，覆盖 mock 文案），
-    // 且按钮可及名含序号前缀，故用子串匹配而非 exact。
-    await page.getByRole("button", { name: "识别中心原子" }).click();
-    await expect(page.getByText("当前观察", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "下一步" })).toBeVisible();
+    await page.getByTestId("molecule-toggle-angles").click();
+    await page.getByTestId("structure-info-toggle").click();
+    await expect(page.getByTestId("molecule-toggle-angles")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute("aria-expanded", "true");
 
     // SPA 切到 NH₃（同为 molecular-geometry 分子）。
     await navigateViaRelatedCard(page, "pyramidal-nh3");
 
-    // 引导态必须清空：页面 [id] 复位 effect 仍要把 isGuidedMode 归位。
-    await expect(page.getByText("当前观察", { exact: true })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "下一步" })).toHaveCount(0);
+    // 普通显示开关由页面 [id] effect 复位；折叠信息用 module key 重新挂载，默认保持关闭。
+    await expect(page.getByTestId("molecule-toggle-angles")).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute("aria-expanded", "false");
   });
 
   test("杂化轨道：改成 sp³ 后往返，默认模式按模块特判恢复为 sp", async ({ page }) => {

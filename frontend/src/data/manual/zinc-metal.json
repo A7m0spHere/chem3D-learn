@@ -32,33 +32,6 @@
   "bonds": [],
   "lonePairs": [],
   "keyAngles": [],
-  "lessonSteps": [
-    {
-      "id": "cell",
-      "titleZh": "观察六方晶胞",
-      "bodyZh": "先观察六方柱晶胞：上下两层为 A 层，晶胞中部有 3 个内部 Zn 构成 B 层。"
-    },
-    {
-      "id": "layer",
-      "titleZh": "理解 A-B-A 堆积",
-      "bodyZh": "上下两层 A 层位置对应，中间 B 层落在 A 层三角形空隙上方，形成六方最密堆积。"
-    },
-    {
-      "id": "coordination",
-      "titleZh": "数出十二配位",
-      "bodyZh": "切换到周期延展后的局部配位簇：中心 Zn 同层有 6 个最近邻，上层 3 个、下层 3 个最近邻，配位数为 12。"
-    },
-    {
-      "id": "counting",
-      "titleZh": "完成晶胞计数",
-      "bodyZh": "只按平均占有计数：顶角 12 × 1/6 = 2，面心 2 × 1/2 = 1，内部 3 × 1 = 3，合计 6。"
-    },
-    {
-      "id": "metallicBond",
-      "titleZh": "认识金属键",
-      "bodyZh": "金属键可用电子海模型理解：金属阳离子或原子实与离域电子之间存在整体作用，不是定向共价键。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [3.1, 2.45, 3.7],
     "cameraFov": 42,

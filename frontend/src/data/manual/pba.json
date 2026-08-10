@@ -227,23 +227,6 @@
   ],
   "lonePairs": [],
   "keyAngles": [],
-  "lessonSteps": [
-    {
-      "id": "framework",
-      "titleZh": "看双金属框架",
-      "bodyZh": "先找到 M 与 M′ 两类金属节点，再看 C≡N 桥如何把它们连成框架。"
-    },
-    {
-      "id": "octahedron",
-      "titleZh": "看 M′(CN)₆ 八面体",
-      "bodyZh": "M′ 周围有 6 个 C 端配位方向，可看成一个 M′(CN)₆ 八面体单元。"
-    },
-    {
-      "id": "vacancy",
-      "titleZh": "看可变占位",
-      "bodyZh": "A 位离子、空位和水分子会随样品变化。本模块只帮助读图，不给具体样品参数。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [2.55, 2.15, 2.85],
     "cameraFov": 38,

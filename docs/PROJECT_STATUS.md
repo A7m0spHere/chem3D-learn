@@ -1,11 +1,20 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-10（Codex，完成 T-040 Claude 协作入口清理）
+> 最后更新：2026-08-10（Codex，完成 T-039A 共享布局与普通分子收缩）
 
 ## 一句话定位
 
 Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学教师课堂演示的前端优先 3D 结构化学学习网站。详见 `docs/PROJECT_BRIEF.md`。
+
+## T-039A 3D-first 收缩结果（2026-08-10）
+
+- 维护者体验取代原定小范围 Alpha：详细讲解右栏缺乏差异化，双栏造成 Viewer 下方大面积空白，“回到自由探索”还会因长面板折叠触发滚动位置异常。当前不声称有普通学生验证。
+- `ModuleDetailPage` 已改为全宽 Viewer → 工具栏 → 信息区的单列骨架；普通分子使用默认折叠的 `StructureInfoDisclosure`，只呈现名称 / 分子式、空间构型、典型键角和模型边界。
+- `MoleculeViewer` 回到纯自由探索：旋转、缩放、键角、孤电子对和原子标记继续独立可用；步骤聚焦、自动开关、完成状态和退出按钮已删除。
+- 23 份手写结构及 mock 数据不再携带 `lessonSteps` / `guidedObservation`；`LessonStep` / `GuidedObservation*` 类型、`ExplorerPanel` 及三个无入口旧组件已删除。原子坐标、化学键、晶胞几何、专题模式、路由、模块数量、版本和 Darwin 快照未改。
+- 验证：lint、build、logic 161 / 161、系统 Chrome 普通分子 3 / 3、跨模块状态 5 / 5 通过。production 首轮 3 / 4 仅发现旧“自由探索”面板文本断言，已改为真实 Viewer 容器断言，最终复跑结果记录在 HANDOFF。
+- T-039A 位于独立分支 `codex/t039a-3d-first`；T-039B 必须等待 A 合并后再从最新 `main` 开始。
 
 ## T-038D 验收结果（2026-08-09）
 
@@ -33,7 +42,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 真实 3D 内容覆盖 VSEPR 核心分子、多个晶胞与空隙模型、σ/π 键和杂化轨道、有机共面/乙烯/苯/乙炔、有机拼装实验室等专题。
 - `frontend/src/data/manual/` 下有 23 个已跟踪 JSON，并全部在 `mockMolecules.ts` 注册。模块目录、考试专题和专项教学数据还分布在 `frontend/src/data/*.ts`。
 - `organicBuilderNomenclature.ts` 为 1894 行；`organicBuilderChemistry.ts` 中 `knownOrganicMolecules` 当前是 **17 个**。
-- `ModuleDetailPage.tsx` 的专题控制状态已按组下沉到 `useCrystalControls` / `useOrganicPlanarControls` / `useBondingControls` 三个 typed hook（各自管理默认值与切模块重置）；页面只保留讲解步骤、VSEPR 开关、有机拼装过渡与 `viewerLoading` 等自留状态，并继续通过 `deriveViewerKind` / `viewerRegistry` 统一分发 viewer、toolbar、panel。
+- `ModuleDetailPage.tsx` 的专题控制状态已按组下沉到 `useCrystalControls` / `useOrganicPlanarControls` / `useBondingControls` 三个 typed hook（各自管理默认值与切模块重置）；页面不再维护普通分子讲解步骤，只保留 VSEPR 显示开关、有机拼装过渡与 `viewerLoading` 等自留状态，并继续通过 `deriveViewerKind` / `viewerRegistry` 统一分发 viewer、toolbar、panel。
 - 后端提供 `/health`、`/api/molecules`、`/api/molecules/:id` 及 `/api/structures` 别名，共 6 条独立手写结构数据；前端当前没有调用后端 API。
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 

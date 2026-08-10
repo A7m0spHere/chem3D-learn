@@ -222,28 +222,6 @@
   "bonds": [],
   "lonePairs": [],
   "keyAngles": [],
-  "lessonSteps": [
-    {
-      "id": "cell",
-      "titleZh": "观察 CsCl 晶胞",
-      "bodyZh": "先看立方体晶胞：Cl- 位于 8 个顶点，Cs+ 位于体心。"
-    },
-    {
-      "id": "coordination",
-      "titleZh": "理解八配位",
-      "bodyZh": "中心 Cs+ 沿立方体体对角线方向与 8 个顶点 Cl- 相邻，因此 Cs+ 的配位数为 8。"
-    },
-    {
-      "id": "counting",
-      "titleZh": "用均摊法计数",
-      "bodyZh": "8 个顶点 Cl- 各贡献 1/8，共 1 个 Cl-；体心 Cs+ 完整属于该晶胞，共 1 个 Cs+。"
-    },
-    {
-      "id": "comparison",
-      "titleZh": "对比 NaCl",
-      "bodyZh": "NaCl 是 6 : 6 配位，CsCl 是 8 : 8 配位；CsCl 不能简单当作普通 BCC 金属晶体。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [2.9, 2.35, 3.35],
     "cameraFov": 42,

@@ -59,28 +59,6 @@
       "descriptionZh": "两个 C=O 双键方向相反，使二氧化碳形成对称的直线形结构。高中阶段重点掌握直线形和 180° 键角。"
     }
   ],
-  "lessonSteps": [
-    {
-      "id": "center-atom",
-      "titleZh": "识别中心碳原子",
-      "bodyZh": "先找到位于中心的碳原子。二氧化碳可写作 O=C=O，碳原子两侧各通过一个 C=O 双键连接氧原子。",
-      "focusAtomIds": ["c1"]
-    },
-    {
-      "id": "linear-shape",
-      "titleZh": "观察直线形",
-      "bodyZh": "两个 C=O 双键方向相反，三个原子排在同一直线上，整体呈对称的直线形结构。",
-      "focusAtomIds": ["o1", "c1", "o2"],
-      "focusBondIds": ["c1-o1", "c1-o2"]
-    },
-    {
-      "id": "bond-angle",
-      "titleZh": "观察 180° 键角",
-      "bodyZh": "显示 O-C-O 键角后，可以看到二氧化碳的关键键角为 180°，这是直线形结构的重要特征。",
-      "focusAngleIds": ["o1-c1-o2"],
-      "showAngles": true
-    }
-  ],
   "rendering": {
     "cameraPosition": [0, 2.2, 5.2],
     "cameraFov": 42,
