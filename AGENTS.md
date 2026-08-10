@@ -89,7 +89,6 @@ Actual current structure（以仓库实际为准）:
 ```text
 chem3D-learn/
 ├─ AGENTS.md            # 共享 AI 协作规则（本文件）
-├─ CLAUDE.md            # Claude Code 专用补充，首行 @AGENTS.md 导入本文件
 ├─ PLANS.md             # 多步任务的一次性暂存区，完成后清空
 ├─ docs/                # 项目文档与治理文件
 │  ├─ PROJECT_BRIEF.md / DESIGN_SYSTEM.md / UI_SPEC.md
@@ -149,7 +148,6 @@ chem3D-learn/
 - 不要随意更新 Playwright 截图基线；先确认平台、预期 UI 变化和审核范围。
 - 不要把 `frontend/package-lock.json` 与 `video/package-lock.json` 混用，也不要提交与任务无关的 npm 平台元数据改写。
 - 修改手写 JSON 时同步检查 `mockMolecules.ts` 注册、`learningModules.ts` 路由映射和 `MoleculeRecord` 类型。
-- `.claude/settings.local.json` 是本机权限配置，由全局 ignore 排除，不属于项目交付文件。
 
 ## Gemini UI Collaboration
 
@@ -195,7 +193,7 @@ Before coding:
 - Read `docs/UI_SPEC.md`
 - Read `docs/MOLECULE_DATA_SCHEMA.md` if data is involved
 
-Shared agent context (Claude Code & Codex both read and update these):
+Shared agent context (Codex reads and updates these):
 - `docs/PROJECT_STATUS.md` — living status snapshot.
 - `docs/TASKS.md` — prioritized backlog with status + acceptance criteria.
 - `docs/DECISIONS.md` — append-only log of important technical decisions and why.
@@ -330,7 +328,6 @@ The `video/` project is a standalone Remotion project. It is **not** part of the
 | npm | 随受支持的 Node.js 安装 | 11.9.0 |
 | Git | Git for Windows；必须可用 `git` 和 Git Bash | 2.54.0.windows.1 / Git Bash 5.3.9 |
 | Browser | 仍受安全更新支持的 Chromium 浏览器；Windows 测试使用系统 Chrome 通道 | Google Chrome 119.0.6045.106（本机快照，不作为推荐版本） |
-| Claude Code | 仅 Claude Code 协作时需要 | 2.1.220 |
 
 本机约有 16 GB 内存，足以完成当前前端构建和 3D 页面开发。版本升级后先运行下方预检和验证矩阵；不要因为快照版本变化就无理由重写 lockfile。
 
@@ -343,7 +340,6 @@ $PSVersionTable.PSVersion
 node --version
 npm --version
 git --version
-claude --version
 where.exe node
 where.exe npm
 where.exe git
@@ -352,7 +348,7 @@ git config --get core.autocrlf
 git status --short --branch
 ```
 
-如果某工具不存在或版本低于兼容下限，先报告实际输出再处理；不要擅自升级 Node.js、npm、Git、Chrome 或 Claude Code。
+如果某工具不存在或版本低于兼容下限，先报告实际输出再处理；不要擅自升级 Node.js、npm、Git 或 Chrome。
 
 ### PowerShell 命令与路径规则
 

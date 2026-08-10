@@ -554,3 +554,10 @@
 - **阻断修复**：系统 Chrome 在 390×844 实测普通分子 `FloatingToolbar` 的 `size="sm"` 将按钮高度压为 36px；只给该组件四个按钮增加局部 `!h-11`，不修改共享 `chem-touch-button`、其他专题工具栏、3D 几何或路由。
 - **视觉与性能边界**：Windows 只读目检 1280×720 / 390×844，确认 3D Viewer 保持主视觉、信息层级清楚且课堂投影可读；不运行或更新 Darwin 快照。production 继续由既有 4 项测试锁定首页不提前下载重型 3D chunk、模块详情预取 / 懒加载和路由恢复。
 - **验证**：lint、build、logic 163/163、NH₃ 无截图系统 Chrome 5/5、production 4/4 通过；build 的 `ThreeViewerFrame` large chunk 警告是既有非阻断边界。T-039 小范围 Alpha 仅登记为“待启动”，不在本轮开展。
+
+## D-044 移除 Claude 专用协作入口
+
+- **日期**：2026-08-10（Codex，T-040）
+- **决定**：删除根目录 `CLAUDE.md` 与本地 `.claude/settings.local.json`，当前仓库治理入口统一为 `AGENTS.md`。
+- **理由**：项目所有者要求移除仓库中的 Claude 协作入口；核对 Git 提交作者后，未发现独立的 Claude Git 身份，因此无需改写提交历史或远程权限。
+- **边界**：保留历史交接、决策和任务记录中的 Claude 归属文字，保证项目审计可追溯；不修改业务代码、用户未提交改动或依赖。

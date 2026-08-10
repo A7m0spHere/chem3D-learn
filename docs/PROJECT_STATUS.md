@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
-> 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-09（Codex，完成 T-038D NH₃ 引导观察样板验收）
+> 项目当前状态快照。供 Codex 每次开工前快速了解全局。
+> 最后更新：2026-08-10（Codex，完成 T-040 Claude 协作入口清理）
 
 ## 一句话定位
 
@@ -13,6 +13,12 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 新增无截图断言覆盖 1280×720 与 390×844：页面无横向溢出；步骤、上一步 / 下一步、退出和普通分子四个工具栏按钮均至少 44×44；`prefers-reduced-motion: reduce` 下四段解释与 CH₄ → NH₃ → H₂O 比较结论直接可见。
 - 验收中发现普通分子工具栏的 `size="sm"` 将实际按钮高度压到 36px；仅在 `FloatingToolbar` 四个按钮增加 `!h-11`，未修改 3D 几何、路由、Viewer 内核、预取策略、版本或视觉快照。
 - `npm.cmd run lint`、`npm.cmd run build`、`npm.cmd run test:logic`（163/163）、系统 Chrome 引导 spec（5/5）与 production（4/4）通过。Windows 未运行或更新 Darwin 快照；build 仅保留既有按需 `ThreeViewerFrame` large chunk 警告。
+
+## T-040 Claude 协作入口清理（2026-08-10）
+
+- 已删除根目录 `CLAUDE.md` 与本地 `.claude/settings.local.json`，当前治理入口统一为 `AGENTS.md`。
+- Git 提交作者核对未发现独立的 Claude 身份，因此未改写提交历史或远程权限；历史文档中的协作归属保留用于追溯。
+- 本次未触碰工作区中已有的业务代码和未提交改动。
 
 ## 技术栈（已核实）
 
@@ -76,11 +82,11 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
   - `git diff --check` 对 `tailwind.config.ts` 报的 "space before tab in indent" 是该文件既有风格（shadcn 生成，HEAD 中每行都是两空格+制表符），非本次引入。
   - 提交过程中发现并修正了 TASKS.md 的一处事实错误：T-022 的前两项（模板坐标重写、旋转对齐）实际已在这批改动中落地，详见下方与 `docs/TASKS.md` T-022。
 
-- `main` 已包含 Claude Code 的全站滚动滑入动画（`5f66b7a`）与 Codex 对接修复（`55c3dfc`）：Home / Modules / Paths / Exam / About / ExamTopicDetail 使用统一 `ScrollReveal`，ModuleDetailPage 的 3D Canvas 保持不动；Modules 分类区块间距已移到动画 wrapper，避免子 `section` 的 `last:` 因包装层变化而把每个区块都误判为末项。
+- `main` 已包含全站滚动滑入动画（`5f66b7a`）与后续对接修复（`55c3dfc`）：Home / Modules / Paths / Exam / About / ExamTopicDetail 使用统一 `ScrollReveal`，ModuleDetailPage 的 3D Canvas 保持不动；Modules 分类区块间距已移到动画 wrapper，避免子 `section` 的 `last:` 因包装层变化而把每个区块都误判为末项。
 - 工作区干净，与 `origin/main` 同步。**引线标签扩展系列已收尾**：转换类 T-011 MOF-5（`fb6ceec`）、T-012 MXene（`2c5615a`）、T-013 ReN₃（`9e3e464`）、T-014 金属密堆积（`547482b`）、T-015 PBA（`f3f4984`）、T-018 ZincMetal（`cac0e90`）、T-019 BaTiO3（`a52cf62`）；评估类 T-016 Graphite / T-017 ZnS 逐 scene 核对后判定**无需改动**（全部恒显标签均为标题/总结/门控/已在外围，无压在结构上的指向型恒显标签，见 D-016）。T-010 原子图例（`d18b785`）亦已提交。此前 HANDOFF/STATUS 记录的「T-010/T-011 尚未提交、等用户确认」已过时，实际已按当时建议分 commit 落地。
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
-- `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+- `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
 
 ## 独立验证结果（2026-08-03，T-035 撤销与方向纠偏）
 
