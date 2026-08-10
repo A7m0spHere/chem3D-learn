@@ -179,6 +179,66 @@ test.describe("T-039B 专题展示 Viewer 3D-first 契约", () => {
     await expectNoHorizontalOverflow(page);
   });
 
+  test("杂化专题在桌面使用 360px 高密度 Inspector，窄屏恢复纵向", async ({ page }) => {
+    test.setTimeout(120_000);
+
+    for (const viewport of [
+      { width: 1280, height: 720 },
+      { width: 1552, height: 926 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/module/hybrid-orbitals-sp");
+
+      const stage = page.getByTestId("module-builder-transition-stage");
+      const rail = page.getByTestId("specialty-control-rail");
+      const toolbar = page.getByTestId("module-toolbar");
+      const disclosure = page.getByTestId("structure-info-disclosure");
+      const [stageBox, railBox, toolbarBox, disclosureBox] = await Promise.all([
+        stage.boundingBox(),
+        rail.boundingBox(),
+        toolbar.boundingBox(),
+        disclosure.boundingBox(),
+      ]);
+      if (!stageBox || !railBox || !toolbarBox || !disclosureBox) {
+        throw new Error("杂化专题 Viewer 或 Inspector 未获得可测量布局");
+      }
+      expect(railBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width - 1);
+      expect(railBox.width).toBeGreaterThanOrEqual(358);
+      expect(railBox.width).toBeLessThanOrEqual(362);
+      expect(stageBox.width).toBeGreaterThan(railBox.width * 2);
+      expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height - 1);
+      expect(await toolbar.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(
+        true,
+      );
+      await expectNoHorizontalOverflow(page);
+    }
+
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.goto("/module/hybrid-orbitals-sp");
+    const stage = page.getByTestId("module-builder-transition-stage");
+    const toolbar = page.getByTestId("module-toolbar");
+    const disclosure = page.getByTestId("structure-info-disclosure");
+    const [stageBox, toolbarBox, disclosureBox] = await Promise.all([
+      stage.boundingBox(),
+      toolbar.boundingBox(),
+      disclosure.boundingBox(),
+    ]);
+    if (!stageBox || !toolbarBox || !disclosureBox) {
+      throw new Error("1024px 杂化专题纵向布局未获得可测量位置");
+    }
+    expect(toolbarBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height - 1);
+    expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height - 1);
+    await expectNoHorizontalOverflow(page);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload();
+    const mobileButtons = await toolbar.getByRole("button").evaluateAll((buttons) =>
+      buttons.map((button) => button.getBoundingClientRect().toJSON()),
+    );
+    expect(mobileButtons.every((box) => box.width >= 44 && box.height >= 44)).toBe(true);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("390px 纵向布局、两列控制、键盘 Disclosure 与 44px 触控边界", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/module/polarity-judgment");

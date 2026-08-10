@@ -92,7 +92,7 @@ function HybridControls({
   const canShowUnhybridizedP = activeMode === "sp" || activeMode === "sp2";
 
   return (
-    <div className="mt-2 grid gap-2 border-t border-border/80 pt-2 sm:grid-cols-[minmax(240px,1fr)_auto] sm:items-center">
+    <div className="chem-hybrid-controls mt-2 grid gap-2 border-t border-border/80 pt-2 sm:grid-cols-[minmax(240px,1fr)_auto] sm:items-center">
       <label
         className="flex min-w-0 flex-col gap-1 rounded-xl bg-background/70 px-3 py-2 text-xs font-semibold text-text-secondary"
         htmlFor="hybrid-progress"
@@ -120,7 +120,7 @@ function HybridControls({
         />
       </label>
 
-      <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+      <div className="chem-hybrid-actions grid grid-cols-2 gap-2 sm:flex sm:items-center">
         <Button
           className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-render-solid"

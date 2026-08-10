@@ -174,12 +174,13 @@ const specialtyViewerKinds = new Set<ViewerKind>([
   "organic-coplanar",
 ]);
 
-// 杂化专题含进度滑杆和四个附加开关，保持纵向控制区；其余专题控制密度适中，
-// 在 xl 以上使用略宽于普通分子的 Inspector rail。
+// 专题在 xl 以上进入 Inspector rail。杂化 / 成键基础含进度滑杆和四个附加开关，
+// 使用更宽的 rail；其余专题保持较紧凑宽度。
 const specialtyInspectorKinds = new Set<ViewerKind>([
   "polarity",
   "sigma-bond",
   "pi-bond",
+  "bonding-basics",
   "ethylene",
   "benzene",
   "acetylene",
@@ -464,6 +465,7 @@ export function ModuleDetailPage() {
   const viewerKind = deriveViewerKind(moduleData, molecule, usesRealViewer);
   const usesSpecialtyInfo = specialtyViewerKinds.has(viewerKind);
   const usesSpecialtyInspector = specialtyInspectorKinds.has(viewerKind);
+  const usesDenseSpecialtyInspector = viewerKind === "bonding-basics";
   const bondingBasicsModuleId = isBondingBasicsModuleId(moduleData.id)
     ? moduleData.id
     : "hybrid-orbitals-sp";
@@ -1215,7 +1217,9 @@ export function ModuleDetailPage() {
             className={viewerKind === "molecule"
               ? "grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_272px] xl:items-start"
               : usesSpecialtyInspector
-                ? "grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_304px] xl:items-start"
+                ? usesDenseSpecialtyInspector
+                  ? "grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start"
+                  : "grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_304px] xl:items-start"
                 : "flex min-w-0 flex-col gap-3"}
           >
             <div
@@ -1254,7 +1258,11 @@ export function ModuleDetailPage() {
                   viewerKind === "molecule"
                     ? "xl:[&_.chem-control-console]:w-full xl:[&_.chem-control-grid]:flex-col xl:[&_.chem-control-grid]:items-stretch xl:[&_.chem-touch-button]:w-full"
                     : usesSpecialtyInspector
-                      ? "xl:[&_.chem-control-console]:w-full xl:[&_.chem-control-grid]:flex-col xl:[&_.chem-control-grid]:items-stretch xl:[&_.chem-touch-button]:w-full"
+                      ? `xl:[&_.chem-control-console]:w-full xl:[&_.chem-control-grid]:flex-col xl:[&_.chem-control-grid]:items-stretch xl:[&_.chem-touch-button]:w-full ${
+                          usesDenseSpecialtyInspector
+                            ? "xl:[&_.chem-hybrid-controls]:grid-cols-1 xl:[&_.chem-hybrid-actions]:!grid xl:[&_.chem-hybrid-actions]:grid-cols-2 xl:[&_.chem-hybrid-actions]:w-full"
+                            : ""
+                        }`
                       : ""
                 }`}
                 data-testid="module-toolbar"
