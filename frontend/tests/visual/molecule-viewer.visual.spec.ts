@@ -59,12 +59,17 @@ test.describe("普通分子 3D-first 页面", () => {
     expect(stageBox.width).toBeGreaterThan(900);
     expect(Math.abs(railBox.y - stageBox.y)).toBeLessThanOrEqual(2);
     expect(railBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width);
-    expect(Math.abs(railBox.width - 240)).toBeLessThanOrEqual(2);
+    expect(Math.abs(railBox.width - 272)).toBeLessThanOrEqual(2);
     expect(Math.abs(toolbarBox.width - railBox.width)).toBeLessThanOrEqual(2);
     expect(Math.abs(disclosureBox.x - railBox.x)).toBeLessThanOrEqual(2);
     expect(Math.abs(disclosureBox.width - railBox.width)).toBeLessThanOrEqual(2);
     expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height);
     expect(disclosureBox.y + disclosureBox.height).toBeLessThanOrEqual(stageBox.y + stageBox.height);
+
+    const summary = toggle.locator(":scope > span").first().locator(":scope > span").nth(1);
+    const summaryBox = await summary.boundingBox();
+    if (!summaryBox) throw new Error("结构信息摘要未获得可测量布局");
+    expect(summaryBox.height).toBeLessThanOrEqual(44);
 
     await toggle.focus();
     await page.keyboard.press("Enter");
@@ -94,7 +99,7 @@ test.describe("普通分子 3D-first 页面", () => {
     await assertNoHorizontalOverflow(page);
   });
 
-  test("NH₃ 桌面端以大 Viewer 配合右侧 240px 纵向控制栏", async ({ page }) => {
+  test("NH₃ 在 xl 桌面端以大 Viewer 配合右侧 272px 纵向控制栏", async ({ page }) => {
     const viewports = [
       { width: 1280, height: 720 },
       { width: 1552, height: 926 },
@@ -124,7 +129,7 @@ test.describe("普通分子 3D-first 页面", () => {
       expect(Math.abs(stageBox.height - expectedStageHeight)).toBeLessThanOrEqual(2);
       expect(Math.abs(railBox.y - stageBox.y)).toBeLessThanOrEqual(2);
       expect(railBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width);
-      expect(Math.abs(railBox.width - 240)).toBeLessThanOrEqual(2);
+      expect(Math.abs(railBox.width - 272)).toBeLessThanOrEqual(2);
       expect(Math.abs(toolbarBox.width - railBox.width)).toBeLessThanOrEqual(2);
       expect(Math.abs(disclosureBox.width - railBox.width)).toBeLessThanOrEqual(2);
       expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height);
@@ -139,12 +144,46 @@ test.describe("普通分子 3D-first 页面", () => {
       if (buttonBoxes.some((box) => !box)) throw new Error("桌面端控制按钮未获得可测量布局");
       const measuredButtons = buttonBoxes as NonNullable<(typeof buttonBoxes)[number]>[];
       for (const [index, box] of measuredButtons.entries()) {
-        expect(box.width).toBeGreaterThan(190);
+        expect(box.width).toBeGreaterThan(220);
         expect(box.height).toBeGreaterThanOrEqual(44);
         if (index > 0) expect(box.y).toBeGreaterThan(measuredButtons[index - 1].y);
       }
       await assertNoHorizontalOverflow(page);
     }
+  });
+
+  test("NH₃ 在 1024px 下保持 Viewer、工具栏与结构信息纵向排列", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.goto("/module/pyramidal-nh3");
+
+    const stage = page.getByTestId("module-builder-transition-stage");
+    const rail = page.getByTestId("molecule-control-rail");
+    const toolbar = page.getByTestId("module-toolbar");
+    const disclosure = page.getByTestId("structure-info-disclosure");
+    const boxes = await Promise.all([stage, rail, toolbar, disclosure].map((locator) => locator.boundingBox()));
+    if (boxes.some((box) => !box)) throw new Error("1024px 普通分子布局未获得可测量边界");
+    const [stageBox, railBox, toolbarBox, disclosureBox] = boxes as NonNullable<(typeof boxes)[number]>[];
+
+    expect(Math.abs(railBox.x - stageBox.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(railBox.width - stageBox.width)).toBeLessThanOrEqual(2);
+    expect(railBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height);
+    expect(Math.abs(toolbarBox.width - railBox.width)).toBeLessThanOrEqual(2);
+    expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height);
+    expect(Math.abs(disclosureBox.width - railBox.width)).toBeLessThanOrEqual(2);
+
+    const buttonBoxes = await Promise.all([
+      page.getByTestId("molecule-toggle-auto-rotate"),
+      page.getByTestId("molecule-toggle-angles"),
+      page.getByTestId("molecule-toggle-lone-pairs"),
+      page.getByTestId("molecule-toggle-atom-labels"),
+    ].map((button) => button.boundingBox()));
+    if (buttonBoxes.some((box) => !box)) throw new Error("1024px 工具栏按钮未获得可测量边界");
+    const measuredButtons = buttonBoxes as NonNullable<(typeof buttonBoxes)[number]>[];
+    for (const box of measuredButtons) expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(Math.max(...measuredButtons.map((box) => box.y)) - Math.min(...measuredButtons.map((box) => box.y)))
+      .toBeLessThanOrEqual(2);
+
+    await assertNoHorizontalOverflow(page);
   });
 
   test("NH₃ 工具栏独立控制键角、孤电子对和标记", async ({ page }) => {

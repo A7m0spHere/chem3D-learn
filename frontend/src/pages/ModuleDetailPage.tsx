@@ -1101,7 +1101,7 @@ export function ModuleDetailPage() {
           {/* 3D Viewer */}
           <div
             className={viewerKind === "molecule"
-              ? "grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start"
+              ? "grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_272px] xl:items-start"
               : "flex min-w-0 flex-col gap-3"}
           >
             <div
@@ -1132,7 +1132,7 @@ export function ModuleDetailPage() {
               <div
                 className={`w-full rounded-xl border border-border bg-white px-3 py-2 shadow-sm ${
                   viewerKind === "molecule"
-                    ? "lg:[&_.chem-control-console]:w-full lg:[&_.chem-control-grid]:flex-col lg:[&_.chem-control-grid]:items-stretch lg:[&_.chem-touch-button]:w-full"
+                    ? "xl:[&_.chem-control-console]:w-full xl:[&_.chem-control-grid]:flex-col xl:[&_.chem-control-grid]:items-stretch xl:[&_.chem-touch-button]:w-full"
                     : ""
                 }`}
                 data-testid="module-toolbar"
