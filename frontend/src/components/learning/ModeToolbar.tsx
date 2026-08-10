@@ -47,7 +47,7 @@ export function ModeToolbar<M extends string, V extends string = never>({
   onModeChange,
   viewToggle,
 }: ModeToolbarProps<M, V>) {
-  const buttonClassName = "chem-touch-button w-full sm:w-auto";
+  const buttonClassName = "chem-touch-button !h-11 w-full sm:w-auto";
 
   return (
     <div className="chem-control-console">

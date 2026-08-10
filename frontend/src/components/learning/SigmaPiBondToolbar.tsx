@@ -22,7 +22,7 @@ type SigmaPiBondToolbarProps =
     };
 
 export function SigmaPiBondToolbar(props: SigmaPiBondToolbarProps) {
-  const buttonClassName = "chem-touch-button w-full sm:w-auto";
+  const buttonClassName = "chem-touch-button !h-11 w-full sm:w-auto";
   const lesson = getOrbitalBondLesson(props.lessonType);
 
   return (

@@ -30,7 +30,7 @@ export function OrganicCoplanarToolbar({
   onToggleLabels,
   onToggleVinylAligned,
 }: OrganicCoplanarToolbarProps) {
-  const buttonClassName = "chem-touch-button w-full sm:w-auto";
+  const buttonClassName = "chem-touch-button !h-11 w-full sm:w-auto";
 
   return (
     <div className="chem-control-console">
@@ -45,7 +45,7 @@ export function OrganicCoplanarToolbar({
               key={mode.id}
               onClick={() => onModeChange(mode.id)}
               size="sm"
-              title={mode.titleZh}
+              title={mode.viewerTitle}
               type="button"
               variant={isActive ? "default" : "ghost"}
             >

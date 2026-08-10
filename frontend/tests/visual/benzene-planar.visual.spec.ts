@@ -21,12 +21,11 @@ test.describe("苯环平面结构模块视觉回归", () => {
         { exact: true },
       ),
     ).toBeVisible();
-    await expect(
-      page.getByRole("complementary").getByRole("heading", {
-        exact: true,
-        name: "苯环平面结构",
-      }),
-    ).toBeVisible();
+    await expect(page.getByRole("complementary")).toHaveCount(0);
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
     await page.getByRole("button", { exact: true, name: "共面验证" }).click();
     await expect(

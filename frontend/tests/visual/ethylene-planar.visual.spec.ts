@@ -27,12 +27,11 @@ test.describe("乙烯平面结构模块视觉回归", () => {
       ),
     ).toBeVisible();
     await expect(viewer.getByTestId("ethylene-sp2-label")).toHaveCount(2);
-    await expect(
-      page.getByRole("complementary").getByRole("heading", {
-        exact: true,
-        name: "乙烯平面结构",
-      }),
-    ).toBeVisible();
+    await expect(page.getByRole("complementary")).toHaveCount(0);
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
     await page.getByRole("button", { exact: true, name: "共面验证" }).click();
     await expect(
@@ -62,7 +61,9 @@ test.describe("乙烯平面结构模块视觉回归", () => {
     await expect(canvasArea.getByText("≈120°", { exact: true })).toHaveCount(2);
     await expect(viewer.getByTestId("ethylene-sp2-label")).toHaveCount(2);
     await expect(page.getByText("sp² 碳：近似平面三角形", { exact: true })).toHaveCount(0);
-    await expect(page.getByText("键角写作约 120° 或 ≈120°", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText(
+      "代表性键角约 120°",
+    );
 
     await page.waitForTimeout(600);
     await expect(canvasArea).toHaveScreenshot("ethylene-planar-angle-viewer.png", {
@@ -102,7 +103,7 @@ test.describe("乙烯平面结构模块视觉回归", () => {
     await expect(
       page.getByText("若强行扭转，p 轨道不再平行，π 键会被破坏", { exact: true }),
     ).toHaveCount(0);
-    await expect(page.getByText("C=C 双键有旋转限制", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText("双键扭转受限");
   });
 
   test("移动端三段式布局不覆盖 Canvas", async ({ page }) => {
