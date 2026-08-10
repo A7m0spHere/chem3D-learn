@@ -39,7 +39,7 @@ export function BondingBasicsToolbar({
           const Icon = getModeIcon(mode.id);
           return (
             <Button
-              className="chem-touch-button w-full sm:w-auto"
+              className="chem-touch-button !h-11 w-full sm:w-auto"
               data-testid={`bonding-basics-mode-${mode.id}`}
               key={mode.id}
               onClick={() => onModeChange(mode.id)}
@@ -122,7 +122,7 @@ function HybridControls({
 
       <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
         <Button
-          className="chem-touch-button min-w-0 px-3"
+          className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-render-solid"
           onClick={() => onRenderModeChange?.("solid")}
           size="sm"
@@ -134,7 +134,7 @@ function HybridControls({
           实体轨道
         </Button>
         <Button
-          className="chem-touch-button min-w-0 px-3"
+          className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-render-cloud"
           onClick={() => onRenderModeChange?.("cloud")}
           size="sm"
@@ -146,7 +146,7 @@ function HybridControls({
           电子云
         </Button>
         <Button
-          className="chem-touch-button min-w-0 px-3"
+          className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-toggle-unhybridized-p"
           disabled={!canShowUnhybridizedP}
           onClick={onToggleUnhybridizedP}
@@ -159,7 +159,7 @@ function HybridControls({
           {canShowUnhybridizedP ? "未杂化 p" : "无 p 轨道"}
         </Button>
         <Button
-          className="chem-touch-button min-w-0 px-3"
+          className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-toggle-axes"
           onClick={onToggleAxes}
           size="sm"

@@ -83,21 +83,15 @@ import { CrystalModeToolbar } from "@/components/learning/CrystalModeToolbar";
 // T-028B：NaCl 周期探索 UI 与教学 panel 分离。
 import { CrystalWorkspaceToolbar } from "@/components/learning/CrystalWorkspaceToolbar";
 import { NaClPeriodicPanel } from "@/components/learning/NaClPeriodicPanel";
-import { OrganicCoplanarPanel } from "@/components/learning/OrganicCoplanarPanel";
 import { OrganicCoplanarToolbar } from "@/components/learning/OrganicCoplanarToolbar";
-import { EthylenePlanarPanel } from "@/components/learning/EthylenePlanarPanel";
 import { EthylenePlanarToolbar } from "@/components/learning/EthylenePlanarToolbar";
-import { BenzenePlanarPanel } from "@/components/learning/BenzenePlanarPanel";
 import { BenzenePlanarToolbar } from "@/components/learning/BenzenePlanarToolbar";
-import { AcetyleneLinearPanel } from "@/components/learning/AcetyleneLinearPanel";
 import { AcetyleneLinearToolbar } from "@/components/learning/AcetyleneLinearToolbar";
-import { SigmaPiBondPanel } from "@/components/learning/SigmaPiBondPanel";
 import { SigmaPiBondToolbar } from "@/components/learning/SigmaPiBondToolbar";
-import { BondingBasicsPanel } from "@/components/learning/BondingBasicsPanel";
 import { BondingBasicsToolbar } from "@/components/learning/BondingBasicsToolbar";
-import { MolecularPolarityPanel } from "@/components/learning/MolecularPolarityPanel";
 import { MolecularPolarityToolbar } from "@/components/learning/MolecularPolarityToolbar";
 import { FloatingToolbar } from "@/components/learning/FloatingToolbar";
+import { SpecialtyInfoDisclosure } from "@/components/learning/SpecialtyInfoDisclosure";
 import { StructureInfoDisclosure } from "@/components/learning/StructureInfoDisclosure";
 import { ViewerErrorBoundary } from "@/components/common/ViewerErrorBoundary";
 
@@ -125,9 +119,17 @@ import {
 import { ModuleCard } from "@/components/home/ModuleCard";
 import { learningModules } from "@/data/learningModules";
 import {
+  getBondingBasicsLesson,
+  getBondingBasicsModeInfo,
   isBondingBasicsModuleId,
   type HybridOrbitalControls,
 } from "@/data/bondingBasics";
+import { getMolecularPolarityModeInfo } from "@/data/molecularPolarity";
+import { getOrbitalBondLesson, getOrbitalBondModeInfo } from "@/data/sigmaPiBonds";
+import { getEthylenePlanarModeInfo } from "@/data/ethylenePlanar";
+import { getBenzenePlanarModeInfo } from "@/data/benzenePlanar";
+import { getAcetyleneLinearModeInfo } from "@/data/acetyleneLinear";
+import { getOrganicCoplanarModeInfo } from "@/data/organicCoplanar";
 
 // ---------------------------------------------------------------------------
 // Viewer 注册表：用单一 viewerKind 判别取代原先散落在 viewer/toolbar/panel
@@ -160,6 +162,29 @@ type ViewerKind =
   | "crystal-ren3"
   | "molecule"
   | "placeholder";
+
+const specialtyViewerKinds = new Set<ViewerKind>([
+  "polarity",
+  "sigma-bond",
+  "pi-bond",
+  "bonding-basics",
+  "ethylene",
+  "benzene",
+  "acetylene",
+  "organic-coplanar",
+]);
+
+// 杂化专题含进度滑杆和四个附加开关，保持纵向控制区；其余专题控制密度适中，
+// 在 xl 以上使用略宽于普通分子的 Inspector rail。
+const specialtyInspectorKinds = new Set<ViewerKind>([
+  "polarity",
+  "sigma-bond",
+  "pi-bond",
+  "ethylene",
+  "benzene",
+  "acetylene",
+  "organic-coplanar",
+]);
 
 type ViewerSpec = {
   viewer: () => ReactNode;
@@ -437,6 +462,8 @@ export function ModuleDetailPage() {
   }
 
   const viewerKind = deriveViewerKind(moduleData, molecule, usesRealViewer);
+  const usesSpecialtyInfo = specialtyViewerKinds.has(viewerKind);
+  const usesSpecialtyInspector = specialtyInspectorKinds.has(viewerKind);
   const bondingBasicsModuleId = isBondingBasicsModuleId(moduleData.id)
     ? moduleData.id
     : "hybrid-orbitals-sp";
@@ -552,11 +579,19 @@ export function ModuleDetailPage() {
           onModeChange={setMolecularPolarityMode}
         />
       ),
-      panel: () => (
-        <div className="flex-1 min-h-[400px]">
-          <MolecularPolarityPanel activeMode={molecularPolarityMode} />
-        </div>
-      ),
+      panel: () => {
+        const modeInfo = getMolecularPolarityModeInfo(molecularPolarityMode);
+        return (
+          <SpecialtyInfoDisclosure
+            identity="分子极性"
+            key={moduleData.id}
+            mode={modeInfo.label}
+            modelBoundary="键偶极箭头和电子云为定性示意，不表示偶极矩大小的定量计算。"
+            state={modeInfo.result ? `${modeInfo.result} · ${modeInfo.state}` : modeInfo.state}
+            structureType="键偶极与分子空间构型"
+          />
+        );
+      },
     },
     "sigma-bond": {
       viewer: () => (
@@ -576,11 +611,20 @@ export function ModuleDetailPage() {
           showLabels={showSigmaPiBondLabels}
         />
       ),
-      panel: () => (
-        <div className="flex-1 min-h-[400px]">
-          <SigmaPiBondPanel activeMode={sigmaBondMode} lessonType="sigma" />
-        </div>
-      ),
+      panel: () => {
+        const lesson = getOrbitalBondLesson("sigma");
+        const modeInfo = getOrbitalBondModeInfo("sigma", sigmaBondMode);
+        return (
+          <SpecialtyInfoDisclosure
+            identity={lesson.title}
+            key={moduleData.id}
+            mode={modeInfo.label}
+            modelBoundary="电子云形状和重叠为定性示意。"
+            state={modeInfo.state}
+            structureType="轨道沿键轴正面重叠"
+          />
+        );
+      },
     },
     "pi-bond": {
       viewer: () => (
@@ -603,11 +647,20 @@ export function ModuleDetailPage() {
           showLabels={showSigmaPiBondLabels}
         />
       ),
-      panel: () => (
-        <div className="flex-1 min-h-[400px]">
-          <SigmaPiBondPanel activeMode={piBondMode} lessonType="pi" />
-        </div>
-      ),
+      panel: () => {
+        const lesson = getOrbitalBondLesson("pi");
+        const modeInfo = getOrbitalBondModeInfo("pi", piBondMode);
+        return (
+          <SpecialtyInfoDisclosure
+            identity={lesson.title}
+            key={moduleData.id}
+            mode={modeInfo.label}
+            modelBoundary="电子云形状和重叠为定性示意。"
+            state={modeInfo.state}
+            structureType="平行 p 轨道侧向重叠"
+          />
+        );
+      },
     },
     "bonding-basics": {
       viewer: () => (
@@ -630,11 +683,26 @@ export function ModuleDetailPage() {
           onToggleHybridUnhybridizedP={() => setShowHybridUnhybridizedP((value) => !value)}
         />
       ),
-      panel: () => (
-        <div className="flex-1 min-h-[400px]">
-          <BondingBasicsPanel activeMode={bondingBasicsMode} moduleId={bondingBasicsModuleId} />
-        </div>
-      ),
+      panel: () => {
+        const lesson = getBondingBasicsLesson(bondingBasicsModuleId);
+        const modeInfo = getBondingBasicsModeInfo(bondingBasicsModuleId, bondingBasicsMode);
+        const modelBoundary = bondingBasicsModuleId === "ionic-bond-formation"
+          ? "电子转移与静电吸引为定性示意，不表示能量或真实晶格计算。"
+          : "电子云形状和重叠为定性示意。";
+        return (
+          <SpecialtyInfoDisclosure
+            extraFacts={modeInfo.angleLabel
+              ? [{ label: "关键几何值", value: modeInfo.angleLabel }]
+              : undefined}
+            identity={lesson.title}
+            key={moduleData.id}
+            mode={modeInfo.label}
+            modelBoundary={modelBoundary}
+            state={modeInfo.state}
+            structureType={modeInfo.structure ?? lesson.title}
+          />
+        );
+      },
     },
     ethylene: {
       viewer: () => (
@@ -654,11 +722,22 @@ export function ModuleDetailPage() {
           planeView={ethylenePlaneView}
         />
       ),
-      panel: () => (
-        <div className="flex-1 min-h-[400px]">
-          <EthylenePlanarPanel activeMode={ethyleneMode} planeView={ethylenePlaneView} />
-        </div>
-      ),
+      panel: () => {
+        const modeInfo = getEthylenePlanarModeInfo(ethyleneMode);
+        const state = ethyleneMode === "plane"
+          ? `${modeInfo.state} · ${ethylenePlaneView === "side" ? "侧视" : "俯视"}`
+          : modeInfo.state;
+        return (
+          <SpecialtyInfoDisclosure
+            identity="乙烯平面结构"
+            key={moduleData.id}
+            mode={modeInfo.label}
+            modelBoundary="几何与键角采用理想化典型值；轨道和 π 键显示为定性示意。"
+            state={state}
+            structureType="sp² 碳与 C=C 双键"
+          />
+        );
+      },
     },
     benzene: {
       viewer: () => (
@@ -678,11 +757,22 @@ export function ModuleDetailPage() {
           planeView={benzenePlaneView}
         />
       ),
-      panel: () => (
-        <div className="flex-1 min-h-[400px]">
-          <BenzenePlanarPanel activeMode={benzeneMode} planeView={benzenePlaneView} />
-        </div>
-      ),
+      panel: () => {
+        const modeInfo = getBenzenePlanarModeInfo(benzeneMode);
+        const state = benzeneMode === "plane"
+          ? `${modeInfo.state} · ${benzenePlaneView === "side" ? "侧视" : "俯视"}`
+          : modeInfo.state;
+        return (
+          <SpecialtyInfoDisclosure
+            identity="苯环平面结构"
+            key={moduleData.id}
+            mode={modeInfo.label}
+            modelBoundary="苯环几何采用理想化教学模型；π 电子云为定性示意。"
+            state={state}
+            structureType="sp² 苯环与离域 π 体系"
+          />
+        );
+      },
     },
     acetylene: {
       viewer: () => (
@@ -702,11 +792,22 @@ export function ModuleDetailPage() {
           onModeChange={setAcetyleneMode}
         />
       ),
-      panel: () => (
-        <div className="flex-1 min-h-[400px]">
-          <AcetyleneLinearPanel activeMode={acetyleneMode} lineView={acetyleneLineView} />
-        </div>
-      ),
+      panel: () => {
+        const modeInfo = getAcetyleneLinearModeInfo(acetyleneMode);
+        const state = acetyleneMode === "line"
+          ? `${modeInfo.state} · ${acetyleneLineView === "side" ? "侧视" : "正视"}`
+          : modeInfo.state;
+        return (
+          <SpecialtyInfoDisclosure
+            identity="乙炔直线结构"
+            key={moduleData.id}
+            mode={modeInfo.label}
+            modelBoundary="直线几何与键角采用理想化典型值；轨道和 π 键显示为定性示意。"
+            state={state}
+            structureType="sp 碳与 C≡C 三键"
+          />
+        );
+      },
     },
     "organic-coplanar": {
       viewer: () => (
@@ -729,14 +830,24 @@ export function ModuleDetailPage() {
           vinylAligned={organicVinylAligned}
         />
       ),
-      panel: () => (
-        <div className="flex-1 min-h-[400px]">
-          <OrganicCoplanarPanel
-            activeMode={organicCoplanarMode}
-            vinylAligned={organicVinylAligned}
+      panel: () => {
+        const modeInfo = getOrganicCoplanarModeInfo(organicCoplanarMode);
+        const state = organicCoplanarMode === "rotation"
+          ? organicVinylAligned
+            ? "乙烯基已与苯环平面对齐"
+            : "乙烯基与苯环约成 45°"
+          : modeInfo.state;
+        return (
+          <SpecialtyInfoDisclosure
+            identity="有机共线共面"
+            key={moduleData.id}
+            mode={modeInfo.labelZh}
+            modelBoundary="默认 45° 与“对齐平面”是几何示意，不是最低能构象的量化计算结果。"
+            state={state}
+            structureType="苯环、sp³、sp² 与 sp 片段"
           />
-        </div>
-      ),
+        );
+      },
     },
     "crystal-nacl": {
       viewer: () =>
@@ -1054,6 +1165,7 @@ export function ModuleDetailPage() {
     <main
       className="module-builder-transition motion-page-enter relative isolate min-h-screen bg-background pb-20"
       data-builder-transition-phase={builderTransitionPhase}
+      data-specialty-viewer={usesSpecialtyInfo ? "true" : undefined}
     >
       {/* 1. 顶部信息区 */}
       <div className="border-b border-border bg-white">
@@ -1102,7 +1214,9 @@ export function ModuleDetailPage() {
           <div
             className={viewerKind === "molecule"
               ? "grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_272px] xl:items-start"
-              : "flex min-w-0 flex-col gap-3"}
+              : usesSpecialtyInspector
+                ? "grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_304px] xl:items-start"
+                : "flex min-w-0 flex-col gap-3"}
           >
             <div
               className={`organic-builder-transition-source relative flex overflow-hidden rounded-2xl border border-border bg-white shadow-panel ${pullingBuilderAtomId ? "pointer-events-none" : ""} ${
@@ -1125,27 +1239,35 @@ export function ModuleDetailPage() {
             </div>
 
             <div
-              className={viewerKind === "molecule" ? "flex min-w-0 flex-col gap-3" : "min-w-0"}
-              data-testid={viewerKind === "molecule" ? "molecule-control-rail" : undefined}
+              className={viewerKind === "molecule" || usesSpecialtyInspector
+                ? "flex min-w-0 flex-col gap-3"
+                : "min-w-0"}
+              data-testid={viewerKind === "molecule"
+                ? "molecule-control-rail"
+                : usesSpecialtyInspector
+                  ? "specialty-control-rail"
+                  : undefined}
             >
               {/* 独立操作台 (Control Console) */}
               <div
                 className={`w-full rounded-xl border border-border bg-white px-3 py-2 shadow-sm ${
                   viewerKind === "molecule"
                     ? "xl:[&_.chem-control-console]:w-full xl:[&_.chem-control-grid]:flex-col xl:[&_.chem-control-grid]:items-stretch xl:[&_.chem-touch-button]:w-full"
-                    : ""
+                    : usesSpecialtyInspector
+                      ? "xl:[&_.chem-control-console]:w-full xl:[&_.chem-control-grid]:flex-col xl:[&_.chem-control-grid]:items-stretch xl:[&_.chem-touch-button]:w-full"
+                      : ""
                 }`}
                 data-testid="module-toolbar"
               >
                 <div className="max-w-full overflow-x-auto pb-1">{spec.toolbar()}</div>
               </div>
 
-              {viewerKind === "molecule" ? spec.panel() : null}
+              {viewerKind === "molecule" || usesSpecialtyInspector ? spec.panel() : null}
             </div>
           </div>
 
-          {/* 普通分子信息已进入控制右栏；其余 Viewer 家族在后续阶段逐步收缩。 */}
-          {viewerKind !== "molecule" ? (
+          {/* 高密度成键控制与尚未收缩的 Viewer 家族继续使用下方信息区。 */}
+          {viewerKind !== "molecule" && !usesSpecialtyInspector ? (
             <div className="flex min-w-0 flex-col gap-5">{spec.panel()}</div>
           ) : null}
         </div>

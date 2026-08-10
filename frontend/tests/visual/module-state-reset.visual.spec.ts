@@ -85,9 +85,11 @@ test.describe("跨模块 SPA 切换后专题状态复位", () => {
     ).toBeVisible();
 
     await page.getByRole("button", { exact: true, name: "sp³" }).click();
+    await page.getByTestId("structure-info-toggle").click();
     await expect(
       page.getByText("sp³ 杂化｜四个轨道指向四面体", { exact: true }),
     ).toBeVisible();
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute("aria-expanded", "true");
 
     // bondingBasicsMode 是各模块独立状态，需往返才能观测复位是否发生：
     // 若切模块不复位，返回后仍会停留在 sp³。
@@ -97,6 +99,7 @@ test.describe("跨模块 SPA 切换后专题状态复位", () => {
     await expect(
       page.getByText("sp 杂化｜两个杂化轨道沿 X 轴反向排布", { exact: true }),
     ).toBeVisible();
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute("aria-expanded", "false");
   });
 
   test("有机平面：改成 π 键后往返，乙烯模式恢复为整体结构", async ({ page }) => {
@@ -108,6 +111,7 @@ test.describe("跨模块 SPA 切换后专题状态复位", () => {
     ).toBeVisible();
 
     await page.getByRole("button", { exact: true, name: "π 键" }).click();
+    await page.getByTestId("structure-info-toggle").click();
     await expect(
       page.getByText("C=C 双键｜1 个 σ 键 + 1 个 π 键", { exact: true }),
     ).toBeVisible();
@@ -118,6 +122,7 @@ test.describe("跨模块 SPA 切换后专题状态复位", () => {
     await expect(
       page.getByText("乙烯 C₂H₄｜所有原子近似共面", { exact: true }),
     ).toBeVisible();
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute("aria-expanded", "false");
   });
 
   test("σ 键：改成 s-p 后往返，模式恢复为 s-s", async ({ page }) => {
@@ -129,6 +134,7 @@ test.describe("跨模块 SPA 切换后专题状态复位", () => {
     ).toBeVisible();
 
     await page.getByRole("button", { exact: true, name: "s-p σ 键" }).click();
+    await page.getByTestId("structure-info-toggle").click();
     await expect(
       page.getByText("s-p σ 键｜s 轨道与 p 轨道头碰头重叠", { exact: true }),
     ).toBeVisible();
@@ -139,5 +145,6 @@ test.describe("跨模块 SPA 切换后专题状态复位", () => {
     await expect(
       page.getByText("s-s σ 键｜球形轨道沿 X 轴正面重叠", { exact: true }),
     ).toBeVisible();
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute("aria-expanded", "false");
   });
 });

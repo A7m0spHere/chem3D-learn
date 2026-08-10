@@ -1,8 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { readdirSync, readFileSync } from "node:fs";
 import { learningModules } from "../../src/data/learningModules";
+import { acetyleneLinearModes } from "../../src/data/acetyleneLinear";
+import { benzenePlanarModes } from "../../src/data/benzenePlanar";
+import { bondingBasicsLessons } from "../../src/data/bondingBasics";
+import { ethylenePlanarModes } from "../../src/data/ethylenePlanar";
+import { molecularPolarityModes } from "../../src/data/molecularPolarity";
 import { organicCoplanarModes } from "../../src/data/organicCoplanar";
 import { organicCoplanarBuilderSeed } from "../../src/data/organicBuilderSeeds";
+import { orbitalBondLessons } from "../../src/data/sigmaPiBonds";
 import type { MoleculeRecord } from "../../src/types/molecule";
 
 function readMoleculeJson(fileName: string): MoleculeRecord {
@@ -75,10 +81,44 @@ test("有机共面模型明确自身身份、45° 教学姿态与构象边界", 
 
   expect(organicCoplanarBuilderSeed.formula).toBe("C₁₁H₁₁N");
   expect(organicCoplanarBuilderSeed.noteZh).toContain("不是单纯苯乙烯");
-  expect(overview?.bodyZh).toContain("理想化综合模型");
-  expect(sp2?.bodyZh).toContain("代表性教学姿态");
-  expect(sp2?.notes).toContain("45° 不是最低能计算结果；实际取向会受取代基、相态、环境与热运动影响。");
-  expect(rotation?.bodyZh).toContain("不是在预测最低能构象");
+  expect(overview?.viewerSummary).toContain("理想化综合模型");
+  expect(sp2?.viewerSummary).toContain("当前 45° 是理想化代表姿态");
+  expect(rotation?.state).toContain("绕连接单键旋转");
+  expect(copy).not.toContain("bodyZh");
+  expect(copy).not.toContain("facts");
+  expect(copy).not.toContain("notes");
   expect(copy).not.toContain("默认示例中，乙烯基平面与苯环平面约成 45° 夹角");
   expect(copy).not.toContain("TODO-CHEM-VERIFY");
+});
+
+test("专题模式只保留渲染控制与精简状态，不再携带旧 Panel 教学字段", () => {
+  const modeGroups = [
+    molecularPolarityModes,
+    orbitalBondLessons.sigma.modes,
+    orbitalBondLessons.pi.modes,
+    ...Object.values(bondingBasicsLessons).map((lesson) => lesson.modes),
+    ethylenePlanarModes,
+    benzenePlanarModes,
+    acetyleneLinearModes,
+    organicCoplanarModes,
+  ];
+  const removedFields = [
+    "bodyZh",
+    "description",
+    "examNote",
+    "facts",
+    "notes",
+    "points",
+    "viewerNotes",
+  ];
+
+  for (const modes of modeGroups) {
+    expect(new Set(modes.map((mode) => mode.id)).size).toBe(modes.length);
+    for (const mode of modes) {
+      expect(mode.state).toBeTruthy();
+      for (const field of removedFields) {
+        expect(mode).not.toHaveProperty(field);
+      }
+    }
+  }
 });
