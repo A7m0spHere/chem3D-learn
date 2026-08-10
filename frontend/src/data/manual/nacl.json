@@ -296,28 +296,6 @@
       "descriptionZh": "体心 Na+ 周围 6 个 Cl- 分布在上下、左右、前后六个互相垂直的方向。"
     }
   ],
-  "lessonSteps": [
-    {
-      "id": "cell",
-      "titleZh": "观察 NaCl 晶胞",
-      "bodyZh": "先看透明立方体晶胞：Cl- 位于 8 个顶点和 6 个面心，Na+ 位于 12 条棱的中点和 1 个体心。"
-    },
-    {
-      "id": "coordination",
-      "titleZh": "理解六配位",
-      "bodyZh": "高亮体心 Na+ 时，可以看到它第一配位层最近的 6 个 Cl- 分布在六个方向；反过来，每个 Cl- 的第一配位层也有 6 个 Na+。"
-    },
-    {
-      "id": "counting",
-      "titleZh": "用均摊法计数",
-      "bodyZh": "Cl-：8 × 1/8 + 6 × 1/2 = 4；Na+：12 × 1/4 + 1 = 4，所以晶胞中 Na+ 与 Cl- 的个数比是 1 : 1。"
-    },
-    {
-      "id": "voids",
-      "titleZh": "理解八面体空隙",
-      "bodyZh": "可以先把 Cl- 看作面心立方骨架，再把 Na+ 看作填入八面体空隙的离子。体心和棱心都是八面体空隙位置。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [3.2, 2.8, 4.2],
     "cameraFov": 42,

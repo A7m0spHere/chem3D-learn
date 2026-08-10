@@ -29,7 +29,7 @@ Required layout:
   - choose a module or structure
   - observe the 3D model when available
   - toggle angles/lone pairs/labels where supported
-  - follow lesson steps or module guidance
+  - use the available 3D controls and modes, opening concise structure information only when needed
 
 Visual requirements:
 - Light background using the design tokens.
@@ -57,9 +57,9 @@ Purpose:
 - Use real 3D viewer only when hand-authored structure data is available.
 
 Desktop layout:
-- Viewer and lesson/module panel should dominate the page content.
+- Viewer should use the full content width, followed immediately by its toolbar and a default-collapsed information disclosure.
 - 3D viewer must stay large enough for classroom projection.
-- Explanation, key facts, common mistakes, and related modules should remain readable.
+- Basic structural facts and model boundaries should remain readable without competing with the Viewer.
 
 Required 3D controls when real structure data exists:
 - Rotate and zoom via 3D viewer controls.
@@ -67,7 +67,6 @@ Required 3D controls when real structure data exists:
 - Toggle key bond angles.
 - Toggle lone pairs where applicable.
 - Toggle atom labels where supported.
-- Switch lesson steps.
 
 3D viewer requirements:
 - Must be visually dominant when the structure is the main learning task.
@@ -75,11 +74,11 @@ Required 3D controls when real structure data exists:
 - Should show atom labels or legends when useful.
 - Angle labels and lone-pair markers must be readable.
 
-Lesson/module panel requirements:
-- Show current structure or module name.
-- Show formula when applicable.
-- Show current lesson step title and explanation when structure data exists.
-- Keep text concise and high-school appropriate.
+Structure information requirements:
+- Default to collapsed and reset to collapsed after switching modules.
+- For ordinary molecules, keep only name / formula, geometry, typical bond angle, and a concise model boundary.
+- Use a native keyboard-operable button with explicit expanded state; do not rely only on color.
+- Specialized viewers may retain necessary live status, but should not use a long course-style side panel.
 - Mark uncertain chemistry facts with `TODO-CHEM-VERIFY`.
 
 ## Paths, Exam, and About Pages
@@ -97,20 +96,19 @@ Requirements:
 ## Responsive Strategy
 
 Desktop:
-- Keep the viewer and teaching panel prominent on 3D learning pages.
+- Keep the full-width viewer, toolbar, and collapsed information disclosure prominent on 3D learning pages.
 - Keep navigation and category browsing clear.
 
 Tablet:
-- Viewer may stack above or beside the lesson panel depending on available width.
+- Viewer, toolbar, and information disclosure remain in one vertical sequence.
 - Controls remain touch-friendly.
 
 Mobile:
-- Viewer appears near the top when available.
-- Explanation appears below the viewer.
+- Viewer appears near the top when available, followed by the toolbar and collapsed information.
 - Avoid horizontal overflow.
 
 Teacher projection mode:
-- Text, buttons, labels, and step explanations must remain readable.
+- Text, buttons, scene labels, and basic structure information must remain readable.
 - Avoid tiny dense controls.
 - Prefer clear contrast and stable layout.
 

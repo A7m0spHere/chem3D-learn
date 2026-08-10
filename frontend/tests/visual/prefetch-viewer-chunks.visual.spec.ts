@@ -104,7 +104,7 @@ test.describe("T-006 模块卡片按意图预取 3D 资源", () => {
     await ch4Link.click();
 
     await expect(page).toHaveURL(/\/module\/tetrahedral-ch4$/);
-    // 页面 chunk 正常加载并渲染：出现 3D viewer 的自由探索面板标题。
-    await expect(page.getByText("自由探索", { exact: true })).toBeVisible({ timeout: 20_000 });
+    // 页面 chunk 正常加载并渲染：真正的普通分子 Viewer 容器出现。
+    await expect(page.getByTestId("molecule-viewer")).toBeVisible({ timeout: 20_000 });
   });
 });

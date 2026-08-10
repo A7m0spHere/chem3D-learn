@@ -97,8 +97,8 @@ import { BondingBasicsPanel } from "@/components/learning/BondingBasicsPanel";
 import { BondingBasicsToolbar } from "@/components/learning/BondingBasicsToolbar";
 import { MolecularPolarityPanel } from "@/components/learning/MolecularPolarityPanel";
 import { MolecularPolarityToolbar } from "@/components/learning/MolecularPolarityToolbar";
-import { ExplorerPanel } from "@/components/learning/ExplorerPanel";
 import { FloatingToolbar } from "@/components/learning/FloatingToolbar";
+import { StructureInfoDisclosure } from "@/components/learning/StructureInfoDisclosure";
 import { ViewerErrorBoundary } from "@/components/common/ViewerErrorBoundary";
 
 import { getModuleById } from "@/data/learningModules";
@@ -271,7 +271,6 @@ export function ModuleDetailPage() {
     } satisfies MockMoleculeRecord;
   }, [mockMolecule, realMolecule]);
 
-  const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [autoRotate, setAutoRotate] = useState(false);
   const [showAngles, setShowAngles] = useState(false);
   const [showLonePairs, setShowLonePairs] = useState(false);
@@ -368,8 +367,6 @@ export function ModuleDetailPage() {
 
   const [viewerLoading, setViewerLoading] = useState(false);
   const [naclTeachingReady, setNaClTeachingReady] = useState(false);
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [isGuidedMode, setIsGuidedMode] = useState(false);
   const [pullingBuilderAtomId, setPullingBuilderAtomId] = useState<string>();
   const [builderTransitionPhase, setBuilderTransitionPhase] = useState<"idle" | "pulling" | "expanding">("idle");
   const prefersReducedMotion = useReducedMotion();
@@ -417,9 +414,8 @@ export function ModuleDetailPage() {
   }, [moduleData, navigate, prefersReducedMotion, pullingBuilderAtomId]);
 
   // 专题控制状态（晶体 / 有机平面 / 成键杂化）的切模块重置已下沉到各自 hook；
-  // 这里只重置页面自留的状态：讲解步骤、普通分子 VSEPR 开关、有机拼装过渡、viewer 载入。
+  // 这里只重置页面自留的状态：普通分子 VSEPR 开关、有机拼装过渡、viewer 载入。
   useEffect(() => {
-    setActiveStepIndex(0);
     setShowAngles(false);
     setShowLonePairs(false);
     setShowAtomLabels(false);
@@ -427,8 +423,6 @@ export function ModuleDetailPage() {
     setBuilderTransitionPhase("idle");
     setViewerLoading(true);
     setNaClTeachingReady(false);
-    setCompletedSteps(new Set());
-    setIsGuidedMode(false);
     const timer = setTimeout(() => setViewerLoading(false), 300);
     return () => clearTimeout(timer);
   }, [id]);
@@ -442,7 +436,6 @@ export function ModuleDetailPage() {
     );
   }
 
-  const activeStep = molecule?.lessonSteps[activeStepIndex] ?? molecule?.lessonSteps[0];
   const viewerKind = deriveViewerKind(moduleData, molecule, usesRealViewer);
   const bondingBasicsModuleId = isBondingBasicsModuleId(moduleData.id)
     ? moduleData.id
@@ -459,24 +452,6 @@ export function ModuleDetailPage() {
   const activeCrystalViewMode = crystalModes.some((mode) => mode.id === crystalViewMode)
     ? crystalViewMode
     : defaultCrystalViewMode;
-
-  const goToStep = (nextIndex: number) => {
-    if (!molecule) return;
-    const clampedIndex = Math.min(Math.max(nextIndex, 0), molecule.lessonSteps.length - 1);
-    const nextStep = molecule.lessonSteps[clampedIndex];
-
-    setActiveStepIndex(clampedIndex);
-    setIsGuidedMode(true);
-    setCompletedSteps((prev) => {
-      const next = new Set(prev);
-      for (let i = 0; i < clampedIndex; i++) {
-        next.add(i);
-      }
-      return next;
-    });
-    if (nextStep.showAngles) setShowAngles(true);
-    if (nextStep.showLonePairs) setShowLonePairs(true);
-  };
 
   const relatedModules = learningModules
     .filter(
@@ -993,17 +968,11 @@ export function ModuleDetailPage() {
     },
     molecule: {
       viewer: () =>
-        activeStep && molecule ? (
+        molecule ? (
           <MoleculeViewer
-            activeStep={activeStep}
             autoRotate={autoRotate}
-            isGuidedMode={isGuidedMode}
             loading={viewerLoading}
             molecule={molecule}
-            onToggleAngles={() => setShowAngles((value) => !value)}
-            onToggleAtomLabels={() => setShowAtomLabels((value) => !value)}
-            onToggleAutoRotate={() => setAutoRotate((value) => !value)}
-            onToggleLonePairs={() => setShowLonePairs((value) => !value)}
             showAngles={showAngles}
             showAtomLabels={showAtomLabels}
             showLonePairs={showLonePairs}
@@ -1015,7 +984,7 @@ export function ModuleDetailPage() {
           />
         ),
       toolbar: () =>
-        activeStep && molecule ? (
+        molecule ? (
           <FloatingToolbar
             autoRotate={autoRotate}
             showAngles={showAngles}
@@ -1029,20 +998,21 @@ export function ModuleDetailPage() {
         ) : null,
       panel: () =>
         molecule ? (
-          <div className="flex-1 min-h-[400px]">
-            <ExplorerPanel
-              activeStep={activeStep!}
-              molecule={molecule}
-              lessonSteps={molecule.lessonSteps}
-              activeStepIndex={activeStepIndex}
-              completedStepIndices={completedSteps}
-              isGuidedMode={isGuidedMode}
-              onExitGuided={() => setIsGuidedMode(false)}
-              onPrevious={() => goToStep(activeStepIndex - 1)}
-              onNext={() => goToStep(activeStepIndex + 1)}
-              onSelectStep={goToStep}
-            />
-          </div>
+          <StructureInfoDisclosure
+            facts={[
+              { label: "名称 / 分子式", value: `${molecule.nameZh} · ${molecule.formula}` },
+              { label: "空间构型", value: molecule.geometryZh },
+              { label: "典型键角", value: molecule.keyAngles[0]?.label ?? "未标注" },
+            ]}
+            key={moduleData.id}
+            modelBoundary="键角为典型值，模型用于观察原子、化学键与孤电子对的空间关系。"
+            summaryItems={[
+              { label: "分子式", value: molecule.formula },
+              { label: "名称", value: molecule.nameZh },
+              { label: "空间构型", value: molecule.geometryZh },
+              { label: "典型键角", value: molecule.keyAngles[0]?.label ?? "未标注" },
+            ]}
+          />
         ) : null,
     },
     placeholder: {
@@ -1127,9 +1097,8 @@ export function ModuleDetailPage() {
 
       {/* 2. 主体学习区 */}
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
-
-          {/* 左侧：3D Viewer */}
+        <div className="flex min-w-0 flex-col gap-3">
+          {/* 3D Viewer */}
           <div className="flex min-w-0 flex-col gap-3">
             <div
               className={`organic-builder-transition-source relative flex min-h-[480px] overflow-hidden rounded-2xl border border-border bg-white shadow-panel sm:min-h-[560px] ${pullingBuilderAtomId ? "pointer-events-none" : ""} ${
@@ -1155,9 +1124,8 @@ export function ModuleDetailPage() {
             </div>
           </div>
 
-          {/* 右侧：知识点与步骤 */}
-          <div className="flex min-w-0 flex-col gap-5 xl:sticky xl:top-[76px]">
-            {/* 普通分子提供自由探索与按需讲解；专题模块保留各自知识面板。 */}
+          {/* 信息区：T-039A 先迁移普通分子；其余 Viewer 家族在后续阶段逐步收缩。 */}
+          <div className="flex min-w-0 flex-col gap-5">
             {spec.panel()}
           </div>
         </div>

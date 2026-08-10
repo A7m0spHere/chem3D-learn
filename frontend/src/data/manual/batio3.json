@@ -45,14 +45,6 @@
       "descriptionZh": "理想立方模型中，相邻 Ti—O 方向互相垂直，构成 TiO₆ 正八面体。"
     }
   ],
-  "lessonSteps": [
-    { "id": "cell", "titleZh": "观察理想立方晶胞", "bodyZh": "Ba²⁺ 位于 8 个顶点，Ti⁴⁺ 位于体心，O²⁻ 位于 6 个面心。" },
-    { "id": "polyhedron", "titleZh": "辨认 TiO₆ 八面体", "bodyZh": "以体心 Ti⁴⁺ 为中心，6 个面心 O²⁻ 构成理想八面体。" },
-    { "id": "b-site", "titleZh": "数 Ti⁴⁺ 的最近邻", "bodyZh": "Ti⁴⁺ 周围最近的 O²⁻ 有 6 个，所以 Ti⁴⁺ 为 6 配位。" },
-    { "id": "a-site", "titleZh": "数 Ba²⁺ 的最近邻", "bodyZh": "完整局部环境需要补上相邻晶胞的 O²⁻；Ba²⁺ 周围共有 12 个最近邻 O²⁻。" },
-    { "id": "counting", "titleZh": "完成晶胞均摊", "bodyZh": "Ba：8×1/8=1；Ti：1；O：6×1/2=3，所以化学式为 BaTiO₃。" },
-    { "id": "origin", "titleZh": "比较等价原点", "bodyZh": "平移晶胞原点后可画成 Ti 位于顶点、Ba 位于体心、O 位于棱心；无限晶体并未改变。" }
-  ],
   "rendering": {
     "cameraPosition": [2.85, 2.35, 3.2],
     "cameraFov": 40,

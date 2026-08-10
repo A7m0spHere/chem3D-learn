@@ -86,7 +86,6 @@
       "descriptionZh": "h-BN 层内 B 和 N 交替排列，局部近似平面三角环境，N-B-N 键角约为 120°。"
     }
   ],
-  "lessonSteps": [],
   "rendering": {
     "cameraPosition": [3.2, 2.35, 3.7],
     "cameraFov": 39,

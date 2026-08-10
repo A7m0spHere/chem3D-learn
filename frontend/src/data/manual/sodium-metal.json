@@ -140,28 +140,6 @@
   "bonds": [],
   "lonePairs": [],
   "keyAngles": [],
-  "lessonSteps": [
-    {
-      "id": "cell",
-      "titleZh": "观察 BCC 晶胞",
-      "bodyZh": "金属钠晶体可用体心立方结构表示：Na 原子位于晶胞的 8 个顶点和 1 个体心。"
-    },
-    {
-      "id": "coordination",
-      "titleZh": "理解最近邻关系",
-      "bodyZh": "体心 Na 周围最近的 Na 原子有 8 个，可按最近邻关系理解为 8 配位。"
-    },
-    {
-      "id": "counting",
-      "titleZh": "完成晶胞计数",
-      "bodyZh": "顶点 Na：8 × 1/8 = 1；体心 Na：1，所以一个 BCC 晶胞中实际含有 2 个 Na 原子。"
-    },
-    {
-      "id": "metallicBond",
-      "titleZh": "理解金属键示意",
-      "bodyZh": "金属钠不是由独立 Na2 分子构成，也不是 NaCl 式离子晶体。电子海示意只帮助理解金属键模型。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [2.9, 2.35, 3.35],
     "cameraFov": 42,

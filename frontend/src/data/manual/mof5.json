@@ -33,38 +33,6 @@
     },
     "formulaExplanationZh": "教学拓扑立方平均含 1 个 Zn₄O SBU 和 3 个 BDC，因此得到 Zn₄O(BDC)₃；真实 Fm-3m 常规晶胞含 8 个化学式单位。"
   },
-  "lessonSteps": [
-    {
-      "id": "building-units",
-      "titleZh": "先拆成两类构筑单元",
-      "bodyZh": "识别 Zn₄O 金属簇节点与两端都能连接的 BDC 有机连接体。"
-    },
-    {
-      "id": "node",
-      "titleZh": "放大 Zn₄O 节点",
-      "bodyZh": "中心 μ₄-O 周围有 4 个 Zn；单个 Zn 与 O 近似四配位，而整个 SBU 向六个方向连接。"
-    },
-    {
-      "id": "linker",
-      "titleZh": "沿 BDC 追踪桥联",
-      "bodyZh": "BDC 两端羧酸根分别连接相邻 Zn₄O 节点，中间苯环提供刚性的线性间隔。"
-    },
-    {
-      "id": "topology",
-      "titleZh": "抽象成 pcu 立方网络",
-      "bodyZh": "把每个 Zn₄O SBU 看成一个六连接节点，把 BDC 看成边，就得到周期延展的简单立方拓扑。"
-    },
-    {
-      "id": "voids",
-      "titleZh": "最后观察孔隙",
-      "bodyZh": "孔隙是节点和连接体围出的空间，不是漏画了原子；客体标记只说明孔隙可容纳分子。"
-    },
-    {
-      "id": "counting",
-      "titleZh": "用共享关系推导组成",
-      "bodyZh": "教学拓扑立方平均含 1 个 Zn₄O SBU 和 3 个 BDC，得到 Zn₄O(BDC)₃。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [4.8, 3.8, 5.9],
     "cameraFov": 39,

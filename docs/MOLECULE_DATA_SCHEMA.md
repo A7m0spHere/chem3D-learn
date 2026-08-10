@@ -42,7 +42,6 @@ type MoleculeRecord = {
   bonds: Bond[];
   lonePairs: LonePair[];
   keyAngles: AngleSpec[];
-  lessonSteps: LessonStep[];
   rendering?: MoleculeRendering;
   metadata?: MoleculeMetadata;
   crystalTeaching?: CrystalTeaching;
@@ -61,7 +60,6 @@ Field semantics:
 - `bonds`: visible bonds or crystal neighbor connections.
 - `lonePairs`: visible lone-pair markers, empty when not applicable.
 - `keyAngles`: teaching-focused angle annotations.
-- `lessonSteps`: ordered explanation steps.
 - `rendering`: optional viewer tuning for camera, atom scale, bond radius, and labels.
 - `metadata`: optional source and verification metadata.
 - `crystalTeaching`: optional crystal-specific teaching modes, observation steps, counting copy, and void guidance.
@@ -144,58 +142,6 @@ Field semantics:
 
 If the exact value is uncertain for the teaching model, mark the related description with `TODO-CHEM-VERIFY`.
 
-## LessonStep
-
-```ts
-type LessonStep = {
-  id: string;
-  titleZh: string;
-  bodyZh: string;
-  focusAtomIds?: string[];
-  focusBondIds?: string[];
-  focusAngleIds?: string[];
-  showLonePairs?: boolean;
-  showAngles?: boolean;
-  guidedObservation?: GuidedObservation;
-};
-```
-
-Field semantics:
-- `id`: stable step ID.
-- `titleZh`: short Chinese step title.
-- `bodyZh`: concise Chinese teaching explanation.
-- `focusAtomIds`: optional atoms to highlight.
-- `focusBondIds`: optional bonds to highlight.
-- `focusAngleIds`: optional angles to highlight.
-- `showLonePairs`: whether this step should emphasize lone pairs.
-- `showAngles`: whether this step should emphasize key angles.
-- `guidedObservation`: optional structured copy for a guided-observation sample. It is absent from existing records unless that module has been deliberately upgraded.
-
-### GuidedObservation
-
-```ts
-type GuidedObservation = {
-  observationGoalZh: string;
-  operationHintZh: string;
-  visibleChangeZh: string;
-  reasonZh: string;
-  comparison?: {
-    titleZh: string;
-    summaryZh: string;
-    items: Array<{
-      moleculeId: string;
-      formula: string;
-      centralLonePairCount: number;
-      bondAngleDeg: number;
-    }>;
-  };
-};
-```
-
-- The four required strings respectively answer: what to observe, how to operate, what becomes visible, and why the structure behaves that way.
-- `comparison` is optional and only needed for a concluding step. It carries display-ready comparison data so a UI can render one lightweight row or table without creating additional 3D canvases.
-- Keep `guidedObservation` optional for backward compatibility. Existing `titleZh`, `bodyZh`, focus IDs, and visibility flags remain the baseline data contract for all other hand-authored structures.
-
 ## MoleculeRendering
 
 ```ts
@@ -252,6 +198,7 @@ type CrystalTeaching = {
 ## Data Rules
 
 - Keep data small and hand-authored for core structures.
+- Do not put public course steps, quiz state, scores, or long guided-observation copy in structure records. Viewer controls and concise information disclosures consume structural values directly.
 - Extended frontend modules may exist without real 3D data; use placeholders honestly.
 - Do not add dynamic SMILES parsing or RDKit runtime generation without explicit approval.
 - Do not turn this into a large chemistry database.
