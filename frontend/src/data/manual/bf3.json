@@ -73,28 +73,6 @@
       "descriptionZh": "三个 B-F 键位于同一平面内，并尽量均匀分布，相邻 B-F 键夹角约为 120°。"
     }
   ],
-  "lessonSteps": [
-    {
-      "id": "center-atom",
-      "titleZh": "识别中心硼原子",
-      "bodyZh": "先找到中心的硼原子。三氟化硼中，硼原子连接三个氟原子。",
-      "focusAtomIds": ["b1"]
-    },
-    {
-      "id": "trigonal-planar",
-      "titleZh": "观察平面三角形",
-      "bodyZh": "三个 B-F 键位于同一平面内，三个氟原子围绕硼原子均匀展开，形成平面三角形。",
-      "focusAtomIds": ["f1", "f2", "f3"],
-      "focusBondIds": ["b1-f1", "b1-f2", "b1-f3"]
-    },
-    {
-      "id": "bond-angle",
-      "titleZh": "观察 120° 键角",
-      "bodyZh": "显示 F-B-F 键角后，可以看到平面三角形结构的典型键角约为 120°。在常用中性路易斯结构中，中心 B 周围计入 6 个价层电子，未满足八隅体；它可以接受电子对，因此 BF₃ 表现为路易斯酸。",
-      "focusAngleIds": ["f1-b1-f2"],
-      "showAngles": true
-    }
-  ],
   "rendering": {
     "cameraPosition": [0, 0.3, 5.4],
     "cameraFov": 42,

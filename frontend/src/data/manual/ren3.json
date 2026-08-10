@@ -28,38 +28,6 @@
     },
     "formulaExplanationZh": "常规 Imm2 晶胞中 Re 位点 multiplicity 为 2；N1 4c 与 N2 2b 共给出 6 个 N，因此 2 Re : 6 N 化简为 ReN₃。"
   },
-  "lessonSteps": [
-    {
-      "id": "pressure-window",
-      "titleZh": "先分清计算预测与实验确认",
-      "bodyZh": "原始结构搜索预测 Imm2-ReN₃ 在约 38.3–100 GPa 的研究范围内进入稳定区；本模块不把它表述成已经实验确认合成的 Imm2 相。"
-    },
-    {
-      "id": "orthorhombic-cell",
-      "titleZh": "读取正交晶胞与周期关系",
-      "bodyZh": "论文公布的 0 GPa 松弛参考晶胞满足 a≠b≠c。由镜面对称和 I 心平移可生成 2 个 Re 与 6 个 N。"
-    },
-    {
-      "id": "tri-nitrogen",
-      "titleZh": "找出 N1–N2–N1 三氮单元",
-      "bodyZh": "一个 N2 位点连接两个 N1 位点，形成折线形 N₃ 结构单元；它属于延展晶体，不是图外独立存在的小分子。"
-    },
-    {
-      "id": "re-seven-coordinate",
-      "titleZh": "以 Re 为中心数七个最近邻",
-      "bodyZh": "按 0 GPa 参考坐标计算，代表性 Re 周围有 7 个距离不超过 2.25 Å 的 N 最近邻，可抽象为 ReN₇ 七配位多面体。"
-    },
-    {
-      "id": "polyhedral-network",
-      "titleZh": "把局部多面体接回周期网络",
-      "bodyZh": "相邻 ReN₇ 多面体通过共享 N 位点与 N₃ 单元连接，形成三维延展网络，而不是互不相连的 ReN₇ 分子。"
-    },
-    {
-      "id": "formula-property",
-      "titleZh": "最后由位点数得到 ReN₃",
-      "bodyZh": "常规晶胞含 2 Re 和 6 N，即 2 个 ReN₃。氮富集与 Re–N/N–N 方向性网络有助于解释预测的力学增强，但不等于材料是纯共价绝缘体。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [5.2, 3.8, 6.2],
     "cameraFov": 39,

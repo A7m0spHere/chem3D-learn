@@ -6,29 +6,21 @@ import { AtomMesh } from "@/components/three/AtomMesh";
 import { BondMesh } from "@/components/three/BondMesh";
 import { LonePairMesh } from "@/components/three/LonePairMesh";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
-import type { MoleculeRecord, LessonStep } from "@/types/molecule";
+import type { MoleculeRecord } from "@/types/molecule";
 
 type MoleculeViewerProps = {
   molecule: MoleculeRecord;
-  activeStep: LessonStep;
   autoRotate: boolean;
   loading?: boolean;
-  isGuidedMode?: boolean;
   showAngles: boolean;
   showAtomLabels?: boolean;
   showLonePairs: boolean;
-  onToggleAutoRotate?: () => void;
-  onToggleAngles?: () => void;
-  onToggleAtomLabels?: () => void;
-  onToggleLonePairs?: () => void;
 };
 
 export function MoleculeViewer({
   molecule,
-  activeStep,
   autoRotate,
   loading = false,
-  isGuidedMode = false,
   showAngles,
   showAtomLabels = false,
   showLonePairs,
@@ -50,9 +42,6 @@ export function MoleculeViewer({
 
     return [0, -(min[1] + max[1]) / 2, 0] as [number, number, number];
   }, [molecule.atoms]);
-  const focusedAtomIds = new Set(isGuidedMode ? activeStep.focusAtomIds ?? [] : []);
-  const focusedBondIds = new Set(isGuidedMode ? activeStep.focusBondIds ?? [] : []);
-  const visibleAngleIds = new Set(activeStep.focusAngleIds ?? molecule.keyAngles.map((angle) => angle.id));
   const displayName = molecule.names?.zh ?? molecule.nameZh;
   const cameraPosition: [number, number, number] = molecule.rendering?.cameraPosition ?? [3.6, 3, 4.2];
   const cameraFov = molecule.rendering?.cameraFov ?? 42;
@@ -65,10 +54,10 @@ export function MoleculeViewer({
     <ThreeViewerFrame
       className="min-h-[420px] transition-shadow duration-base ease-out-soft hover:shadow-lg lg:min-h-[620px]"
       loading={loading}
-      meta={isGuidedMode ? `${displayName} · 跟随讲解` : `${displayName} · 自由探索`}
+      meta={`${displayName} · 自由探索`}
       stageTestId="molecule-viewer-canvas"
-      summary={isGuidedMode ? activeStep.bodyZh : "拖拽旋转、滚轮缩放；可用下方控制显示键角、孤电子对和原子标记。"}
-      title={`${molecule.formula}｜${isGuidedMode ? activeStep.titleZh : "自由探索"}`}
+      summary="拖拽旋转、滚轮缩放；可用下方控制显示键角、孤电子对和原子标记。"
+      title={`${molecule.formula}｜自由探索`}
       viewerTestId="molecule-viewer"
     >
       <Canvas
@@ -86,7 +75,7 @@ export function MoleculeViewer({
                 key={bond.id}
                 atomsById={atomsById}
                 bond={bond}
-                isFocused={focusedBondIds.has(bond.id)}
+                isFocused={false}
                 radius={bondRadius}
               />
             ))}
@@ -95,13 +84,12 @@ export function MoleculeViewer({
                 key={atom.id}
                 atom={atom}
                 atomScale={atomScale}
-                isFocused={focusedAtomIds.has(atom.id)}
+                isFocused={false}
                 showLabel={showAtomLabels}
               />
             ))}
             {showAngles &&
               molecule.keyAngles
-                .filter((angle) => visibleAngleIds.has(angle.id))
                 .map((angle) => (
                   <AngleArc
                     key={angle.id}

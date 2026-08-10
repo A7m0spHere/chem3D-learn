@@ -1,11 +1,21 @@
 # PROJECT_STATUS.md
 
-> 项目当前状态快照。供 Claude Code / Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-09（Codex，完成 T-038D NH₃ 引导观察样板验收）
+> 项目当前状态快照。供 Codex 每次开工前快速了解全局。
+> 最后更新：2026-08-10（Codex，完成 T-039A 普通分子右侧控制栏修正）
 
 ## 一句话定位
 
 Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学教师课堂演示的前端优先 3D 结构化学学习网站。详见 `docs/PROJECT_BRIEF.md`。
+
+## T-039A 3D-first 收缩结果（2026-08-10）
+
+- 维护者体验取代原定小范围 Alpha：详细讲解右栏缺乏差异化，双栏造成 Viewer 下方大面积空白，“回到自由探索”还会因长面板折叠触发滚动位置异常。当前不声称有普通学生验证。
+- `ModuleDetailPage` 已移除教学右栏；普通分子使用默认折叠的 `StructureInfoDisclosure`，只呈现名称 / 分子式、空间构型、典型键角和模型边界。
+- PR #2 的维护者审阅最终采用 `xl` 起效的桌面“大 Viewer + 272px 右侧控制栏”：Viewer 恢复原视口驱动高度，四个模型控制纵向占满右栏，默认折叠的结构信息紧随其后并利用右栏空白；展开事实在窄栏内使用单列。低于 `xl` 统一使用 Viewer → 工具栏 → 折叠信息，移动端按钮保持两列，不引入悬浮或 sticky 控件。
+- `MoleculeViewer` 回到纯自由探索：旋转、缩放、键角、孤电子对和原子标记继续独立可用；步骤聚焦、自动开关、完成状态和退出按钮已删除。
+- 23 份手写结构及 mock 数据不再携带 `lessonSteps` / `guidedObservation`；`LessonStep` / `GuidedObservation*` 类型、`ExplorerPanel` 及三个无入口旧组件已删除。原子坐标、化学键、晶胞几何、专题模式、路由、模块数量、版本和 Darwin 快照未改。
+- 验证：lint、build、logic 161 / 161、系统 Chrome 普通分子 6 / 6、跨模块状态 5 / 5、production 4 / 4 通过；1280×720、1552×926 冻结左侧 Viewer / 272px 右栏 / 纵向按钮 / 右栏结构信息，1024×768 冻结纵向布局，390×844 冻结纵向顺序、两列按钮与无横向溢出。
+- T-039A 位于独立分支 `codex/t039a-3d-first-clean`，PR #2 保持 Draft；T-039B 必须等待 A 合并后再从最新 `main` 开始。
 
 ## T-038D 验收结果（2026-08-09）
 
@@ -27,7 +37,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 真实 3D 内容覆盖 VSEPR 核心分子、多个晶胞与空隙模型、σ/π 键和杂化轨道、有机共面/乙烯/苯/乙炔、有机拼装实验室等专题。
 - `frontend/src/data/manual/` 下有 23 个已跟踪 JSON，并全部在 `mockMolecules.ts` 注册。模块目录、考试专题和专项教学数据还分布在 `frontend/src/data/*.ts`。
 - `organicBuilderNomenclature.ts` 为 1894 行；`organicBuilderChemistry.ts` 中 `knownOrganicMolecules` 当前是 **17 个**。
-- `ModuleDetailPage.tsx` 的专题控制状态已按组下沉到 `useCrystalControls` / `useOrganicPlanarControls` / `useBondingControls` 三个 typed hook（各自管理默认值与切模块重置）；页面只保留讲解步骤、VSEPR 开关、有机拼装过渡与 `viewerLoading` 等自留状态，并继续通过 `deriveViewerKind` / `viewerRegistry` 统一分发 viewer、toolbar、panel。
+- `ModuleDetailPage.tsx` 的专题控制状态已按组下沉到 `useCrystalControls` / `useOrganicPlanarControls` / `useBondingControls` 三个 typed hook（各自管理默认值与切模块重置）；页面不再维护普通分子讲解步骤，只保留 VSEPR 显示开关、有机拼装过渡与 `viewerLoading` 等自留状态，并继续通过 `deriveViewerKind` / `viewerRegistry` 统一分发 viewer、toolbar、panel。
 - 后端提供 `/health`、`/api/molecules`、`/api/molecules/:id` 及 `/api/structures` 别名，共 6 条独立手写结构数据；前端当前没有调用后端 API。
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
@@ -76,11 +86,11 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
   - `git diff --check` 对 `tailwind.config.ts` 报的 "space before tab in indent" 是该文件既有风格（shadcn 生成，HEAD 中每行都是两空格+制表符），非本次引入。
   - 提交过程中发现并修正了 TASKS.md 的一处事实错误：T-022 的前两项（模板坐标重写、旋转对齐）实际已在这批改动中落地，详见下方与 `docs/TASKS.md` T-022。
 
-- `main` 已包含 Claude Code 的全站滚动滑入动画（`5f66b7a`）与 Codex 对接修复（`55c3dfc`）：Home / Modules / Paths / Exam / About / ExamTopicDetail 使用统一 `ScrollReveal`，ModuleDetailPage 的 3D Canvas 保持不动；Modules 分类区块间距已移到动画 wrapper，避免子 `section` 的 `last:` 因包装层变化而把每个区块都误判为末项。
+- `main` 已包含全站滚动滑入动画（`5f66b7a`）与后续对接修复（`55c3dfc`）：Home / Modules / Paths / Exam / About / ExamTopicDetail 使用统一 `ScrollReveal`，ModuleDetailPage 的 3D Canvas 保持不动；Modules 分类区块间距已移到动画 wrapper，避免子 `section` 的 `last:` 因包装层变化而把每个区块都误判为末项。
 - 工作区干净，与 `origin/main` 同步。**引线标签扩展系列已收尾**：转换类 T-011 MOF-5（`fb6ceec`）、T-012 MXene（`2c5615a`）、T-013 ReN₃（`9e3e464`）、T-014 金属密堆积（`547482b`）、T-015 PBA（`f3f4984`）、T-018 ZincMetal（`cac0e90`）、T-019 BaTiO3（`a52cf62`）；评估类 T-016 Graphite / T-017 ZnS 逐 scene 核对后判定**无需改动**（全部恒显标签均为标题/总结/门控/已在外围，无压在结构上的指向型恒显标签，见 D-016）。T-010 原子图例（`d18b785`）亦已提交。此前 HANDOFF/STATUS 记录的「T-010/T-011 尚未提交、等用户确认」已过时，实际已按当时建议分 commit 落地。
 - `frontend/package-lock.json` 的 npm 平台元数据（rollup linux 包的 `libc` 字段）问题已在 T-007 收口：升级只保留 5 个包的版本变化，13 处被 npm 剥离的 `libc` 元数据已按 HEAD 原值还原，lockfile diff 无平台元数据噪声。
 - `.tmp-npm-cache/` 已加入根 `.gitignore`（`d759f94`），不再出现在 `git status`；仍不得提交。
-- `CLAUDE.md` 与 `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
+- `docs/DECISIONS.md` 已在 T-000 提交 `6a5361e` 中交付；Windows 环境治理补充已在 `0bd9b58` 中交付。
 
 ## 独立验证结果（2026-08-03，T-035 撤销与方向纠偏）
 
@@ -414,7 +424,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-下一项是 **T-039：小范围 Alpha（待启动）**。T-038D 已通过，但本轮不开展 Alpha；后续仅在维护者与少量朋友范围观察首次访问者能否找到目标、完成 NH₃ 四步并说出原因。不要重新引入选择题、判题、分数、重试或题库路线，也不要批量扩展其他模块。
+下一项是 **T-039B：专题展示 Viewer 收缩（尚未启动）**。必须先等待 T-039A 独立 PR 合并，再从最新 `main` 建新分支；不要在当前分支追加功能，也不要恢复 NH₃ 引导、朋友 / 同学 Alpha、选择题或题库路线。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。

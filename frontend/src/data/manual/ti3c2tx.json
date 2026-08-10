@@ -32,38 +32,6 @@
     },
     "formulaExplanationZh": "从 Ti₃AlC₂ 中移除 Al 得到 Ti₃C₂ 骨架；表面再带有数量和种类可变的端基 Tₓ，因此写作 Ti₃C₂Tₓ。"
   },
-  "lessonSteps": [
-    {
-      "id": "max-to-mxene",
-      "titleZh": "先找出 MAX 相中的 Al 层",
-      "bodyZh": "Ti₃AlC₂ 中的 Al 位于 Ti₃C₂ 层块之间；选择性移除 Al 并剥离后，得到二维 Ti₃C₂ 基础片层。"
-    },
-    {
-      "id": "five-planes",
-      "titleZh": "从侧面数五个原子层",
-      "bodyZh": "单层骨架按 Ti–C–Ti–C–Ti 排列，最外侧是 Ti，C 位于相邻 Ti 层之间。"
-    },
-    {
-      "id": "coordination",
-      "titleZh": "以 C 为中心检查最近邻",
-      "bodyZh": "一个代表性 C 周围有 6 个 Ti 近邻，可抽象为 Ti₆ 八面体局部配位。"
-    },
-    {
-      "id": "terminations",
-      "titleZh": "再看两侧表面端基",
-      "bodyZh": "O、OH、F 等端基连接在外侧 Ti 表面；混合端基示意不代表固定比例或精确排布。"
-    },
-    {
-      "id": "restacking",
-      "titleZh": "由单层回到多层堆叠",
-      "bodyZh": "剥离片层可以重新堆叠，层间距和层间环境会受端基、含水状态及插层物种影响。"
-    },
-    {
-      "id": "formula",
-      "titleZh": "最后读懂 Ti₃C₂Tₓ",
-      "bodyZh": "Ti₃C₂ 表示骨架中 Ti:C = 3:2；Tₓ 表示可变表面端基，不是名为 T 的元素。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [4.6, 3.4, 5.8],
     "cameraFov": 39,

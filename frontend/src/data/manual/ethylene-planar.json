@@ -116,27 +116,6 @@
       "descriptionZh": "两个碳原子的局部结构都体现 sp² 杂化特点。"
     }
   ],
-  "lessonSteps": [
-    {
-      "id": "plane",
-      "titleZh": "确认 6 个原子共面",
-      "bodyZh": "乙烯 C2H4 中 2 个 C 和 4 个 H 都落在同一个分子平面内。",
-      "focusAtomIds": ["c1", "c2", "h1", "h2", "h3", "h4"]
-    },
-    {
-      "id": "angle",
-      "titleZh": "观察约 120° 键角",
-      "bodyZh": "每个碳为 sp² 杂化，三个 σ 键方向形成近似平面三角形，键角约 120°。",
-      "focusAngleIds": ["h1-c1-c2", "h2-c1-c2", "c1-c2-h3", "c1-c2-h4"],
-      "showAngles": true
-    },
-    {
-      "id": "pi-bond",
-      "titleZh": "理解 π 键限制旋转",
-      "bodyZh": "C=C 双键由 1 个 σ 键和 1 个 π 键组成，π 键需要两个 p 轨道保持平行侧向重叠。",
-      "focusBondIds": ["c1-c2"]
-    }
-  ],
   "rendering": {
     "cameraPosition": [0.2, -4.8, 3.2],
     "cameraFov": 42,

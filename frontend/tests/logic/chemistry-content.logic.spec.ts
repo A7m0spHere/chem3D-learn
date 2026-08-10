@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { learningModules } from "../../src/data/learningModules";
 import { organicCoplanarModes } from "../../src/data/organicCoplanar";
 import { organicCoplanarBuilderSeed } from "../../src/data/organicBuilderSeeds";
@@ -22,11 +22,25 @@ test("BF₃ 文案把中心 B 的六电子、八隅体例外与路易斯酸边�
 
   expect(module?.keyPoints).toContain("常用中性路易斯结构中，中心 B 周围计入 6 个价层电子");
   expect(module?.keyPoints).toContain("中心 B 未满足八隅体，可接受电子对，表现为路易斯酸");
-  expect(bf3.lessonSteps.at(-1)?.bodyZh).toContain("BF₃ 表现为路易斯酸");
+  expect(module?.description).toContain("键角 120°");
   expect(mockSource).toContain("所有原子都缺电子");
   expect(mockSource).not.toContain("缺电子表述后续复核");
   expect(copy).not.toContain("缺电子分子");
   expect(copy).not.toContain("TODO-CHEM-VERIFY");
+});
+
+test("23 份手写结构不再携带课程步骤或引导观察数据", () => {
+  const manualDataUrl = new URL("../../src/data/manual/", import.meta.url);
+  const files = readdirSync(manualDataUrl).filter((file) => file.endsWith(".json"));
+
+  expect(files).toHaveLength(23);
+  for (const file of files) {
+    const raw = readFileSync(new URL(file, manualDataUrl), "utf8");
+    const record = JSON.parse(raw) as Record<string, unknown>;
+
+    expect(record, file).not.toHaveProperty("lessonSteps");
+    expect(raw, file).not.toContain("guidedObservation");
+  }
 });
 
 test("CaF₂ 数据锁定萤石常规胞计数、8:4 配位与示意尺度边界", () => {

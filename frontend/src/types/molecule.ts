@@ -179,39 +179,6 @@ export type AngleSpec = {
   descriptionZh: string;
 };
 
-export type GuidedObservationComparisonItem = {
-  moleculeId: string;
-  formula: string;
-  centralLonePairCount: number;
-  bondAngleDeg: number;
-};
-
-export type GuidedObservationComparison = {
-  titleZh: string;
-  summaryZh: string;
-  items: GuidedObservationComparisonItem[];
-};
-
-export type GuidedObservation = {
-  observationGoalZh: string;
-  operationHintZh: string;
-  visibleChangeZh: string;
-  reasonZh: string;
-  comparison?: GuidedObservationComparison;
-};
-
-export type LessonStep = {
-  id: string;
-  titleZh: string;
-  bodyZh: string;
-  focusAtomIds?: string[];
-  focusBondIds?: string[];
-  focusAngleIds?: string[];
-  showLonePairs?: boolean;
-  showAngles?: boolean;
-  guidedObservation?: GuidedObservation;
-};
-
 export type MoleculeRecord = {
   id: string;
   kind?: MoleculeKind;
@@ -228,7 +195,6 @@ export type MoleculeRecord = {
   bonds: Bond[];
   lonePairs: LonePair[];
   keyAngles: AngleSpec[];
-  lessonSteps: LessonStep[];
   rendering?: MoleculeRendering;
   metadata?: MoleculeMetadata;
   crystalTeaching?: CrystalTeaching;

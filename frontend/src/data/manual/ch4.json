@@ -87,28 +87,6 @@
       "descriptionZh": "四个 C-H 键尽量远离，形成正四面体构型，任意两个 C-H 键之间的夹角约为 109.5°。"
     }
   ],
-  "lessonSteps": [
-    {
-      "id": "center-atom",
-      "titleZh": "识别中心原子",
-      "bodyZh": "先找到位于中心的碳原子。甲烷中碳原子连接四个氢原子，是观察空间构型的起点。",
-      "focusAtomIds": ["c1"]
-    },
-    {
-      "id": "tetrahedral-shape",
-      "titleZh": "观察四面体结构",
-      "bodyZh": "四个氢原子不是排在同一平面上，而是分布在空间四个方向，整体呈正四面体结构。",
-      "focusAtomIds": ["h1", "h2", "h3", "h4"],
-      "focusBondIds": ["c1-h1", "c1-h2", "c1-h3", "c1-h4"]
-    },
-    {
-      "id": "bond-angle",
-      "titleZh": "观察键角",
-      "bodyZh": "显示 H-C-H 键角后，可以看到甲烷的典型键角约为 109.5°，这正是正四面体结构的重要特征。",
-      "focusAngleIds": ["h1-c1-h2"],
-      "showAngles": true
-    }
-  ],
   "rendering": {
     "cameraPosition": [3.6, 3, 4.2],
     "cameraFov": 42,

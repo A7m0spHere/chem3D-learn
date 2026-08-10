@@ -49,33 +49,6 @@
     },
     "formulaExplanationZh": "两种晶胞所含化学式单位数不同，但 Zn:S 都为 1:1，化学式均为 ZnS。"
   },
-  "lessonSteps": [
-    {
-      "id": "comparison",
-      "titleZh": "先看两种晶胞",
-      "bodyZh": "闪锌矿是立方结构，纤锌矿是六方结构；先只比较晶胞外形和层序。"
-    },
-    {
-      "id": "stacking",
-      "titleZh": "复用 FCC/HCP 层序",
-      "bodyZh": "闪锌矿的 S 骨架按 ABCABC 堆积，纤锌矿的 S 骨架按 ABAB 堆积。"
-    },
-    {
-      "id": "voids",
-      "titleZh": "填一半四面体空隙",
-      "bodyZh": "N 个密堆积 S 形成 2N 个四面体空隙，Zn 只占其中 N 个。"
-    },
-    {
-      "id": "coordination",
-      "titleZh": "检查 4:4 配位",
-      "bodyZh": "每个 Zn 最近邻 4 个 S，每个 S 最近邻也有 4 个 Zn。"
-    },
-    {
-      "id": "counting",
-      "titleZh": "最后比较晶胞计数",
-      "bodyZh": "闪锌矿常规立方晶胞含 4 ZnS，纤锌矿 P 六方晶胞含 2 ZnS。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [4.6, 3.5, 5.8],
     "cameraFov": 39,

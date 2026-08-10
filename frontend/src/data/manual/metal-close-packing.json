@@ -28,38 +28,6 @@
     },
     "formulaExplanationZh": "单质金属的化学式仍写作 M；不同晶胞画法改变每个常用晶胞的原子数，不改变元素组成。"
   },
-  "lessonSteps": [
-    {
-      "id": "layer",
-      "titleZh": "先看单层六方密排",
-      "bodyZh": "同一层中，每个球与周围 6 个球相切，留下两组方向相反的三角形空隙。"
-    },
-    {
-      "id": "hcp",
-      "titleZh": "叠成 HCP",
-      "bodyZh": "第二层放入第一层的一组三角形空隙，第三层回到 A 位，形成 ABAB 重复。"
-    },
-    {
-      "id": "fcc",
-      "titleZh": "叠成 FCC",
-      "bodyZh": "第三层不回到 A 位，而是进入另一组空隙的 C 位，形成 ABCABC 重复。"
-    },
-    {
-      "id": "coordination",
-      "titleZh": "数十二配位",
-      "bodyZh": "中心原子同层有 6 个最近邻，上层 3 个、下层 3 个，合计配位数为 12。"
-    },
-    {
-      "id": "counting",
-      "titleZh": "比较常用晶胞计数",
-      "bodyZh": "FCC 立方晶胞平均含 4 个原子；高中常用 HCP 六方柱晶胞平均含 6 个原子。"
-    },
-    {
-      "id": "comparison",
-      "titleZh": "归纳相同点与不同点",
-      "bodyZh": "两者局部配位和理想空间利用率相同，区别在第三层及其后续的堆积位置。"
-    }
-  ],
   "rendering": {
     "cameraPosition": [4.8, 3.6, 5.8],
     "cameraFov": 40,
