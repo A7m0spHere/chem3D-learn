@@ -1101,12 +1101,14 @@ export function ModuleDetailPage() {
           {/* 3D Viewer */}
           <div className="flex min-w-0 flex-col gap-3">
             <div
-              className={`organic-builder-transition-source relative flex min-h-[480px] overflow-hidden rounded-2xl border border-border bg-white shadow-panel sm:min-h-[560px] ${pullingBuilderAtomId ? "pointer-events-none" : ""} ${
-                viewerKind === "sigma-bond" ||
-                viewerKind === "pi-bond" ||
-                viewerKind === "bonding-basics"
-                  ? "xl:h-[calc(100vh-235px)] xl:min-h-[560px]"
-                  : "xl:h-[calc(100vh-205px)] xl:min-h-[640px]"
+              className={`organic-builder-transition-source relative flex overflow-hidden rounded-2xl border border-border bg-white shadow-panel ${pullingBuilderAtomId ? "pointer-events-none" : ""} ${
+                viewerKind === "molecule"
+                  ? "h-[clamp(440px,58dvh,500px)] lg:h-[clamp(520px,66dvh,640px)]"
+                  : viewerKind === "sigma-bond" ||
+                      viewerKind === "pi-bond" ||
+                      viewerKind === "bonding-basics"
+                    ? "min-h-[480px] sm:min-h-[560px] xl:h-[calc(100vh-235px)] xl:min-h-[560px]"
+                    : "min-h-[480px] sm:min-h-[560px] xl:h-[calc(100vh-205px)] xl:min-h-[640px]"
               }`}
               data-testid="module-builder-transition-stage"
               style={(pullingBuilderAtomId || returnedFromBuilder) && !prefersReducedMotion

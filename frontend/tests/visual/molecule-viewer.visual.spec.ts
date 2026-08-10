@@ -9,6 +9,16 @@ async function assertNoHorizontalOverflow(page: import("@playwright/test").Page)
   expect(widths.scrollWidth).toBeLessThanOrEqual(widths.clientWidth);
 }
 
+async function alignViewerBelowHeader(
+  stage: import("@playwright/test").Locator,
+) {
+  await stage.evaluate((element) => {
+    const headerOffset = 76;
+    const targetTop = element.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({ top: Math.max(targetTop, 0), behavior: "auto" });
+  });
+}
+
 test.describe("普通分子 3D-first 页面", () => {
   test("五个普通分子均进入真实 Viewer，默认折叠且无旧步骤入口", async ({ page }) => {
     const modules = [
@@ -61,6 +71,38 @@ test.describe("普通分子 3D-first 页面", () => {
     await expect(disclosure.getByText("典型键角", { exact: true })).toBeVisible();
     await expect(disclosure.getByText("模型边界：", { exact: true })).toBeVisible();
     await assertNoHorizontalOverflow(page);
+  });
+
+  test("NH₃ 在桌面与手机视口下无需继续滚动即可操作完整工具栏", async ({ page }) => {
+    const viewports = [
+      { width: 1280, height: 720 },
+      { width: 1552, height: 926 },
+      { width: 390, height: 844 },
+    ] as const;
+
+    for (const viewport of viewports) {
+      await page.setViewportSize(viewport);
+      await page.goto("/module/pyramidal-nh3");
+
+      const stage = page.getByTestId("module-builder-transition-stage");
+      const toolbar = page.locator("[data-floating-toolbar]");
+      await expect(stage).toBeVisible();
+      await expect(toolbar).toBeVisible();
+      await alignViewerBelowHeader(stage);
+
+      const stageBox = await stage.boundingBox();
+      const toolbarBox = await toolbar.boundingBox();
+      if (!stageBox || !toolbarBox) throw new Error("Viewer 或工具栏未获得可测量布局");
+
+      const expectedStageHeight = viewport.width >= 1024
+        ? Math.min(640, Math.max(520, viewport.height * 0.66))
+        : Math.min(500, Math.max(440, viewport.height * 0.58));
+      expect(Math.abs(stageBox.height - expectedStageHeight)).toBeLessThanOrEqual(2);
+      expect(stageBox.y).toBeGreaterThanOrEqual(60);
+      expect(toolbarBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height);
+      expect(toolbarBox.y + toolbarBox.height).toBeLessThanOrEqual(viewport.height);
+      await assertNoHorizontalOverflow(page);
+    }
   });
 
   test("NH₃ 工具栏独立控制键角、孤电子对和标记", async ({ page }) => {

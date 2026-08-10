@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-10（Codex，完成 T-039A 共享布局与普通分子收缩）
+> 最后更新：2026-08-10（Codex，完成 T-039A 普通分子首屏可操作性修正）
 
 ## 一句话定位
 
@@ -11,10 +11,11 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 - 维护者体验取代原定小范围 Alpha：详细讲解右栏缺乏差异化，双栏造成 Viewer 下方大面积空白，“回到自由探索”还会因长面板折叠触发滚动位置异常。当前不声称有普通学生验证。
 - `ModuleDetailPage` 已改为全宽 Viewer → 工具栏 → 信息区的单列骨架；普通分子使用默认折叠的 `StructureInfoDisclosure`，只呈现名称 / 分子式、空间构型、典型键角和模型边界。
+- PR #2 的维护者审阅发现全宽 Viewer 高度仍会把工具栏推到首屏外；普通分子现使用窄屏 `clamp(440px, 58dvh, 500px)`、桌面 `clamp(520px, 66dvh, 640px)`，保留全宽和 Canvas 内缩放，同时让 Viewer 顶部对齐页头后无需继续滚动即可操作完整工具栏。
 - `MoleculeViewer` 回到纯自由探索：旋转、缩放、键角、孤电子对和原子标记继续独立可用；步骤聚焦、自动开关、完成状态和退出按钮已删除。
 - 23 份手写结构及 mock 数据不再携带 `lessonSteps` / `guidedObservation`；`LessonStep` / `GuidedObservation*` 类型、`ExplorerPanel` 及三个无入口旧组件已删除。原子坐标、化学键、晶胞几何、专题模式、路由、模块数量、版本和 Darwin 快照未改。
-- 验证：lint、build、logic 161 / 161、系统 Chrome 普通分子 4 / 4、跨模块状态 5 / 5、production 4 / 4 通过。production 首轮唯一失败是旧“自由探索”面板文本断言，改为真实 Viewer 容器断言后通过。
-- T-039A 位于独立分支 `codex/t039a-3d-first-clean`；T-039B 必须等待 A 合并后再从最新 `main` 开始。
+- 验证：lint、build、logic 161 / 161、系统 Chrome 普通分子 5 / 5、跨模块状态 5 / 5、production 4 / 4 通过；1280×720、1552×926、390×844 均冻结高度与工具栏首屏边界。
+- T-039A 位于独立分支 `codex/t039a-3d-first-clean`，PR #2 保持 Draft；T-039B 必须等待 A 合并后再从最新 `main` 开始。
 
 ## T-038D 验收结果（2026-08-09）
 

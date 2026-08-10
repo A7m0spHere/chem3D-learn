@@ -58,6 +58,7 @@ Purpose:
 
 Desktop layout:
 - Viewer should use the full content width, followed immediately by its toolbar and a default-collapsed information disclosure.
+- For ordinary molecules, once the Viewer top is aligned below the fixed header, the complete toolbar should remain operable without another page scroll at the supported desktop viewports.
 - 3D viewer must stay large enough for classroom projection.
 - Basic structural facts and model boundaries should remain readable without competing with the Viewer.
 

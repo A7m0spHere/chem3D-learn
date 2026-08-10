@@ -41,7 +41,8 @@
 - 通用 `StructureInfoDisclosure`；
 - 删除普通分子公开引导 UI、状态、类型、数据和测试；
 - 23 份手写结构不再含 `lessonSteps` / `guidedObservation`；
-- 五个普通分子继续进入真实 Viewer，手动显示开关保持独立。
+- 五个普通分子继续进入真实 Viewer，手动显示开关保持独立；
+- 普通分子 Viewer 使用窄屏 440–500px、桌面 520–640px 的响应式高度；Viewer 顶部对齐固定页头后，完整工具栏无需继续滚动即可操作。
 
 ### T-039B：专题展示 Viewer
 
@@ -72,6 +73,8 @@
 ## 阶段验收
 
 每阶段使用独立 PR，前一阶段合并后下一阶段才从最新 `main` 开始。每阶段至少执行 lint、build、logic、对应 Viewer 家族的系统 Chrome 无截图行为测试、production、`git diff --check`，并审计工作树、lockfile、版本与生成文件。
+
+T-039A 的普通分子布局另以 1280×720、1552×926、390×844 冻结 Viewer 高度、工具栏首屏边界、44px 触控尺寸与无横向溢出；不通过悬浮覆盖工具栏来换取可达性。
 
 Windows 不更新 Darwin 快照。T-039D 完成后，在 macOS 对受全宽布局影响的快照集中人工审核，只更新确认合理的基线。
 
