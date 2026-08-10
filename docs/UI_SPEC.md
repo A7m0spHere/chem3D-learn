@@ -57,8 +57,8 @@ Purpose:
 - Use real 3D viewer only when hand-authored structure data is available.
 
 Desktop layout:
-- Ordinary molecules use a large Viewer on the left and a 240px model-control rail on the right; the default-collapsed information disclosure spans the area below both columns.
-- The control rail contains only model interactions, stays aligned with the Viewer top, and does not float or become sticky.
+- Ordinary molecules use a large Viewer on the left and a 240px control rail on the right; the rail places model interactions first and the default-collapsed information disclosure below them.
+- The control rail contains no teaching prose, stays aligned with the Viewer top, and does not float or become sticky; expanded facts use a single column at the rail width.
 - 3D viewer must stay large enough for classroom projection.
 - Basic structural facts and model boundaries should remain readable without competing with the Viewer.
 
@@ -97,7 +97,7 @@ Requirements:
 ## Responsive Strategy
 
 Desktop:
-- Keep the full-width viewer, toolbar, and collapsed information disclosure prominent on 3D learning pages.
+- Keep the large viewer prominent; for ordinary molecules, place the toolbar and collapsed information disclosure in the adjacent 240px rail.
 - Keep navigation and category browsing clear.
 
 Tablet:

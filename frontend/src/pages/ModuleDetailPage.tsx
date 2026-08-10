@@ -1124,23 +1124,30 @@ export function ModuleDetailPage() {
               </ViewerErrorBoundary>
             </div>
 
-            {/* 独立操作台 (Control Console) */}
             <div
-              className={`w-full rounded-xl border border-border bg-white px-3 py-2 shadow-sm ${
-                viewerKind === "molecule"
-                  ? "lg:[&_.chem-control-console]:w-full lg:[&_.chem-control-grid]:flex-col lg:[&_.chem-control-grid]:items-stretch lg:[&_.chem-touch-button]:w-full"
-                  : ""
-              }`}
-              data-testid="module-toolbar"
+              className={viewerKind === "molecule" ? "flex min-w-0 flex-col gap-3" : "min-w-0"}
+              data-testid={viewerKind === "molecule" ? "molecule-control-rail" : undefined}
             >
-              <div className="max-w-full overflow-x-auto pb-1">{spec.toolbar()}</div>
+              {/* 独立操作台 (Control Console) */}
+              <div
+                className={`w-full rounded-xl border border-border bg-white px-3 py-2 shadow-sm ${
+                  viewerKind === "molecule"
+                    ? "lg:[&_.chem-control-console]:w-full lg:[&_.chem-control-grid]:flex-col lg:[&_.chem-control-grid]:items-stretch lg:[&_.chem-touch-button]:w-full"
+                    : ""
+                }`}
+                data-testid="module-toolbar"
+              >
+                <div className="max-w-full overflow-x-auto pb-1">{spec.toolbar()}</div>
+              </div>
+
+              {viewerKind === "molecule" ? spec.panel() : null}
             </div>
           </div>
 
-          {/* 信息区：T-039A 先迁移普通分子；其余 Viewer 家族在后续阶段逐步收缩。 */}
-          <div className="flex min-w-0 flex-col gap-5">
-            {spec.panel()}
-          </div>
+          {/* 普通分子信息已进入控制右栏；其余 Viewer 家族在后续阶段逐步收缩。 */}
+          {viewerKind !== "molecule" ? (
+            <div className="flex min-w-0 flex-col gap-5">{spec.panel()}</div>
+          ) : null}
         </div>
 
 

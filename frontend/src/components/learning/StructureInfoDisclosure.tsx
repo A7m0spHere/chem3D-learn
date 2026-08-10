@@ -24,7 +24,7 @@ export function StructureInfoDisclosure({
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm"
+      className="@container overflow-hidden rounded-2xl border border-border bg-white shadow-sm"
       data-testid="structure-info-disclosure"
     >
       <button
@@ -57,7 +57,7 @@ export function StructureInfoDisclosure({
 
       {isOpen ? (
         <div className="border-t border-border px-4 py-4 sm:px-5" id={contentId}>
-          <dl className="grid gap-3 sm:grid-cols-3">
+          <dl className="grid gap-3 @[36rem]:grid-cols-3" data-testid="structure-info-facts">
             {facts.map((fact) => (
               <div className="rounded-xl bg-background px-4 py-3" key={fact.label}>
                 <dt className="text-xs font-semibold text-text-secondary">{fact.label}</dt>

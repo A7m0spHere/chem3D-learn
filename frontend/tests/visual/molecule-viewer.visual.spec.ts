@@ -35,6 +35,7 @@ test.describe("普通分子 3D-first 页面", () => {
 
     const stage = page.getByTestId("module-builder-transition-stage");
     const viewer = page.getByTestId("molecule-viewer");
+    const rail = page.getByTestId("molecule-control-rail");
     const toolbar = page.getByTestId("module-toolbar");
     const disclosure = page.getByTestId("structure-info-disclosure");
     const toggle = page.getByTestId("structure-info-toggle");
@@ -49,14 +50,21 @@ test.describe("普通分子 3D-first 页面", () => {
     await expect(page.getByText("按需跟随讲解", { exact: true })).toHaveCount(0);
 
     const stageBox = await stage.boundingBox();
+    const railBox = await rail.boundingBox();
     const toolbarBox = await toolbar.boundingBox();
     const disclosureBox = await disclosure.boundingBox();
-    if (!stageBox || !toolbarBox || !disclosureBox) throw new Error("普通分子主区域未获得可测量布局");
+    if (!stageBox || !railBox || !toolbarBox || !disclosureBox) {
+      throw new Error("普通分子主区域未获得可测量布局");
+    }
     expect(stageBox.width).toBeGreaterThan(900);
-    expect(Math.abs(toolbarBox.y - stageBox.y)).toBeLessThanOrEqual(2);
-    expect(toolbarBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width);
-    expect(Math.abs(toolbarBox.width - 240)).toBeLessThanOrEqual(2);
-    expect(disclosureBox.y).toBeGreaterThan(stageBox.y + stageBox.height);
+    expect(Math.abs(railBox.y - stageBox.y)).toBeLessThanOrEqual(2);
+    expect(railBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width);
+    expect(Math.abs(railBox.width - 240)).toBeLessThanOrEqual(2);
+    expect(Math.abs(toolbarBox.width - railBox.width)).toBeLessThanOrEqual(2);
+    expect(Math.abs(disclosureBox.x - railBox.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(disclosureBox.width - railBox.width)).toBeLessThanOrEqual(2);
+    expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height);
+    expect(disclosureBox.y + disclosureBox.height).toBeLessThanOrEqual(stageBox.y + stageBox.height);
 
     await toggle.focus();
     await page.keyboard.press("Enter");
@@ -65,6 +73,24 @@ test.describe("普通分子 3D-first 页面", () => {
     await expect(disclosure.getByText("空间构型", { exact: true })).toBeVisible();
     await expect(disclosure.getByText("典型键角", { exact: true })).toBeVisible();
     await expect(disclosure.getByText("模型边界：", { exact: true })).toBeVisible();
+    const expandedDisclosureBox = await disclosure.boundingBox();
+    if (!expandedDisclosureBox) throw new Error("展开后的结构信息未获得可测量布局");
+    expect(Math.abs(expandedDisclosureBox.x - railBox.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(expandedDisclosureBox.width - railBox.width)).toBeLessThanOrEqual(2);
+
+    const factBoxes = await disclosure.getByTestId("structure-info-facts").locator(":scope > div").all();
+    const measuredFacts = await Promise.all(factBoxes.map((fact) => fact.boundingBox()));
+    if (measuredFacts.some((box) => !box)) throw new Error("结构信息事实卡未获得可测量布局");
+    const facts = measuredFacts as NonNullable<(typeof measuredFacts)[number]>[];
+    for (const [index, box] of facts.entries()) {
+      expect(box.width).toBeGreaterThan(180);
+      if (index > 0) expect(box.y).toBeGreaterThan(facts[index - 1].y);
+    }
+    const disclosureWidths = await disclosure.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(disclosureWidths.scrollWidth).toBeLessThanOrEqual(disclosureWidths.clientWidth);
     await assertNoHorizontalOverflow(page);
   });
 
@@ -79,22 +105,30 @@ test.describe("普通分子 3D-first 页面", () => {
       await page.goto("/module/pyramidal-nh3");
 
       const stage = page.getByTestId("module-builder-transition-stage");
+      const rail = page.getByTestId("molecule-control-rail");
       const toolbar = page.getByTestId("module-toolbar");
       const disclosure = page.getByTestId("structure-info-disclosure");
       await expect(stage).toBeVisible();
+      await expect(rail).toBeVisible();
       await expect(toolbar).toBeVisible();
 
       const stageBox = await stage.boundingBox();
+      const railBox = await rail.boundingBox();
       const toolbarBox = await toolbar.boundingBox();
       const disclosureBox = await disclosure.boundingBox();
-      if (!stageBox || !toolbarBox || !disclosureBox) throw new Error("Viewer、工具栏或结构信息未获得可测量布局");
+      if (!stageBox || !railBox || !toolbarBox || !disclosureBox) {
+        throw new Error("Viewer、右栏、工具栏或结构信息未获得可测量布局");
+      }
 
       const expectedStageHeight = Math.max(640, viewport.height - 205);
       expect(Math.abs(stageBox.height - expectedStageHeight)).toBeLessThanOrEqual(2);
-      expect(Math.abs(toolbarBox.y - stageBox.y)).toBeLessThanOrEqual(2);
-      expect(toolbarBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width);
-      expect(Math.abs(toolbarBox.width - 240)).toBeLessThanOrEqual(2);
-      expect(disclosureBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height);
+      expect(Math.abs(railBox.y - stageBox.y)).toBeLessThanOrEqual(2);
+      expect(railBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width);
+      expect(Math.abs(railBox.width - 240)).toBeLessThanOrEqual(2);
+      expect(Math.abs(toolbarBox.width - railBox.width)).toBeLessThanOrEqual(2);
+      expect(Math.abs(disclosureBox.width - railBox.width)).toBeLessThanOrEqual(2);
+      expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height);
+      expect(disclosureBox.y + disclosureBox.height).toBeLessThanOrEqual(stageBox.y + stageBox.height);
 
       const buttonBoxes = await Promise.all([
         page.getByTestId("molecule-toggle-auto-rotate"),
@@ -142,7 +176,7 @@ test.describe("普通分子 3D-first 页面", () => {
     await page.goto("/module/pyramidal-nh3", { waitUntil: "networkidle" });
 
     const stage = page.getByTestId("module-builder-transition-stage");
-    const toolbar = page.locator("[data-floating-toolbar]");
+    const toolbar = page.getByTestId("module-toolbar");
     const disclosure = page.getByTestId("structure-info-disclosure");
     const boxes = await Promise.all([stage, toolbar, disclosure].map((locator) => locator.boundingBox()));
     if (boxes.some((box) => !box)) throw new Error("移动端主区域未获得可测量布局");
