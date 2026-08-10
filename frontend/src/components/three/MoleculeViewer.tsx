@@ -52,7 +52,7 @@ export function MoleculeViewer({
 
   return (
     <ThreeViewerFrame
-      className="!min-h-[440px] transition-shadow duration-base ease-out-soft hover:shadow-lg lg:!min-h-[520px]"
+      className="min-h-[420px] transition-shadow duration-base ease-out-soft hover:shadow-lg lg:min-h-[620px]"
       loading={loading}
       meta={`${displayName} · 自由探索`}
       stageTestId="molecule-viewer-canvas"

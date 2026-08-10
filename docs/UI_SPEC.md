@@ -57,8 +57,8 @@ Purpose:
 - Use real 3D viewer only when hand-authored structure data is available.
 
 Desktop layout:
-- Viewer should use the full content width, followed immediately by its toolbar and a default-collapsed information disclosure.
-- For ordinary molecules, once the Viewer top is aligned below the fixed header, the complete toolbar should remain operable without another page scroll at the supported desktop viewports.
+- Ordinary molecules use a large Viewer on the left and a 240px model-control rail on the right; the default-collapsed information disclosure spans the area below both columns.
+- The control rail contains only model interactions, stays aligned with the Viewer top, and does not float or become sticky.
 - 3D viewer must stay large enough for classroom projection.
 - Basic structural facts and model boundaries should remain readable without competing with the Viewer.
 

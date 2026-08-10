@@ -9,16 +9,6 @@ async function assertNoHorizontalOverflow(page: import("@playwright/test").Page)
   expect(widths.scrollWidth).toBeLessThanOrEqual(widths.clientWidth);
 }
 
-async function alignViewerBelowHeader(
-  stage: import("@playwright/test").Locator,
-) {
-  await stage.evaluate((element) => {
-    const headerOffset = 76;
-    const targetTop = element.getBoundingClientRect().top + window.scrollY - headerOffset;
-    window.scrollTo({ top: Math.max(targetTop, 0), behavior: "auto" });
-  });
-}
-
 test.describe("普通分子 3D-first 页面", () => {
   test("五个普通分子均进入真实 Viewer，默认折叠且无旧步骤入口", async ({ page }) => {
     const modules = [
@@ -39,12 +29,13 @@ test.describe("普通分子 3D-first 页面", () => {
     }
   });
 
-  test("NH₃ 默认全宽自由探索，结构信息默认折叠且可用键盘展开", async ({ page }) => {
+  test("NH₃ 桌面自由探索采用大 Viewer 与右侧控制栏，结构信息默认折叠", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/module/pyramidal-nh3");
 
     const stage = page.getByTestId("module-builder-transition-stage");
     const viewer = page.getByTestId("molecule-viewer");
+    const toolbar = page.getByTestId("module-toolbar");
     const disclosure = page.getByTestId("structure-info-disclosure");
     const toggle = page.getByTestId("structure-info-toggle");
 
@@ -58,9 +49,13 @@ test.describe("普通分子 3D-first 页面", () => {
     await expect(page.getByText("按需跟随讲解", { exact: true })).toHaveCount(0);
 
     const stageBox = await stage.boundingBox();
+    const toolbarBox = await toolbar.boundingBox();
     const disclosureBox = await disclosure.boundingBox();
-    if (!stageBox || !disclosureBox) throw new Error("普通分子主区域未获得可测量布局");
-    expect(stageBox.width).toBeGreaterThan(1100);
+    if (!stageBox || !toolbarBox || !disclosureBox) throw new Error("普通分子主区域未获得可测量布局");
+    expect(stageBox.width).toBeGreaterThan(900);
+    expect(Math.abs(toolbarBox.y - stageBox.y)).toBeLessThanOrEqual(2);
+    expect(toolbarBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width);
+    expect(Math.abs(toolbarBox.width - 240)).toBeLessThanOrEqual(2);
     expect(disclosureBox.y).toBeGreaterThan(stageBox.y + stageBox.height);
 
     await toggle.focus();
@@ -73,11 +68,10 @@ test.describe("普通分子 3D-first 页面", () => {
     await assertNoHorizontalOverflow(page);
   });
 
-  test("NH₃ 在桌面与手机视口下无需继续滚动即可操作完整工具栏", async ({ page }) => {
+  test("NH₃ 桌面端以大 Viewer 配合右侧 240px 纵向控制栏", async ({ page }) => {
     const viewports = [
       { width: 1280, height: 720 },
       { width: 1552, height: 926 },
-      { width: 390, height: 844 },
     ] as const;
 
     for (const viewport of viewports) {
@@ -85,22 +79,36 @@ test.describe("普通分子 3D-first 页面", () => {
       await page.goto("/module/pyramidal-nh3");
 
       const stage = page.getByTestId("module-builder-transition-stage");
-      const toolbar = page.locator("[data-floating-toolbar]");
+      const toolbar = page.getByTestId("module-toolbar");
+      const disclosure = page.getByTestId("structure-info-disclosure");
       await expect(stage).toBeVisible();
       await expect(toolbar).toBeVisible();
-      await alignViewerBelowHeader(stage);
 
       const stageBox = await stage.boundingBox();
       const toolbarBox = await toolbar.boundingBox();
-      if (!stageBox || !toolbarBox) throw new Error("Viewer 或工具栏未获得可测量布局");
+      const disclosureBox = await disclosure.boundingBox();
+      if (!stageBox || !toolbarBox || !disclosureBox) throw new Error("Viewer、工具栏或结构信息未获得可测量布局");
 
-      const expectedStageHeight = viewport.width >= 1024
-        ? Math.min(640, Math.max(520, viewport.height * 0.66))
-        : Math.min(500, Math.max(440, viewport.height * 0.58));
+      const expectedStageHeight = Math.max(640, viewport.height - 205);
       expect(Math.abs(stageBox.height - expectedStageHeight)).toBeLessThanOrEqual(2);
-      expect(stageBox.y).toBeGreaterThanOrEqual(60);
-      expect(toolbarBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height);
-      expect(toolbarBox.y + toolbarBox.height).toBeLessThanOrEqual(viewport.height);
+      expect(Math.abs(toolbarBox.y - stageBox.y)).toBeLessThanOrEqual(2);
+      expect(toolbarBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width);
+      expect(Math.abs(toolbarBox.width - 240)).toBeLessThanOrEqual(2);
+      expect(disclosureBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height);
+
+      const buttonBoxes = await Promise.all([
+        page.getByTestId("molecule-toggle-auto-rotate"),
+        page.getByTestId("molecule-toggle-angles"),
+        page.getByTestId("molecule-toggle-lone-pairs"),
+        page.getByTestId("molecule-toggle-atom-labels"),
+      ].map((button) => button.boundingBox()));
+      if (buttonBoxes.some((box) => !box)) throw new Error("桌面端控制按钮未获得可测量布局");
+      const measuredButtons = buttonBoxes as NonNullable<(typeof buttonBoxes)[number]>[];
+      for (const [index, box] of measuredButtons.entries()) {
+        expect(box.width).toBeGreaterThan(190);
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        if (index > 0) expect(box.y).toBeGreaterThan(measuredButtons[index - 1].y);
+      }
       await assertNoHorizontalOverflow(page);
     }
   });
@@ -142,6 +150,15 @@ test.describe("普通分子 3D-first 页面", () => {
 
     expect(toolbarBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height);
     expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height);
+
+    const autoRotateBox = await page.getByTestId("molecule-toggle-auto-rotate").boundingBox();
+    const angleBox = await page.getByTestId("molecule-toggle-angles").boundingBox();
+    const lonePairBox = await page.getByTestId("molecule-toggle-lone-pairs").boundingBox();
+    const labelBox = await page.getByTestId("molecule-toggle-atom-labels").boundingBox();
+    if (!autoRotateBox || !angleBox || !lonePairBox || !labelBox) throw new Error("移动端控制按钮未获得可测量布局");
+    expect(Math.abs(autoRotateBox.y - angleBox.y)).toBeLessThanOrEqual(2);
+    expect(lonePairBox.y).toBeGreaterThan(autoRotateBox.y);
+    expect(Math.abs(lonePairBox.y - labelBox.y)).toBeLessThanOrEqual(2);
 
     for (const button of [
       page.getByTestId("molecule-toggle-auto-rotate"),

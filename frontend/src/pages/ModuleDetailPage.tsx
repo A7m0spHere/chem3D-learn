@@ -1099,11 +1099,15 @@ export function ModuleDetailPage() {
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-col gap-3">
           {/* 3D Viewer */}
-          <div className="flex min-w-0 flex-col gap-3">
+          <div
+            className={viewerKind === "molecule"
+              ? "grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start"
+              : "flex min-w-0 flex-col gap-3"}
+          >
             <div
               className={`organic-builder-transition-source relative flex overflow-hidden rounded-2xl border border-border bg-white shadow-panel ${pullingBuilderAtomId ? "pointer-events-none" : ""} ${
                 viewerKind === "molecule"
-                  ? "h-[clamp(440px,58dvh,500px)] lg:h-[clamp(520px,66dvh,640px)]"
+                  ? "min-h-[480px] sm:min-h-[560px] xl:h-[calc(100vh-205px)] xl:min-h-[640px]"
                   : viewerKind === "sigma-bond" ||
                       viewerKind === "pi-bond" ||
                       viewerKind === "bonding-basics"
@@ -1121,7 +1125,14 @@ export function ModuleDetailPage() {
             </div>
 
             {/* 独立操作台 (Control Console) */}
-            <div className="w-full rounded-xl border border-border bg-white px-3 py-2 shadow-sm">
+            <div
+              className={`w-full rounded-xl border border-border bg-white px-3 py-2 shadow-sm ${
+                viewerKind === "molecule"
+                  ? "lg:[&_.chem-control-console]:w-full lg:[&_.chem-control-grid]:flex-col lg:[&_.chem-control-grid]:items-stretch lg:[&_.chem-touch-button]:w-full"
+                  : ""
+              }`}
+              data-testid="module-toolbar"
+            >
               <div className="max-w-full overflow-x-auto pb-1">{spec.toolbar()}</div>
             </div>
           </div>
