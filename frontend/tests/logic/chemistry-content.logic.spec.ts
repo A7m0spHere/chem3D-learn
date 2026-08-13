@@ -35,9 +35,29 @@ test("BF₃ 文案把中心 B 的六电子、八隅体例外与路易斯酸边�
   expect(copy).not.toContain("TODO-CHEM-VERIFY");
 });
 
-test("23 份手写结构不再携带课程步骤或引导观察数据", () => {
+test("23 份手写结构不再携带课程步骤、旧教学面板或引导观察数据", () => {
   const manualDataUrl = new URL("../../src/data/manual/", import.meta.url);
   const files = readdirSync(manualDataUrl).filter((file) => file.endsWith(".json"));
+  const allowedFields = new Set([
+    "atoms",
+    "bonds",
+    "category",
+    "coordinationLinks",
+    "crystal",
+    "crystalControls",
+    "formula",
+    "id",
+    "interlayerForces",
+    "ions",
+    "keyAngles",
+    "kind",
+    "lonePairs",
+    "metadata",
+    "names",
+    "nameZh",
+    "rendering",
+    "summaryZh",
+  ]);
 
   expect(files).toHaveLength(23);
   for (const file of files) {
@@ -45,7 +65,9 @@ test("23 份手写结构不再携带课程步骤或引导观察数据", () => {
     const record = JSON.parse(raw) as Record<string, unknown>;
 
     expect(record, file).not.toHaveProperty("lessonSteps");
+    expect(record, file).not.toHaveProperty("crystalTeaching");
     expect(raw, file).not.toContain("guidedObservation");
+    expect(Object.keys(record).filter((field) => !allowedFields.has(field)), file).toEqual([]);
   }
 });
 
@@ -73,7 +95,7 @@ test("CaF₂ 数据锁定萤石常规胞计数、8:4 配位与示意尺度边界
   expect(copy).not.toContain("TODO-CHEM-VERIFY");
 });
 
-test("17 份晶体数据均提供最小 CrystalControls 与 CrystalInfo", () => {
+test("17 份晶体数据只提供最小 CrystalControls 与 CrystalInfo", () => {
   const manualDataUrl = new URL("../../src/data/manual/", import.meta.url);
   const records = readdirSync(manualDataUrl)
     .filter((file) => file.endsWith(".json"))
@@ -103,13 +125,7 @@ test("17 份晶体数据均提供最小 CrystalControls 与 CrystalInfo", () => 
       expect(stage.labelZh, `${file}:${stage.id}`).toBeTruthy();
     }
 
-    // T-039D 删除旧字段前，用并行数据锁定控制 ID 与顺序没有在迁移中变化。
-    expect(controls?.viewModes, file).toEqual(
-      record.crystalTeaching?.viewModes.map(({ id, labelZh }) => ({ id, labelZh })),
-    );
-    expect(controls?.voidStages ?? [], file).toEqual(
-      record.crystalTeaching?.voidStages?.map(({ id, labelZh }) => ({ id, labelZh })) ?? [],
-    );
+    expect(record, file).not.toHaveProperty("crystalTeaching");
   }
 });
 

@@ -64,13 +64,13 @@ export function OrganicBuilderToolbox({
 
   return (
     <aside className="rounded-2xl border border-white/80 bg-white/90 p-4 shadow-overlay backdrop-blur-xl" data-testid="organic-builder-toolbox">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 pr-10">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary-dark">
           <Atom className="h-5 w-5" />
         </div>
         <div>
           <h2 className="font-bold text-text-primary">分子模型盒</h2>
-          <p className="text-xs text-text-secondary">先选原子，再添加即可自动连接</p>
+          <p className="text-xs text-text-secondary">选中原子后添加即连接</p>
         </div>
       </div>
 
@@ -101,7 +101,7 @@ export function OrganicBuilderToolbox({
         <div className="grid grid-cols-3 gap-2" role="group" aria-label="选择键级">
           {([1, 2, 3] as BuilderBondOrder[]).map((order) => (
             <Button
-              className="h-10"
+              className="h-11"
               data-testid={`builder-bond-order-${order}`}
               key={order}
               onClick={() => onSelectedBondOrderChange(order)}
@@ -119,7 +119,7 @@ export function OrganicBuilderToolbox({
         <div className="grid grid-cols-2 gap-2">
           {builderFragmentTemplates.map((template) => (
             <Button
-              className="justify-start"
+              className="h-11 justify-start"
               key={template.id}
               onClick={() => onAddFragment(template.id)}
               size="sm"
@@ -135,11 +135,11 @@ export function OrganicBuilderToolbox({
       <div className="mt-4 rounded-xl border border-border bg-background p-3">
         <p className="text-xs leading-5 text-text-secondary">{selectionText}</p>
         <div className="mt-2 grid grid-cols-2 gap-2">
-          <Button disabled={!selectedAtomId} onClick={onDetachAtom} size="sm" variant="outline">
+          <Button className="h-11" disabled={!selectedAtomId} onClick={onDetachAtom} size="sm" variant="outline">
             <Eraser className="mr-1.5 h-4 w-4" />
             整体拔下
           </Button>
-          <Button disabled={!selectedAtomId && !selectedBond} onClick={onRemoveSelection} size="sm" variant="outline">
+          <Button className="h-11" disabled={!selectedAtomId && !selectedBond} onClick={onRemoveSelection} size="sm" variant="outline">
             <Trash2 className="mr-1.5 h-4 w-4" />
             删除所选
           </Button>
@@ -147,19 +147,19 @@ export function OrganicBuilderToolbox({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-4">
-        <Button disabled={!canUndo} onClick={onUndo} size="sm" variant="ghost">
+        <Button className="h-11" disabled={!canUndo} onClick={onUndo} size="sm" variant="ghost">
           <Undo2 className="mr-1.5 h-4 w-4" />撤销
         </Button>
-        <Button disabled={!canRedo} onClick={onRedo} size="sm" variant="ghost">
+        <Button className="h-11" disabled={!canRedo} onClick={onRedo} size="sm" variant="ghost">
           <Redo2 className="mr-1.5 h-4 w-4" />重做
         </Button>
-        <Button onClick={onAutoFillHydrogens} size="sm" variant="outline">
+        <Button className="h-11" onClick={onAutoFillHydrogens} size="sm" variant="outline">
           <Sparkles className="mr-1.5 h-4 w-4" />一键补氢
         </Button>
-        <Button onClick={onReset} size="sm" variant="outline">
+        <Button className="h-11" onClick={onReset} size="sm" variant="outline">
           <RotateCcw className="mr-1.5 h-4 w-4" />恢复起点
         </Button>
-        <Button className="col-span-2" onClick={onNewBlank} size="sm" variant="ghost">
+        <Button className="col-span-2 h-11" onClick={onNewBlank} size="sm" variant="ghost">
           <Trash2 className="mr-1.5 h-4 w-4" />新建空白模型
         </Button>
       </div>

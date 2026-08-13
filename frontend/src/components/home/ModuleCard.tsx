@@ -17,10 +17,10 @@ export function ModuleCard({ module }: ModuleCardProps) {
     <article
       onMouseEnter={prefetchViewerChunks}
       onFocus={prefetchViewerChunks}
-      className="group flex h-full flex-col rounded-xl border border-border bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-panel">
+      className="group flex h-full flex-col rounded-xl border border-border bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-panel sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="mb-3 text-3xl font-black leading-none text-primary-dark">
+          <div className="mb-2 text-2xl font-black leading-none text-primary-dark">
             {module.formula ?? module.title.split("：")[0]}
           </div>
           <h3 className="text-lg font-bold leading-snug text-text-primary transition-colors group-hover:text-primary">
@@ -35,31 +35,31 @@ export function ModuleCard({ module }: ModuleCardProps) {
         </span>
       </div>
 
-      <div className={`mt-4 inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ${
+      <div className={`mt-3 inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ${
         hasInteractiveModel ? "bg-primary-light text-primary-dark" : "bg-slate-100 text-text-secondary"
       }`}>
         {hasInteractiveModel ? <Move3d className="h-3.5 w-3.5" aria-hidden="true" /> : <NotebookText className="h-3.5 w-3.5" aria-hidden="true" />}
         {hasInteractiveModel ? "可交互 3D" : "引导学习"}
       </div>
 
-      <p className="mt-4 flex-1 text-sm leading-6 text-text-secondary line-clamp-3">
+      <p className="mt-3 flex-1 text-sm leading-6 text-text-secondary line-clamp-2">
         {module.description}
       </p>
 
       {primaryFact ? (
-        <div className="mt-5 rounded-lg border border-border bg-background px-4 py-3">
-          <div className="text-xs font-semibold text-text-secondary">观察重点</div>
-          <div className="mt-1 text-base font-bold text-text-primary">{primaryFact}</div>
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-background px-3 py-2">
+          <div className="text-xs font-semibold text-text-secondary">看什么</div>
+          <div className="text-right text-sm font-bold text-text-primary">{primaryFact}</div>
         </div>
       ) : (
-        <div className="mt-5 rounded-lg border border-dashed border-border bg-background/70 px-4 py-3">
-          <div className="text-xs font-semibold text-text-secondary">学习状态</div>
-          <div className="mt-1 text-sm font-semibold text-text-primary">轻量教学模块</div>
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-background/70 px-3 py-2">
+          <div className="text-xs font-semibold text-text-secondary">学习方式</div>
+          <div className="text-sm font-semibold text-text-primary">引导观察</div>
         </div>
       )}
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {module.tags.slice(0, 3).map((tag) => (
+      <div className="mt-3 flex flex-wrap gap-2">
+        {module.tags.slice(0, 2).map((tag) => (
           <span
             key={tag}
             className="rounded-full border border-border bg-background px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors group-hover:border-primary/20"
@@ -69,7 +69,7 @@ export function ModuleCard({ module }: ModuleCardProps) {
         ))}
       </div>
 
-      <Button asChild className="mt-6 w-full rounded-lg group-hover:bg-primary-dark transition-colors">
+      <Button asChild className="mt-4 h-11 w-full rounded-lg transition-colors group-hover:bg-primary-dark">
         <Link to={`/module/${module.id}`}>
           进入模块
           <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" aria-hidden="true" />

@@ -19,9 +19,14 @@ test("拼装实验室识别乙烯并支持从空白补成甲烷", async ({ page 
   await expect(page.getByTestId("organic-builder-page")).toBeVisible();
   await expect(page.getByTestId("builder-formula")).toHaveText("C₂H₄");
   await expect(page.getByTestId("builder-known-name")).toHaveText("乙烯");
+  await expect(page.getByTestId("builder-diagnostics-toggle")).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByTestId("builder-bond-angle-matches")).not.toBeVisible();
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("平面三角形 · sp²");
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("≈120°");
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("C 中心 · 2 处");
+  await page.getByTestId("builder-diagnostics-toggle").click();
+  await expect(page.getByTestId("builder-diagnostics-toggle")).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByTestId("builder-bond-angle-matches")).toBeVisible();
   await expect(
     page.getByTestId("organic-builder-viewer").getByText("≈120°", { exact: true }).first(),
   ).toBeAttached();

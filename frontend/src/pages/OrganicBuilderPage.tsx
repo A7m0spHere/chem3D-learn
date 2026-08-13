@@ -322,7 +322,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
       >
         <div className="pointer-events-auto mx-auto flex max-w-[1560px] items-center justify-between gap-3 rounded-2xl border border-white/80 bg-white/90 px-3 py-2.5 shadow-overlay backdrop-blur-xl sm:px-4">
           <div className="flex min-w-0 items-center gap-2.5">
-            <Button aria-label="返回上一个页面" className="h-10 w-10 shrink-0 p-0" onClick={handleBack} size="sm" variant="ghost">
+            <Button aria-label="返回上一个页面" className="h-11 w-11 shrink-0 p-0" onClick={handleBack} size="sm" variant="ghost">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-dark sm:flex">
@@ -341,7 +341,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
               <Button
                 aria-controls="builder-toolbox-panel"
                 aria-pressed={desktopToolboxOpen}
-                className="h-9"
+                className="h-11"
                 onClick={() => setDesktopToolboxOpen((value) => !value)}
                 size="sm"
                 variant={desktopToolboxOpen ? "secondary" : "ghost"}
@@ -351,7 +351,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
               <Button
                 aria-controls="builder-info-panel"
                 aria-pressed={desktopInfoOpen}
-                className="h-9"
+                className="h-11"
                 onClick={() => setDesktopInfoOpen((value) => !value)}
                 size="sm"
                 variant={desktopInfoOpen ? "secondary" : "ghost"}
@@ -361,7 +361,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
             </div>
             <div className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1.5 text-xs font-semibold sm:px-3 sm:text-sm ${isDirty ? "bg-accent/15 text-accent-dark" : "bg-primary/10 text-primary-dark"}`}>
               <SaveOff className="h-4 w-4" />
-              <span className="hidden sm:inline">{isDirty ? "有未保存的课堂草稿" : "当前为起始状态"}</span>
+              <span className="hidden sm:inline">{isDirty ? "已修改" : "起始态"}</span>
               <span className="sm:hidden">{isDirty ? "已修改" : "起始态"}</span>
             </div>
           </div>
@@ -390,7 +390,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
       >
         <button
           aria-label="收起模型盒"
-          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-background hover:text-text-primary"
+          className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-background hover:text-text-primary"
           onClick={() => {
             setActiveCompactPanel(undefined);
             setDesktopToolboxOpen(false);
@@ -420,7 +420,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
       </div>
 
       <div
-        className={`absolute bottom-[76px] left-3 right-3 z-30 max-h-[72%] overflow-y-auto rounded-2xl transition-all duration-300 ease-out-soft md:bottom-4 md:left-auto md:right-4 md:top-[84px] md:max-h-none md:w-[350px] xl:w-[340px] ${staggerDelay("delay-100")} ${
+        className={`absolute bottom-[76px] left-3 right-3 z-30 max-h-[72%] overflow-y-auto rounded-2xl transition-all duration-300 ease-out-soft md:bottom-4 md:left-auto md:right-4 md:top-[84px] md:max-h-none md:w-[340px] xl:w-[320px] ${staggerDelay("delay-100")} ${
           activeCompactPanel === "info"
             ? "visible pointer-events-auto translate-y-0 opacity-100 md:translate-x-0"
             : "invisible pointer-events-none translate-y-5 opacity-0 md:translate-x-5 md:translate-y-0"
@@ -433,7 +433,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
       >
         <button
           aria-label="收起结构信息"
-          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-background hover:text-text-primary"
+          className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-background hover:text-text-primary"
           onClick={() => {
             setActiveCompactPanel(undefined);
             setDesktopInfoOpen(false);
@@ -462,6 +462,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
         <Button
           aria-controls="builder-toolbox-panel"
           aria-expanded={activeCompactPanel === "toolbox"}
+          className="h-11"
           onClick={() => setActiveCompactPanel((value) => value === "toolbox" ? undefined : "toolbox")}
           size="sm"
           variant={activeCompactPanel === "toolbox" ? "default" : "ghost"}
@@ -471,6 +472,7 @@ function OrganicBuilderPageInner({ seedId }: { seedId: string }) {
         <Button
           aria-controls="builder-info-panel"
           aria-expanded={activeCompactPanel === "info"}
+          className="h-11"
           onClick={() => setActiveCompactPanel((value) => value === "info" ? undefined : "info")}
           size="sm"
           variant={activeCompactPanel === "info" ? "default" : "ghost"}

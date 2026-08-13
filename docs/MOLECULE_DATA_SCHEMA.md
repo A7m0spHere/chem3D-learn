@@ -46,7 +46,6 @@ type MoleculeRecord = {
   metadata?: MoleculeMetadata;
   crystal?: CrystalInfo;
   crystalControls?: CrystalControls;
-  crystalTeaching?: CrystalTeaching;
 };
 ```
 
@@ -66,7 +65,6 @@ Field semantics:
 - `metadata`: optional source and verification metadata.
 - `crystal`: concise crystal identity, lattice / model, coordination, unit-cell counts, and composition explanation consumed by the default-collapsed CrystalInfo.
 - `crystalControls`: minimal runtime controls. Each view mode or void stage contains only a stable ID and short Chinese label.
-- `crystalTeaching`: deprecated compatibility data. Production UI no longer consumes its observation steps, long mode prose, tips, mistakes, or void guidance; T-039D owns final field and data deletion.
 
 ## Atom
 
@@ -207,6 +205,7 @@ type CrystalControls = {
 - `viewModes` and `voidStages` only select real Viewer branches. Titles and summaries should come from the short label plus `summaryZh`, not from duplicated teaching paragraphs.
 - Void stages such as framework, visible voids, and filled sites belong to first-level interaction when the active mode needs them.
 - Do not add `titleZh`, `bodyZh`, observation guides, common mistakes, teaching tips, or course steps back into `CrystalControls`.
+- Do not add top-level `titleZh`, `subtitleZh`, `descriptionZh`, or the removed `crystalTeaching` compatibility object back into manual records. Use `nameZh`, `summaryZh`, `crystal`, and `crystalControls` as the single concise sources.
 
 ## Data Rules
 

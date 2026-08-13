@@ -46,8 +46,21 @@ Purpose:
 
 Requirements:
 - Category filters should be clear and touch-friendly.
-- Module cards should show title, subtitle, difficulty, tags, and concise explanation.
+- Module cards should show what the structure is, whether it can be manipulated in 3D, the primary observation target, and one concise reason to open it.
+- Keep descriptions to two visual lines and avoid repeating the same idea across description, observation card, and tags.
 - Modules without real 3D data may use placeholder visual guidance instead of pretending to have a complete model.
+
+## Organic Builder
+
+Purpose:
+- Keep the 3D canvas as the full-screen working surface while preserving atom, bond, fragment, detach, delete, undo / redo, hydrogen fill, reset, drag, rotate, zoom, and pan operations.
+- Keep live formula, name, mass, fragment count, valence progress, and the primary validation message visible without turning the page into a teaching article.
+
+Information requirements:
+- At `xl` and wider, the toolbox and compact live structure summary may remain open over the full-screen canvas.
+- Below `xl`, open the toolbox or structure summary on demand from touch-friendly bottom actions.
+- Bond-angle matches, full valence issues, naming notes, detected fragments, and model boundaries live in one default-collapsed diagnostic disclosure.
+- The diagnostic toggle and primary builder actions must provide at least a 44px touch target.
 
 ## Module Detail / 3D Learning Experience
 
@@ -94,6 +107,7 @@ Purpose:
 
 Requirements:
 - These pages should follow the same light education visual language.
+- Paths is a compact directory of optional understanding sequences: show one focus chain per path and a short observation reason per structure; do not duplicate self-study essays inside every section.
 - Placeholder states are acceptable while the frontend is being developed.
 - Avoid expanding into a full question bank, account system, or backend SaaS workflow without explicit approval.
 

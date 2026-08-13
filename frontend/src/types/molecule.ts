@@ -70,20 +70,6 @@ export type MoleculeMetadata = {
   verified?: boolean;
 };
 
-export type CrystalTeachingViewMode = {
-  id: CrystalViewMode;
-  labelZh: string;
-  titleZh: string;
-  bodyZh: string;
-};
-
-export type CrystalVoidStageTeaching = {
-  id: CrystalVoidStage;
-  labelZh: string;
-  titleZh: string;
-  bodyZh: string;
-};
-
 export type CrystalControlViewMode = {
   id: CrystalViewMode;
   labelZh: string;
@@ -97,46 +83,6 @@ export type CrystalControlVoidStage = {
 export type CrystalControls = {
   viewModes: CrystalControlViewMode[];
   voidStages?: CrystalControlVoidStage[];
-};
-
-export type CrystalObservationGuideStep = {
-  labelZh: string;
-  titleZh: string;
-  bodyZh: string;
-  modeId?: CrystalViewMode;
-  stageId?: CrystalVoidStage;
-};
-
-export type CrystalObservationGuide = {
-  titleZh: string;
-  subtitleZh: string;
-  steps: CrystalObservationGuideStep[];
-  teacherPromptZh: string;
-};
-
-export type CrystalTeaching = {
-  currentModelZh?: string;
-  structureTypeZh: string;
-  modelZh: string;
-  coordinationNumberZh: string;
-  spatialFeatureLabelZh?: string;
-  spatialFeatureZh: string;
-  teachingTipZh?: string;
-  unitCellDescriptionZh: string;
-  particleCountZh: {
-    cl?: string;
-    na?: string;
-    cs?: string;
-    formula?: string;
-    ratio: string;
-    lines?: string[];
-  };
-  coordinationDescriptionZh: string[];
-  commonMistakesZh: string[];
-  observationGuide?: CrystalObservationGuide;
-  viewModes: CrystalTeachingViewMode[];
-  voidStages?: CrystalVoidStageTeaching[];
-  voidGuidanceZh?: string[];
 };
 
 export type Atom = {
@@ -213,5 +159,4 @@ export type MoleculeRecord = {
   keyAngles: AngleSpec[];
   rendering?: MoleculeRendering;
   metadata?: MoleculeMetadata;
-  crystalTeaching?: CrystalTeaching;
 };

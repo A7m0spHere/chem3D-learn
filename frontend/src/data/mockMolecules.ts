@@ -117,7 +117,6 @@ export function mergeMoleculeData(
     keyAngles: real.keyAngles,
     rendering: real.rendering,
     metadata: real.metadata,
-    crystalTeaching: real.crystalTeaching,
   };
 }
 

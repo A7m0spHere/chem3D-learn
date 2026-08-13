@@ -75,57 +75,5 @@
       { "id": "counting", "labelZh": "晶胞计数" },
       { "id": "originShift", "labelZh": "等价原点" }
     ]
-  },
-  "crystalTeaching": {
-    "currentModelZh": "理想立方教学模型",
-    "structureTypeZh": "钙钛矿型氧化物",
-    "modelZh": "理想立方 BaTiO₃（Pm-3m）",
-    "coordinationNumberZh": "Ba²⁺：12；Ti⁴⁺：6",
-    "spatialFeatureLabelZh": "核心空间关系",
-    "spatialFeatureZh": "TiO₆ 八面体构成骨架，Ba²⁺ 位于八面体之间的 A 位空腔中；同一无限晶格可因原点选择不同而出现不同晶胞画法",
-    "teachingTipZh": "模型边界：高考题常用理想立方钙钛矿图帮助计数和判断配位。室温 BaTiO₃ 通常为四方相，本模块不把理想立方图当作所有温度下的真实结构。",
-    "unitCellDescriptionZh": "常见画法中 Ba²⁺ 位于 8 个顶点，Ti⁴⁺ 位于体心，O²⁻ 位于 6 个面心。平移原点后可等价地画成 Ti⁴⁺ 位于顶点、Ba²⁺ 位于体心、O²⁻ 位于棱心。",
-    "particleCountZh": {
-      "formula": "Ba：1；Ti：1；O：3",
-      "ratio": "Ba : Ti : O = 1 : 1 : 3，所以化学式为 BaTiO₃",
-      "lines": [
-        "顶点 Ba²⁺：8 × 1/8 = 1",
-        "体心 Ti⁴⁺：1 × 1 = 1",
-        "面心 O²⁻：6 × 1/2 = 3",
-        "Ba : Ti : O = 1 : 1 : 3"
-      ]
-    },
-    "coordinationDescriptionZh": [
-      "Ti⁴⁺ 周围最近的 6 个 O²⁻ 位于六个正交方向，构成 TiO₆ 八面体，Ti⁴⁺ 的配位数为 6。",
-      "Ba²⁺ 周围最近的 12 个 O²⁻ 来自本晶胞和相邻晶胞，构成立方八面体式局部环境，Ba²⁺ 的配位数为 12。",
-      "一个 O²⁻ 在理想立方模型中同时与 2 个 Ti⁴⁺ 最近邻，并处于 4 个 Ba²⁺ 围成的平面环境中。",
-      "图中的 Ti—O、Ba—O 辅助线只用于标出最近邻配位，不应机械理解为独立分子中的普通共价键。"
-    ],
-    "commonMistakesZh": [
-      "把理想立方教学模型误认为室温 BaTiO₃ 的精确真实结构。",
-      "只看一个晶胞内画出的 O²⁻，漏数 Ba²⁺ 来自相邻晶胞的最近邻，误判 Ba²⁺ 配位数。",
-      "把面心 O²⁻ 全部完整计入本晶胞，忘记每个面心粒子只贡献 1/2。",
-      "看到 Ti 位于顶点的另一种画法就误认为晶体结构改变；它只是平移原点后的等价晶胞。",
-      "把配位辅助线当作独立 BaTiO₃ 分子中的普通化学键。"
-    ],
-    "observationGuide": {
-      "titleZh": "课堂观察顺序",
-      "subtitleZh": "按“位置 → TiO₆ → 双配位 → 计数与等价画法”建立空间认识。",
-      "steps": [
-        { "labelZh": "位置", "titleZh": "先认三类晶胞位置", "bodyZh": "旋转晶胞，依次说出 Ba²⁺、Ti⁴⁺、O²⁻ 分别位于顶点、体心和面心。", "modeId": "cell" },
-        { "labelZh": "八面体", "titleZh": "再看 TiO₆ 几何与 Ti 的 6 配位", "bodyZh": "先用八面体轮廓认清六个 O²⁻ 的方向，再切到 Ti⁴⁺ 6 配位模式只数最近邻。", "modeId": "polyhedron" },
-        { "labelZh": "配位", "titleZh": "补齐 Ba²⁺ 的 12 个最近邻", "bodyZh": "重点观察淡色的相邻晶胞 O²⁻，理解为什么只数当前晶胞会漏掉 Ba²⁺ 的完整配位层。", "modeId": "aSiteCoordination" },
-        { "labelZh": "迁移", "titleZh": "均摊计数后比较等价原点", "bodyZh": "先算出 1 : 1 : 3，再切换两种原点画法，确认位置名称改变但无限晶体没有改变。", "modeId": "counting" }
-      ],
-      "teacherPromptZh": "追问：如果把原点从 Ba²⁺ 所在顶点平移到 Ti⁴⁺ 所在位置，三类粒子分别会出现在新晶胞的什么位置？化学式为什么不变？"
-    },
-    "viewModes": [
-      { "id": "cell", "labelZh": "晶胞结构", "titleZh": "理想立方钙钛矿晶胞", "bodyZh": "Ba²⁺ 位于顶点，Ti⁴⁺ 位于体心，O²⁻ 位于面心。这是本模块后续配位、计数和原点平移的共同起点。" },
-      { "id": "polyhedron", "labelZh": "TiO₆ 八面体", "titleZh": "TiO₆ 理想八面体", "bodyZh": "6 个面心 O²⁻ 位于 Ti⁴⁺ 的六个正交方向；O—O 轮廓帮助看清八面体几何，不表示 O—O 共价键。" },
-      { "id": "bSiteCoordination", "labelZh": "Ti⁴⁺ 6配位", "titleZh": "Ti⁴⁺ 的 6 配位", "bodyZh": "只保留体心 Ti⁴⁺ 与 6 个最近邻 O²⁻ 的辅助线，突出配位数而不显示八面体边。" },
-      { "id": "aSiteCoordination", "labelZh": "Ba²⁺ 12配位", "titleZh": "Ba²⁺ 的 12 配位", "bodyZh": "以一个 Ba²⁺ 为中心补绘相邻晶胞中的 O²⁻，完整显示 12 个最近邻；淡色粒子来自周期延展。" },
-      { "id": "counting", "labelZh": "晶胞计数", "titleZh": "均摊法得到 BaTiO₃", "bodyZh": "Ba：8×1/8=1；Ti：1×1=1；O：6×1/2=3，所以 Ba : Ti : O = 1 : 1 : 3。" },
-      { "id": "originShift", "labelZh": "等价原点", "titleZh": "两种等价晶胞画法", "bodyZh": "选择不同原点后，可在“Ba 顶点 / Ti 体心 / O 面心”和“Ti 顶点 / Ba 体心 / O 棱心”之间切换；二者描述同一无限晶体。" }
-    ]
   }
 }

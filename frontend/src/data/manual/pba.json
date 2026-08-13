@@ -8,8 +8,6 @@
   },
   "nameZh": "PBA 普鲁士蓝类似物",
   "category": "crystal",
-  "titleZh": "PBA 普鲁士蓝类似物",
-  "descriptionZh": "PBA 可先看成两类金属节点被 C≡N 线性桥连接，再观察空位、水和客体离子如何进入框架。",
   "summaryZh": "先找 M / M′ 两类节点，再看 C≡N 桥。最后用空位水合模式理解 PBA 通式为什么带有变量。",
   "atoms": [
     {
@@ -262,121 +260,6 @@
       { "id": "framework", "labelZh": "完整框架" },
       { "id": "voids", "labelZh": "六氰空位" },
       { "id": "filled", "labelZh": "水合/A位" }
-    ]
-  },
-  "crystalTeaching": {
-    "currentModelZh": "通用 PBA 教学模型",
-    "structureTypeZh": "双金属氰基桥联配位框架",
-    "modelZh": "M / M′ 交替节点 + C≡N 桥",
-    "coordinationNumberZh": "M′(CN)₆ 近似六配位；M 节点也通过 N 端与多个 CN 桥相连",
-    "spatialFeatureLabelZh": "空间特征",
-    "spatialFeatureZh": "金属节点和线性氰基桥组成三维框架，孔隙中可出现 A 位离子、水分子或空位。",
-    "teachingTipZh": "课堂上先看整体框架，再开标签区分 C 端、N 端和两类金属节点。本模型是通用示意，不代表具体样品占位率。",
-    "unitCellDescriptionZh": "中心 M′ 连向 6 个 C 端，C≡N 桥的 N 端再连到周围 M 节点。A 位、空位和水合会让真实组成发生变化。",
-    "particleCountZh": {
-      "ratio": "通式：AₓM[M′(CN)₆]₁₋ᵧ□ᵧ·nH₂O",
-      "lines": [
-        "M / M′：两类过渡金属节点",
-        "CN：线性桥联配体",
-        "A、□、H₂O：客体离子、空位和水合环境",
-        "本模型用于读图，不做具体样品计数"
-      ]
-    },
-    "coordinationDescriptionZh": [
-      "先看 M′(CN)₆ 八面体单元。",
-      "C 端靠近 M′，N 端桥联到周围 M 节点。",
-      "空位和水会改变局部环境，所以通式常出现 x、y、n。"
-    ],
-    "commonMistakesZh": [
-      "把 C≡N 桥当成孤立小分子，而忽略它连接两类金属节点。",
-      "看到立方框架就直接套 NaCl 或 CsCl 计数模板。",
-      "把通用教学模型误认为某个具体 PBA 样品的精确晶体结构。"
-    ],
-    "observationGuide": {
-      "titleZh": "课堂观察顺序",
-      "subtitleZh": "投影时先认节点和桥，再讨论空位、水合与通式变量。",
-      "steps": [
-        {
-          "labelZh": "双金属",
-          "titleZh": "先找 M / M′ 两类金属节点",
-          "bodyZh": "让学生先定位中心 M′ 和周围 M，建立节点-桥-节点的读图顺序。",
-          "modeId": "cell"
-        },
-        {
-          "labelZh": "八面体",
-          "titleZh": "再看 M′(CN)₆ 八面体方向",
-          "bodyZh": "切到配位骨架，观察 M′ 指向 6 个 C 端，形成近似八面体方向。",
-          "modeId": "coordination"
-        },
-        {
-          "labelZh": "理想框架",
-          "titleZh": "切到空位水合，先保留理想桥联骨架",
-          "bodyZh": "在空位水合模式下先停在完整框架，确认 6 个 CN 方向仍然连到周围 M 节点。",
-          "modeId": "voids",
-          "stageId": "framework"
-        },
-        {
-          "labelZh": "六氰空位",
-          "titleZh": "再看 □ 空位对组成变量的影响",
-          "bodyZh": "切到六氰空位，说明 □ 表示局部缺失，会改变孔道和配位环境，对应通式中的 y。",
-          "modeId": "voids",
-          "stageId": "voids"
-        },
-        {
-          "labelZh": "水合-A位",
-          "titleZh": "最后看水和 A 位客体离子",
-          "bodyZh": "切到水合-A位，说明水分子和 A 位离子进入孔隙，x、y、n 会随具体样品变化，不是固定数。",
-          "modeId": "voids",
-          "stageId": "filled"
-        }
-      ],
-      "teacherPromptZh": "追问：这张图里哪些部分是固定框架，哪些位置可能随样品组成改变？"
-    },
-    "viewModes": [
-      {
-        "id": "cell",
-        "labelZh": "框架晶胞",
-        "titleZh": "双金属氰基桥联框架",
-        "bodyZh": "先看两类金属节点，再看 C≡N 桥把节点连成三维框架。"
-      },
-      {
-        "id": "coordination",
-        "labelZh": "配位骨架",
-        "titleZh": "M′(CN)₆ 八面体方向",
-        "bodyZh": "把中心 M′ 放大看：6 个 C 端方向构成近似八面体。"
-      },
-      {
-        "id": "voids",
-        "labelZh": "空位水合",
-        "titleZh": "空位、水与 A 位客体",
-        "bodyZh": "先看 □ 代表缺失，再看水和 A 位离子如何补偿框架环境。"
-      },
-      {
-        "id": "comparison",
-        "labelZh": "结构类比",
-        "titleZh": "从普通晶胞到配位框架",
-        "bodyZh": "PBA 先读节点和桥联，再讨论组成；不要直接套 NaCl / CsCl 模板。"
-      }
-    ],
-    "voidStages": [
-      {
-        "id": "framework",
-        "labelZh": "完整框架",
-        "titleZh": "先看理想桥联骨架",
-        "bodyZh": "先保留完整 M′(CN)₆，观察 6 个方向如何连到周围 M 节点。"
-      },
-      {
-        "id": "voids",
-        "labelZh": "六氰空位",
-        "titleZh": "再看 □ 空位",
-        "bodyZh": "□ 表示局部缺失，会改变孔道和配位环境。"
-      },
-      {
-        "id": "filled",
-        "labelZh": "水合/A位",
-        "titleZh": "最后看水和客体离子",
-        "bodyZh": "水分子和 A 位离子进入孔隙，帮助理解 x、y、n 这些变量。"
-      }
     ]
   }
 }

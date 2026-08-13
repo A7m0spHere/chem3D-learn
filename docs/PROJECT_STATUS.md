@@ -1,20 +1,28 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-13（Codex，完成 T-039C 晶体与 NaCl 周期工作台 3D-first 收缩）
+> 最后更新：2026-08-13（Codex，T-039D 与 T-039 全站 3D-first 收口已完成）
 
 ## 一句话定位
 
 Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学教师课堂演示的前端优先 3D 结构化学学习网站。详见 `docs/PROJECT_BRIEF.md`。
 
+## T-039D 拼装实验室、目录与全局清理结果（2026-08-13）
+
+- Organic Builder 已改为“实时结构摘要 + 默认折叠诊断详情”：分子式、名称、式量、片段数、价态进度与首条问题常驻；键角、完整问题、命名说明、识别片段和模型边界按需展开。原子 / 键 / 片段操作、拖动、旋转、缩放、平移、撤销 / 重做、补氢、重置及全部化学算法未改。
+- Modules 卡片和 Paths 参考顺序已压缩重复说明，保留结构身份、交互类型、观察重点、打开理由、分组与全部路由；Exam 未修改。
+- 17 份晶体 JSON 已删除无生产消费者的 `crystalTeaching`；另删除 5 份 JSON 中不属于 `MoleculeRecord` 的顶层 `titleZh` / `subtitleZh` / `descriptionZh` 副本。`crystalControls`、`crystal`、原子、键、坐标和 Viewer 分支未改。
+- 新增六档视口与普通分子 / 专题 / NaCl 代表性无截图浏览器契约；独立 Python Playwright 验收覆盖 Builder、Modules、Paths 的 1920×1080、1440×900、1366×768、1280×800、1024×768、390×844，页面横向溢出均为 0、浏览器错误为 0，关键操作高度均至少 44px。
+- 验证：lint、build、logic 163 / 163、T-039D 系统 Chrome 3 / 3、既有 Builder / 普通分子 / 专题 / 晶体 / NaCl / 状态重置无截图回归 37 / 37、production 4 / 4 通过。Windows 未运行或更新 Darwin 快照；macOS 默认 Chromium 的集中快照审核仍属于平台专项验收，不阻塞 T-039A～D 实现收口。
+
 ## T-039C 晶体与 NaCl 周期工作台收缩结果（2026-08-13）
 
-- 从已合并 T-039B 的 `main@c3e6876` 开始，17 份公开晶体记录新增最小 `crystalControls`：模式与空隙阶段只保留稳定 ID 和短标签；全部晶体补齐 `CrystalInfo`，长 `CrystalTeaching` 暂留兼容但已没有生产 UI 消费者，交给 T-039D 最终删除。
+- 从已合并 T-039B 的 `main@c3e6876` 开始，17 份公开晶体记录新增最小 `crystalControls`：模式与空隙阶段只保留稳定 ID 和短标签；全部晶体补齐 `CrystalInfo`。当时暂留的无消费者 `CrystalTeaching` 已由 T-039D 删除。
 - 晶体详情统一为全宽 Viewer → 模式工具栏 → 默认折叠“晶体信息”。删除 `CrystalKnowledgePanel` 及观察顺序、常见误区、长讲解、教学提示；空隙三阶段直接进入模式工具栏首层，不再藏在长面板中。
 - NaCl 教学 Viewer 保留六配位、粒子计数、标签和周期探索入口。周期模式保留 N=1/2/3、粒子选择、六配位、ghost、隔离与退出选择；晶胞边框移入单层二级 Disclosure，周期计数改为默认折叠的精简信息，未选择时只显示短操作提示。
 - 未修改 3D 几何、原子 / 离子坐标、化学键、配位算法、NaCl 周期身份、相机、渲染参数、依赖、版本或 Darwin 快照；CaF₂ 已核实计数结论转入 `CrystalInfo.formulaExplanationZh`，避免 UI 依赖旧教学长文。
 - 实测 1920×1080、1440×900、1366×768、1280×800、1024×768、390×844 均无横向溢出；晶体长面板从桌面约 1499px、移动端约 2207px 收缩为默认 70px Disclosure（NaCl 移动端 94px），Viewer 仍保持 1216 / 960 / 358px 主宽度。
-- 验证：lint、build、logic 163 / 163、新增晶体 3D-first 系统 Chrome 4 / 4、NaCl 周期工作台 4 / 4、普通分子 / 专题 / 状态重置回归 19 / 19、production 4 / 4 通过。Windows 未运行或更新 Darwin 快照，macOS 集中视觉审核留给 T-039D。
+- 验证：lint、build、logic 163 / 163、新增晶体 3D-first 系统 Chrome 4 / 4、NaCl 周期工作台 4 / 4、普通分子 / 专题 / 状态重置回归 19 / 19、production 4 / 4 通过。Windows 未运行或更新 Darwin 快照；macOS 集中视觉审核仍需在对应平台单独执行。
 
 ## T-039B 专题展示 Viewer 收缩结果（2026-08-10）
 
@@ -443,7 +451,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-下一项是 **T-039D 拼装实验室、目录与全局清理**：压缩功能性动态反馈与目录文案，删除 T-039C 已停止消费的 `CrystalTeaching` 长字段，并在 macOS 集中审核 Darwin 快照。不要恢复 NH₃ 引导、朋友 / 同学 Alpha、选择题或题库路线。
+下一项建议是在 **macOS 默认 Chromium** 上集中审核 T-039A～D 影响的 Darwin 快照；只更新人工确认属于预期布局变化的基线，Windows 仍不得更新。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。

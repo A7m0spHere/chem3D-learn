@@ -25,7 +25,7 @@
 关键发现：
 
 - **5 个 VSEPR 分子的结构核心已经是逐字一致的**（`id` / `kind` / `formula` / `names` / `nameZh` / `category` / `atoms` / `bonds` / `lonePairs` 全等）。它们的差异只在「教学表现字段」——后端serving的是更早/更简的教学文案，前端是当前课堂版本。
-- **`nacl` 是有意的教学简化，不是意外漂移**：后端 serving 15 原子的简化晶胞、无 `crystalTeaching`、`names.zh="氯化钠晶胞"`；前端是 27 原子完整晶胞、有 `crystalTeaching`、`nameZh="NaCl 型晶体结构（氯化钠晶胞）"`。二者是**不同抽象层次的教学模型**，不应强行统一。
+- **`nacl` 是有意的教学简化，不是意外漂移**：后端 serving 15 原子的简化晶胞，前端是 27 原子完整晶胞；二者是**不同抽象层次的教学模型**，不应强行统一。历史审计时前端还带有 `crystalTeaching`，该兼容字段已在 T-039D 删除，不影响这里记录的结构分叉。
 
 ## 设计原则
 
