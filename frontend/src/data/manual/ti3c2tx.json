@@ -43,6 +43,16 @@
     "notesZh": "本模块使用理想化六方原子片层和代表性混合端基位点，不导入完整实验结构。端基比例、占位、缺陷、层间距和插层位置均可能随制备与环境改变。",
     "verified": true
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "comparison", "labelZh": "MAX → MXene" },
+      { "id": "layer", "labelZh": "五层片层" },
+      { "id": "coordination", "labelZh": "C 六配位" },
+      { "id": "covalentNetwork", "labelZh": "表面端基" },
+      { "id": "interlayerForce", "labelZh": "重新堆叠" },
+      { "id": "counting", "labelZh": "组成表达" }
+    ]
+  },
   "crystalTeaching": {
     "currentModelZh": "Ti₃C₂Tₓ 理想教学模型",
     "structureTypeZh": "二维过渡金属碳化物 MXene",

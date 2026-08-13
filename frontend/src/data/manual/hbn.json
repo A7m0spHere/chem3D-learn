@@ -97,6 +97,21 @@
     "notesZh": "用于说明 h-BN 的 B/N 交替六方层状结构、层内 B-N 共价键、层间弱相互作用，以及与石墨导电性的差异。坐标为教学示意，不表示真实晶格参数。",
     "verified": true
   },
+  "crystal": {
+    "typeZh": "层状共价晶体",
+    "latticeZh": "h-BN 层状教学模型",
+    "coordination": "层内 B、N 均为 3 配位",
+    "unitCellCount": {},
+    "formulaExplanationZh": "本模型展示两层 h-BN 片段，不把画面中的球数作为晶胞计数；基本组成比为 B : N = 1 : 1。"
+  },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "layer", "labelZh": "层状结构" },
+      { "id": "inPlaneBond", "labelZh": "B-N 共价键" },
+      { "id": "interlayerForce", "labelZh": "层间作用力" },
+      { "id": "comparison", "labelZh": "对比石墨" }
+    ]
+  },
   "crystalTeaching": {
     "structureTypeZh": "层状共价晶体",
     "modelZh": "h-BN 层状教学模型",

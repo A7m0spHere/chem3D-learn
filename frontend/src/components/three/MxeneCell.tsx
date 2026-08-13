@@ -52,7 +52,7 @@ export function MxeneCell({
   showLabels,
   loading = false,
 }: MxeneCellProps) {
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const camera = getCameraPreset(viewMode);
 
   return (
@@ -62,8 +62,8 @@ export function MxeneCell({
       loading={loading}
       meta="拖拽旋转 · 标签只保留当前焦点"
       stageTestId="mxene-canvas"
-      summary={activeMode?.bodyZh ?? molecule.summaryZh}
-      title={`Ti₃C₂Tₓ｜${activeMode?.titleZh ?? "MXene 二维片层"}`}
+      summary={molecule.summaryZh}
+      title={`Ti₃C₂Tₓ｜${activeMode?.labelZh ?? "MXene 二维片层"}`}
       viewerTestId="mxene-viewer"
     >
       <Canvas

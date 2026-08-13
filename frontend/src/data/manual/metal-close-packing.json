@@ -39,6 +39,16 @@
     "notesZh": "采用理想等径硬球模型说明 FCC/CCP 与 HCP 的层序、十二配位、常用晶胞计数和空间利用率；不表示具体金属的热力学稳定相或真实原子尺寸。",
     "verified": true
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "layer", "labelZh": "单层密排" },
+      { "id": "hcpStacking", "labelZh": "HCP｜ABAB" },
+      { "id": "fccStacking", "labelZh": "FCC｜ABCABC" },
+      { "id": "coordination", "labelZh": "12 配位" },
+      { "id": "counting", "labelZh": "晶胞计数" },
+      { "id": "comparison", "labelZh": "对比总结" }
+    ]
+  },
   "crystalTeaching": {
     "currentModelZh": "FCC / HCP 对比模型",
     "structureTypeZh": "金属晶体",

@@ -112,6 +112,7 @@ export function mergeMoleculeData(
     coordinationLinks: real.coordinationLinks,
     interlayerForces: real.interlayerForces,
     crystal: real.crystal,
+    crystalControls: real.crystalControls,
     lonePairs: real.lonePairs,
     keyAngles: real.keyAngles,
     rendering: real.rendering,

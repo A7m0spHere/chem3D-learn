@@ -70,7 +70,7 @@ export function SodiumMetalCell({
   );
   const cameraPosition = molecule.rendering?.cameraPosition ?? [2.9, 2.35, 3.35];
   const cameraFov = molecule.rendering?.cameraFov ?? 42;
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const showNearestNeighborLinks = viewMode === "coordination";
   const showMutedLinks = viewMode === "metallicBond";
   const showMetallicBondHint = viewMode === "metallicBond";
@@ -80,8 +80,8 @@ export function SodiumMetalCell({
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}
-      summary={activeMode?.bodyZh ?? molecule.summaryZh}
-      title={`${molecule.formula}｜${activeMode?.titleZh ?? "完整 BCC 晶胞"}`}
+      summary={molecule.summaryZh}
+      title={`${molecule.formula}｜${activeMode?.labelZh ?? "晶胞结构"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
         <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>

@@ -19,8 +19,8 @@
 - **方向**：维护者对 T-038 的实际体验已证明，详细讲解右栏没有形成产品差异，反而压缩 Viewer、制造空白并带来退出后的滚动异常。T-039 不再开展朋友 / 同学 Alpha，先把产品收回到“3D 展示 + 独立操作 + 少量基础事实 / 功能反馈”。
 - **总计划**：见 `docs/guided-observation/T039_3D_FIRST_REDUCTION.md`。
 - [x] **T-039A 共享布局与普通分子**（2026-08-10）：删除 `ExplorerPanel`、步骤状态、全部 `lessonSteps` / `GuidedObservation*` 及对应测试；普通分子只保留名称 / 分子式、构型、典型键角与模型边界。PR #2 的维护者审阅最终采用 `xl` 起效的桌面“大 Viewer + 272px 右侧控制栏”，低于 `xl` 使用 Viewer → 工具栏 → 默认折叠结构信息；恢复大 Viewer 高度，右栏先放四个模型控制，再利用下方空白放置默认折叠的结构信息。PR #2 已合并，merge commit `5f3606acc7f1cb4399f94c967ced5acda05758e9`。
-- [x] **T-039B 专题展示 Viewer**（2026-08-10）：从合并后的 `main` 独立实施；覆盖极性、σ/π 键、三类成键基础、乙烯 / 苯 / 乙炔和有机共面共 10 个公开模块。删除 7 个旧教学 Panel 与无消费者长文数据，保留全部真实模式、轨道 / 标签 / 平面 / 角弧 / 动画和渲染参数；控制密度适中的专题在 `xl` 以上使用大 Viewer + 304px Inspector，杂化 / 成键基础使用 360px 高密度 Inspector，低于 `xl` 全部纵向。当前分支 `codex/t039b-specialty-viewers` 已完成本地验收，待独立 Draft PR 审阅；T-039C 尚未启动。
-- [ ] **T-039C 晶体与 NaCl 周期工作台**：迁移最小 `CrystalControls`，压缩晶体 / NaCl 状态信息，保持全部周期与配位算法。
+- [x] **T-039B 专题展示 Viewer**（2026-08-10）：从合并后的 `main` 独立实施；覆盖极性、σ/π 键、三类成键基础、乙烯 / 苯 / 乙炔和有机共面共 10 个公开模块。删除 7 个旧教学 Panel 与无消费者长文数据，保留全部真实模式、轨道 / 标签 / 平面 / 角弧 / 动画和渲染参数；控制密度适中的专题在 `xl` 以上使用大 Viewer + 304px Inspector，杂化 / 成键基础使用 360px 高密度 Inspector，低于 `xl` 全部纵向。PR #3 已合并，merge commit `c3e6876`。
+- [x] **T-039C 晶体与 NaCl 周期工作台**（2026-08-13）：17 份晶体迁移最小 `CrystalControls` 并补齐 `CrystalInfo`，删除 `CrystalKnowledgePanel`，统一全宽 Viewer → 首层真实控制 → 默认折叠信息；NaCl 保留 N=1/2/3、选择 / 六配位 / ghost / 隔离，边框移入单层二级 Disclosure，周期计数压缩并折叠。全部周期与配位算法、3D 几何和 Darwin 快照保持不变；长 `CrystalTeaching` 只作临时兼容，留给 T-039D 删除。
 - [ ] **T-039D 拼装实验室、目录与全局清理**：压缩动态反馈和目录文案，清理最终无消费者的数据字段，并在 macOS 集中审核 Darwin 快照。
 - **阶段门**：A～D 各自独立 PR；前一阶段未合并，不启动下一阶段。
 

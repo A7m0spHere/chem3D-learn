@@ -94,8 +94,8 @@ export function GraphiteCell({
 
   const cameraPosition = molecule.rendering?.cameraPosition ?? [3.2, 2.35, 3.7];
   const cameraFov = molecule.rendering?.cameraFov ?? 39;
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
-  const hasPiElectronMode = Boolean(molecule.crystalTeaching?.viewModes.some((mode) => mode.id === "piElectron"));
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
+  const hasPiElectronMode = Boolean(molecule.crystalControls?.viewModes.some((mode) => mode.id === "piElectron"));
   const showLayerPlanes = viewMode === "layer" || viewMode === "comparison" || viewMode === "interlayerForce";
   const showInterlayer = viewMode === "interlayerForce";
   const showPiCloud = viewMode === "piElectron";
@@ -108,8 +108,8 @@ export function GraphiteCell({
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}
-      summary={activeMode?.bodyZh ?? molecule.summaryZh}
-      title={`${molecule.formula}｜${activeMode?.titleZh ?? "平行层状结构"}`}
+      summary={molecule.summaryZh}
+      title={`${molecule.formula}｜${activeMode?.labelZh ?? "层状结构"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
       <Canvas

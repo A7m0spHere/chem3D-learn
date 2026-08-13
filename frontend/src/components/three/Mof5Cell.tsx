@@ -93,16 +93,13 @@ export function Mof5Cell({
   showLabels,
   loading = false,
 }: Mof5CellProps) {
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
-  const activeStage = molecule.crystalTeaching?.voidStages?.find((stage) => stage.id === voidStage);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
+  const activeStage = molecule.crystalControls?.voidStages?.find((stage) => stage.id === voidStage);
   const isVoidMode = viewMode === "voids";
   const camera = getCameraPreset(viewMode);
   const displayTitle = isVoidMode
-    ? activeStage?.titleZh ?? activeMode?.titleZh ?? "孔隙与客体"
-    : activeMode?.titleZh ?? "立方 pcu 拓扑框架";
-  const displaySummary = isVoidMode && activeStage
-    ? activeStage.bodyZh
-    : activeMode?.bodyZh ?? molecule.summaryZh;
+    ? `${activeMode?.labelZh ?? "孔隙与客体"}｜${activeStage?.labelZh ?? "裸框架"}`
+    : activeMode?.labelZh ?? "立方拓扑";
 
   return (
     <ThreeViewerFrame
@@ -111,7 +108,7 @@ export function Mof5Cell({
       loading={loading}
       meta="拖拽旋转 · 标签只显示当前焦点"
       stageTestId="mof5-canvas"
-      summary={displaySummary}
+      summary={molecule.summaryZh}
       title={`MOF-5｜${displayTitle}`}
       viewerTestId="mof5-viewer"
     >

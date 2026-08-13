@@ -20,6 +20,19 @@ async function waitForViewerReady(page: import("@playwright/test").Page, testid:
   await expect(viewer.locator("canvas")).toBeVisible({ timeout: 30_000 });
 }
 
+function collectUnexpectedErrors(
+  page: import("@playwright/test").Page,
+  errors: string[],
+) {
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    const sourceUrl = message.location().url;
+    if (message.type() === "error" && !sourceUrl.endsWith("/favicon.ico")) {
+      errors.push(message.text());
+    }
+  });
+}
+
 async function clickBoundaryDisplayCopy(page: import("@playwright/test").Page) {
   const stage = page.getByTestId("nacl-periodic-2-canvas");
   const box = await stage.boundingBox();
@@ -74,10 +87,7 @@ test.describe("NaCl 周期探索工作台", () => {
   test("默认教学模式、入口与周期数量、边框三态、返回恢复、切模块重置", async ({ page }) => {
     test.setTimeout(120_000);
     const errors: string[] = [];
-    page.on("pageerror", (err) => errors.push(err.message));
-    page.on("console", (msg) => {
-      if (msg.type() === "error") errors.push(msg.text());
-    });
+    collectUnexpectedErrors(page, errors);
 
     await page.goto("/module/nacl-crystal");
 
@@ -87,27 +97,31 @@ test.describe("NaCl 周期探索工作台", () => {
 
     // 2. 现有「六配位」「粒子计数」按钮仍可用。
     await page.getByRole("button", { exact: true, name: "六配位" }).click();
-    await expect(page.getByText("NaCl｜最近邻配位关系", { exact: true })).toBeVisible();
+    await expect(page.getByText("NaCl｜六配位", { exact: true })).toBeVisible();
     await page.getByRole("button", { exact: true, name: "粒子计数" }).click();
-    await expect(page.getByText("NaCl｜均摊法计数", { exact: true })).toBeVisible();
+    await expect(page.getByText("NaCl｜粒子计数", { exact: true })).toBeVisible();
 
-    // 教学模式下右侧是 CrystalKnowledgePanel（含「晶胞组成」）。
-    await expect(page.getByText("晶胞组成", { exact: true })).toBeVisible();
+    // 教学模式只保留默认折叠的 CrystalInfo。
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText("晶体信息");
 
     // 3. 点击「周期探索」进入新 Viewer（默认 2×2×2）。
     await page.getByTestId("workspace-enter-periodic").click();
     await waitForViewerReady(page, "nacl-periodic-2-viewer");
     await expect(page.getByTestId("nacl-periodic-2-viewer")).toBeVisible();
 
-    // 周期模式下右侧是 NaClPeriodicPanel（含「当前模型状态」）。
-    await expect(page.getByText("当前模型状态", { exact: true })).toBeVisible();
+    // 周期模式保留首层复制控制，计数信息默认折叠。
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText("周期结构信息");
+    await expect(page.getByTestId("structure-info-toggle")).toHaveAttribute("aria-expanded", "false");
     await expect(page.getByTestId("workspace-size-group")).toContainText("观察范围");
-    await expect(page.getByTestId("workspace-frame-group")).toContainText("晶胞边框");
+    await expect(page.getByTestId("workspace-frame-settings-toggle")).toHaveAttribute("aria-expanded", "false");
     await expect(
       page.getByTestId("nacl-periodic-2-canvas").getByRole("img"),
     ).toHaveAttribute("aria-label", /NaCl 2×2×2 周期超晶胞三维视图/);
 
-    // 4. 默认 2×2×2：晶胞 8 / 化学式单位 32 / 独立位点 64 / 显示实例 125。
+    // 4. 默认摘要先表达单胞 → 三轴复制 → 超晶胞；展开后提供精确计数。
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText("沿 a、b、c 各复制 2 次");
+    await page.getByTestId("structure-info-toggle").click();
     await expect(page.getByTestId("periodic-fact-cells")).toContainText("8");
     await expect(page.getByTestId("periodic-fact-formula-units")).toContainText("32");
     await expect(page.getByTestId("periodic-fact-independent")).toContainText(
@@ -139,7 +153,8 @@ test.describe("NaCl 周期探索工作台", () => {
     await expect(page.getByTestId("periodic-fact-display")).toContainText("343");
     await expect(page.getByTestId("workspace-size-3")).toHaveAttribute("aria-pressed", "true");
 
-    // 7. 边框三态可切换，且有稳定 testid 与 aria-pressed。
+    // 7. 边框三态位于单层二级 disclosure，仍可键盘发现和切换。
+    await page.getByTestId("workspace-frame-settings-toggle").click();
     await expect(page.getByTestId("workspace-frame-outer")).toHaveAttribute("aria-pressed", "true");
     await page.getByTestId("workspace-frame-all").click();
     await expect(page.getByTestId("workspace-frame-all")).toHaveAttribute("aria-pressed", "true");
@@ -151,13 +166,12 @@ test.describe("NaCl 周期探索工作台", () => {
     await page.getByTestId("workspace-frame-outer").click();
     await expect(page.getByTestId("workspace-frame-outer")).toHaveAttribute("aria-pressed", "true");
 
-    // 8. 返回教学视图后，原 NaClCell 与原知识面板恢复。
+    // 8. 返回教学视图后，NaClCell 与精简晶体信息恢复。
     await page.getByRole("button", { exact: true, name: "返回教学" }).click();
     await waitForViewerReady(page, "nacl-viewer");
     await expect(page.getByTestId("nacl-viewer")).toBeVisible();
-    await expect(page.getByText("晶胞组成", { exact: true })).toBeVisible();
-    // 返回后不应再有周期面板。
-    await expect(page.getByText("当前模型状态", { exact: true })).toHaveCount(0);
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText("晶体信息");
+    await expect(page.getByText("周期结构信息", { exact: true })).toHaveCount(0);
 
     // 9. 从 NaCl 进入周期探索，再切到其他晶体再返回，工作台状态重置到教学。
     //    用 page.goto 切到金属钠晶体（同晶体类、不同模块），验证不会出现周期面板；
@@ -167,15 +181,15 @@ test.describe("NaCl 周期探索工作台", () => {
     // 切到金属钠晶体：该模块不应出现周期探索入口或周期面板。
     await page.goto("/module/sodium-metal-crystal");
     await expect(page.getByTestId("sodium-metal-viewer")).toBeVisible();
-    await expect(page.getByText("当前模型状态", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("周期结构信息", { exact: true })).toHaveCount(0);
     await expect(page.getByTestId("workspace-enter-periodic")).toHaveCount(0);
 
     // 切回 NaCl：应恢复默认教学模式（教学 Viewer + 知识面板）。
     await page.goto("/module/nacl-crystal");
     await waitForViewerReady(page, "nacl-viewer");
     await expect(page.getByTestId("nacl-viewer")).toBeVisible();
-    await expect(page.getByText("晶胞组成", { exact: true })).toBeVisible();
-    await expect(page.getByText("当前模型状态", { exact: true })).toHaveCount(0);
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText("晶体信息");
+    await expect(page.getByText("周期结构信息", { exact: true })).toHaveCount(0);
 
     // 10. 无 pageerror 与非预期 console error。
     expect(errors).toEqual([]);
@@ -184,10 +198,7 @@ test.describe("NaCl 周期探索工作台", () => {
   test("T-028D：边界副本可真实点击，隔离配位层后拖拽不误清选择", async ({ page }) => {
     test.setTimeout(120_000);
     const errors: string[] = [];
-    page.on("pageerror", (error) => errors.push(error.message));
-    page.on("console", (message) => {
-      if (message.type() === "error") errors.push(message.text());
-    });
+    collectUnexpectedErrors(page, errors);
 
     await page.setViewportSize({ height: 900, width: 1440 });
     await page.goto("/module/nacl-crystal");
@@ -235,10 +246,7 @@ test.describe("NaCl 周期探索工作台", () => {
   }) => {
     test.setTimeout(120_000);
     const errors: string[] = [];
-    page.on("pageerror", (error) => errors.push(error.message));
-    page.on("console", (message) => {
-      if (message.type() === "error") errors.push(message.text());
-    });
+    collectUnexpectedErrors(page, errors);
 
     for (const viewport of [
       { height: 900, width: 1440 },
@@ -265,6 +273,20 @@ test.describe("NaCl 周期探索工作台", () => {
         "workspace-size-1",
         "workspace-size-2",
         "workspace-size-3",
+      ]) {
+        const box = await page.getByTestId(buttonId).boundingBox();
+        expect(box).not.toBeNull();
+        expect(box!.height).toBeGreaterThanOrEqual(44);
+      }
+
+      const frameToggle = page.getByTestId("workspace-frame-settings-toggle");
+      await expect(frameToggle).toHaveAttribute("aria-expanded", "false");
+      const frameToggleBox = await frameToggle.boundingBox();
+      expect(frameToggleBox).not.toBeNull();
+      expect(frameToggleBox!.height).toBeGreaterThanOrEqual(44);
+      await frameToggle.click();
+      await expect(frameToggle).toHaveAttribute("aria-expanded", "true");
+      for (const buttonId of [
         "workspace-frame-outer",
         "workspace-frame-all",
         "workspace-frame-hidden",
@@ -306,10 +328,7 @@ test.describe("NaCl 周期探索工作台", () => {
   test("周期模式粒子选择、仅看配位层、退出选择与切尺寸/切模块自动清除", async ({ page }) => {
     test.setTimeout(120_000);
     const errors: string[] = [];
-    page.on("pageerror", (err) => errors.push(err.message));
-    page.on("console", (msg) => {
-      if (msg.type() === "error") errors.push(msg.text());
-    });
+    collectUnexpectedErrors(page, errors);
 
     await page.goto("/module/nacl-crystal");
     await waitForViewerReady(page, "nacl-viewer");
@@ -363,7 +382,7 @@ test.describe("NaCl 周期探索工作台", () => {
     await clickAnyDisplayInstance(page, "nacl-periodic-3-canvas");
     await page.getByRole("button", { exact: true, name: "返回教学" }).click();
     await waitForViewerReady(page, "nacl-viewer");
-    await expect(page.getByText("晶胞组成", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText("晶体信息");
 
     // 9. 再进入周期探索并选择，切到其他模块再回 NaCl → 选择与隔离重置为无选择/教学。
     await page.getByTestId("workspace-enter-periodic").click();
@@ -374,7 +393,7 @@ test.describe("NaCl 周期探索工作台", () => {
     await expect(page.getByTestId("sodium-metal-viewer")).toBeVisible();
     await page.goto("/module/nacl-crystal");
     await waitForViewerReady(page, "nacl-viewer");
-    await expect(page.getByText("晶胞组成", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("structure-info-disclosure")).toContainText("晶体信息");
     await expect(page.getByTestId("periodic-selection")).toHaveCount(0);
 
     // 10. 无 pageerror 与非预期 console error。

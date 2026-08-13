@@ -69,20 +69,20 @@ export function ZnSPolytypeCell({
 }: ZnSPolytypeCellProps) {
   const [voidPolytype, setVoidPolytype] = useState<Polytype>("zinc-blende");
   const [coordinationCenter, setCoordinationCenter] = useState<CoordinationCenter>("Zn");
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
-  const activeStage = molecule.crystalTeaching?.voidStages?.find((stage) => stage.id === voidStage);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
+  const activeStage = molecule.crystalControls?.voidStages?.find((stage) => stage.id === voidStage);
   const camera = getCameraPreset(viewMode);
   const isVoidMode = viewMode === "voids";
   const isPolyhedronMode = viewMode === "polyhedron";
   const polytypeLabel = voidPolytype === "zinc-blende" ? "闪锌矿" : "纤锌矿";
   const displayTitle = isVoidMode
-    ? `${activeStage?.titleZh ?? activeMode?.titleZh ?? "半填四面体空隙"}｜${polytypeLabel}`
+    ? `${activeMode?.labelZh ?? "半填空隙"}｜${activeStage?.labelZh ?? "S 骨架"}｜${polytypeLabel}`
     : isPolyhedronMode
-      ? `${activeMode?.titleZh ?? "4:4 配位"}｜${coordinationCenter} 中心`
-      : activeMode?.titleZh ?? "ZnS 多晶型对比";
+      ? `${activeMode?.labelZh ?? "4:4 配位"}｜${coordinationCenter} 中心`
+      : activeMode?.labelZh ?? "晶型总览";
   const displaySummary = getDisplaySummary(
     viewMode,
-    isVoidMode && activeStage ? activeStage.bodyZh : activeMode?.bodyZh ?? molecule.summaryZh,
+    molecule.summaryZh,
   );
   const sceneRotation: Vec3 =
     viewMode === "comparison" || viewMode === "counting"

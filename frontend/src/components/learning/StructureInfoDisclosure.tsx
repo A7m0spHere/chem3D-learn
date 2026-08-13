@@ -3,6 +3,7 @@ import { useId, useState } from "react";
 
 export type StructureInfoItem = {
   label: string;
+  testId?: string;
   value: string;
 };
 
@@ -59,7 +60,11 @@ export function StructureInfoDisclosure({
         <div className="border-t border-border px-4 py-4 sm:px-5" id={contentId}>
           <dl className="grid gap-3 @[36rem]:grid-cols-3" data-testid="structure-info-facts">
             {facts.map((fact) => (
-              <div className="rounded-xl bg-background px-4 py-3" key={fact.label}>
+              <div
+                className="rounded-xl bg-background px-4 py-3"
+                data-testid={fact.testId}
+                key={fact.label}
+              >
                 <dt className="text-xs font-semibold text-text-secondary">{fact.label}</dt>
                 <dd className="mt-1 text-sm font-semibold leading-6 text-text-primary">{fact.value}</dd>
               </div>

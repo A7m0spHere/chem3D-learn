@@ -53,6 +53,27 @@
     "notesZh": "用于说明八面体空隙的六配位空间形状，坐标为教学示意。",
     "verified": true
   },
+  "crystal": {
+    "typeZh": "密堆积空隙",
+    "latticeZh": "面心立方密堆积中的八面体空隙教学模型",
+    "coordination": "6",
+    "unitCellCount": {
+      "voids": 4
+    },
+    "formulaExplanationZh": "体心空隙 1 个，12 个棱心空隙各贡献 1/4，共 4 个；面心立方中八面体空隙数与球数相同。"
+  },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "骨架" },
+      { "id": "voids", "labelZh": "空隙" },
+      { "id": "counting", "labelZh": "计数" }
+    ],
+    "voidStages": [
+      { "id": "framework", "labelZh": "骨架" },
+      { "id": "voids", "labelZh": "标出空隙" },
+      { "id": "filled", "labelZh": "填入小球" }
+    ]
+  },
   "crystalTeaching": {
     "structureTypeZh": "密堆积空隙",
     "modelZh": "八面体空隙教学模型",

@@ -1,11 +1,20 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-10（Codex，完成 T-039B 专题展示 Viewer 3D-first 收缩）
+> 最后更新：2026-08-13（Codex，完成 T-039C 晶体与 NaCl 周期工作台 3D-first 收缩）
 
 ## 一句话定位
 
 Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学教师课堂演示的前端优先 3D 结构化学学习网站。详见 `docs/PROJECT_BRIEF.md`。
+
+## T-039C 晶体与 NaCl 周期工作台收缩结果（2026-08-13）
+
+- 从已合并 T-039B 的 `main@c3e6876` 开始，17 份公开晶体记录新增最小 `crystalControls`：模式与空隙阶段只保留稳定 ID 和短标签；全部晶体补齐 `CrystalInfo`，长 `CrystalTeaching` 暂留兼容但已没有生产 UI 消费者，交给 T-039D 最终删除。
+- 晶体详情统一为全宽 Viewer → 模式工具栏 → 默认折叠“晶体信息”。删除 `CrystalKnowledgePanel` 及观察顺序、常见误区、长讲解、教学提示；空隙三阶段直接进入模式工具栏首层，不再藏在长面板中。
+- NaCl 教学 Viewer 保留六配位、粒子计数、标签和周期探索入口。周期模式保留 N=1/2/3、粒子选择、六配位、ghost、隔离与退出选择；晶胞边框移入单层二级 Disclosure，周期计数改为默认折叠的精简信息，未选择时只显示短操作提示。
+- 未修改 3D 几何、原子 / 离子坐标、化学键、配位算法、NaCl 周期身份、相机、渲染参数、依赖、版本或 Darwin 快照；CaF₂ 已核实计数结论转入 `CrystalInfo.formulaExplanationZh`，避免 UI 依赖旧教学长文。
+- 实测 1920×1080、1440×900、1366×768、1280×800、1024×768、390×844 均无横向溢出；晶体长面板从桌面约 1499px、移动端约 2207px 收缩为默认 70px Disclosure（NaCl 移动端 94px），Viewer 仍保持 1216 / 960 / 358px 主宽度。
+- 验证：lint、build、logic 163 / 163、新增晶体 3D-first 系统 Chrome 4 / 4、NaCl 周期工作台 4 / 4、普通分子 / 专题 / 状态重置回归 19 / 19、production 4 / 4 通过。Windows 未运行或更新 Darwin 快照，macOS 集中视觉审核留给 T-039D。
 
 ## T-039B 专题展示 Viewer 收缩结果（2026-08-10）
 
@@ -15,7 +24,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 专题模式数据已删除 Panel 专用的长描述、要点、教学 / 考试提示和事实列表，只保留模式 ID、短标签 / 标题、Viewer 必需标题与摘要，以及折叠信息所需短状态。轨道、标签、引线、参考平面、键角弧、σ / π 重叠、杂化进度 / 渲染方式和有机单键旋转均保持真实 3D 分支。
 - 专题 Toolbar 的 `size="sm"` 高度覆盖问题已限定修正为 `!h-11`，确保移动端模式和状态按钮至少 44px；未改公共 Button、3D 几何、坐标、化学键、相机或渲染算法。
 - 验证：lint、build、logic 162 / 162、系统 Chrome 专题行为 8 / 8、跨模块状态 5 / 5、production 4 / 4 通过；1280×720 与 1552×926 验证 304px 常规 rail 和 360px 杂化高密度 rail，1024×768 与 390×844 验证纵向顺序、移动端两列按钮、键盘 Disclosure 和无横向溢出。Windows 未运行或更新 Darwin 快照。
-- T-039C / D 尚未启动；晶体、NaCl 周期工作台、拼装实验室、Modules / Paths 与 Exam 本阶段未改。
+- T-039B 已通过 PR #3 合并，merge commit 为 `c3e6876`；T-039C 从该基线开始。拼装实验室、Modules / Paths 与 Exam 留给 T-039D。
 
 ## T-039A 3D-first 收缩结果（2026-08-10）
 
@@ -434,7 +443,7 @@ T-024 已确认旧 `three` 688 KB 警告背后存在真实生产回归：对象�
 
 ## 下一步（按优先级，见 docs/TASKS.md）
 
-下一项是 **T-039B 独立 Draft PR 的维护者视觉审阅**。T-039C 尚未启动；只有 B 合并后，才从最新 `main` 建新分支处理晶体与 NaCl 周期工作台。不要恢复 NH₃ 引导、朋友 / 同学 Alpha、选择题或题库路线。
+下一项是 **T-039D 拼装实验室、目录与全局清理**：压缩功能性动态反馈与目录文案，删除 T-039C 已停止消费的 `CrystalTeaching` 长字段，并在 macOS 集中审核 Darwin 快照。不要恢复 NH₃ 引导、朋友 / 同学 Alpha、选择题或题库路线。
 
 已收口的历史优先项（仅供追溯）：
 - 引线标签扩展系列（T-011~T-019）**已全部收口**：MOF-5/MXene/ReN₃/MetalClosePacking/PBA/ZincMetal/BaTiO3 已按标准转换恒显遮挡标签；Graphite（T-016）与 ZnS（T-017）逐条核对后判定**无需改动**。

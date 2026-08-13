@@ -43,6 +43,24 @@
     "notesZh": "用于说明人教版高中选择性必修 2 中六方最密堆积、十二配位和六方晶胞平均占有计数关系；坐标为教学示意。",
     "verified": true
   },
+  "crystal": {
+    "typeZh": "金属晶体",
+    "latticeZh": "六方最密堆积教学模型",
+    "coordination": "12",
+    "unitCellCount": {
+      "Zn": 6
+    },
+    "formulaExplanationZh": "12 个顶角 Zn 各贡献 1/6，上下 2 个面心 Zn 各贡献 1/2，另有 3 个内部 Zn，合计 6 个。"
+  },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "晶胞" },
+      { "id": "layer", "labelZh": "分层堆积" },
+      { "id": "coordination", "labelZh": "配位环境" },
+      { "id": "counting", "labelZh": "晶胞计数" },
+      { "id": "metallicBond", "labelZh": "金属键" }
+    ]
+  },
   "crystalTeaching": {
     "currentModelZh": "金属锌晶体结构",
     "structureTypeZh": "金属晶体",

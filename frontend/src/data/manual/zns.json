@@ -60,6 +60,21 @@
     "notesZh": "采用理想闪锌矿与理想纤锌矿教学坐标。纤锌矿取 u=3/8、c/a=√(8/3)；真实 ZnS 可有轻微四面体畸变。本模型不描述能带、相稳定性或 Zn-S 键的离子性与共价性比例。",
     "verified": true
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "comparison", "labelZh": "晶型总览" },
+      { "id": "fccStacking", "labelZh": "闪锌矿｜ABC" },
+      { "id": "hcpStacking", "labelZh": "纤锌矿｜AB" },
+      { "id": "voids", "labelZh": "半填空隙" },
+      { "id": "polyhedron", "labelZh": "4:4 配位" },
+      { "id": "counting", "labelZh": "晶胞计数" }
+    ],
+    "voidStages": [
+      { "id": "framework", "labelZh": "S 骨架" },
+      { "id": "voids", "labelZh": "全部空隙" },
+      { "id": "filled", "labelZh": "Zn 占一半" }
+    ]
+  },
   "crystalTeaching": {
     "currentModelZh": "ZnS 闪锌矿 / 纤锌矿对比",
     "structureTypeZh": "二元四面体配位晶体",

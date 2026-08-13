@@ -85,16 +85,15 @@ export function NaClCell({
   );
   const cameraPosition = molecule.rendering?.cameraPosition ?? [3.2, 2.8, 4.2];
   const cameraFov = molecule.rendering?.cameraFov ?? 42;
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
-  const activeStage = molecule.crystalTeaching?.voidStages?.find((stage) => stage.id === voidStage);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
+  const activeStage = molecule.crystalControls?.voidStages?.find((stage) => stage.id === voidStage);
   const isVoidMode = viewMode === "voids";
   const groupScale = isVoidMode ? 0.7 : 0.8;
   const groupPosition: [number, number, number] = isVoidMode ? [0, -0.12, 0] : [0, -0.08, 0];
 
-  const displayTitle = isVoidMode && activeStage ? activeStage.titleZh : activeMode?.titleZh ?? "完整晶胞";
-  const displaySummary = isVoidMode && activeStage
-    ? activeStage.bodyZh
-    : activeMode?.bodyZh ?? molecule.summaryZh;
+  const displayTitle = isVoidMode && activeStage
+    ? `${activeMode?.labelZh ?? "八面体空隙"}｜${activeStage.labelZh}`
+    : activeMode?.labelZh ?? "晶胞结构";
 
   // R3F 的 onCreated 在事件层已经连接后才触发。切走前等待这个信号，可避免旧
   // Canvas 尚在异步创建时被卸载，导致其内部事件目标 ref 变成 null。
@@ -109,7 +108,7 @@ export function NaClCell({
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}
-      summary={displaySummary}
+      summary={molecule.summaryZh}
       title={`${molecule.formula}｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >

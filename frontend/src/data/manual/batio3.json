@@ -66,6 +66,16 @@
     "unitCellCount": { "Ba": 1, "Ti": 1, "O": 3 },
     "formulaExplanationZh": "8 个顶点 Ba²⁺ 各贡献 1/8，共 1 个；体心 Ti⁴⁺ 完整属于本晶胞，共 1 个；6 个面心 O²⁻ 各贡献 1/2，共 3 个，因此化学式为 BaTiO₃。"
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "晶胞结构" },
+      { "id": "polyhedron", "labelZh": "TiO₆ 八面体" },
+      { "id": "bSiteCoordination", "labelZh": "Ti⁴⁺ 6配位" },
+      { "id": "aSiteCoordination", "labelZh": "Ba²⁺ 12配位" },
+      { "id": "counting", "labelZh": "晶胞计数" },
+      { "id": "originShift", "labelZh": "等价原点" }
+    ]
+  },
   "crystalTeaching": {
     "currentModelZh": "理想立方教学模型",
     "structureTypeZh": "钙钛矿型氧化物",

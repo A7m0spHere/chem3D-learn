@@ -237,7 +237,22 @@
       "Ca": 4,
       "F": 8
     },
-    "formulaExplanationZh": "8 个顶点 Ca²⁺ 各贡献 1/8，共 1 个；6 个面心 Ca²⁺ 各贡献 1/2，共 3 个；合计 4 个 Ca²⁺。8 个 F⁻ 全部位于晶胞内部，不参与均摊，共 8 个。Ca : F = 4 : 8 = 1 : 2，与化学式 CaF₂ 一致。"
+    "formulaExplanationZh": "8 个顶点 Ca²⁺ 各贡献 1/8，共 1 个；6 个面心 Ca²⁺ 各贡献 1/2，共 3 个；合计 4 个 Ca²⁺。8 个 F⁻ 全部位于晶胞内部，不参与均摊，共 8 个。Ca : F = 4 : 8 = 1 : 2，与化学式 CaF₂ 一致；从两端统计同一批最近邻接触，有 4 × 8 = 8 × 4。"
+  },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "晶胞结构" },
+      { "id": "coordination", "labelZh": "Ca²⁺ 8配位" },
+      { "id": "coordinationAnion", "labelZh": "F⁻ 4配位" },
+      { "id": "counting", "labelZh": "晶胞计数" },
+      { "id": "voids", "labelZh": "四面体空隙" },
+      { "id": "comparison", "labelZh": "反萤石对比" }
+    ],
+    "voidStages": [
+      { "id": "framework", "labelZh": "Ca²⁺ 骨架" },
+      { "id": "voids", "labelZh": "显示空隙" },
+      { "id": "filled", "labelZh": "F⁻ 全部填入" }
+    ]
   },
   "crystalTeaching": {
     "structureTypeZh": "离子晶体",

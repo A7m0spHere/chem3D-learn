@@ -73,15 +73,14 @@ export function PbaCell({
     () => new Map(molecule.atoms.map((atom) => [atom.id, atom])),
     [molecule.atoms],
   );
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
-  const activeStage = molecule.crystalTeaching?.voidStages?.find((stage) => stage.id === voidStage);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
+  const activeStage = molecule.crystalControls?.voidStages?.find((stage) => stage.id === voidStage);
   const cameraPosition = molecule.rendering?.cameraPosition ?? [2.55, 2.15, 2.85];
   const cameraFov = molecule.rendering?.cameraFov ?? 38;
   const isVoidMode = viewMode === "voids";
-  const displayTitle = isVoidMode && activeStage ? activeStage.titleZh : activeMode?.titleZh ?? "框架晶胞";
-  const displaySummary = isVoidMode && activeStage
-    ? activeStage.bodyZh
-    : activeMode?.bodyZh ?? molecule.summaryZh;
+  const displayTitle = isVoidMode && activeStage
+    ? `${activeMode?.labelZh ?? "空位水合"}｜${activeStage.labelZh}`
+    : activeMode?.labelZh ?? "框架晶胞";
   const visibleAtoms = molecule.atoms.filter((atom) => shouldRenderAtom(atom, viewMode, voidStage));
 
   return (
@@ -89,7 +88,7 @@ export function PbaCell({
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}
-      summary={displaySummary}
+      summary={molecule.summaryZh}
       title={`PBA｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >

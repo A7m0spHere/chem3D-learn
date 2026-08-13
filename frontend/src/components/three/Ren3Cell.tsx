@@ -68,7 +68,7 @@ export function Ren3Cell({
   showLabels,
   loading = false,
 }: Ren3CellProps) {
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const camera = getCameraPreset(viewMode);
 
   return (
@@ -78,8 +78,8 @@ export function Ren3Cell({
       loading={loading}
       meta="拖拽旋转 · 理论预测模型"
       stageTestId="ren3-canvas"
-      summary={activeMode?.bodyZh ?? molecule.summaryZh}
-      title={`ReN₃｜${activeMode?.titleZh ?? "Imm2 高压预测相"}`}
+      summary={molecule.summaryZh}
+      title={`ReN₃｜${activeMode?.labelZh ?? "高压窗口"}`}
       viewerTestId="ren3-viewer"
     >
       <Canvas

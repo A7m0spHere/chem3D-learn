@@ -245,6 +245,14 @@
     },
     "formulaExplanationZh": "8 个顶点 Cl- 各贡献 1/8，共 1 个 Cl-；体心 Cs+ 完整属于该晶胞，共 1 个 Cs+，所以化学式为 CsCl。"
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "晶胞结构" },
+      { "id": "coordination", "labelZh": "配位关系" },
+      { "id": "counting", "labelZh": "晶胞计数" },
+      { "id": "comparison", "labelZh": "结构对比" }
+    ]
+  },
   "crystalTeaching": {
     "structureTypeZh": "离子晶体",
     "modelZh": "CsCl 型",

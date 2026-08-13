@@ -41,7 +41,7 @@ export function VoidStructureCell({
   );
   const cameraPosition = molecule.rendering?.cameraPosition ?? [2.8, 2.4, 3.2];
   const cameraFov = molecule.rendering?.cameraFov ?? 42;
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const isVoidMode = viewMode === "voids";
   const showCenterMarker = isVoidMode
     ? voidStage !== "framework"
@@ -67,8 +67,8 @@ export function VoidStructureCell({
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}
-      summary={activeMode?.bodyZh ?? molecule.summaryZh}
-      title={`${molecule.nameZh}｜${activeMode?.titleZh ?? "空间骨架"}`}
+      summary={molecule.summaryZh}
+      title={`${molecule.nameZh}｜${activeMode?.labelZh ?? "空间骨架"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
         <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>

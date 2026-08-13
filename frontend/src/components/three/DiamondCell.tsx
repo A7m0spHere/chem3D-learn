@@ -102,8 +102,8 @@ export function DiamondCell({
   );
   const cameraPosition = molecule.rendering?.cameraPosition ?? [2.95, 2.35, 3.45];
   const cameraFov = molecule.rendering?.cameraFov ?? 42;
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
-  const activeStage = molecule.crystalTeaching?.voidStages?.find((stage) => stage.id === voidStage);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
+  const activeStage = molecule.crystalControls?.voidStages?.find((stage) => stage.id === voidStage);
   const useCompactLabels = useCompactCrystalLabels();
   const isVoidMode = viewMode === "voids";
   const visibleBonds = isVoidMode && voidStage !== "filled"
@@ -112,17 +112,16 @@ export function DiamondCell({
       ? molecule.bonds.filter((bond) => coordinationFocusBondIds.has(bond.id))
       : molecule.bonds;
 
-  const displayTitle = isVoidMode && activeStage ? activeStage.titleZh : activeMode?.titleZh ?? "完整金刚石晶胞";
-  const displaySummary = isVoidMode && activeStage
-    ? activeStage.bodyZh
-    : activeMode?.bodyZh ?? molecule.summaryZh;
+  const displayTitle = isVoidMode && activeStage
+    ? `${activeMode?.labelZh ?? "四面体空隙"}｜${activeStage.labelZh}`
+    : activeMode?.labelZh ?? "晶胞结构";
 
   return (
     <ThreeViewerFrame
       loading={loading}
       meta="拖拽旋转 · 标签可按需开启"
       stageTestId={`${molecule.id}-canvas`}
-      summary={displaySummary}
+      summary={molecule.summaryZh}
       title={`${molecule.formula}｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >

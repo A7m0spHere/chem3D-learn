@@ -39,6 +39,16 @@
     "notesZh": "仅模拟 2014 年结构搜索提出的 Imm2-ReN₃。晶格参数与分数坐标采用论文表中的 0 GPa 松弛参考值；压力视图只表达计算稳定范围，不模拟压力下的连续晶格收缩。",
     "verified": true
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "pressure", "labelZh": "高压窗口" },
+      { "id": "cell", "labelZh": "正交晶胞" },
+      { "id": "covalentNetwork", "labelZh": "N₃ 单元" },
+      { "id": "coordination", "labelZh": "Re 七配位" },
+      { "id": "polyhedron", "labelZh": "多面体网络" },
+      { "id": "counting", "labelZh": "组成与性质" }
+    ]
+  },
   "crystalTeaching": {
     "currentModelZh": "Imm2-ReN₃ 理论预测相",
     "structureTypeZh": "氮富集高压氮化物三维多面体网络",

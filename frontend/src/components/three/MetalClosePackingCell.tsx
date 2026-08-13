@@ -49,9 +49,9 @@ export function MetalClosePackingCell({
   showLabels,
   loading = false,
 }: MetalClosePackingCellProps) {
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const camera = getCameraPreset(viewMode);
-  const summary = getSummary(viewMode, activeMode?.bodyZh ?? molecule.summaryZh);
+  const summary = getSummary(viewMode, molecule.summaryZh);
   const sceneRotation: Vec3 =
     viewMode === "counting" || viewMode === "comparison"
       ? [0.08, 0, 0]
@@ -64,7 +64,7 @@ export function MetalClosePackingCell({
       meta="拖拽旋转 · 滚轮缩放"
       stageTestId="metal-close-packing-canvas"
       summary={summary}
-      title={`${molecule.formula}｜${activeMode?.titleZh ?? "金属晶体密堆积"}`}
+      title={`${molecule.formula}｜${activeMode?.labelZh ?? "金属晶体密堆积"}`}
       viewerTestId="metal-close-packing-viewer"
     >
       <Canvas

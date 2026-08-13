@@ -22,7 +22,7 @@ function getDefaultCrystalViewMode(moduleId: string | undefined): CrystalViewMod
   return moduleId === "ren3-high-pressure-nitride" ? "pressure" : "cell";
 }
 
-export type CrystalControls = {
+export type CrystalControlState = {
   crystalViewMode: CrystalViewMode;
   crystalModelStyle: CrystalModelStyle;
   voidStage: CrystalVoidStage;
@@ -38,7 +38,7 @@ export type CrystalControls = {
  * 管理晶体 viewer 的视图模式、模型风格、空隙阶段与标签开关。
  * `moduleId` 变化时（SPA 切换模块）自动重置回该模块的默认值。
  */
-export function useCrystalControls(moduleId: string | undefined): CrystalControls {
+export function useCrystalControls(moduleId: string | undefined): CrystalControlState {
   const [crystalViewMode, setCrystalViewMode] = useState<CrystalViewMode>(() =>
     getDefaultCrystalViewMode(moduleId),
   );

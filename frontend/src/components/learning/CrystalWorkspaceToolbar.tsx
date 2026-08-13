@@ -1,4 +1,5 @@
-import { ArrowLeft, Eye, Grid3x3, Layers3, Sparkles, X } from "lucide-react";
+import { useId, useState } from "react";
+import { ArrowLeft, ChevronDown, Eye, Grid3x3, Layers3, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type {
   CrystalCellFrameMode,
@@ -48,11 +49,15 @@ export function CrystalWorkspaceToolbar({
   onToggleIsolate,
   onClearSelection,
 }: CrystalWorkspaceToolbarProps) {
+  const [showFrameControls, setShowFrameControls] = useState(false);
+  const frameControlsId = useId();
+  const activeFrameLabel = FRAME_MODES.find((mode) => mode.id === cellFrameMode)?.label;
+
   return (
     <div className="chem-control-console w-full">
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-end">
         <Button
-          className="chem-touch-button !h-11 shrink-0"
+          className="chem-touch-button !h-11 w-full sm:w-auto"
           onClick={onExitPeriodic}
           size="sm"
           title="返回 NaCl 教学视图"
@@ -63,7 +68,7 @@ export function CrystalWorkspaceToolbar({
           返回教学
         </Button>
         <fieldset
-          className="min-w-0 flex-[1_1_280px] border-0 p-0"
+          className="min-w-0 border-0 p-0"
           data-testid="workspace-size-group"
         >
           <legend className="mb-1.5 text-xs font-semibold text-text-secondary">观察范围</legend>
@@ -88,11 +93,32 @@ export function CrystalWorkspaceToolbar({
             })}
           </div>
         </fieldset>
-        <fieldset
-          className="min-w-0 flex-[1_1_300px] border-0 p-0"
-          data-testid="workspace-frame-group"
+        <Button
+          aria-controls={frameControlsId}
+          aria-expanded={showFrameControls}
+          className="chem-touch-button !h-11 w-full sm:w-auto"
+          data-testid="workspace-frame-settings-toggle"
+          onClick={() => setShowFrameControls((value) => !value)}
+          size="sm"
+          title={`晶胞边框：${activeFrameLabel}`}
+          type="button"
+          variant="ghost"
         >
-          <legend className="mb-1.5 text-xs font-semibold text-text-secondary">晶胞边框</legend>
+          <Layers3 className="h-4 w-4" aria-hidden="true" />
+          边框：{activeFrameLabel}
+          <ChevronDown
+            aria-hidden="true"
+            className={`h-4 w-4 transition-transform ${showFrameControls ? "rotate-180" : ""}`}
+          />
+        </Button>
+      </div>
+      {showFrameControls ? (
+        <fieldset
+          className="mt-3 min-w-0 border-0 border-t border-border/60 p-0 pt-2"
+          data-testid="workspace-frame-group"
+          id={frameControlsId}
+        >
+          <legend className="px-1 text-xs font-semibold text-text-secondary">晶胞边框</legend>
           <div className="grid grid-cols-3 gap-2">
             {FRAME_MODES.map(({ id, label, icon: Icon }) => {
               const isActive = id === cellFrameMode;
@@ -115,7 +141,7 @@ export function CrystalWorkspaceToolbar({
             })}
           </div>
         </fieldset>
-      </div>
+      ) : null}
       {/* 选择存在时的配位层控件，作为独立分组换行显示。 */}
       {hasSelection ? (
         <fieldset

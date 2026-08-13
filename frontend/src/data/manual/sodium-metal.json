@@ -162,6 +162,14 @@
     },
     "formulaExplanationZh": "8 个顶点 Na 原子各贡献 1/8，共 1 个 Na 原子；体心 Na 原子完整属于该晶胞，共 1 个 Na 原子，因此一个晶胞中实际含有 2 个 Na 原子。"
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "晶胞结构" },
+      { "id": "coordination", "labelZh": "最近邻关系" },
+      { "id": "counting", "labelZh": "晶胞计数" },
+      { "id": "metallicBond", "labelZh": "金属键示意" }
+    ]
+  },
   "crystalTeaching": {
     "structureTypeZh": "金属晶体",
     "modelZh": "BCC 体心立方",

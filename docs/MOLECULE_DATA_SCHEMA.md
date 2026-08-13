@@ -44,6 +44,8 @@ type MoleculeRecord = {
   keyAngles: AngleSpec[];
   rendering?: MoleculeRendering;
   metadata?: MoleculeMetadata;
+  crystal?: CrystalInfo;
+  crystalControls?: CrystalControls;
   crystalTeaching?: CrystalTeaching;
 };
 ```
@@ -62,7 +64,9 @@ Field semantics:
 - `keyAngles`: teaching-focused angle annotations.
 - `rendering`: optional viewer tuning for camera, atom scale, bond radius, and labels.
 - `metadata`: optional source and verification metadata.
-- `crystalTeaching`: optional crystal-specific teaching modes, observation steps, counting copy, and void guidance.
+- `crystal`: concise crystal identity, lattice / model, coordination, unit-cell counts, and composition explanation consumed by the default-collapsed CrystalInfo.
+- `crystalControls`: minimal runtime controls. Each view mode or void stage contains only a stable ID and short Chinese label.
+- `crystalTeaching`: deprecated compatibility data. Production UI no longer consumes its observation steps, long mode prose, tips, mistakes, or void guidance; T-039D owns final field and data deletion.
 
 ## Atom
 
@@ -180,20 +184,29 @@ Field semantics:
 - `notesZh`: Chinese notes for limitations, simplifications, or teaching intent.
 - `verified`: whether chemistry content has been manually reviewed.
 
-## CrystalTeaching Void Guidance
+## CrystalInfo and CrystalControls
 
-Crystal modules that use the shared void-mode panel may override its generic hints:
+Public crystal records use concise facts and short runtime controls:
 
 ```ts
-type CrystalTeaching = {
-  voidStages?: CrystalVoidStageTeaching[];
-  voidGuidanceZh?: string[];
-  // Other crystal teaching fields omitted here.
+type CrystalInfo = {
+  typeZh: string;
+  latticeZh: string;
+  coordination: string;
+  unitCellCount: Record<string, number>;
+  formulaExplanationZh: string;
+};
+
+type CrystalControls = {
+  viewModes: Array<{ id: CrystalViewMode; labelZh: string }>;
+  voidStages?: Array<{ id: CrystalVoidStage; labelZh: string }>;
 };
 ```
 
-- `voidStages`: optional ordered interaction stages such as framework, visible voids, and filled sites.
-- `voidGuidanceZh`: optional module-specific explanation shown below the stage controls. Use it when the shared “center marker” wording does not match the rendered model, for example a porous framework that visualizes pore volume and guest molecules.
+- `CrystalInfo` is the only public crystal fact source for the shared disclosure. Keep its copy concise and chemically reviewed.
+- `viewModes` and `voidStages` only select real Viewer branches. Titles and summaries should come from the short label plus `summaryZh`, not from duplicated teaching paragraphs.
+- Void stages such as framework, visible voids, and filled sites belong to first-level interaction when the active mode needs them.
+- Do not add `titleZh`, `bodyZh`, observation guides, common mistakes, teaching tips, or course steps back into `CrystalControls`.
 
 ## Data Rules
 

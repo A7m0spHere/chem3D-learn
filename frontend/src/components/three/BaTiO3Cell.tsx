@@ -75,7 +75,7 @@ export function BaTiO3Cell({
     [molecule.atoms],
   );
   const shiftedAtoms = useMemo(() => deriveTiCornerCell(molecule.atoms), [molecule.atoms]);
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const isOriginMode = viewMode === "originShift";
   const usesTiCornerCell = isOriginMode && originConvention === "ti-corner";
   const displayAtoms = usesTiCornerCell ? shiftedAtoms : molecule.atoms;
@@ -87,9 +87,8 @@ export function BaTiO3Cell({
   const cameraFov = molecule.rendering?.cameraFov ?? 40;
   const originLabel = originConvention === "ba-corner" ? "Ba 顶点画法" : "Ti 顶点画法";
   const displayTitle = isOriginMode
-    ? `${activeMode?.titleZh ?? "两种等价晶胞画法"}｜${originLabel}`
-    : activeMode?.titleZh ?? "理想立方钙钛矿晶胞";
-  const displaySummary = activeMode?.bodyZh ?? molecule.summaryZh;
+    ? `${activeMode?.labelZh ?? "等价原点"}｜${originLabel}`
+    : activeMode?.labelZh ?? "晶胞结构";
 
   return (
     <ThreeViewerFrame
@@ -106,7 +105,7 @@ export function BaTiO3Cell({
         )
       }
       stageTestId="batio3-canvas"
-      summary={displaySummary}
+      summary={molecule.summaryZh}
       title={`BaTiO₃｜${displayTitle}`}
       viewerTestId="batio3-viewer"
     >

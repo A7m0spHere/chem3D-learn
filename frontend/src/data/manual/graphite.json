@@ -97,6 +97,22 @@
     "notesZh": "用于说明石墨层状结构、层内共价键、层间范德华力和离域 π 电子，坐标为教学示意。",
     "verified": true
   },
+  "crystal": {
+    "typeZh": "混合晶体",
+    "latticeZh": "石墨层状教学模型",
+    "coordination": "层内每个 C 与 3 个 C 成键",
+    "unitCellCount": {},
+    "formulaExplanationZh": "本模型展示层状片段，不把画面中的球数作为晶胞计数；层内 C 原子数 : C-C 键数 = 2 : 3。"
+  },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "layer", "labelZh": "层状结构" },
+      { "id": "inPlaneBond", "labelZh": "层内共价键" },
+      { "id": "interlayerForce", "labelZh": "层间作用力" },
+      { "id": "piElectron", "labelZh": "离域 π 电子" },
+      { "id": "comparison", "labelZh": "对比金刚石" }
+    ]
+  },
   "crystalTeaching": {
     "structureTypeZh": "混合晶体",
     "modelZh": "石墨层状教学模型",

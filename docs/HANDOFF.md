@@ -2,41 +2,38 @@
 
 ## 最近一次交接
 
-- **任务**：T-039B 专题展示 Viewer 3D-first 收缩
-- **日期**：2026-08-10
-- **分支**：`codex/t039b-specialty-viewers`
-- **基线**：`origin/main@5f3606acc7f1cb4399f94c967ced5acda05758e9`
-- **阶段状态**：T-039A 已通过 PR #2 合并闭环；T-039B 实现和本地验收完成，将以当前分支的独立 Draft PR 交付。T-039C / D 尚未启动。
+- **任务**：T-039C 晶体与 NaCl 周期工作台 3D-first 收缩
+- **日期**：2026-08-13
+- **分支**：`main`
+- **基线**：已合并 T-039B 的 `origin/main@c3e6876`（PR #3）
+- **阶段状态**：T-039A / B / C 已完成；T-039D 是唯一下一阶段。
 
 ## 本轮改动
 
-- 覆盖 10 个公开专题：分子极性、σ 键、π 键、sp / sp² / sp³ 杂化、离子键、配位键、乙烯平面、苯环平面、乙炔直线和有机共线共面。
-- `ModuleDetailPage` 删除 7 个旧专题教学 Panel 的注册与渲染；新增最小 `SpecialtyInfoDisclosure` 包装，统一消费 T-039A 的 `StructureInfoDisclosure`，默认折叠且模块切换后恢复关闭。
-- 控制密度适中的极性、σ / π、有机平面和有机共面在 `xl` 以上使用大 Viewer + 304px Inspector rail；杂化 / 成键基础使用 360px 高密度 rail 容纳进度滑杆和四个附加开关。右栏均依次放真实模式控制和折叠信息；低于 `xl` 的全部专题都按 Viewer → Toolbar → Disclosure 排列。
-- 专题数据删除只服务旧 Panel 的 description / points / examNote / facts / notes / viewerNotes 等长教学字段；新增或保留短 `state`，以及 Viewer / Toolbar 真正消费的模式 ID、短标签、标题、Viewer 标题与摘要。
-- 全部真实 3D 能力保持：极性箭头与角度、σ / π 轨道重叠、标注与播放、杂化进度 / 实体轨道 / 电子云 / 未杂化 p / 坐标轴、乙烯 / 苯 / 乙炔参考平面 / 参考线 / 角弧 / π 云，以及有机共面的标签和单键旋转。
-- T-039B 专题 Toolbar 的按钮显式使用 `!h-11`，避免 `size="sm"` 把触控高度压到 36px；没有修改公共 Button 或其他 Viewer 家族。
-- 没有修改晶体、NaCl 周期工作台、拼装实验室、Modules / Paths、Exam、路由、模块数量、原子坐标、化学键、相机、依赖、lockfile、版本、发布配置或 Darwin 快照。
+- 17 份晶体 JSON 增加最小 `crystalControls`，只保留模式 / 空隙阶段 ID 与短标签；缺失的 6 份 `CrystalInfo` 已补齐。所有晶体 Viewer 都只读取短控制契约和 `summaryZh`，不再读取长 `CrystalTeaching` 标题或正文。
+- 删除 `CrystalKnowledgePanel`，新增共享 `CrystalInfoDisclosure`；晶体统一使用全宽 Viewer → 工具栏 → 默认折叠信息。空隙阶段按钮移入模式工具栏首层，标签开关与模式切换继续真实驱动原 3D 分支。
+- NaCl 教学模式保留六配位、粒子计数、标签与“周期探索”。周期模式保留 N=1/2/3、选择、六邻居、ghost、隔离与退出选择；边框三态放进单层二级 Disclosure，周期事实默认折叠，选择区只保留功能性实时状态。
+- `CrystalControls` 类型与 hook 的 `CrystalControlState` 命名已分离；`mockMolecules` 会合并真实 `crystalControls`。CaF₂ 已核实的 `4 × 8 = 8 × 4` 计数依据移到 `CrystalInfo.formulaExplanationZh`。
+- `crystal-viewer.visual.spec.ts` 的 macOS 行为文案断言已同步短标题，但 Windows 没有运行截图回归或更新 80 张 Darwin 基线。
 
 ## 验证
 
-- `npm.cmd run lint`：通过。
-- `npm.cmd run build`：通过；仅保留既有按需 `ThreeViewerFrame` large chunk 警告。
-- `npm.cmd run test:logic`：162 / 162 通过；新增专题数据无旧 Panel 字段、模式 ID 唯一与短状态存在契约。
-- 系统 Chrome `specialty-viewers.visual.spec.ts`：8 / 8 通过；覆盖 10 个入口、旧 Panel 消失、5 类代表真实 3D 状态、1280×720 / 1552×926 的 304px 常规 rail 与 360px 杂化 rail、1024×768 / 390×844 的纵向布局、两列移动控制、键盘 Disclosure、44px 触控与无横向溢出。
-- 系统 Chrome `module-state-reset.visual.spec.ts`：5 / 5 通过；杂化、有机平面和 σ 键在 SPA 往返后模式与 Disclosure 均恢复默认。
-- `npm.cmd run test:production`：4 / 4 通过；首页仍不提前加载 ModuleDetailPage 或重型 3D chunk。
-- `git diff --check`：提交前复核；Windows 未运行或更新 Darwin 快照。
+- `npm.cmd run lint`、`npm.cmd run build` 通过；`npm.cmd run test:logic` 163 / 163 通过。build 只保留既有按需 `ThreeViewerFrame` large chunk 警告。
+- 系统 Chrome `crystal-3d-first.visual.spec.ts`：4 / 4 通过；覆盖代表性晶体、全宽顺序、首层空隙阶段、键盘 Disclosure、390px 触控与无溢出。
+- 系统 Chrome `crystal-workspace.visual.spec.ts`：4 / 4 通过；覆盖 N=1/2/3、边框二级 Disclosure、真实粒子 / 边界副本选择、六配位、ghost、隔离、拖拽、状态重置和 1440/1280/768/390。
+- 系统 Chrome普通分子 / 专题 / 状态重置回归：19 / 19 通过。
+- 系统 Chrome `npm.cmd run test:production`：4 / 4 通过；首页仍不提前加载模块详情或重型 3D chunk，动态路由错误兜底正常。
+- 真实渲染实测 1920×1080、1440×900、1366×768、1280×800、1024×768、390×844 均无横向溢出；CrystalInfo 默认高度 70px，NaCl 移动端 94px。
+- `/favicon.ico` 是既有缺失资源；NaCl 测试只按 `message.location().url` 排除该已知请求，其他 page / console error 仍会失败。
 
 ## 已知边界
 
-- T-039B 只收缩专题展示 Viewer。普通晶体、`CrystalKnowledgePanel` / `CrystalTeaching`、NaCl 周期工作台与拼装实验室仍保持原实现，留给 T-039C / D。
-- 304px 只用于本阶段控制密度适中的专题，360px 只用于杂化 / 成键基础的高密度控制；两者都不是其他 Viewer 家族的全局固定规范。
-- 既有 Darwin 截图基线未更新；T-039D 后需在 macOS 集中人工审核布局变化。当前 Windows 只运行无截图行为测试。
-- 没有开展朋友 / 同学 Alpha，也不声称获得普通学生验证；没有恢复 T-038 引导、答题、评分或题库功能。
+- `CrystalTeaching` 类型和 JSON 长字段尚未删除，但 `rg` 应只剩兼容合并与类型定义，没有生产 UI 消费者；必须由 T-039D 连同最终无消费者字段一起清理。
+- T-039D 还需收缩 Organic Builder、Modules / Paths / Exam 文案，并在 macOS 集中人工审核 / 更新确有预期变化的 Darwin 基线；Windows 禁止更新这些快照。
+- 没有修改晶体几何、坐标、配位 / 周期算法、相机、渲染参数、依赖、lockfile、版本或发布配置；也没有恢复引导、在线答题或 Alpha 招募。
 
 ## 下一位 Agent
 
-1. 只对 T-039B Draft PR 做桌面与手机真实页面视觉审阅，重点检查 304px 常规 rail、360px 杂化 rail 和展开后的短信息。
-2. 若发现阻断项，只在当前 T-039B 分支做窄范围修正并复跑相应无截图测试；不要修改晶体、NaCl 或拼装实验室。
-3. 未经项目负责人单独授权，不要转 Ready、合并或启动 T-039C。
+1. 从已交付 T-039C 的最新 `main` 开始 T-039D，只处理拼装实验室、目录文案、最终无消费者数据和 macOS 视觉收口。
+2. 删除 `CrystalTeaching` 前先用 `rg` 复核所有消费者，并同步 17 份手写晶体 JSON、类型、逻辑契约与数据规范。
+3. 在 macOS 使用默认 Chromium 审核完整 Darwin 快照；只更新经人工确认属于 T-039A～D 预期布局变化的基线。

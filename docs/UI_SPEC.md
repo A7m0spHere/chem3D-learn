@@ -59,6 +59,7 @@ Purpose:
 Desktop layout:
 - At `xl` and wider, ordinary molecules use a large Viewer on the left and a 272px control rail on the right; the rail places model interactions first and the default-collapsed information disclosure below them.
 - The control rail contains no teaching prose, stays aligned with the Viewer top, and does not float or become sticky; expanded facts use a single column at the rail width.
+- Crystal modules stay full-width at all desktop breakpoints and use Viewer → mode controls → default-collapsed CrystalInfo; do not reintroduce a crystal teaching rail.
 - 3D viewer must stay large enough for classroom projection.
 - Basic structural facts and model boundaries should remain readable without competing with the Viewer.
 
@@ -80,6 +81,8 @@ Structure information requirements:
 - For ordinary molecules, keep only name / formula, geometry, typical bond angle, and a concise model boundary.
 - Use a native keyboard-operable button with explicit expanded state; do not rely only on color.
 - Specialized viewers may retain necessary live status, but should not use a long course-style side panel.
+- Crystal mode and void-stage controls use short labels and remain directly discoverable below the Viewer; observation guides, common mistakes, teaching tips, and long mode prose are not public UI.
+- In the NaCl periodic workspace, N=1/2/3 and selection actions remain first-level controls. Cell-frame detail may use one secondary disclosure, and periodic count facts remain default-collapsed; selected-ion coordination is concise live status, not a course panel.
 - Mark uncertain chemistry facts with `TODO-CHEM-VERIFY`.
 
 ## Paths, Exam, and About Pages

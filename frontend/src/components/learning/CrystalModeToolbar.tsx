@@ -1,20 +1,27 @@
+import type { ReactNode } from "react";
 import { Box, Calculator, Gauge, GitCompare, Layers3, Network, Orbit, Pyramid, Share2, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type {
+  CrystalControlViewMode,
+  CrystalControlVoidStage,
   CrystalModelStyle,
-  CrystalTeachingViewMode,
   CrystalViewMode,
+  CrystalVoidStage,
 } from "@/types/molecule";
 
 type CrystalModeToolbarProps = {
-  modes: CrystalTeachingViewMode[];
+  modes: CrystalControlViewMode[];
   activeMode: CrystalViewMode;
+  activeVoidStage: CrystalVoidStage;
+  extraAction?: ReactNode;
   showLabels: boolean;
   onModeChange: (mode: CrystalViewMode) => void;
   onToggleLabels: () => void;
+  onVoidStageChange: (stage: CrystalVoidStage) => void;
   modelStyle?: CrystalModelStyle;
   onModelStyleChange?: (style: CrystalModelStyle) => void;
   supportsModelStyle?: boolean;
+  voidStages?: CrystalControlVoidStage[];
 };
 
 const modeIcons: Record<CrystalViewMode, typeof Box> = {
@@ -42,15 +49,19 @@ const modeIcons: Record<CrystalViewMode, typeof Box> = {
 export function CrystalModeToolbar({
   modes,
   activeMode,
+  activeVoidStage,
+  extraAction,
   showLabels,
   onModeChange,
   onToggleLabels,
+  onVoidStageChange,
   modelStyle = "ballStick",
   onModelStyleChange,
   supportsModelStyle = false,
+  voidStages = [],
 }: CrystalModeToolbarProps) {
   return (
-    <div className="chem-control-console">
+    <div className="chem-control-console w-full">
       <div className="chem-control-grid">
         {modes.map((mode) => {
           const Icon = modeIcons[mode.id];
@@ -59,11 +70,11 @@ export function CrystalModeToolbar({
           return (
             <Button
               aria-pressed={isActive}
-              className="chem-touch-button"
+              className="chem-touch-button !h-11 w-full sm:w-auto"
               key={mode.id}
               onClick={() => onModeChange(mode.id)}
               size="sm"
-              title={mode.titleZh}
+              title={mode.labelZh}
               type="button"
               variant={isActive ? "default" : "ghost"}
             >
@@ -72,11 +83,12 @@ export function CrystalModeToolbar({
             </Button>
           );
         })}
+        {extraAction}
         {supportsModelStyle && onModelStyleChange ? (
           <>
             <Button
               aria-pressed={modelStyle === "ballStick"}
-              className="chem-touch-button"
+              className="chem-touch-button !h-11 w-full sm:w-auto"
               onClick={() => onModelStyleChange("ballStick")}
               size="sm"
               title="切换为球棍模型"
@@ -88,7 +100,7 @@ export function CrystalModeToolbar({
             </Button>
             <Button
               aria-pressed={modelStyle === "packing"}
-              className="chem-touch-button"
+              className="chem-touch-button !h-11 w-full sm:w-auto"
               onClick={() => onModelStyleChange("packing")}
               size="sm"
               title="切换为堆积模型"
@@ -102,7 +114,7 @@ export function CrystalModeToolbar({
         ) : null}
         <Button
           aria-pressed={showLabels}
-          className="chem-touch-button"
+          className="chem-touch-button !h-11 w-full sm:w-auto"
           onClick={onToggleLabels}
           size="sm"
           title="显示/隐藏晶胞位点标签"
@@ -113,6 +125,31 @@ export function CrystalModeToolbar({
           标签
         </Button>
       </div>
+      {activeMode === "voids" && voidStages.length > 0 ? (
+        <fieldset className="mt-3 min-w-0 border-0 border-t border-border/60 p-0 pt-2">
+          <legend className="px-1 text-xs font-semibold text-text-secondary">空隙观察</legend>
+          <div className="mt-1 grid grid-cols-3 gap-2">
+            {voidStages.map((stage) => {
+              const isActive = stage.id === activeVoidStage;
+
+              return (
+                <Button
+                  aria-pressed={isActive}
+                  className="chem-touch-button !h-11 min-w-0 w-full px-2"
+                  data-testid={`crystal-void-stage-${stage.id}`}
+                  key={stage.id}
+                  onClick={() => onVoidStageChange(stage.id)}
+                  size="sm"
+                  type="button"
+                  variant={isActive ? "default" : "ghost"}
+                >
+                  {stage.labelZh}
+                </Button>
+              );
+            })}
+          </div>
+        </fieldset>
+      ) : null}
     </div>
   );
 }

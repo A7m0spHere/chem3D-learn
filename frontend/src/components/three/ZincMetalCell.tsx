@@ -49,7 +49,7 @@ export function ZincMetalCell({
 }: ZincMetalCellProps) {
   const cameraPosition = molecule.rendering?.cameraPosition ?? [3.1, 2.45, 3.7];
   const cameraFov = molecule.rendering?.cameraFov ?? 42;
-  const activeMode = molecule.crystalTeaching?.viewModes.find((mode) => mode.id === viewMode);
+  const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const isCoordinationMode = viewMode === "coordination";
   const isLayerMode = viewMode === "layer";
   const isCountingMode = viewMode === "counting";
@@ -66,8 +66,8 @@ export function ZincMetalCell({
       loading={loading}
       meta={`${modelStyle === "packing" ? "堆积模型" : "球棍模型"} · 拖拽旋转`}
       stageTestId={`${molecule.id}-canvas`}
-      summary={activeMode?.bodyZh ?? molecule.summaryZh}
-      title={`${molecule.formula}｜${activeMode?.titleZh ?? "六方晶胞"}`}
+      summary={molecule.summaryZh}
+      title={`${molecule.formula}｜${activeMode?.labelZh ?? "晶胞"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
         <Canvas

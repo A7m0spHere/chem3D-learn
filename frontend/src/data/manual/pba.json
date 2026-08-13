@@ -251,6 +251,19 @@
     },
     "formulaExplanationZh": "通式常写作 AₓM[M′(CN)₆]₁₋ᵧ□ᵧ·nH₂O，A、空位和水合数会随具体体系变化。"
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "框架晶胞" },
+      { "id": "coordination", "labelZh": "配位骨架" },
+      { "id": "voids", "labelZh": "空位水合" },
+      { "id": "comparison", "labelZh": "结构类比" }
+    ],
+    "voidStages": [
+      { "id": "framework", "labelZh": "完整框架" },
+      { "id": "voids", "labelZh": "六氰空位" },
+      { "id": "filled", "labelZh": "水合/A位" }
+    ]
+  },
   "crystalTeaching": {
     "currentModelZh": "通用 PBA 教学模型",
     "structureTypeZh": "双金属氰基桥联配位框架",

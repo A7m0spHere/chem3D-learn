@@ -84,6 +84,21 @@ export type CrystalVoidStageTeaching = {
   bodyZh: string;
 };
 
+export type CrystalControlViewMode = {
+  id: CrystalViewMode;
+  labelZh: string;
+};
+
+export type CrystalControlVoidStage = {
+  id: CrystalVoidStage;
+  labelZh: string;
+};
+
+export type CrystalControls = {
+  viewModes: CrystalControlViewMode[];
+  voidStages?: CrystalControlVoidStage[];
+};
+
 export type CrystalObservationGuideStep = {
   labelZh: string;
   titleZh: string;
@@ -192,6 +207,7 @@ export type MoleculeRecord = {
   coordinationLinks?: CoordinationLink[];
   interlayerForces?: InterlayerForce[];
   crystal?: CrystalInfo;
+  crystalControls?: CrystalControls;
   bonds: Bond[];
   lonePairs: LonePair[];
   keyAngles: AngleSpec[];

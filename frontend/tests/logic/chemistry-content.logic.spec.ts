@@ -51,8 +51,8 @@ test("23 份手写结构不再携带课程步骤或引导观察数据", () => {
 
 test("CaF₂ 数据锁定萤石常规胞计数、8:4 配位与示意尺度边界", () => {
   const caf2 = readMoleculeJson("caf2.json");
-  if (!caf2?.crystal || !caf2.crystalTeaching || !caf2.metadata) {
-    throw new Error("CaF₂ 晶体教学数据未完整注册");
+  if (!caf2?.crystal || !caf2.crystalControls || !caf2.metadata) {
+    throw new Error("CaF₂ 晶体结构与控制数据未完整注册");
   }
   const calciumSites = caf2.atoms.filter((atom) => atom.element === "Ca");
   const fluorideSites = caf2.atoms.filter((atom) => atom.element === "F");
@@ -64,13 +64,53 @@ test("CaF₂ 数据锁定萤石常规胞计数、8:4 配位与示意尺度边界
   expect(caf2.crystal.unitCellCount).toEqual({ Ca: 4, F: 8 });
   expect(caf2.crystal.coordination).toBe("8 : 4");
   expect(caf2.crystal.latticeZh).toContain("Fm-3m");
-  expect(caf2.crystalTeaching.coordinationNumberZh).toBe("Ca²⁺：8；F⁻：4");
-  expect(caf2.crystalTeaching.coordinationDescriptionZh.join(" ")).toContain("4 × 8 = 8 × 4");
+  expect(caf2.crystalControls.viewModes.map((mode) => mode.id)).toContain("coordinationAnion");
+  expect(caf2.crystal.formulaExplanationZh).toContain("4 × 8 = 8 × 4");
   expect(copy).not.toContain("这是电中性的要求");
   expect(caf2.metadata.notesZh).toContain("约 5.463 Å");
   expect(caf2.metadata.notesZh).toContain("画面单位不等于 Å");
   expect(caf2.metadata.verified).toBe(true);
   expect(copy).not.toContain("TODO-CHEM-VERIFY");
+});
+
+test("17 份晶体数据均提供最小 CrystalControls 与 CrystalInfo", () => {
+  const manualDataUrl = new URL("../../src/data/manual/", import.meta.url);
+  const records = readdirSync(manualDataUrl)
+    .filter((file) => file.endsWith(".json"))
+    .map((file) => ({ file, record: readMoleculeJson(file) }))
+    .filter(({ record }) => record.kind === "crystal");
+
+  expect(records).toHaveLength(17);
+  for (const { file, record } of records) {
+    expect(record.crystal, file).toBeTruthy();
+    expect(record.crystal?.typeZh, file).toBeTruthy();
+    expect(record.crystal?.latticeZh, file).toBeTruthy();
+    expect(record.crystal?.coordination, file).toBeTruthy();
+    expect(record.crystal?.formulaExplanationZh, file).toBeTruthy();
+
+    const controls = record.crystalControls;
+    expect(controls, file).toBeTruthy();
+    expect(controls?.viewModes.length, file).toBeGreaterThan(0);
+    expect(new Set(controls?.viewModes.map((mode) => mode.id)).size, file).toBe(
+      controls?.viewModes.length,
+    );
+    for (const mode of controls?.viewModes ?? []) {
+      expect(Object.keys(mode).sort(), `${file}:${mode.id}`).toEqual(["id", "labelZh"]);
+      expect(mode.labelZh, `${file}:${mode.id}`).toBeTruthy();
+    }
+    for (const stage of controls?.voidStages ?? []) {
+      expect(Object.keys(stage).sort(), `${file}:${stage.id}`).toEqual(["id", "labelZh"]);
+      expect(stage.labelZh, `${file}:${stage.id}`).toBeTruthy();
+    }
+
+    // T-039D 删除旧字段前，用并行数据锁定控制 ID 与顺序没有在迁移中变化。
+    expect(controls?.viewModes, file).toEqual(
+      record.crystalTeaching?.viewModes.map(({ id, labelZh }) => ({ id, labelZh })),
+    );
+    expect(controls?.voidStages ?? [], file).toEqual(
+      record.crystalTeaching?.voidStages?.map(({ id, labelZh }) => ({ id, labelZh })) ?? [],
+    );
+  }
 });
 
 test("有机共面模型明确自身身份、45° 教学姿态与构象边界", () => {

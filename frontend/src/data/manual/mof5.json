@@ -44,6 +44,21 @@
     "notesZh": "局部 Zn₄O 与 BDC 使用理想化比例，整体使用单孔 pcu 拓扑立方帮助教学，不是完整 CIF 原子坐标。省略 H、溶剂、缺陷、框架振动和真实吸附位点。",
     "verified": true
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "立方拓扑" },
+      { "id": "comparison", "labelZh": "构筑单元" },
+      { "id": "coordination", "labelZh": "Zn₄O 节点" },
+      { "id": "covalentNetwork", "labelZh": "BDC 连接体" },
+      { "id": "voids", "labelZh": "孔隙与客体" },
+      { "id": "counting", "labelZh": "组成计数" }
+    ],
+    "voidStages": [
+      { "id": "framework", "labelZh": "裸框架" },
+      { "id": "voids", "labelZh": "孔隙体积" },
+      { "id": "filled", "labelZh": "加入客体" }
+    ]
+  },
   "crystalTeaching": {
     "currentModelZh": "MOF-5 理想教学模型",
     "structureTypeZh": "金属有机框架（MOF）",

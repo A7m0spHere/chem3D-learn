@@ -310,6 +310,29 @@
     "notesZh": "NaCl 晶胞教学模型，按高中教材常见表达显示 Cl- 面心立方排列和 Na+ 八面体空隙填充；辅助线只表示第一配位层的最近邻关系。",
     "verified": true
   },
+  "crystal": {
+    "typeZh": "离子晶体",
+    "latticeZh": "Cl⁻ 面心立方排列；Na⁺ 占据全部八面体空隙",
+    "coordination": "Na⁺：6；Cl⁻：6",
+    "unitCellCount": {
+      "Na": 4,
+      "Cl": 4
+    },
+    "formulaExplanationZh": "Cl⁻：8 × 1/8 + 6 × 1/2 = 4；Na⁺：12 × 1/4 + 1 = 4，所以 Na⁺ : Cl⁻ = 1 : 1。"
+  },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "晶胞结构" },
+      { "id": "coordination", "labelZh": "六配位" },
+      { "id": "counting", "labelZh": "粒子计数" },
+      { "id": "voids", "labelZh": "八面体空隙" }
+    ],
+    "voidStages": [
+      { "id": "framework", "labelZh": "Cl- 骨架" },
+      { "id": "voids", "labelZh": "显示空隙" },
+      { "id": "filled", "labelZh": "Na+ 填入" }
+    ]
+  },
   "crystalTeaching": {
     "structureTypeZh": "离子晶体",
     "modelZh": "NaCl 型",

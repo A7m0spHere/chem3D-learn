@@ -303,6 +303,21 @@
     },
     "formulaExplanationZh": "8 个顶点 C 各贡献 1/8，共 1 个 C；6 个面心 C 各贡献 1/2，共 3 个 C；4 个晶胞内部 C 完整属于该晶胞，共 4 个 C。因此一个金刚石常规晶胞中实际含有 8 个 C 原子。"
   },
+  "crystalControls": {
+    "viewModes": [
+      { "id": "cell", "labelZh": "晶胞结构" },
+      { "id": "coordination", "labelZh": "四面体配位" },
+      { "id": "counting", "labelZh": "晶胞计数" },
+      { "id": "covalentNetwork", "labelZh": "共价网络" },
+      { "id": "voids", "labelZh": "四面体空隙" },
+      { "id": "comparison", "labelZh": "结构对比" }
+    ],
+    "voidStages": [
+      { "id": "framework", "labelZh": "C 骨架" },
+      { "id": "voids", "labelZh": "显示空隙" },
+      { "id": "filled", "labelZh": "C 占据一半" }
+    ]
+  },
   "crystalTeaching": {
     "structureTypeZh": "共价晶体 / 原子晶体",
     "modelZh": "金刚石型",
