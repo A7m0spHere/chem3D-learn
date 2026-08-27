@@ -1,6 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
 const channel = process.env.PLAYWRIGHT_CHANNEL;
+process.env.PLAYWRIGHT_SERVER_MODE ??= "production";
 process.env.PLAYWRIGHT_PORT ??= String(5100 + (process.pid % 1000));
 const testPort = Number(process.env.PLAYWRIGHT_PORT);
 const testBaseUrl = `http://127.0.0.1:${testPort}`;

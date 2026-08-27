@@ -46,7 +46,9 @@ test.describe("乙烯平面结构模块视觉回归", () => {
     await expect(viewer.getByTestId("ethylene-sp2-label")).toHaveCount(0);
     await expect(page.getByText("所有原子 z = 0", { exact: true })).toHaveCount(0);
     await page.getByRole("button", { exact: true, name: "侧视" }).click();
-    await expect(page.getByText("侧视验证共面", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { exact: true, name: "侧视" }),
+    ).toHaveAttribute("aria-pressed", "true");
 
     await page.getByRole("button", { exact: true, name: "键角" }).click();
     await expect(

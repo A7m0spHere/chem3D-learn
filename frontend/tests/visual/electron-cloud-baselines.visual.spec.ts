@@ -15,7 +15,7 @@ const electronCloudScenarios: ElectronCloudScenario[] = [
     route: "/module/pyramidal-nh3",
     stageTestId: "molecule-viewer-canvas",
     prepare: async (page) => {
-      await page.getByRole("button", { name: "识别孤电子对" }).click();
+      await page.getByTestId("molecule-toggle-lone-pairs").click();
       await expect(page.getByTestId("molecule-viewer-canvas").getByText("孤电子对", { exact: true })).toBeVisible();
     },
   },
@@ -25,7 +25,7 @@ const electronCloudScenarios: ElectronCloudScenario[] = [
     route: "/module/v-shape-h2o",
     stageTestId: "molecule-viewer-canvas",
     prepare: async (page) => {
-      await page.getByRole("button", { name: "识别两对孤电子对" }).click();
+      await page.getByTestId("molecule-toggle-lone-pairs").click();
       await expect(page.getByTestId("molecule-viewer-canvas").getByText("孤电子对", { exact: true })).toBeVisible();
     },
   },
@@ -128,7 +128,7 @@ const electronCloudScenarios: ElectronCloudScenario[] = [
     stageTestId: "graphite-canvas",
     prepare: async (page) => {
       await page.getByRole("button", { exact: true, name: "离域 π 电子" }).click();
-      await expect(page.getByTestId("graphite-viewer").getByText("C｜层内离域 π 电子", { exact: true })).toBeVisible();
+      await expect(page.getByTestId("graphite-viewer").getByText("C｜离域 π 电子", { exact: true })).toBeVisible();
     },
   },
 ];

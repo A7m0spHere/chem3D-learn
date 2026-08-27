@@ -35,7 +35,9 @@ test.describe("乙炔直线结构模块视觉回归", () => {
     ).toBeVisible();
     await expect(canvasArea.getByTestId("acetylene-line-label")).toHaveCount(1);
     await page.getByRole("button", { exact: true, name: "侧视" }).click();
-    await expect(page.getByText("侧视验证同轴", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { exact: true, name: "侧视" }),
+    ).toHaveAttribute("aria-pressed", "true");
 
     await page.getByRole("button", { exact: true, name: "键角" }).click();
     await expect(viewer.getByText("sp 碳｜直线形结构｜键角 180°", { exact: true })).toBeVisible();

@@ -212,13 +212,13 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     await expectCanvasAreaHasDetail(canvasArea);
   });
 
-  test("CaF₂ 页面公开晶胞计数、双配位与显示尺度边界", async ({ page }) => {
+  test("CaF₂ 页面公开晶胞计数、双配位与晶格模型说明", async ({ page }) => {
     await page.goto("/module/caf2-fluorite");
 
     const viewer = page.getByTestId("caf2-viewer");
     await page.getByTestId("structure-info-toggle").click();
     const crystalInfo = page.getByTestId("structure-info-disclosure");
-    await expect(crystalInfo).toContainText(/不按约 5\.463 Å 的晶格常数直接缩放/);
+    await expect(crystalInfo).toContainText(/立方 Fm-3m；Ca²⁺ 构成面心立方子晶格/);
 
     await page.getByRole("button", { exact: true, name: "晶胞计数" }).click();
     await expect(crystalInfo).toContainText(/4 × 8 = 8 × 4/);

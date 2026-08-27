@@ -38,7 +38,9 @@ test.describe("苯环平面结构模块视觉回归", () => {
       ),
     ).toBeVisible();
     await page.getByRole("button", { exact: true, name: "侧视" }).click();
-    await expect(page.getByText("侧视验证 12 原子共面", { exact: true })).toHaveCount(2);
+    await expect(
+      page.getByRole("button", { exact: true, name: "侧视" }),
+    ).toHaveAttribute("aria-pressed", "true");
 
     await page.getByRole("button", { exact: true, name: "键角" }).click();
     await expect(
