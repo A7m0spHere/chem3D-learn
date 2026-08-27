@@ -34,7 +34,25 @@
 
 ## 待办（按优先级）
 
-（暂无。macOS 集中审核方案已被 T-040 的 CI 方案取代。）
+### T-041 Code review 收口：门禁、移动端主视区与数据脱节
+
+- **来源**：2026-08-28 Claude Code 对 T-040 合并后 `main` 的 code review（已修复项见 `docs/HANDOFF.md`）。
+- **A（高，需维护者决策）：`main` 没有自动质量门禁**
+  - 现状：`.github/workflows/deploy-pages.yml` 在 push 主分支时自动构建并部署到 GitHub Pages，流程内只跑 `npm run test:pages`；`visual-regression.yml` 只有 `workflow_dispatch`。结果是刚建成的视觉回归**不拦截任何改动**，破坏 3D 渲染的提交可以直接上线。
+  - 待决策：① 给 `visual-regression.yml` 增加 `pull_request` 触发（覆盖最全，但每个 PR 约 60 分钟 runner 时间）；② 仅在 `deploy-pages.yml` 部署前增加 `npm run lint` 与 `npm run test:logic`（秒级、无浏览器依赖，但不覆盖视觉）；③ 两者结合。
+  - 未自主实施的原因：涉及 CI 成本与部署可靠性权衡，且会改动生产部署路径。
+- **B（中）：移动端 3D 主视区被压到 177px**
+  - 现状：390×844 视口下 MOF-5 canvas 实测 177px，占屏高约 21%。`ThreeViewerFrame` 外框 `min-h-[500px]`，内部 `grid-rows-[auto_minmax(0,1fr)_auto]`；窄屏下顶栏与摘要栏因 `flex-wrap` 换行合计吃掉约 323px。
+  - 与 `AGENTS.md` 的「Large 3D viewer area」「不要把 3D viewer 缩成小装饰卡片」冲突。T-040 把测试下限从 200 调到 150 让测试转绿，等于把现状固化为预期。
+  - 验收：窄屏下 canvas 占比回到可用区间（建议 ≥40% 屏高），且不引入横向溢出；改动会影响 Linux 截图基线，需走 `rebuild` 流程。
+- **C（中）：23 份手写 JSON 的 `metadata.notesZh` 全库无消费者**
+  - 现状：23 / 23 份 JSON 都写了经 `docs/CHEMISTRY_VERIFICATION.md` 核验的模型边界说明（例如 CaF₂ 的「本模型使用分数坐标和统一视觉尺度，画面单位不等于 Å」「Ca-F 连线仅表示最近邻接触，不是共价键」），但 `src/` 中除类型定义外零引用，学生从未看到。
+  - 同时 UI 上的「模型边界」是 `ModuleDetailPage.tsx` 里硬编码的短句（约 8 处），只覆盖专题模块，与 JSON 数据源完全脱节。
+  - 待决策：是否把 `notesZh` 接入 `StructureInfoDisclosure` 的 `modelBoundary`（需处理长度——notesZh 多为 3～4 句，直接渲染会与 3D-first 方向冲突），或在 JSON 中另立一个短字段。
+  - 注：T-039D 删除 `crystalTeaching` 是正确的（那批字段同样无消费者）；本条是它暴露出的更大范围问题，不是 T-039D 的回归。
+- **D（低）：`mxene-callout.visual.spec.ts` 的固定等待**
+  - `waitForTimeout(1000)` 是 Playwright 反模式。T-040 勘误已确认病因是 CJK 字体度量而非补间动画，正确修法是 `document.fonts.ready`（与其余 3 处一致）。
+  - 未自主改动的原因：该用例当前在 CI 上是绿的，而 Windows 本机无法复现 CI 时序，改为事件驱动需先在 CI 上验证，避免引入 flaky。
 
 ---
 

@@ -88,6 +88,7 @@ Actual current structure（以仓库实际为准）:
 
 ```text
 chem3D-learn/
+├─ .github/workflows/    # deploy-pages.yml（推送即部署）、visual-regression.yml（手动触发）
 ├─ AGENTS.md            # 共享 AI 协作规则（本文件）
 ├─ CLAUDE.md            # Claude Code 专用补充，首行 @AGENTS.md 导入本文件
 ├─ PLANS.md             # 多步任务的一次性暂存区，完成后清空
@@ -100,6 +101,7 @@ chem3D-learn/
 │  ├─ TASKS.md          # 待办任务、优先级、状态、验收标准
 │  ├─ DECISIONS.md      # 重要技术决策及理由
 │  ├─ HANDOFF.md        # 最近一次 Agent 的交接记录
+│  ├─ archive/          # 归档的历史状态与任务日志（只读）
 │  └─ ui-refactor/      # UI 改版前后对比截图
 ├─ frontend/            # 主产品：Vite + React 18 + TS + R3F
 │  ├─ index.html        # Vite HTML 入口，挂载 /src/main.tsx
@@ -271,11 +273,15 @@ npm run lint         # eslint .
 npm run test:logic   # Playwright logic tests (playwright.logic.config.ts)
 npm run test:production # build + production preview prefetch regression (no screenshots)
 npm run test:visual  # 截图回归 + 浏览器交互/布局测试
+npm run test:visual:update # 重建快照基线；仅限 Linux CI，见下
+npm run test:pages   # build:pages + GitHub Pages 产物测试
+npm run test:sites   # build:sites + SPA fallback 测试
 npm run check        # build + test:visual
 npm run preview      # preview the production build
 ```
 
-- 当前 80 张视觉快照全部为 macOS 基线（`*-darwin.png`），没有 Windows/Linux 基线；不要在 Windows/Linux 上更新这些快照。
+- 视觉快照现有两套基线：78 张 Linux（`*-linux.png`）与 78 张 macOS（`*-darwin.png`）。Linux 基线于 2026-08-27 由 CI 生成、经 PR #4 人工审核后合并，是现行基线；Darwin 基线为历史遗留，清理是独立后续任务。任何平台的快照都不要在 Windows 本机更新。
+- 视觉基线由 `.github/workflows/visual-regression.yml` 维护，两种手动触发模式：`verify` 对既有基线跑回归，`rebuild` 重新生成 Linux 快照并开评审 PR（必须逐张人工审核后合并）。
 - 当前 Windows 环境缺少 Playwright 默认使用的 `chromium_headless_shell`，直接运行 `npm run test:visual` 会在浏览器启动阶段失败。系统 Chrome 通道的冒烟测试已验证可用：PowerShell 中先设置 `$env:PLAYWRIGHT_CHANNEL='chrome'`。完整截图回归仍受 macOS 基线限制。
 - `npm run test:production` 会先构建，再用 `vite preview` 运行 `prefetch-viewer-chunks.visual.spec.ts`；它不含截图，用于防止生产首页再次提前下载 3D chunk。
 - `npm run check` 等于 build + 完整 visual 测试，因此也受上述浏览器和平台条件约束。
@@ -314,7 +320,7 @@ The `video/` project is a standalone Remotion project. It is **not** part of the
 | frontend tests | `PLAYWRIGHT_PORT` | 未设置时按进程 ID 计算本地 Vite 测试端口 |
 | video capture | `CHEM3D_CAPTURE_URL` | `http://127.0.0.1:5173`，真实前端素材采集地址 |
 
-使用 `createBrowserRouter` 意味着生产静态托管需要 SPA history fallback；当前仓库没有正式部署配置，具体托管方式为**待确认**。
+使用 `createBrowserRouter` 意味着生产静态托管需要 SPA history fallback。仓库已有 `.github/workflows/deploy-pages.yml`（push 到主分支时构建并部署到 GitHub Pages，流程内跑 `npm run test:pages`）、`frontend/public/404.html` 兜底和 `frontend/scripts/prepare-sites-build.mjs`。注意该部署流程当前**不跑** lint、logic 或视觉回归。
 
 ## Windows Development Environment
 
@@ -432,15 +438,15 @@ $env:CHEM3D_CAPTURE_URL = 'http://127.0.0.1:5173'
 | --- | --- | --- |
 | frontend type/build | `npm run build` | 已通过；保留按需 3D chunk 的 large chunk 警告 |
 | frontend lint | `npm run lint` | 已通过 |
-| frontend pure logic | `npm run test:logic` | 83 / 83 已通过，不依赖浏览器 |
-| frontend production prefetch | 设置 `$env:PLAYWRIGHT_CHANNEL = 'chrome'` 后运行 `npm run test:production` | 3 / 3 已通过，不含截图 |
-| frontend browser behavior | 设置 `$env:PLAYWRIGHT_CHANNEL = 'chrome'` 后运行针对性无截图用例 | 系统 Chrome 通道已验证可用 |
-| frontend visual snapshots | `npm run test:visual` | 只有 80 张 Darwin 基线；Windows 不得更新 |
+| frontend pure logic | `npm run test:logic` | 163 / 163 已通过，不依赖浏览器 |
+| frontend production prefetch | 设置 `$env:PLAYWRIGHT_CHANNEL = 'chrome'` 后运行 `npm run test:production` | 4 / 4 已通过，不含截图 |
+| frontend browser behavior | 设置 `$env:PLAYWRIGHT_CHANNEL = 'chrome'` 后运行针对性用例，并加 `--ignore-snapshots` | 系统 Chrome 通道已验证可用 |
+| frontend visual snapshots | `npm run test:visual` | 现行基线为 78 张 Linux（CI 维护）；Windows 不得更新 |
 | backend | `npm test` | 22 / 22 已通过 |
 | video | `npm run lint` / `npm run render` | 本机尚未安装 `video/node_modules`，未验证 |
 
 - Playwright 缓存当前有 Chromium，但缺少默认配置需要的 `chromium_headless_shell`；不要把“缓存存在”误写成完整视觉环境可用。
-- 在 Windows 使用系统 Chrome 时，只运行明确不更新截图的针对性行为用例。不得运行 `test:visual:update`，也不得接受由平台字体、抗锯齿或 GPU 差异造成的 Darwin 快照改写。
+- 在 Windows 使用系统 Chrome 时，**必须**给 `playwright test` 加 `--ignore-snapshots`。只靠 `-g` 挑选「无截图的用例」不可靠：一旦过滤命中含 `toHaveScreenshot` 的用例，Playwright 会因缺少 win32 基线而自动写入 `*-win32.png` 并让测试失败，从而污染仓库。不得运行 `test:visual:update`，也不得接受由平台字体、抗锯齿或 GPU 差异造成的快照改写。
 - `npm run check` 包含完整 visual 测试，因此在现有 Windows 环境下不能作为无条件的一键验收命令。
 - 每次测试后用 `git status --short` 确认没有快照、lockfile、缓存或其他无关文件被改写。
 

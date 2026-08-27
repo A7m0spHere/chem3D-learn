@@ -590,3 +590,15 @@
   4. `crystalControls` 与 `crystal` 已覆盖全部晶体运行时控制和折叠事实后，删除无消费者的 `crystalTeaching`；同时删除 5 份 JSON 中从未进入 `MoleculeRecord` 的顶层重复标题 / 描述字段，并用允许字段集合测试防止回流。
 - **理由**：开放式拼装需要及时反馈，但不需要六张同时展开的解释卡；目录需要支持快速选择，而不是在进入 3D 前承担微型教材。把详细信息放入可访问的按需 Disclosure，能同时保持反馈完整、Canvas 主导和短决策路径。
 - **验证边界**：lint、build、logic 163 / 163、系统 Chrome 无截图回归 40 / 40、production 4 / 4 与 Python Playwright 六档视口验收通过；23 份 JSON 均无契约外顶层字段。Windows 未运行或更新 Darwin 快照，macOS 默认 Chromium 的集中快照审核仍是独立平台任务。
+
+## D-047 切换态按钮统一 `aria-pressed`，并明确 Windows 本机跑视觉套件的护栏
+
+- **日期**：2026-08-28（Claude Code，T-041 code review 收口）
+- **决定**：
+  1. 「当前选中 / 激活」语义的按钮一律显式声明 `aria-pressed`，不依赖 `variant` 的视觉差异表达状态。本次补齐 11 处：`ModeToolbar`（模式组）、`BondingBasicsToolbar`（模式组 + 实体轨道 / 电子云 / 未杂化 p / XYZ 四个开关）、`OrganicCoplanarToolbar`（模式组 + 标签）、`SigmaPiBondToolbar`（模式组 + 标注）、`OrganicBuilderToolbox`（键级组）。
+  2. `aria-pressed` 加在**各调用点**，不加进 `components/ui/button.tsx`。`Button` 的 `variant` 是纯样式枚举，`default` 同时是激活态和普通按钮的默认值，在该层推断会把页面上每个普通按钮都变成 toggle。若后续要收敛，正确做法是新建 `ToggleButton`（必填 `pressed`，内部同时驱动 `variant` 与 `aria-pressed`）。
+  3. **label 随状态反向切换的按钮不加** `aria-pressed`：`SigmaPiBondToolbar` 的播放 / 暂停、`OrganicCoplanarToolbar` 的「对齐平面 / 恢复 45°」。它们的可见文字已经表达了下一步动作，再叠加「已按下」会让读屏读出互相矛盾的信息——这类是动作按钮，不是切换态按钮。
+  4. 在 Windows 本机运行 `playwright test` 时**必须**加 `--ignore-snapshots`。仅靠 `-g` 挑选「无截图用例」不可靠：本次 review 中一次遗漏就让 Playwright 因缺 win32 基线自动写入了 4 张 `caf2-*-win32.png`（已删除，未进入提交）。该护栏已写入 `AGENTS.md` 的 Windows 验证矩阵。
+- **理由**：视觉激活态对读屏用户完全不可感知，而这些工具栏正是模块页的主交互；`aria-pressed` 同时给出了比文案更稳定的测试锚点——T-040 的三处「侧视验证…」文本断言正是因为文案被删而失效，改用按钮态后不再随教学文案漂移。
+- **勘误**：本次 review 初稿曾判定「T-040 把 CaF₂ 断言从显示尺度澄清改为空间群标签，削弱了测试覆盖」。复核后该判断**不成立**：那句「不按约 5.463 Å 的晶格常数直接缩放」位于无消费者的 `crystalTeaching.viewModes[].bodyZh`，从未渲染到页面，旧断言在 main 上长期为红。T-039D 删除该字段、T-040 把断言改指向真实渲染的 `crystal.latticeZh`，两者都是正确修复。由此暴露的真实问题是 23 / 23 份 JSON 的 `metadata.notesZh` 同样无消费者，已记为 T-041-C。
+- **验证边界**：`aria-pressed` 是无障碍属性，不参与样式计算，不改变任何渲染输出，因此不触碰截图基线。lint、build、logic 163 / 163 通过；系统 Chrome 通道 `--ignore-snapshots` 下受影响的 12 个 spec 共 67 / 67 通过；两套基线各 78 张，`git status` 无快照、lockfile 或缓存污染。

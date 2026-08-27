@@ -52,7 +52,7 @@ jobs:
 
       - name: Regenerate Linux snapshots (rebuild)
         if: inputs.mode == 'rebuild'
-        run: npx playwright test --update-snapshots
+        run: npm run test:visual:update
 
       - name: Upload failure diagnostics
         if: failure()
@@ -106,7 +106,7 @@ jobs:
             echo "**Review guidance**"
             echo "- Review every changed/new PNG before merging; merging without review defeats the purpose."
             echo "- Chemistry geometry, atom coordinates and teaching copy must not change together with the baselines."
-            echo "- After this PR merges and a follow-up \`verify\` run is green twice, the stale \*-darwin.png set can be cleaned up separately."
+            echo "- After this PR merges and a follow-up \`verify\` run is green twice, the stale *-darwin.png set can be cleaned up separately."
             echo ""
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > body.md

@@ -19,8 +19,8 @@ test("结构分类滑入完成后仍保留区块间距", async ({ page }) => {
     await section.scrollIntoViewIfNeeded();
     const reveal = section.locator("..");
     await expect(reveal).toHaveCSS("opacity", "1");
-    // 还要等 1100ms 的滑入位移真正落位，否则测量的 rect 含未完成的位移，
-    // 相邻间距会被读小（CI 软渲染下尤其明显）。
+    // 还要等滑入位移真正落位（transform 归位），否则测量的 rect 含未完成的
+    // 位移，相邻间距会被读小（CI 软渲染下尤其明显）。
     await expect(reveal).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
   }
 

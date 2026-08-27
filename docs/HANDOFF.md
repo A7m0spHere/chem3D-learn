@@ -2,26 +2,58 @@
 
 ## 当前任务
 
-- **任务**：T-040 视觉基线迁移至 ubuntu CI（2026-08-27 启动，Claude Code）。
-- **内容**：新增 `.github/workflows/visual-regression.yml`（`verify` / `rebuild` 两种 dispatch 模式）；首次 `rebuild` 在 `visual-baselines/linux-rebuild-*` 分支生成 `-linux.png` 基线并开评审 PR，**必须人工逐张审核后合并**。
-- **验收**：合并 rebuild PR 后，`verify` 连续两轮全绿；之后 UI 迭代的视觉回归由 CI 承担。darwin 旧基线的清理是独立后续任务。
-- **首轮 rebuild（run `33078407631`）**：155 / 168 通过并产出 Linux 快照，13 个失败；A+B 组 7 项（commit `fdd74f0`）、C 组 4 项（commit `438139f`）与后续 3 个时序抖动（`9b0f5ad` / `8f3c2bf` / `06ed5b9`）已全部修复——最终定性：13 个失败全部是 main 上从未回绿的过期断言，无一与 CI 平台有关。
-- **第五轮 rebuild（run `33091976613`，2026-08-27）全绿**：168 / 168 通过，78 张 `-linux.png` 基线随分支 `visual-baselines/linux-rebuild-20260827-1622` 推送，评审 PR 为 **#4**。注意：仓库默认不允许 GitHub Actions 创建 PR，run 里 `gh pr create` 被拒，#4 由维护者 gh CLI 手动补开；workflow 已加失败降级与设置指引注释。
-- **待办**：① 人工逐张审核 PR #4 的 78 张快照后合并；② 合并后手动跑两次 `verify` 模式，连续全绿即可关闭 T-040；③ 若希望以后 rebuild 自动开 PR，到 Settings → Actions → General → Workflow permissions 勾选「Allow GitHub Actions to create and approve pull requests」；④ darwin 旧基线（80 张）清理为独立后续任务。
-- **同日决策记录**：T-031 真实用户反馈待 `v0.1.0-rc.2` 发布后重启（rc.2 前置 = T-040 完成）。
+- **任务**：T-041 code review 收口（2026-08-28，Claude Code）。上游同步 + 对 T-040 合并后 `main` 的一次完整 review，并修复其中低风险项。
+- **同步**：`git pull --ff-only` 从 `14badfe` 快进到 `e0bfc39`（13 个提交，T-040 视觉基线迁移至 Linux CI）。工作区全程干净，无 stash / reset / force。
 
-## 上次交付摘要（T-039D，2026-08-13）
+## 本次改了什么
 
-- Organic Builder 右栏收为常驻实时摘要 + 默认折叠「诊断详情」；拼装、3D 操作、命名、键角、官能团与验证数据流未改。
-- Modules 卡片压缩为两行说明 + 单行观察重点；Paths 删除重复自学段落。模块数、分组、路由及 Exam 未改。
-- 17 份晶体 JSON 删除无消费者的 `crystalTeaching`，另删 5 份 JSON 的契约外顶层标题 / 描述字段。
-- 新增六档视口契约测试覆盖 Builder、Modules、Paths 与三个 Viewer 家族。
-- 验证：lint、build、logic **163 / 163**、系统 Chrome 回归合计 **40 / 40**、production **4 / 4** 通过；横向溢出与浏览器错误为 0，关键动作 ≥44px。Windows 未运行或更新 Darwin 快照。
+**无障碍（11 处，不改变任何渲染输出）**
+
+- `ModeToolbar.tsx` 模式按钮补 `aria-pressed`——T-040 只给同文件的视图切换按钮加了，模式组漏了；该组被 Acetylene / Benzene / Ethylene / MolecularPolarity 四个工具条共用，改一处修四页。
+- `BondingBasicsToolbar.tsx` 5 处（模式组 + 实体轨道 / 电子云 / 未杂化 p / XYZ），模式组顺带提取 `isActive` 变量与同族文件对齐。
+- `OrganicCoplanarToolbar.tsx` 2 处、`SigmaPiBondToolbar.tsx` 2 处、`OrganicBuilderToolbox.tsx` 1 处。
+- **有意跳过 2 处**：`SigmaPiBondToolbar` 播放 / 暂停、`OrganicCoplanarToolbar`「对齐平面 / 恢复 45°」。这两个按钮的可见文字随状态反向切换，属动作按钮；加 `aria-pressed` 会让读屏读出矛盾信息。理由见 D-047。
+
+**测试与清理**
+
+- `organic-builder.visual.spec.ts`：折叠态断言从 `toHaveCSS("grid-template-rows", "0px")` 改为轮询 `clientHeight === 0`，不再绑定「用 0fr 网格实现折叠」这一具体做法。
+- `crystal-viewer.visual.spec.ts` / `scroll-reveal-layout.visual.spec.ts`：修正两处与代码不符的注释（写着「等 1100ms」，实际用的是 `toHaveCSS(transform)` 轮询）。
+- `mxene-callout.visual.spec.ts`：只修正注释里的错误病因（不是补间动画，是 CJK 字体度量），**保留** `waitForTimeout(1000)`，原因见下方遗留问题 D。
+- 删除死代码 `CrystalModelStyleToggle.tsx`（全 `src/` 零引用，功能已由 `CrystalModeToolbar` 的球棍 / 堆积按钮取代）。
+- 删除 2 张孤儿基线 `molecule-viewer-nh3-lone-pair-darwin.png`、`sigma-pi-bonds-pi-viewer-darwin.png`（对应截图断言已不存在，Playwright 不检测未使用快照）。两套基线现各 78 张。
+- `visual-regression.yml`：rebuild 步骤改用 `npm run test:visual:update` 而非 `npx playwright test --update-snapshots`；修正 PR body 里 `\*-darwin.png` 的多余转义。
+
+**文档**
+
+- `AGENTS.md` 修正 6 处过期事实：基线状态（80 张全 darwin → 各 78 张，Linux 为现行基线）、`test:logic` 83 → 163、`test:production` 3 → 4、命令表补 `test:visual:update` / `test:pages` / `test:sites`、部署状态从「待确认」改为记录已有的 `deploy-pages.yml`、仓库结构补 `.github/workflows/` 与 `docs/archive/`。
+- `AGENTS.md` 新增护栏：Windows 本机跑 `playwright test` **必须**加 `--ignore-snapshots`（见下方教训）。
+- `docs/DECISIONS.md` 追加 D-047；`docs/TASKS.md` 新增 T-041 四条待办。
+
+## 验证
+
+- `npm run build` 通过（保留既有 3D chunk 体积警告）；`npm run lint` 通过；`npm run test:logic` **163 / 163**。
+- 系统 Chrome 通道 + `--ignore-snapshots`，受影响的 12 个 spec 共 **67 / 67** 通过（crystal-viewer、organic-builder、scroll-reveal、organic-coplanar、sigma-pi-bonds、mxene-callout、acetylene、benzene、ethylene、molecular-polarity、specialty-viewers、molecule-viewer）。
+- `git status` 干净：无 win32 快照、无 lockfile 或缓存污染；darwin 78 / linux 78。
+
+## 本次教训（务必读）
+
+在 Windows 上用 `-g` 过滤「无截图用例」**不可靠**。本次一次遗漏 `--ignore-snapshots`，过滤命中了含 `toHaveScreenshot` 的 CaF₂ 用例，Playwright 因缺 win32 基线自动写入了 4 张 `caf2-*-win32.png`。已全部删除、未进入提交，但这正是 `AGENTS.md` 明令禁止的快照污染。此后任何 Windows 本机的 `playwright test` 都要带 `--ignore-snapshots`。
+
+## 遗留问题（均已记入 TASKS.md T-041）
+
+- **A（高，需你决策）**：`main` 没有自动质量门禁。push 主分支即自动部署到 GitHub Pages，流程内只跑 `test:pages`；视觉回归只能手动触发，实际上不拦截任何改动。三个候选方案与成本对比见 T-041-A。
+- **B（中）**：390px 下 3D 主视区仅 177px（约 21% 屏高），与「不要把 3D viewer 缩成小装饰卡片」冲突；T-040 把测试下限 200 → 150 等于把现状固化为预期。修复会动 Linux 基线，需走 `rebuild` 流程。
+- **C（中）**：23 / 23 份手写 JSON 的 `metadata.notesZh` 全库无消费者——经化学核验的模型边界说明（如「画面单位不等于 Å」）从未展示给学生；UI 上的「模型边界」是 `ModuleDetailPage.tsx` 里另一套硬编码短句，只覆盖专题模块。
+- **D（低）**：`mxene-callout` 的 `waitForTimeout(1000)` 应改为 `document.fonts.ready`，但需先在 CI 上验证，避免把当前绿的用例改成 flaky。
+
+## T-040 未收口部分
+
+PR #4 已合并（本次 pull 即包含）。**收口仍需**：手动跑两次 `verify` 模式且连续全绿，之后才能关闭 T-040。darwin 旧基线（78 张）清理是独立后续任务。
 
 ## 平台与环境边界
 
-- 视觉基线只有 `*-darwin.png`（80 张）；Windows 环境一律不得更新快照（仓库既有规则）。
-- 浏览器行为回归使用系统 Chrome 通道（`PLAYWRIGHT_CHANNEL=chrome`）；默认 Playwright Chromium 无头壳未安装。
+- 视觉基线两套：**Linux 78 张为现行基线**（CI 维护，`visual-regression.yml` 的 `verify` / `rebuild`）；darwin 78 张为历史遗留，待清理。任何平台的快照都不得在 Windows 本机更新。
+- 浏览器行为回归使用系统 Chrome 通道（`$env:PLAYWRIGHT_CHANNEL='chrome'`）并加 `--ignore-snapshots`；默认 Playwright Chromium 无头壳未安装。
 - Windows 下使用 Git Bash 路径与 `npm.cmd`；向项目所有者提供的命令用 PowerShell 语法。
 
 ## 治理文档索引
