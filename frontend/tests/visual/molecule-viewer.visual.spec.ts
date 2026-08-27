@@ -155,6 +155,9 @@ test.describe("普通分子 3D-first 页面", () => {
   test("NH₃ 在 1024px 下保持 Viewer、工具栏与结构信息纵向排列", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto("/module/pyramidal-nh3");
+    // ±2px 级别的布局等式断言必须等字体交换完成：回退字体更宽会把
+    // 工具栏与控制栏的宽度差推到 4.95px（run 33078407631 即此因）。
+    await page.evaluate(() => document.fonts.ready);
 
     const stage = page.getByTestId("module-builder-transition-stage");
     const rail = page.getByTestId("molecule-control-rail");
