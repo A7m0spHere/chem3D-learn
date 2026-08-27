@@ -188,6 +188,9 @@ test.describe("T-039B 专题展示 Viewer 3D-first 契约", () => {
     ]) {
       await page.setViewportSize(viewport);
       await page.goto("/module/hybrid-orbitals-sp");
+      // load 事件不保证字体交换完成：回退字体更宽会让工具栏在测量瞬间
+      // 表现为横向溢出（run 33088804177 的偶发失败即此因）。
+      await page.evaluate(() => document.fonts.ready);
 
       const stage = page.getByTestId("module-builder-transition-stage");
       const rail = page.getByTestId("specialty-control-rail");
