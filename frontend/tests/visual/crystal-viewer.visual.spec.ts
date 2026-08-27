@@ -761,7 +761,9 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     expect(summaryBox).not.toBeNull();
     expect(topbarBox!.y + topbarBox!.height).toBeLessThanOrEqual(canvasBox!.y + 1);
     expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(summaryBox!.y + 1);
-    expect(canvasBox!.height).toBeGreaterThan(200);
+    // 390px 下 Canvas 实测高 177px（Windows / Linux 一致，2026-08-27 重新定标；
+    // 旧阈值 200 是 T-039C 布局收缩前的数字），只需保证移动端仍有可用的主视区。
+    expect(canvasBox!.height).toBeGreaterThan(150);
 
     const hasPageHorizontalOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth + 1,
