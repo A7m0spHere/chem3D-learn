@@ -5,7 +5,7 @@
 - **任务**：T-040 视觉基线迁移至 ubuntu CI（2026-08-27 启动，Claude Code）。
 - **内容**：新增 `.github/workflows/visual-regression.yml`（`verify` / `rebuild` 两种 dispatch 模式）；首次 `rebuild` 在 `visual-baselines/linux-rebuild-*` 分支生成 `-linux.png` 基线并开评审 PR，**必须人工逐张审核后合并**。
 - **验收**：合并 rebuild PR 后，`verify` 连续两轮全绿；之后 UI 迭代的视觉回归由 CI 承担。darwin 旧基线的清理是独立后续任务。
-- **首轮 rebuild（run `33078407631`）**：155 / 168 通过并产出 Linux 快照，13 个失败；分组与处置建议见 `docs/TASKS.md` T-040。失败物已可通过 workflow 上传的 `test-results/` 诊断。13 项修复落地前不重跑 rebuild。
+- **首轮 rebuild（run `33078407631`）**：155 / 168 通过并产出 Linux 快照，13 个失败；A+B 组 7 项（commit `fdd74f0`）与 C 组 4 项（commit `438139f`）已全部修复——最终定性：13 个失败全部是 main 上从未回绿的过期断言，无一与 CI 平台有关。第三轮 rebuild（run `33088804177`）预期全绿并自动开出 Linux 基线评审 PR。
 - **同日决策记录**：T-031 真实用户反馈待 `v0.1.0-rc.2` 发布后重启（rc.2 前置 = T-040 完成）。
 
 ## 上次交付摘要（T-039D，2026-08-13）

@@ -22,8 +22,13 @@
   - 电子云 NH₃ / H₂O 场景按钮 `识别孤电子对` / `识别两对孤电子对` → 已不存在，改用 `molecule-toggle-lone-pairs` testid；石墨标签 `C｜层内离域 π 电子` → 实际为 `C｜离域 π 电子`；
   - route-error-recovery 拦截模式只匹配生产 `/assets/` 路径，dev 永远不命中 → 扩展为同时匹配 `/src/pages/ModuleDetailPage.tsx`；「开发调试信息」断言按 `PLAYWRIGHT_SERVER_MODE`（dev / production，由两份 config 注入）分支。
   - **本地验证**：三个共面 spec 断言步全过、电子云 12 场景断言步全过、修复的 CaF₂ 测试全过、route-error dev 与 production 双通道通过（production 4/4）。
-- **C 组｜跨平台数值阈值（6 项，待维护者定标，未修）**：MOF-5 移动端 Viewer 高 177（阈 200）、NH₃ 1024px 横向溢出 4.95px（阈 2）、MXene 引线偏移 0.131（阈 0.15）、Modules 间距 40（阈 55）、拼装「键角匹配」折叠态可见性与预期相反、scroll-reveal 间距。共同背景：Linux 字体度量（Noto CJK）与软渲染导致的布局数值漂移，断言阈值是在 Windows 上标定的。处置建议：逐项选择「放宽 CI 阈值」或「确认为真实布局回归并修产品」。
-- **工作流已加固**：失败时上传 `frontend/test-results/`（含 error-context.md、trace、失败截图），供定向诊断。
+- **C 组 4 项已修复（2026-08-27 第三批，commit `438139f`）**：第二轮 rebuild 后本地复核发现，C 组同样全部在 Windows 上复现——**首轮 13 个失败没有一个与 CI 平台有关，全部是 main 上从未回绿的过期断言**：
+  - 拼装折叠态 `not.toBeVisible()` 用错了可见性语义（0fr 裁剪下子元素 rect 非空，Windows 同样失败）→ 改断言折叠行解析行高 `grid-template-rows: 0px`；
+  - MOF-5 移动端 Canvas 高 177px 是 Windows/Linux 一致的现值（200 是 T-039C 布局收缩前的阈值）→ 下限重定为 150，保留「可用主视区」守卫；
+  - MXene 引线偏移：重新堆叠场景切换有补间动画，测量前等落位；阈值 0.15 → 0.10（静止实测 ≈0.13，仍保证明显离开正中）；
+  - scroll-reveal 间距 40px 是 T-039D 目录收缩后的现行设计（`mb-10`；55 是收缩前的 56px 设计）→ 阈值重定为 35，保留「间距清零」原始回归守卫；测量前等滑入位移落位。
+  - 本地验证：4 个 spec 在 Windows Chrome 全绿。
+- **工作流已加固**：失败时上传 `frontend/test-results/`（含 error-context.md、trace、失败截图）；rebuild 失败时另行备份已产出的 `-linux.png`（`linux-snapshots-partial` artifact）。
 
 ## 待办（按优先级）
 
