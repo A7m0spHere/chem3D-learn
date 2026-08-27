@@ -237,10 +237,20 @@ test.describe("T-039B 专题展示 Viewer 3D-first 契约", () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
+    // reload 会重置字体交换状态：CJK 回退字体度量更宽/更窄，交换完成前
+    // 按钮尺寸可能不足 44px（run 33093611347 即此因）。本文件桌面分支
+    // 已等 fonts.ready，reload 之后同样需要。
+    await page.evaluate(() => document.fonts.ready);
     const mobileButtons = await toolbar.getByRole("button").evaluateAll((buttons) =>
       buttons.map((button) => button.getBoundingClientRect().toJSON()),
     );
-    expect(mobileButtons.every((box) => box.width >= 44 && box.height >= 44)).toBe(true);
+    const undersizedMobileButtons = mobileButtons.filter(
+      (box) => box.width < 44 || box.height < 44,
+    );
+    expect(
+      undersizedMobileButtons,
+      `触控目标须 ≥44×44，实测过小：${JSON.stringify(undersizedMobileButtons)}`,
+    ).toEqual([]);
     await expectNoHorizontalOverflow(page);
   });
 
@@ -263,10 +273,16 @@ test.describe("T-039B 专题展示 Viewer 3D-first 契约", () => {
     expect(toolbarBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height - 1);
     expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height - 1);
 
+    // 触控尺寸同样受 CJK 字体度量影响，测量前先等字体交换完成。
+    await page.evaluate(() => document.fonts.ready);
     const buttonBoxes = await toolbar.getByRole("button").evaluateAll((buttons) =>
       buttons.map((button) => button.getBoundingClientRect().toJSON()),
     );
-    expect(buttonBoxes.every((box) => box.width >= 44 && box.height >= 44)).toBe(true);
+    const undersizedButtons = buttonBoxes.filter((box) => box.width < 44 || box.height < 44);
+    expect(
+      undersizedButtons,
+      `触控目标须 ≥44×44，实测过小：${JSON.stringify(undersizedButtons)}`,
+    ).toEqual([]);
     expect(new Set(buttonBoxes.slice(0, 2).map((box) => Math.round(box.y))).size).toBe(1);
 
     await expect(toggle).toHaveAttribute("aria-expanded", "false");

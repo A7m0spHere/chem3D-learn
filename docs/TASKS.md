@@ -30,6 +30,8 @@
 - **后续 3 个时序抖动修复**：`9b0f5ad`（杂化 Inspector 等 `document.fonts.ready`）、`8f3c2bf`（Ren₃ 卡片先滚动触发滑入、等 transform 落位再点击；杂化栏宽容差 355–365 吸收 Linux 滚动条亚像素差）、`06ed5b9`（NH₃ 1024px 布局等式同样等 `fonts.ready`，预防同类翻车）。
 - **第五轮 rebuild（run `33091976613`）168 / 168 全绿**：78 张 `-linux.png` 已推到 `visual-baselines/linux-rebuild-20260827-1622` 分支，评审 **PR #4**（run 内 `gh pr create` 被仓库「不允许 Actions 创建 PR」设置拒绝，PR 由维护者手动补开；workflow 已加降级警告与设置指引）。
 - **收口条件**：PR #4 人工审核合并 → `verify` 模式连续两轮全绿 → 关闭 T-040。darwin 旧基线清理为独立后续任务。
+- **合并后首次 `verify` 失败（run `33093611347`，sha `e0bfc39`）**：167 / 168，唯一失败是 `specialty-viewers.visual.spec.ts:182`「杂化专题…窄屏恢复纵向」在第 243 行的 44×44 触控目标断言。根因：该处 `page.reload()` 之后**未等** `document.fonts.ready` 就测量按钮尺寸，CJK 回退字体度量导致交换完成前尺寸不足 44px——与 `9b0f5ad` 修过的是同一类问题，只是 reload 分支漏掉了。该断言原用 `every(...).toBe(true)`，失败时不报告哪个按钮、实际多少像素，CI 日志无任何线索。
+- **已修（2026-08-28，T-041 后续提交）**：reload 后补 `fonts.ready`；三处同类 44px 断言（`specialty-viewers` 2 处、`crystal-3d-first` 1 处）改为 filter 出过小按钮并在失败消息中输出实测 rect，同时补上测量前的字体等待。**收口计数从零重新开始**：需在含此修复的 `main` 上再跑两轮 `verify` 且连续全绿。
 - **工作流已加固**：失败时上传 `frontend/test-results/`（含 error-context.md、trace、失败截图）；rebuild 失败时另行备份已产出的 `-linux.png`（`linux-snapshots-partial` artifact）。
 
 ## 待办（按优先级）

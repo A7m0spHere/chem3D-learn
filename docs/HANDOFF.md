@@ -48,7 +48,17 @@
 
 ## T-040 未收口部分
 
-PR #4 已合并（本次 pull 即包含）。**收口仍需**：手动跑两次 `verify` 模式且连续全绿，之后才能关闭 T-040。darwin 旧基线（78 张）清理是独立后续任务。
+PR #4 已合并（本次 pull 即包含）。**合并后的首次 `verify` 已失败**（run `33093611347`，167 / 168）——唯一失败是 `specialty-viewers.visual.spec.ts:182` 在第 243 行的 44×44 触控目标断言，根因是 `page.reload()` 后未等 `document.fonts.ready` 即测量按钮尺寸（CJK 回退字体度量）。该失败发生在本文件上一版写成之后，此前无人记录。
+
+**已于 2026-08-28 修复**（分支 `claude/t041-verify-fix`）：reload 后补字体等待；三处同类 44px 断言改为输出实测 rect 的诊断式写法，并补齐测量前的字体等待。
+
+**收口计数从零重新开始**：需在含该修复的 `main` 上跑两轮 `verify` 且连续全绿，才能关闭 T-040。darwin 旧基线（78 张）清理仍是独立后续任务。
+
+触发方式（GitHub 网页：Actions → Visual regression (Linux baselines) → Run workflow → mode: verify），或：
+
+```powershell
+gh workflow run visual-regression.yml -f mode=verify
+```
 
 ## 平台与环境边界
 

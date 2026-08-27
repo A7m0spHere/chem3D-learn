@@ -114,10 +114,16 @@ test.describe("T-039C 普通晶体 3D-first 契约", () => {
     expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height - 1);
     expect(disclosureBox.height).toBeLessThanOrEqual(130);
 
+    // 触控尺寸同样受 CJK 字体度量影响，测量前先等字体交换完成。
+    await page.evaluate(() => document.fonts.ready);
     const buttonBoxes = await toolbar.getByRole("button").evaluateAll((buttons) =>
       buttons.map((button) => button.getBoundingClientRect().toJSON()),
     );
-    expect(buttonBoxes.every((box) => box.width >= 44 && box.height >= 44)).toBe(true);
+    const undersizedButtons = buttonBoxes.filter((box) => box.width < 44 || box.height < 44);
+    expect(
+      undersizedButtons,
+      `触控目标须 ≥44×44，实测过小：${JSON.stringify(undersizedButtons)}`,
+    ).toEqual([]);
     expect(new Set(buttonBoxes.slice(0, 2).map((box) => Math.round(box.y))).size).toBe(1);
     await expectNoHorizontalOverflow(page);
   });
