@@ -914,6 +914,14 @@ test.describe("晶体与空隙 Viewer 模式摘要", () => {
     const moduleCard = page.locator("article").filter({ hasText: "ReN₃ 高压氮化物" });
     await expect(moduleCard).toBeVisible();
     await expect(moduleCard.getByText("可交互 3D", { exact: true })).toBeVisible();
+    // 卡片在 ScrollReveal wrapper 内且位于首屏之外：先滚动触发滑入、
+    // 等 1100ms 位移真正落位再点击，避免移动中的元素让点击落空
+    // （run 33090146058 偶发未跳转即此因）。
+    await moduleCard.scrollIntoViewIfNeeded();
+    const revealWrapper = moduleCard.locator(
+      'xpath=ancestor::div[contains(@class, "motion-scroll-reveal")][1]',
+    );
+    await expect(revealWrapper).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
     await moduleCard.getByRole("link", { name: /进入模块/ }).click();
     await expect(page).toHaveURL(/\/module\/ren3-high-pressure-nitride$/);
 

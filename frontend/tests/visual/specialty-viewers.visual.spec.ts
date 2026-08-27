@@ -206,8 +206,10 @@ test.describe("T-039B 专题展示 Viewer 3D-first 契约", () => {
         throw new Error("杂化专题 Viewer 或 Inspector 未获得可测量布局");
       }
       expect(railBox.x).toBeGreaterThanOrEqual(stageBox.x + stageBox.width - 1);
-      expect(railBox.width).toBeGreaterThanOrEqual(358);
-      expect(railBox.width).toBeLessThanOrEqual(362);
+      // 360px 高密度 Inspector：容差 ±5 吸收滚动条参与布局后的亚像素差
+      // （CI Linux 实测 357.32，仍是高密度栏而非 304 常规栏或纵向布局）。
+      expect(railBox.width).toBeGreaterThanOrEqual(355);
+      expect(railBox.width).toBeLessThanOrEqual(365);
       expect(stageBox.width).toBeGreaterThan(railBox.width * 2);
       expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height - 1);
       expect(await toolbar.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(
