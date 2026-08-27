@@ -5,7 +5,9 @@
 - **任务**：T-040 视觉基线迁移至 ubuntu CI（2026-08-27 启动，Claude Code）。
 - **内容**：新增 `.github/workflows/visual-regression.yml`（`verify` / `rebuild` 两种 dispatch 模式）；首次 `rebuild` 在 `visual-baselines/linux-rebuild-*` 分支生成 `-linux.png` 基线并开评审 PR，**必须人工逐张审核后合并**。
 - **验收**：合并 rebuild PR 后，`verify` 连续两轮全绿；之后 UI 迭代的视觉回归由 CI 承担。darwin 旧基线的清理是独立后续任务。
-- **首轮 rebuild（run `33078407631`）**：155 / 168 通过并产出 Linux 快照，13 个失败；A+B 组 7 项（commit `fdd74f0`）与 C 组 4 项（commit `438139f`）已全部修复——最终定性：13 个失败全部是 main 上从未回绿的过期断言，无一与 CI 平台有关。第三轮 rebuild（run `33088804177`）预期全绿并自动开出 Linux 基线评审 PR。
+- **首轮 rebuild（run `33078407631`）**：155 / 168 通过并产出 Linux 快照，13 个失败；A+B 组 7 项（commit `fdd74f0`）、C 组 4 项（commit `438139f`）与后续 3 个时序抖动（`9b0f5ad` / `8f3c2bf` / `06ed5b9`）已全部修复——最终定性：13 个失败全部是 main 上从未回绿的过期断言，无一与 CI 平台有关。
+- **第五轮 rebuild（run `33091976613`，2026-08-27）全绿**：168 / 168 通过，78 张 `-linux.png` 基线随分支 `visual-baselines/linux-rebuild-20260827-1622` 推送，评审 PR 为 **#4**。注意：仓库默认不允许 GitHub Actions 创建 PR，run 里 `gh pr create` 被拒，#4 由维护者 gh CLI 手动补开；workflow 已加失败降级与设置指引注释。
+- **待办**：① 人工逐张审核 PR #4 的 78 张快照后合并；② 合并后手动跑两次 `verify` 模式，连续全绿即可关闭 T-040；③ 若希望以后 rebuild 自动开 PR，到 Settings → Actions → General → Workflow permissions 勾选「Allow GitHub Actions to create and approve pull requests」；④ darwin 旧基线（80 张）清理为独立后续任务。
 - **同日决策记录**：T-031 真实用户反馈待 `v0.1.0-rc.2` 发布后重启（rc.2 前置 = T-040 完成）。
 
 ## 上次交付摘要（T-039D，2026-08-13）

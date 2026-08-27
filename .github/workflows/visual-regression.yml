@@ -93,6 +93,10 @@ jobs:
           git commit -m "test(visual): rebuild linux snapshot baselines"
           git push -u origin "$BRANCH"
 
+          # 仓库需在 Settings → Actions → General → Workflow permissions
+          # 勾选「Allow GitHub Actions to create and approve pull requests」，
+          # 否则分支已推送、PR 建不出来（run 33091976613 即此情形，PR #4
+          # 由维护者 gh CLI 手动补开）。
           {
             echo "## Visual baseline rebuild (Linux)"
             echo ""
@@ -106,8 +110,10 @@ jobs:
             echo ""
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > body.md
-          gh pr create \
+          if ! gh pr create \
             --base main \
             --head "$BRANCH" \
-            --title "test(visual): rebuild Linux snapshot baselines" \
-            --body-file body.md | tee "$GITHUB_STEP_SUMMARY"
+            --title "test(visual): rebuild linux snapshot baselines" \
+            --body-file body.md | tee "$GITHUB_STEP_SUMMARY"; then
+            echo "::warning::gh pr create failed - the branch was pushed; open the PR manually from the branch link above." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi

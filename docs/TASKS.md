@@ -25,9 +25,11 @@
 - **C 组 4 项已修复（2026-08-27 第三批，commit `438139f`）**：第二轮 rebuild 后本地复核发现，C 组同样全部在 Windows 上复现——**首轮 13 个失败没有一个与 CI 平台有关，全部是 main 上从未回绿的过期断言**：
   - 拼装折叠态 `not.toBeVisible()` 用错了可见性语义（0fr 裁剪下子元素 rect 非空，Windows 同样失败）→ 改断言折叠行解析行高 `grid-template-rows: 0px`；
   - MOF-5 移动端 Canvas 高 177px 是 Windows/Linux 一致的现值（200 是 T-039C 布局收缩前的阈值）→ 下限重定为 150，保留「可用主视区」守卫；
-  - MXene 引线偏移：重新堆叠场景切换有补间动画，测量前等落位；阈值 0.15 → 0.10（静止实测 ≈0.13，仍保证明显离开正中）；
+  - MXene 引线偏移：阈值 0.15 → 0.10（静止实测 ≈0.13；后续 review 勘误：重新堆叠场景为静态 offsets，差异实为 CJK 字体度量，非补间动画）；
   - scroll-reveal 间距 40px 是 T-039D 目录收缩后的现行设计（`mb-10`；55 是收缩前的 56px 设计）→ 阈值重定为 35，保留「间距清零」原始回归守卫；测量前等滑入位移落位。
-  - 本地验证：4 个 spec 在 Windows Chrome 全绿。
+- **后续 3 个时序抖动修复**：`9b0f5ad`（杂化 Inspector 等 `document.fonts.ready`）、`8f3c2bf`（Ren₃ 卡片先滚动触发滑入、等 transform 落位再点击；杂化栏宽容差 355–365 吸收 Linux 滚动条亚像素差）、`06ed5b9`（NH₃ 1024px 布局等式同样等 `fonts.ready`，预防同类翻车）。
+- **第五轮 rebuild（run `33091976613`）168 / 168 全绿**：78 张 `-linux.png` 已推到 `visual-baselines/linux-rebuild-20260827-1622` 分支，评审 **PR #4**（run 内 `gh pr create` 被仓库「不允许 Actions 创建 PR」设置拒绝，PR 由维护者手动补开；workflow 已加降级警告与设置指引）。
+- **收口条件**：PR #4 人工审核合并 → `verify` 模式连续两轮全绿 → 关闭 T-040。darwin 旧基线清理为独立后续任务。
 - **工作流已加固**：失败时上传 `frontend/test-results/`（含 error-context.md、trace、失败截图）；rebuild 失败时另行备份已产出的 `-linux.png`（`linux-snapshots-partial` artifact）。
 
 ## 待办（按优先级）
