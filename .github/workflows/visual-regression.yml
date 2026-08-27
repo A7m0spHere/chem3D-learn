@@ -54,12 +54,14 @@ jobs:
         if: inputs.mode == 'rebuild'
         run: npx playwright test --update-snapshots
 
-      - name: Upload Playwright report on failure
+      - name: Upload failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ inputs.mode }}
-          path: frontend/playwright-report/
+          name: playwright-failures-${{ inputs.mode }}
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
           retention-days: 14
           if-no-files-found: ignore
 

@@ -15,6 +15,11 @@
 - **已落地**：新增 `.github/workflows/visual-regression.yml`，提供 `verify`（跑视觉套件）与 `rebuild`（重生成 Linux 快照并开评审 PR）两种 workflow_dispatch 模式；runner 为 `ubuntu-latest` + Playwright 官方 Chromium，基线文件带 `-linux.png` 平台后缀，不动既有 `*-darwin.png`。
 - **执行流程**：`rebuild` 产出的快照以 `visual-baselines/linux-rebuild-*` 分支开 PR，必须人工逐张审核后合并——合并未经审阅的基线等于放弃视觉安全网。
 - **验收标准**：合并首轮 rebuild PR 后，`verify` 模式连续两轮全绿；此后日常 UI 迭代的视觉回归由 CI 承担。旧 darwin 基线的清理作为独立后续任务，不与本任务混提。
+- **首轮 rebuild 结果（run `33078407631`，2026-08-27）**：168 个测试中 155 通过并写出 `-linux.png` 快照，**13 个失败**。失败在 Windows 上从未出现——含 darwin 截图步骤的 spec 在 Windows 从未真正执行，本轮首次暴露。按根因分三组：
+  - **A 组｜内容迁移后的测试债（1 项，可直接修测试）**：crystal-viewer CaF₂ 断言期待「不按约 5.463 Å 的晶格常数直接缩放」，该短语在 T-039C/D 教学层收缩后已不再进入 UI（仅存于 JSON `metadata.notesZh`）。处置建议：把断言对齐到当前 CrystalInfo 实际渲染内容，或由维护者决定是否在 UI 恢复显示尺度边界说明。
+  - **B 组｜软件渲染下的交互超时/未达（6 项，需定向排查）**：乙烯 / 苯 / 乙炔「侧视」标签未出现（点击后 15s 内未挂载）、电子云 NH₃ / H₂O 场景 `prepare` 点击 90s 超时、石墨离域 π 标签未出现、路由错误恢复页标题未聚焦。共同背景：GitHub runner 无 GPU，SwiftShader 软渲染帧率低、drei `<Html>` 重投影与入场时序被拉长。处置建议：为这些用例提高定向超时、改用显式 canvas-ready 等待，并依赖已修复上传的 `test-results/` 诊断产物定位。
+  - **C 组｜跨平台数值阈值（6 项，需维护者定标）**：MOF-5 移动端 Viewer 高 177（阈 200）、NH₃ 1024px 横向溢出 4.95px（阈 2）、MXene 引线偏移 0.131（阈 0.15）、Modules 间距 40（阈 55）、拼装「键角匹配」折叠态可见性与预期相反。共同背景：Linux 字体度量（Noto CJK）与软渲染导致的布局数值漂移，断言阈值是在 Windows 上标定的。处置建议：逐项选择「放宽 CI 阈值」或「确认为真实布局回归并修产品」。
+- **工作流已加固**：失败时上传 `frontend/test-results/`（含 error-context.md、trace、失败截图），供下一轮定向诊断。
 
 ## 待办（按优先级）
 
