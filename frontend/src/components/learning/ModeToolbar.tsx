@@ -78,16 +78,16 @@ export function ModeToolbar<M extends string, V extends string = never>({
               const isActive = viewToggle.activeView === opt.id;
 
               return (
-            <Button
-              aria-pressed={isActive}
-              className={buttonClassName}
-              key={opt.id}
-              onClick={() => viewToggle.onViewChange(opt.id)}
-              size="sm"
-              title={opt.title}
-              type="button"
-              variant={isActive ? "default" : "outline"}
-            >
+                <Button
+                  aria-pressed={isActive}
+                  className={buttonClassName}
+                  key={opt.id}
+                  onClick={() => viewToggle.onViewChange(opt.id)}
+                  size="sm"
+                  title={opt.title}
+                  type="button"
+                  variant={isActive ? "default" : "outline"}
+                >
                   <Icon className="h-4 w-4" aria-hidden="true" />
                   {opt.label}
                 </Button>

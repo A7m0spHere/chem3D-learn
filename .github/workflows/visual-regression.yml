@@ -65,6 +65,15 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+      - name: Backup produced Linux snapshots when rebuild fails
+        if: failure() && inputs.mode == 'rebuild'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-snapshots-partial
+          path: frontend/tests/**/*-linux.png
+          retention-days: 14
+          if-no-files-found: ignore
+
       - name: Open baseline review PR (rebuild)
         if: inputs.mode == 'rebuild' && success()
         env:
