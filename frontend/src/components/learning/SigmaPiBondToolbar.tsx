@@ -34,6 +34,7 @@ export function SigmaPiBondToolbar(props: SigmaPiBondToolbarProps) {
 
           return (
             <Button
+              aria-pressed={isActive}
               className={buttonClassName}
               data-testid={`${props.lessonType}-bond-mode-${mode.id}`}
               key={mode.id}
@@ -73,6 +74,7 @@ export function SigmaPiBondToolbar(props: SigmaPiBondToolbarProps) {
           </Button>
         ) : null}
         <Button
+          aria-pressed={props.showLabels}
           className={buttonClassName}
           data-testid={`${props.lessonType}-bond-toggle-labels`}
           onClick={props.onToggleLabels}

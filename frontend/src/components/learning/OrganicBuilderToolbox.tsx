@@ -101,6 +101,7 @@ export function OrganicBuilderToolbox({
         <div className="grid grid-cols-3 gap-2" role="group" aria-label="选择键级">
           {([1, 2, 3] as BuilderBondOrder[]).map((order) => (
             <Button
+              aria-pressed={selectedBondOrder === order}
               className="h-11"
               data-testid={`builder-bond-order-${order}`}
               key={order}

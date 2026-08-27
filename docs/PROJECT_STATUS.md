@@ -1,7 +1,7 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Codex 每次开工前快速了解全局。
-> 最后更新：2026-08-27（第二轮：维护者确认两项决策——视觉基线迁移 ubuntu CI（T-040 进行中）、T-031 待 rc.2 重启）
+> 最后更新：2026-08-28（T-041 code review 收口：无障碍补齐、死代码与孤儿基线清理、治理文档纠偏；四条待办见 TASKS.md）
 > 上一次实质进展更新：2026-08-13（T-039A～D 全站 3D-first 收缩完成）；当日上午的进度文档整理记录亦见本文件
 
 ## 一句话定位
@@ -12,7 +12,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 
 - **版本**：`v0.1.0-rc.1` prerelease 已发布并部署 GitHub Pages（2026-07-29），此后未发新版本。
 - **产品形态**：全站完成 T-039 的 3D-first 收缩——普通分子为大 Viewer + 右侧控制栏 + 折叠结构信息；专题使用精简 Inspector；晶体统一全宽 Viewer → 模式工具栏 → 折叠「晶体信息」；拼装实验室为实时摘要 + 默认折叠诊断。
-- **任务面**：T-040「视觉基线迁移至 ubuntu CI」进行中（2026-08-27 启动）；`main` 此前自 2026-08-13 后无新提交。
+- **任务面**：T-040「视觉基线迁移至 ubuntu CI」基线部分已落地（PR #4 已合并，78 张 `-linux.png` 进入 `main`），收口待 `verify` 模式连续两轮全绿；T-041「code review 收口」于 2026-08-28 完成低风险修复，四条待办待决策。
 - **两项决策已定**（2026-08-27 维护者确认）：
   1. 过期 Darwin 快照 → 迁移到可复现 ubuntu CI（`visual-regression` workflow 的 rebuild 模式生成 `-linux.png` 基线并开评审 PR），见 T-040；
   2. T-031 真实用户反馈 → 待 `v0.1.0-rc.2` 发布后重启，rc.2 前置为 T-040 完成。
@@ -30,7 +30,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 23 个手写结构 JSON 位于 `frontend/src/data/manual/` 并全部注册；17 份晶体记录使用最小 `crystalControls` + `CrystalInfo`，无生产消费者 `crystalTeaching`。
 - `organicBuilderNomenclature.ts` 为 1959 行；`knownOrganicMolecules` 当前为 **16** 个（甲烷、乙烷、乙烯、乙炔、丙烷、丙烯、丙炔、甲醇、乙醇、甲醛、乙醛、甲酸、乙酸、二甲醚、甲胺、乙胺）。新增或删除条目时必须同步 T-001 表驱动测试的中文名期望表。
 - `ModuleDetailPage.tsx` 的专题控制状态由 `useCrystalControls` / `useOrganicPlanarControls` / `useBondingControls` 三个 typed hook 管理，通过 `deriveViewerKind` / `viewerRegistry` 统一分发 viewer、toolbar、panel。
-- 测试基线：logic **163 / 163**（2026-08-27 于 Windows 复跑通过）、ESLint 零警告、`tsc --noEmit` 通过；Darwin 视觉基线共 80 张 `*-darwin.png`，整体相对 T-039A～D 过期待审核；backend 最近记录 22 / 22。
+- 测试基线：logic **163 / 163**（2026-08-28 于 Windows 复跑通过）、ESLint 零警告、`tsc --noEmit` 通过；视觉基线两套——Linux **78 张** `*-linux.png` 为现行基线（CI 维护），darwin 78 张为历史遗留待清理；backend 最近记录 22 / 22。
 - 后端提供 `/health`、`/api/molecules`、`/api/molecules/:id` 及 `/api/structures` 别名；前端当前没有调用后端 API。
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
@@ -53,6 +53,8 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - `backend/src/molecules.js` 与前端核心 JSON 重复，已有防漂移契约测试锁定结构核心（T-005）；教学文案与 nacl 简化胞差异为有意保留，未做构建期单源生成。
 - GitHub Pages 无服务端 history rewrite：深层 URL 首个 HTTP 响应为 404，由 `404.html` 在浏览器端恢复；如需原生 200 或更强 SEO 应换支持 rewrite 的托管。
 - 自动分包后按需 `ThreeViewerFrame` 约 838 KB（gzip ≈225 KB）仍触发 large chunk 警告；首页不下载它，但受限设备直达 CH₄ Canvas 中位约 4.38 秒，略高于 4 秒目标。
+- **`main` 无自动质量门禁**：push 主分支即触发 `deploy-pages.yml` 自动部署，流程内只跑 `test:pages`（不含 lint / logic / 视觉）；`visual-regression.yml` 仅 `workflow_dispatch`。视觉回归目前不拦截任何改动，见 T-041-A。
+- **23 / 23 份手写 JSON 的 `metadata.notesZh` 无消费者**：经化学核验的模型边界说明从未渲染；UI 的「模型边界」是 `ModuleDetailPage.tsx` 中另一套硬编码短句且只覆盖专题模块，见 T-041-C。
 
 ## 其他待确认
 

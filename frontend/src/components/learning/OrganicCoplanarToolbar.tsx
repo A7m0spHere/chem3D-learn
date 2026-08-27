@@ -41,6 +41,7 @@ export function OrganicCoplanarToolbar({
 
           return (
             <Button
+              aria-pressed={isActive}
               className={buttonClassName}
               key={mode.id}
               onClick={() => onModeChange(mode.id)}
@@ -70,6 +71,7 @@ export function OrganicCoplanarToolbar({
         ) : null}
 
         <Button
+          aria-pressed={showLabels}
           className={buttonClassName}
           onClick={onToggleLabels}
           size="sm"

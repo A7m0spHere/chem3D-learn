@@ -21,8 +21,13 @@ test("拼装实验室识别乙烯并支持从空白补成甲烷", async ({ page 
   await expect(page.getByTestId("builder-known-name")).toHaveText("乙烯");
   await expect(page.getByTestId("builder-diagnostics-toggle")).toHaveAttribute("aria-expanded", "false");
   // 折叠用 0fr 网格行裁剪：外层高度为 0，但子元素自身 rect 仍非空，
-  // 不能用 toBeVisible 判定折叠态；断言折叠行的解析行高为 0。
-  await expect(page.locator("#builder-diagnostics")).toHaveCSS("grid-template-rows", "0px");
+  // 不能用 toBeVisible 判定折叠态。这里断言实际渲染高度而不是具体 CSS 属性，
+  // 换成 max-height 等其它折叠实现也不会误报。
+  await expect
+    .poll(async () =>
+      page.locator("#builder-diagnostics").evaluate((element) => element.clientHeight),
+    )
+    .toBe(0);
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("平面三角形 · sp²");
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("≈120°");
   await expect(page.getByTestId("builder-bond-angle-matches")).toContainText("C 中心 · 2 处");

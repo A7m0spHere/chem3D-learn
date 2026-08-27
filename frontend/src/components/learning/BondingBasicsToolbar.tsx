@@ -37,8 +37,10 @@ export function BondingBasicsToolbar({
       <div className="chem-control-grid">
         {lesson.modes.map((mode) => {
           const Icon = getModeIcon(mode.id);
+          const isActive = mode.id === activeMode;
           return (
             <Button
+              aria-pressed={isActive}
               className="chem-touch-button !h-11 w-full sm:w-auto"
               data-testid={`bonding-basics-mode-${mode.id}`}
               key={mode.id}
@@ -46,7 +48,7 @@ export function BondingBasicsToolbar({
               size="sm"
               title={mode.title}
               type="button"
-              variant={mode.id === activeMode ? "default" : "ghost"}
+              variant={isActive ? "default" : "ghost"}
             >
               <Icon className="h-4 w-4" aria-hidden="true" />
               {mode.label}
@@ -122,6 +124,7 @@ function HybridControls({
 
       <div className="chem-hybrid-actions grid grid-cols-2 gap-2 sm:flex sm:items-center">
         <Button
+          aria-pressed={controls.renderMode === "solid"}
           className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-render-solid"
           onClick={() => onRenderModeChange?.("solid")}
@@ -134,6 +137,7 @@ function HybridControls({
           实体轨道
         </Button>
         <Button
+          aria-pressed={controls.renderMode === "cloud"}
           className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-render-cloud"
           onClick={() => onRenderModeChange?.("cloud")}
@@ -146,6 +150,7 @@ function HybridControls({
           电子云
         </Button>
         <Button
+          aria-pressed={controls.showUnhybridizedP && canShowUnhybridizedP}
           className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-toggle-unhybridized-p"
           disabled={!canShowUnhybridizedP}
@@ -159,6 +164,7 @@ function HybridControls({
           {canShowUnhybridizedP ? "未杂化 p" : "无 p 轨道"}
         </Button>
         <Button
+          aria-pressed={controls.showAxes}
           className="chem-touch-button !h-11 min-w-0 px-3"
           data-testid="hybrid-toggle-axes"
           onClick={onToggleAxes}

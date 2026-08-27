@@ -60,8 +60,10 @@ for (const { mode, labels } of MODE_LABELS) {
 
     await switchMode(page, mode);
 
-    // 「重新堆叠」等场景切换后层有补间动画：等落位后再测量，
-    // 避免把运动中的锚点投影当作最终位置（CI 软渲染下更明显）。
+    // 标签是 HTML overlay，boundingBox 受 CJK 字体度量影响（T-040 勘误：
+    // 「重新堆叠」用的是静态 offsets，此处并没有补间动画）。仍用固定等待而
+    // 非 fonts.ready，是因为无法在 Windows 复现 CI 时序；改为事件驱动前
+    // 需先在 CI 上验证，见 TASKS.md T-041。
     await page.waitForTimeout(1000);
 
     for (const text of labels) {

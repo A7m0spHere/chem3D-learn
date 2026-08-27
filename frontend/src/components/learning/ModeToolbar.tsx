@@ -58,6 +58,7 @@ export function ModeToolbar<M extends string, V extends string = never>({
 
           return (
             <Button
+              aria-pressed={isActive}
               className={buttonClassName}
               key={mode.id}
               onClick={() => onModeChange(mode.id)}
