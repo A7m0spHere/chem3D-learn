@@ -2,9 +2,10 @@
 
 ## 当前任务
 
-- **任务**：无进行中任务。T-039A～D 全站 3D-first 收缩已于 2026-08-13 全部收口（HEAD `14badfe`）。
-- **日期**：2026-08-27 文档整理后交接快照
-- **下一项**：见 `docs/TASKS.md` 待办区——先做「视觉基线审核解法决策」（原计划 macOS 默认 Chromium 集中审核 T-039 影响的过期基线；备选思路是迁移到可复现 CI 环境，由维护者选择），决策前不直接更新任何快照。
+- **任务**：T-040 视觉基线迁移至 ubuntu CI（2026-08-27 启动，Claude Code）。
+- **内容**：新增 `.github/workflows/visual-regression.yml`（`verify` / `rebuild` 两种 dispatch 模式）；首次 `rebuild` 在 `visual-baselines/linux-rebuild-*` 分支生成 `-linux.png` 基线并开评审 PR，**必须人工逐张审核后合并**。
+- **验收**：合并 rebuild PR 后，`verify` 连续两轮全绿；之后 UI 迭代的视觉回归由 CI 承担。darwin 旧基线的清理是独立后续任务。
+- **同日决策记录**：T-031 真实用户反馈待 `v0.1.0-rc.2` 发布后重启（rc.2 前置 = T-040 完成）。
 
 ## 上次交付摘要（T-039D，2026-08-13）
 
