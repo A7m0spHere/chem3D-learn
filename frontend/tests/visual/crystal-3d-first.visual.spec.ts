@@ -6,6 +6,23 @@ async function expectNoHorizontalOverflow(page: Page) {
   ).toBe(true);
 }
 
+// .motion-page-enter（ModuleDetailPage 整页容器）带 350ms scale(0.98→1)
+// 页面进入动画：动画进行中测得的按钮 rect 会被等比例缩小（run 33308780225
+// 实测 44×0.98 = 43.12，此前误诊为 CJK 字体度量）。测量触控目标前先等字体
+// 交换与该容器的有限动画结束；reduced-motion 下动画被压到 0.01ms，立即通过。
+async function waitForTouchTargetSettled(page: Page) {
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(async () => {
+    const pageEnter = document.querySelector(".motion-page-enter");
+    if (!pageEnter) return;
+    const finite = pageEnter.getAnimations().filter((animation) => {
+      const timing = animation.effect?.getTiming();
+      return !!timing && timing.iterations !== Infinity;
+    });
+    await Promise.all(finite.map((animation) => animation.finished.catch(() => {})));
+  });
+}
+
 test.describe("T-039C 普通晶体 3D-first 契约", () => {
   test("代表性晶体使用真实 Viewer、短控制与默认折叠 CrystalInfo", async ({ page }) => {
     test.setTimeout(120_000);
@@ -114,8 +131,8 @@ test.describe("T-039C 普通晶体 3D-first 契约", () => {
     expect(disclosureBox.y).toBeGreaterThanOrEqual(toolbarBox.y + toolbarBox.height - 1);
     expect(disclosureBox.height).toBeLessThanOrEqual(130);
 
-    // 触控尺寸同样受 CJK 字体度量影响，测量前先等字体交换完成。
-    await page.evaluate(() => document.fonts.ready);
+    // 触控尺寸测量同样需要等页面进入动画与字体交换完成。
+    await waitForTouchTargetSettled(page);
     const buttonBoxes = await toolbar.getByRole("button").evaluateAll((buttons) =>
       buttons.map((button) => button.getBoundingClientRect().toJSON()),
     );
