@@ -19,6 +19,7 @@
 - **A（高，已完成 2026-08-30）**：质量门禁落地（维护者选定方案③，决策与边界见 `docs/DECISIONS.md` D-048，实现见 PR #7）——`visual-regression.yml` 增加 `pull_request` 触发（目标 `main`，路径限 `frontend/**` 与 workflow 自身；PR 事件一律 verify 模式，rebuild 仅限手动），`deploy-pages.yml` 新增 `quality-gate` 作业（`npm run lint` + `npm run test:logic`）并令 `build` 依赖它。仓库未配置 branch protection，检查目前「可见但不强制」，是否设为必需检查由维护者在 Settings → Branches 决定。
 - **B（中）：移动端 3D 主视区被压到 177px**
   - 现状：390×844 视口下 MOF-5 canvas 实测 177px，占屏高约 21%。`ThreeViewerFrame` 外框 `min-h-[500px]`，内部 `grid-rows-[auto_minmax(0,1fr)_auto]`；窄屏下顶栏与摘要栏因 `flex-wrap` 换行合计吃掉约 323px。
+  - **测试稳定化（2026-08-30，PR #9）**：PR 门禁首次实战暴露两类 flake 并修复——`waitForTouchTargetSettled` 补懒加载容器挂载等待；晶体三宽度与 NH₃ 1024 的 ±2px 等式断言补「字体 + 挂载 + 动画」稳定等待（此前 `goto` 后裸测量，加载窗口内漂 2-6.5px）。教训：新增紧容差断言必须配套稳定等待。
   - **已修（2026-08-30，PR #9）**：摘要栏文本挤压——`ThreeViewerFrame` 摘要文本原为 `flex-1`（basis 0）+ `min-w-0`，被宽图例 `footerMeta`（shrink-0）挤到每行 1-4 字（MOF-5 摘要栏实测 721px 高）；改为 `min-w-[min(15rem,100%)]` 后文本独占整行、图例换行，MOF-5 摘要栏 721px → 125px，全站移动端无横向溢出。桌面渲染不变（图例与文本同行时下限不生效），经取证基线零冲突，无需 rebuild。
   - **同批挂账（随本项 rebuild 周期一起修）**：① `CalloutLabel` 引线标签出界裁切与叠印（极性移动端左缘裁切、杂化移动端顶部裁切、MOF-5 桌面「虚线末端」被引线穿过）——标签位置随相机旋转变化，固定偏移无法根治，需边界钳制；② 相关推荐卡标题=副标题重复（specialty 模块 name 与 title 同值，σ 键 / 离子键形成 / π 键卡可见）——修复会触碰 `modules-molecular-geometry-filter-linux.png` 基线。
   - 与 `AGENTS.md` 的「Large 3D viewer area」「不要把 3D viewer 缩成小装饰卡片」冲突。T-040 把测试下限从 200 调到 150 让测试转绿，等于把现状固化为预期。

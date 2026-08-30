@@ -18,12 +18,20 @@
 - 基线零冲突已取证：78 张 Linux 基线中 viewer 系列为 `canvasArea` 元素级截图（不含摘要栏/chips），390px 基线仅 organic-builder 两张（独立布局），home/modules 基线不含 viewer 摘要栏。
 - 未修（有意挂账，均记录在 TASKS.md T-041-B）：① `CalloutLabel` 标签出界/叠印（位置随相机旋转变化，需边界钳制，随 B 的 rebuild 周期修）；② 推荐卡标题=副标题重复（改 `ModuleCard` 会触碰 `modules-molecular-geometry-filter-linux.png` 基线，同周期修）。
 
+## PR 门禁四轮攻防（重要教训）
+
+PR #9 是新 PR 视觉回归门禁的首次实战，四轮才全绿，暴露了两类真实问题：
+
+1. **helper 竞争（已修）**：`waitForTouchTargetSettled` 在 `page.reload()` 后若懒加载 chunk 晚于 `fonts.ready` 挂载整页容器，`querySelector` 拿到 null 会整段跳过动画等待（run 33314825061 实测动画 98.4% 进度时测量）。修法：先 `waitForSelector(".motion-page-enter", { state: "attached" })` 再 `getAnimations`。
+2. **±2px 等式断言的加载窗口抖动（已修）**：晶体三宽度循环与 NH₃ 1024 等式测试都是 `goto` 后**无稳定等待**直接测量。两轮门禁分别在晶体页漂 6.45/3.22px、NH₃ 页漂 2.31px，且失败断言逐轮不同；诊断轮（输出全部 box + transform）显示稳定值逐像素相等、transform 均为 none。修法：测量前统一调用 `waitForTouchTargetSettled`（等字体 + 容器挂载 + 动画结束），不放宽容差。**教训：新增 ±2px 级布局断言时必须配套稳定等待；main 三次全绿不代表无 flake，只是窗口未命中。**
+3. 诊断轮遗留过 2 个 eslint warning（eslint-disable 指令未匹配规则），已随诊断代码一并移除。
+
 ## 验证
 
 - `npm run build` 通过；`npm run lint` 通过；`npm run test:logic` **163 / 163**。
 - 系统 Chrome 通道 + `--ignore-snapshots`：受影响的 5 个 spec 共 **43 / 43**（molecule-viewer、core-learning-pages、specialty-viewers、crystal-3d-first、crystal-viewer）。
 - 390px 实测复检：MOF-5 摘要 721 → 125px、NaCl 141 → 109px，五页均无横向溢出；修复后截图逐张目检确认。
-- PR #9 会首次触发新的 PR 视觉回归门禁（frontend 路径）——全绿即基线零冲突的最终实证。
+- PR 视觉回归门禁第四轮全绿（run `33317754131`，168/168）：基线零冲突 + 全套件通过的最终实证。前三轮失败与修复见上节。
 - `git status` 干净：无快照 / lockfile / 缓存污染；`ui-review-20260830/` 为维护者本地的审查截图文件夹，未跟踪、不提交。
 
 ## 遗留问题（T-041 B/C/D，按序待办）
