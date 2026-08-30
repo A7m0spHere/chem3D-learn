@@ -623,3 +623,17 @@
   - [x] 记录默认 Playwright 无头浏览器缺失与 Chrome 通道冒烟通过的差异。
   - [x] 前端 build / lint / 23 项 logic 测试、后端 5 项测试均通过。
   - [x] 未运行完整视觉回归，原因是只有 macOS 基线。
+
+---
+
+## T-040 视觉基线迁移至 ubuntu CI（完整收口记录，2026-08-30 归档）
+
+- **决策**：2026-08-27 维护者在两个候选方案中选定「迁移到可复现 CI 环境」，放弃依赖 macOS 人工审核。
+- **已落地**：新增 `.github/workflows/visual-regression.yml`，提供 `verify`（跑视觉套件）与 `rebuild`（重生成 Linux 快照并开评审 PR）两种 workflow_dispatch 模式；runner 为 `ubuntu-latest` + Playwright 官方 Chromium，基线文件带 `-linux.png` 平台后缀，不动既有 `*-darwin.png`。
+- **执行流程**：`rebuild` 产出的快照以 `visual-baselines/linux-rebuild-*` 分支开 PR，必须人工逐张审核后合并。
+- **首轮 rebuild（run `33078407631`）**：168 个测试中 155 通过并写出 `-linux.png` 快照，13 个失败。经本地 Windows 复核，全部是 T-038/T-039 内容收缩后 main 上从未回绿的过期断言（首轮「软件渲染超时」归因是错的），分三批修复（含 commit `438139f`）；另有 3 个时序抖动修复（`9b0f5ad`、`8f3c2bf`、`06ed5b9`，均为等 `document.fonts.ready` 或滑入落位）。
+- **第五轮 rebuild（run `33091976613`）168 / 168 全绿**：78 张 `-linux.png` 推到 `visual-baselines/linux-rebuild-20260827-1622` 分支，人工逐张审核后经 **PR #4** 合并（run 内 `gh pr create` 被仓库设置拒绝，PR 由维护者手动补开；workflow 已加降级警告）。
+- **合并后首次 `verify` 失败（run `33093611347`）**：167 / 168，`specialty-viewers` 44×44 触控目标断言。第一次修复（PR #6，commit `526a96b`）补 `fonts.ready` 并把三处同类断言改为输出实测 rect 的诊断式写法——**但字体归因是误诊**。
+- **第二次 `verify` 失败（run `33308780225`）**：诊断输出揭示真因——7 个按钮实测 43.12px（= 44 × 0.98）、105.84px（= 108 × 0.98），是 `ModuleDetailPage.tsx:1183` 整页容器 `motion-page-enter`（350ms `scale(0.98→1)`）动画进行中测量所致，与 CJK 字体度量无关。修复（PR #8，commit `4feee97`）：`specialty-viewers` / `crystal-3d-first` 两 spec 增加 `waitForTouchTargetSettled`，测量前等 `document.fonts.ready` **且** `.motion-page-enter` 容器上的有限动画全部 `finished`（决策记录见 `docs/DECISIONS.md` D-049）。
+- **收口验证（2026-08-30）**：`main@145dc2c` 上连续两轮 `verify` 全绿——run `33309722930`、run `33310145143`，各 168 / 168。
+- **遗留**：darwin 78 张旧基线清理为独立后续任务；T-041-A 质量门禁已另行落地（PR #7，见 D-048）。

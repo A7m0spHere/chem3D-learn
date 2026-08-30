@@ -602,3 +602,20 @@
 - **理由**：视觉激活态对读屏用户完全不可感知，而这些工具栏正是模块页的主交互；`aria-pressed` 同时给出了比文案更稳定的测试锚点——T-040 的三处「侧视验证…」文本断言正是因为文案被删而失效，改用按钮态后不再随教学文案漂移。
 - **勘误**：本次 review 初稿曾判定「T-040 把 CaF₂ 断言从显示尺度澄清改为空间群标签，削弱了测试覆盖」。复核后该判断**不成立**：那句「不按约 5.463 Å 的晶格常数直接缩放」位于无消费者的 `crystalTeaching.viewModes[].bodyZh`，从未渲染到页面，旧断言在 main 上长期为红。T-039D 删除该字段、T-040 把断言改指向真实渲染的 `crystal.latticeZh`，两者都是正确修复。由此暴露的真实问题是 23 / 23 份 JSON 的 `metadata.notesZh` 同样无消费者，已记为 T-041-C。
 - **验证边界**：`aria-pressed` 是无障碍属性，不参与样式计算，不改变任何渲染输出，因此不触碰截图基线。lint、build、logic 163 / 163 通过；系统 Chrome 通道 `--ignore-snapshots` 下受影响的 12 个 spec 共 67 / 67 通过；两套基线各 78 张，`git status` 无快照、lockfile 或缓存污染。
+
+## D-048 质量门禁采用「PR 视觉回归 + 部署前 lint/logic」组合
+
+- **日期**：2026-08-30（Claude Code，T-041-A；维护者在四个选项中选定方案③，实现见 PR #7）
+- **决定**：
+  1. `visual-regression.yml` 增加 `pull_request` 触发（目标 `main`），路径过滤为 `frontend/**` 与 workflow 自身——纯文档 / backend / video 改动的 PR 不跑 168 项视觉套件。PR 事件一律按 `verify` 模式执行（workflow 级 `RUN_MODE: ${{ inputs.mode || 'verify' }}` 回退），`rebuild` 仍仅限手动触发，PR 永远不会开基线 PR。
+  2. `deploy-pages.yml` 新增 `quality-gate` 作业（`npm run lint` + `npm run test:logic`，秒级、无浏览器依赖），`build` 作业 `needs: quality-gate`——门禁不过，构建与部署都不执行。push `main` 与手动触发均生效。
+  3. concurrency 按 PR 编号分组、新提交取消旧运行；手动触发共用 `manual` 组且不互相取消。
+- **理由**：公开仓库 Actions 免费，60 分钟级 runner 成本可接受，主要代价是 PR 等待时间；路径过滤把该代价限定在真正影响 UI 的 PR。秒级 lint/logic 挡住低级破坏，视觉回归拦截渲染与布局破坏，双层互补。
+- **边界**：仓库未配置 branch protection，这些检查目前「可见但不强制」；是否设为必需检查由维护者在 Settings → Branches 决定。门禁改动本身不触碰截图基线。
+
+## D-049 触控目标测量必须等 `motion-page-enter` 页面进入动画结束
+
+- **日期**：2026-08-30（Claude Code，T-040 收口第二次修复；失败证据 run `33308780225`）
+- **决定**：对按钮 / 布局做二值阈值测量（如 44×44 触控目标）的用例，测量前使用 `waitForTouchTargetSettled`：先 `document.fonts.ready`，再等 `.motion-page-enter`（`ModuleDetailPage.tsx` 整页容器，350ms `scale(0.98→1)`、`both` 填充）上的**有限动画**全部 `finished`（过滤 `iterations === Infinity` 的动画避免悬挂；reduced-motion 下动画时长被压到 0.01ms，等待立即通过）。已应用于 `specialty-viewers` 2 处、`crystal-3d-first` 1 处；带容差的相对几何断言（均匀缩放下差值不变）不强制。
+- **教训**：run `33308780225` 的诊断输出（7 个按钮 43.12px = 44×0.98、105.84px = 108×0.98）揭示真正根因是整页缩放动画，而非此前归因的「CJK 回退字体度量」——PR #6 的字体等待修复是误诊。这是继 T-040 C 组「软件渲染超时」误判之后第二例「把平台时序差异错误归因」：Windows 本机字体解析慢于 350ms 所以动画已完成，Linux CI 上 fonts.ready 秒回所以测量落在动画窗口内，差异是时序而非字体渲染本身。诊断式断言（失败时输出实测 rect JSON）是定位关键，后续新增二值尺寸断言时沿用。
+- **验证**：Windows 系统 Chrome 通道两 spec 12 / 12；Linux `verify` 连续两轮 168 / 168（runs `33309722930`、`33310145143`）。截图断言不受影响（`toHaveScreenshot` 默认禁用动画）。

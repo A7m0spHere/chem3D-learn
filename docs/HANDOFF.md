@@ -2,72 +2,52 @@
 
 ## 当前任务
 
-- **任务**：T-041 code review 收口（2026-08-28，Claude Code）。上游同步 + 对 T-040 合并后 `main` 的一次完整 review，并修复其中低风险项。
-- **同步**：`git pull --ff-only` 从 `14badfe` 快进到 `e0bfc39`（13 个提交，T-040 视觉基线迁移至 Linux CI）。工作区全程干净，无 stash / reset / force。
+- **任务**：项目目标审核 + T-040 收口 + T-041-A 质量门禁落地（2026-08-30，Claude Code）。
+- **维护者确认**：① 按推荐顺序执行（T-040 收口 → T-041 A→B→C→D）；② T-041-A 选方案③（PR 视觉回归 + 部署前 lint/logic）。
+
+## 同步与 PR 链
+
+全程 `git fetch` 核对后推进，merge commit 风格与仓库一致，无 stash / reset / force：
+
+| PR | 内容 | 结果 |
+| --- | --- | --- |
+| #6 | 526a96b：44px 断言补 `fonts.ready` + 诊断式输出（第一次修复，误诊） | 已合并（main `4b278f7`） |
+| #8 | `waitForTouchTargetSettled`：等页面进入动画结束（第二次修复，真因） | 已合并（main `145dc2c`） |
+| #7 | T-041-A 方案③：两个 workflow 加质量门禁 + 治理文档更新 | 已合并（门禁生效） |
+
+## 关键发现（务必读）
+
+1. **44px 触控失败的真因不是字体**：`ModuleDetailPage.tsx:1183` 整页容器挂 `motion-page-enter`（`motion.css:74`，350ms `scale(0.98→1)`）。动画进行中测量，rect 被等比缩小（43.12 = 44×0.98）。Windows 本机字体解析慢于 350ms 所以一直复现不了，Linux CI 上 `fonts.ready` 秒回恰好落在动画窗口。诊断式断言（输出实测 rect）是破案关键——**后续新增二值尺寸断言时必须先等 `waitForTouchTargetSettled`**（见 D-049）。
+2. 这是 T-040 期间第二例「平台时序差异被错误归因」（第一例是「软件渲染超时」）。遇到「只在 CI 失败」的测量类断言，优先怀疑动画 / 字体交换的时序，让断言输出实测数据。
 
 ## 本次改了什么
 
-**无障碍（11 处，不改变任何渲染输出）**
-
-- `ModeToolbar.tsx` 模式按钮补 `aria-pressed`——T-040 只给同文件的视图切换按钮加了，模式组漏了；该组被 Acetylene / Benzene / Ethylene / MolecularPolarity 四个工具条共用，改一处修四页。
-- `BondingBasicsToolbar.tsx` 5 处（模式组 + 实体轨道 / 电子云 / 未杂化 p / XYZ），模式组顺带提取 `isActive` 变量与同族文件对齐。
-- `OrganicCoplanarToolbar.tsx` 2 处、`SigmaPiBondToolbar.tsx` 2 处、`OrganicBuilderToolbox.tsx` 1 处。
-- **有意跳过 2 处**：`SigmaPiBondToolbar` 播放 / 暂停、`OrganicCoplanarToolbar`「对齐平面 / 恢复 45°」。这两个按钮的可见文字随状态反向切换，属动作按钮；加 `aria-pressed` 会让读屏读出矛盾信息。理由见 D-047。
-
-**测试与清理**
-
-- `organic-builder.visual.spec.ts`：折叠态断言从 `toHaveCSS("grid-template-rows", "0px")` 改为轮询 `clientHeight === 0`，不再绑定「用 0fr 网格实现折叠」这一具体做法。
-- `crystal-viewer.visual.spec.ts` / `scroll-reveal-layout.visual.spec.ts`：修正两处与代码不符的注释（写着「等 1100ms」，实际用的是 `toHaveCSS(transform)` 轮询）。
-- `mxene-callout.visual.spec.ts`：只修正注释里的错误病因（不是补间动画，是 CJK 字体度量），**保留** `waitForTimeout(1000)`，原因见下方遗留问题 D。
-- 删除死代码 `CrystalModelStyleToggle.tsx`（全 `src/` 零引用，功能已由 `CrystalModeToolbar` 的球棍 / 堆积按钮取代）。
-- 删除 2 张孤儿基线 `molecule-viewer-nh3-lone-pair-darwin.png`、`sigma-pi-bonds-pi-viewer-darwin.png`（对应截图断言已不存在，Playwright 不检测未使用快照）。两套基线现各 78 张。
-- `visual-regression.yml`：rebuild 步骤改用 `npm run test:visual:update` 而非 `npx playwright test --update-snapshots`；修正 PR body 里 `\*-darwin.png` 的多余转义。
-
-**文档**
-
-- `AGENTS.md` 修正 6 处过期事实：基线状态（80 张全 darwin → 各 78 张，Linux 为现行基线）、`test:logic` 83 → 163、`test:production` 3 → 4、命令表补 `test:visual:update` / `test:pages` / `test:sites`、部署状态从「待确认」改为记录已有的 `deploy-pages.yml`、仓库结构补 `.github/workflows/` 与 `docs/archive/`。
-- `AGENTS.md` 新增护栏：Windows 本机跑 `playwright test` **必须**加 `--ignore-snapshots`（见下方教训）。
-- `docs/DECISIONS.md` 追加 D-047；`docs/TASKS.md` 新增 T-041 四条待办。
+- `frontend/tests/visual/specialty-viewers.visual.spec.ts`、`crystal-3d-first.visual.spec.ts`：各加 `waitForTouchTargetSettled` helper（fonts.ready + `.motion-page-enter` 有限动画 finished），替换三处 44px 断言的测量前等待。
+- `.github/workflows/deploy-pages.yml`：新增 `quality-gate` 作业（lint + test:logic），`build` `needs` 它——push main 与手动触发均生效。
+- `.github/workflows/visual-regression.yml`：增加 `pull_request` 触发（目标 main，路径限 `frontend/**` 与 workflow 自身）；PR 事件一律 verify（`RUN_MODE: ${{ inputs.mode || 'verify' }}`），rebuild 仅限手动；concurrency 按 PR 分组、新提交取消旧运行。
+- 文档：TASKS.md（T-040 移入索引、T-041-A 标记完成）、PROJECT_STATUS.md（2026-08-30 快照）、DECISIONS.md（D-048、D-049）、archive（T-040 完整收口记录）、本文件。
 
 ## 验证
 
-- `npm run build` 通过（保留既有 3D chunk 体积警告）；`npm run lint` 通过；`npm run test:logic` **163 / 163**。
-- 系统 Chrome 通道 + `--ignore-snapshots`，受影响的 12 个 spec 共 **67 / 67** 通过（crystal-viewer、organic-builder、scroll-reveal、organic-coplanar、sigma-pi-bonds、mxene-callout、acetylene、benzene、ethylene、molecular-polarity、specialty-viewers、molecule-viewer）。
-- `git status` 干净：无 win32 快照、无 lockfile 或缓存污染；darwin 78 / linux 78。
+- Linux CI：`verify` 连续两轮 **168 / 168**（runs `33309722930`、`33310145143`，main `145dc2c`）——T-040 收口条件满足并关闭。
+- Windows 本机：lint 通过；logic **163 / 163**（门禁两步本地预验证）；系统 Chrome 通道 + `--ignore-snapshots` 两 spec **12 / 12**。
+- `git status` 全程干净：无 win32 快照、无 lockfile / 缓存污染。
 
-## 本次教训（务必读）
+## 遗留问题（T-041 B/C/D，按序待办）
 
-在 Windows 上用 `-g` 过滤「无截图用例」**不可靠**。本次一次遗漏 `--ignore-snapshots`，过滤命中了含 `toHaveScreenshot` 的 CaF₂ 用例，Playwright 因缺 win32 基线自动写入了 4 张 `caf2-*-win32.png`。已全部删除、未进入提交，但这正是 `AGENTS.md` 明令禁止的快照污染。此后任何 Windows 本机的 `playwright test` 都要带 `--ignore-snapshots`。
+- **B（中）**：390px 下 3D 主视区仅 177px（约 21% 屏高）。`ThreeViewerFrame`（`min-h-[500px]` + 顶栏/摘要栏 `flex-wrap` 换行吃掉约 323px）是病灶。验收：canvas ≥40% 屏高、无横向溢出。**改动会影响 Linux 基线，必须走 rebuild → 人工逐张审核 PR 流程**；A 已合并，B 的 PR 会自动触发 PR 视觉回归（预期对基线红，属正常信号）。
+- **C（中）**：23 份 JSON 的 `metadata.notesZh` 零消费者；UI「模型边界」是 `ModuleDetailPage.tsx` 中 8 处硬编码 `modelBoundary`，只覆盖专题模块。接入方式（并入 `StructureInfoDisclosure.modelBoundary` 处理长度，或 JSON 另立短字段）待维护者决策。
+- **D（低）**：`mxene-callout.visual.spec.ts` 的 `waitForTimeout(1000)` 应改事件驱动；需先在 CI 上验证避免引入 flaky。
 
-## 遗留问题（均已记入 TASKS.md T-041）
+## 平台与环境边界（不变）
 
-- **A（高，需你决策）**：`main` 没有自动质量门禁。push 主分支即自动部署到 GitHub Pages，流程内只跑 `test:pages`；视觉回归只能手动触发，实际上不拦截任何改动。三个候选方案与成本对比见 T-041-A。
-- **B（中）**：390px 下 3D 主视区仅 177px（约 21% 屏高），与「不要把 3D viewer 缩成小装饰卡片」冲突；T-040 把测试下限 200 → 150 等于把现状固化为预期。修复会动 Linux 基线，需走 `rebuild` 流程。
-- **C（中）**：23 / 23 份手写 JSON 的 `metadata.notesZh` 全库无消费者——经化学核验的模型边界说明（如「画面单位不等于 Å」）从未展示给学生；UI 上的「模型边界」是 `ModuleDetailPage.tsx` 里另一套硬编码短句，只覆盖专题模块。
-- **D（低）**：`mxene-callout` 的 `waitForTimeout(1000)` 应改为 `document.fonts.ready`，但需先在 CI 上验证，避免把当前绿的用例改成 flaky。
+- Linux 78 张基线为现行基线；darwin 78 张为遗留待清理；任何平台的快照不得在 Windows 本机更新。
+- Windows 本机跑 `playwright test` 必须带 `--ignore-snapshots`，用系统 Chrome 通道（`PLAYWRIGHT_CHANNEL=chrome`）。
+- verify / rebuild 由 `.github/workflows/visual-regression.yml` 承担：`gh workflow run visual-regression.yml --ref main -f mode=verify`。
 
-## T-040 未收口部分
+## 下一步建议
 
-PR #4 已合并（本次 pull 即包含）。**合并后的首次 `verify` 已失败**（run `33093611347`，167 / 168）——唯一失败是 `specialty-viewers.visual.spec.ts:182` 在第 243 行的 44×44 触控目标断言，根因是 `page.reload()` 后未等 `document.fonts.ready` 即测量按钮尺寸（CJK 回退字体度量）。该失败发生在本文件上一版写成之后，此前无人记录。
-
-**已于 2026-08-28 修复**（分支 `claude/t041-verify-fix`）：reload 后补字体等待；三处同类 44px 断言改为输出实测 rect 的诊断式写法，并补齐测量前的字体等待。
-
-**收口计数从零重新开始**：需在含该修复的 `main` 上跑两轮 `verify` 且连续全绿，才能关闭 T-040。darwin 旧基线（78 张）清理仍是独立后续任务。
-
-触发方式（GitHub 网页：Actions → Visual regression (Linux baselines) → Run workflow → mode: verify），或：
-
-```powershell
-gh workflow run visual-regression.yml -f mode=verify
-```
-
-## 平台与环境边界
-
-- 视觉基线两套：**Linux 78 张为现行基线**（CI 维护，`visual-regression.yml` 的 `verify` / `rebuild`）；darwin 78 张为历史遗留，待清理。任何平台的快照都不得在 Windows 本机更新。
-- 浏览器行为回归使用系统 Chrome 通道（`$env:PLAYWRIGHT_CHANNEL='chrome'`）并加 `--ignore-snapshots`；默认 Playwright Chromium 无头壳未安装。
-- Windows 下使用 Git Bash 路径与 `npm.cmd`；向项目所有者提供的命令用 PowerShell 语法。
-
-## 治理文档索引
-
-- 待办与状态流转：`docs/TASKS.md`；全局事实与风险：`docs/PROJECT_STATUS.md`。
-- 历史任务全文与逐日独立验证日志：`docs/archive/TASKS_ARCHIVE_20260827.md`、`docs/archive/PROJECT_STATUS_ARCHIVE_20260827.md`（只读存档）。
-- 共享规则、流程与禁止事项：根目录 `AGENTS.md`（CLAUDE.md 仅承载 Claude Code 专用补充）。
+1. 决策 T-041-C 的接入方式后实施 B / C（各为独立 PR；B 走 rebuild 流程）。
+2. T-041-D 借一次 CI verify 验证事件驱动改写。
+3. 全部收口后发 `v0.1.0-rc.2`，重启 T-031 真实反馈收集。
+4. 可选：Settings → Branches 把 `lint / test:logic / visual` 设为必需检查；清理 darwin 旧基线。

@@ -9,40 +9,14 @@
 
 ## 进行中
 
-### T-040 视觉基线迁移至 ubuntu CI
-
-- **决策**：2026-08-27 维护者在两个候选方案中选定「迁移到可复现 CI 环境」，放弃依赖 macOS 人工审核。
-- **已落地**：新增 `.github/workflows/visual-regression.yml`，提供 `verify`（跑视觉套件）与 `rebuild`（重生成 Linux 快照并开评审 PR）两种 workflow_dispatch 模式；runner 为 `ubuntu-latest` + Playwright 官方 Chromium，基线文件带 `-linux.png` 平台后缀，不动既有 `*-darwin.png`。
-- **执行流程**：`rebuild` 产出的快照以 `visual-baselines/linux-rebuild-*` 分支开 PR，必须人工逐张审核后合并——合并未经审阅的基线等于放弃视觉安全网。
-- **验收标准**：合并首轮 rebuild PR 后，`verify` 模式连续两轮全绿；此后日常 UI 迭代的视觉回归由 CI 承担。旧 darwin 基线的清理作为独立后续任务，不与本任务混提。
-- **首轮 rebuild 结果（run `33078407631`，2026-08-27）**：168 个测试中 155 通过并写出 `-linux.png` 快照，**13 个失败**。失败在 Windows 上从未出现——含 darwin 截图步骤的 spec 在 Windows 从未真正执行，本轮首次暴露。
-- **分类修正（2026-08-27 本地复核）**：首轮把 7 项归因为「软件渲染超时」是错的——本地 Windows 复跑显示它们在 dev 环境同样失败，根因全部是 T-038/T-039 内容收缩后 spec 未同步（按钮改名、标签文本删除、dev/production 断言未区分）。**A+B 组共 7 项已修复**：
-  - CaF₂ 显示尺度断言 → 对齐当前 CrystalInfo 内容（晶格模型 Fm-3m 文案），测试更名；
-  - 乙烯 / 苯 / 乙炔「侧视验证…」文本断言 → 侧视现为纯相机切换，无对应文本；给 `ModeToolbar` 视图切换按钮补 `aria-pressed`（与 FloatingToolbar 惯例一致），spec 改为断言按钮态；
-  - 电子云 NH₃ / H₂O 场景按钮 `识别孤电子对` / `识别两对孤电子对` → 已不存在，改用 `molecule-toggle-lone-pairs` testid；石墨标签 `C｜层内离域 π 电子` → 实际为 `C｜离域 π 电子`；
-  - route-error-recovery 拦截模式只匹配生产 `/assets/` 路径，dev 永远不命中 → 扩展为同时匹配 `/src/pages/ModuleDetailPage.tsx`；「开发调试信息」断言按 `PLAYWRIGHT_SERVER_MODE`（dev / production，由两份 config 注入）分支。
-  - **本地验证**：三个共面 spec 断言步全过、电子云 12 场景断言步全过、修复的 CaF₂ 测试全过、route-error dev 与 production 双通道通过（production 4/4）。
-- **C 组 4 项已修复（2026-08-27 第三批，commit `438139f`）**：第二轮 rebuild 后本地复核发现，C 组同样全部在 Windows 上复现——**首轮 13 个失败没有一个与 CI 平台有关，全部是 main 上从未回绿的过期断言**：
-  - 拼装折叠态 `not.toBeVisible()` 用错了可见性语义（0fr 裁剪下子元素 rect 非空，Windows 同样失败）→ 改断言折叠行解析行高 `grid-template-rows: 0px`；
-  - MOF-5 移动端 Canvas 高 177px 是 Windows/Linux 一致的现值（200 是 T-039C 布局收缩前的阈值）→ 下限重定为 150，保留「可用主视区」守卫；
-  - MXene 引线偏移：阈值 0.15 → 0.10（静止实测 ≈0.13；后续 review 勘误：重新堆叠场景为静态 offsets，差异实为 CJK 字体度量，非补间动画）；
-  - scroll-reveal 间距 40px 是 T-039D 目录收缩后的现行设计（`mb-10`；55 是收缩前的 56px 设计）→ 阈值重定为 35，保留「间距清零」原始回归守卫；测量前等滑入位移落位。
-- **后续 3 个时序抖动修复**：`9b0f5ad`（杂化 Inspector 等 `document.fonts.ready`）、`8f3c2bf`（Ren₃ 卡片先滚动触发滑入、等 transform 落位再点击；杂化栏宽容差 355–365 吸收 Linux 滚动条亚像素差）、`06ed5b9`（NH₃ 1024px 布局等式同样等 `fonts.ready`，预防同类翻车）。
-- **第五轮 rebuild（run `33091976613`）168 / 168 全绿**：78 张 `-linux.png` 已推到 `visual-baselines/linux-rebuild-20260827-1622` 分支，评审 **PR #4**（run 内 `gh pr create` 被仓库「不允许 Actions 创建 PR」设置拒绝，PR 由维护者手动补开；workflow 已加降级警告与设置指引）。
-- **收口条件**：PR #4 人工审核合并 → `verify` 模式连续两轮全绿 → 关闭 T-040。darwin 旧基线清理为独立后续任务。
-- **合并后首次 `verify` 失败（run `33093611347`，sha `e0bfc39`）**：167 / 168，唯一失败是 `specialty-viewers.visual.spec.ts:182`「杂化专题…窄屏恢复纵向」在第 243 行的 44×44 触控目标断言。根因：该处 `page.reload()` 之后**未等** `document.fonts.ready` 就测量按钮尺寸，CJK 回退字体度量导致交换完成前尺寸不足 44px——与 `9b0f5ad` 修过的是同一类问题，只是 reload 分支漏掉了。该断言原用 `every(...).toBe(true)`，失败时不报告哪个按钮、实际多少像素，CI 日志无任何线索。
-- **已修（2026-08-28，T-041 后续提交）**：reload 后补 `fonts.ready`；三处同类 44px 断言（`specialty-viewers` 2 处、`crystal-3d-first` 1 处）改为 filter 出过小按钮并在失败消息中输出实测 rect，同时补上测量前的字体等待。**收口计数从零重新开始**：需在含此修复的 `main` 上再跑两轮 `verify` 且连续全绿。
-- **工作流已加固**：失败时上传 `frontend/test-results/`（含 error-context.md、trace、失败截图）；rebuild 失败时另行备份已产出的 `-linux.png`（`linux-snapshots-partial` artifact）。
+（暂无。T-040 已于 2026-08-30 收口：完整迁移与收口记录移至 `docs/archive/TASKS_ARCHIVE_20260827.md`，快速检索见文末索引表。）
 
 ## 待办（按优先级）
 
-### T-041 Code review 收口：门禁、移动端主视区与数据脱节
+### T-041 Code review 收口：移动端主视区、数据触达与测试时序
 
 - **来源**：2026-08-28 Claude Code 对 T-040 合并后 `main` 的 code review（已修复项见 `docs/HANDOFF.md`）。
-- **A（高，需维护者决策）：`main` 没有自动质量门禁**
-  - 现状：`.github/workflows/deploy-pages.yml` 在 push 主分支时自动构建并部署到 GitHub Pages，流程内只跑 `npm run test:pages`；`visual-regression.yml` 只有 `workflow_dispatch`。结果是刚建成的视觉回归**不拦截任何改动**，破坏 3D 渲染的提交可以直接上线。
-  - 待决策：① 给 `visual-regression.yml` 增加 `pull_request` 触发（覆盖最全，但每个 PR 约 60 分钟 runner 时间）；② 仅在 `deploy-pages.yml` 部署前增加 `npm run lint` 与 `npm run test:logic`（秒级、无浏览器依赖，但不覆盖视觉）；③ 两者结合。
-  - 未自主实施的原因：涉及 CI 成本与部署可靠性权衡，且会改动生产部署路径。
+- **A（高，已完成 2026-08-30）**：质量门禁落地（维护者选定方案③，决策与边界见 `docs/DECISIONS.md` D-048，实现见 PR #7）——`visual-regression.yml` 增加 `pull_request` 触发（目标 `main`，路径限 `frontend/**` 与 workflow 自身；PR 事件一律 verify 模式，rebuild 仅限手动），`deploy-pages.yml` 新增 `quality-gate` 作业（`npm run lint` + `npm run test:logic`）并令 `build` 依赖它。仓库未配置 branch protection，检查目前「可见但不强制」，是否设为必需检查由维护者在 Settings → Branches 决定。
 - **B（中）：移动端 3D 主视区被压到 177px**
   - 现状：390×844 视口下 MOF-5 canvas 实测 177px，占屏高约 21%。`ThreeViewerFrame` 外框 `min-h-[500px]`，内部 `grid-rows-[auto_minmax(0,1fr)_auto]`；窄屏下顶栏与摘要栏因 `flex-wrap` 换行合计吃掉约 323px。
   - 与 `AGENTS.md` 的「Large 3D viewer area」「不要把 3D viewer 缩成小装饰卡片」冲突。T-040 把测试下限从 200 调到 150 让测试转绿，等于把现状固化为预期。
@@ -116,3 +90,4 @@
 | T-039B | 专题展示 Viewer 3D-first 收缩 | 2026-08-10 | PR #3 `c3e6876` |
 | T-039C | 晶体与 NaCl 周期工作台收缩 | 2026-08-13 | `0aceb2d` |
 | T-039D | 拼装实验室、目录与全局清理（含晶体 JSON 减负） | 2026-08-13 | `14badfe`（HEAD） |
+| T-040 | 视觉基线迁移至 ubuntu CI（78 张 `-linux.png` 基线 + `verify` 连续两轮 168/168 全绿） | 2026-08-30 | PR #4；收口 runs `33309722930` / `33310145143` |
