@@ -1201,12 +1201,14 @@ export function ModuleDetailPage() {
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-dark">
+              {/* flex-wrap + nowrap：窄屏下让标签 chip 以整词为单位换行，
+                  避免容器挤压导致 chip 内文字断行（如「竞赛入/门」）。 */}
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-dark">
                   {moduleData.difficulty}
                 </span>
                 {moduleData.tags.map(tag => (
-                  <span key={tag} className="text-xs font-medium text-text-secondary border border-border px-2 py-0.5 rounded-full">
+                  <span key={tag} className="whitespace-nowrap text-xs font-medium text-text-secondary border border-border px-2 py-0.5 rounded-full">
                     {tag}
                   </span>
                 ))}
