@@ -91,3 +91,50 @@ test("MOF-5「孔隙与客体」逐阶段的引线标签可见", async ({ page }
   await expect(stage.getByText("孔隙体积（教学示意）", { exact: true })).toBeVisible();
   await expect(stage.getByText("客体分子（示意）", { exact: true })).toBeVisible();
 });
+
+// ---------------------------------------------------------------------------
+// T-042 守卫：极窄视口下钳制 + 分离必须把所有引线标签 pill 留在画布内
+// （修复前 390px 下 MOF-5「虚线末端」标签被画布边缘裁切、与 pcu 标签叠印）。
+// ---------------------------------------------------------------------------
+test("360px 极窄视口下所有引线标签 pill 不越出画布", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto(MOF5_ROUTE);
+  // ±2px 级别的几何断言按 D-049 惯例等页面稳定：字体交换 + 懒加载容器挂载 +
+  // 页面进入动画结束。
+  await page.evaluate(() => document.fonts.ready);
+  await page
+    .waitForSelector(".motion-page-enter", { state: "attached", timeout: 10_000 })
+    .catch(() => undefined);
+  await page.evaluate(async () => {
+    const pageEnter = document.querySelector(".motion-page-enter");
+    if (!pageEnter) return;
+    await Promise.all(
+      pageEnter
+        .getAnimations()
+        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+        .map((animation) => animation.finished.catch(() => {})),
+    );
+  });
+
+  const stage = page.getByTestId(STAGE);
+  await expect(
+    stage.getByText("pcu｜每个节点沿 ±x、±y、±z 六方向连接", { exact: true }),
+  ).toBeVisible();
+
+  const stageBox = await stage.boundingBox();
+  if (!stageBox) throw new Error("360px 下 MOF-5 stage 未获得可测量边界");
+
+  const pills = await page
+    .locator("[data-callout-label]")
+    .evaluateAll((elements) => elements.map((el) => el.getBoundingClientRect().toJSON()));
+  expect(pills.length).toBeGreaterThanOrEqual(2);
+
+  const outside = pills.filter(
+    (box) =>
+      box.x < stageBox.x - 1 ||
+      box.y < stageBox.y - 1 ||
+      box.x + box.width > stageBox.x + stageBox.width + 1 ||
+      box.y + box.height > stageBox.y + stageBox.height + 1,
+  );
+  expect(outside, `引线标签 pill 越出画布：${JSON.stringify(outside)}`).toEqual([]);
+});

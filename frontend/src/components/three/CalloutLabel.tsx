@@ -1,6 +1,7 @@
 import { Html, Line } from "@react-three/drei";
 import { useMemo, type ReactNode } from "react";
 import { Vector3 } from "three";
+import { useClampedHtmlPosition } from "@/components/three/useClampedHtmlPosition";
 
 // ---------------------------------------------------------------------------
 // 引线标签（callout）。
@@ -16,6 +17,15 @@ import { Vector3 } from "three";
 // 相比「屏幕边缘绝对固定 + 每帧手动投影」的方案，这种「3D 外推锚点」实现简单、
 // 与现有 viewer 的 demand frameloop 天然兼容，且旋转时引线端点自洽，不需要额外
 // 的逐帧 JS 投影代码。代价是标签位置随视角变化而非死锁在边缘——对课堂展示足够。
+//
+// 遮挡治理（T-042，D-016「不追求完美避让」的后续）：
+// - 深度淡出（fadePosition）：标签转到结构后方时连续淡出到 0.16，不再以 DOM 层
+//   浮在前面原子之上。不用 drei occlude——blending 会劫持 canvas z-index 并把
+//   内容等比缩放成纹理，raycast 是二元 display:none 且粗射线会误伤引线，
+//   理由详见 useClampedHtmlPosition.ts 文件头；
+// - useClampedHtmlPosition：pill 出画布时钳回界内（治极性/杂化类边缘裁切），
+//   同画布同组标签投影重叠时沿 y 分离（治 MOF-5「虚线末端」叠印）。
+//   三者都只在必要时改变渲染——默认视角渲染不变。
 // ---------------------------------------------------------------------------
 
 type Vec3 = [number, number, number];
@@ -46,6 +56,10 @@ export function CalloutLabel({
     [anchor, offset],
   );
 
+  const { measureRef, calculatePosition } = useClampedHtmlPosition({
+    collisionGroup: "callout",
+  });
+
   // 引线不一直画到标签正中心，留一小段间隙，避免线头戳进文字。
   const lineEnd = useMemo<Vec3>(() => {
     const a = new Vector3(...anchor);
@@ -65,9 +79,18 @@ export function CalloutLabel({
       {/* 不用 distanceFactor：标签保持固定屏幕字号，放大看结构时文字不会被等比
           放大到撑出画布。锚点与引线仍是 3D 坐标、随相机跟随；只有文字大小恒定。
           zIndexRange 压低，避免标签盖住更靠前的原子球交互（本组件 pointerEvents 已关）。 */}
-      <Html center pointerEvents="none" position={labelPosition} zIndexRange={[10, 0]}>
-        {children}
+      <Html
+        calculatePosition={calculatePosition}
+        center
+        pointerEvents="none"
+        position={labelPosition}
+        zIndexRange={[10, 0]}
+      >
+        <div className="inline-block" data-callout-label ref={measureRef}>
+          {children}
+        </div>
       </Html>
     </group>
   );
 }
+

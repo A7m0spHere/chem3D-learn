@@ -5,6 +5,7 @@ import { Quaternion, Vector3 } from "three";
 import { CameraRig } from "@/components/three/CameraRig";
 import { PiCloudBand } from "@/components/three/OrbitalPrimitives";
 import { SceneLighting } from "@/components/three/SceneLighting";
+import { useClampedHtmlPosition } from "@/components/three/useClampedHtmlPosition";
 import {
   teachingAccentLabelClass,
   teachingCloudLabelClass,
@@ -436,12 +437,25 @@ function TinyDipoleLabel({
     : tone === "accent"
       ? teachingAccentLabelClass
       : teachingCompactLabelClass;
+  // 试点接入屏幕空间钳制（T-042）：窄画布下「F 更吸电子」等标签曾贴边被裁
+  // 一半；distanceFactor 缩放渲染保持不变，仅出界时把 pill 钳回画布内。
+  const { measureRef, calculatePosition } = useClampedHtmlPosition({
+    collisionGroup: "polarity-callout",
+  });
 
   return (
-    <Html center distanceFactor={7.3} pointerEvents="none" position={position}>
-      <span className={className} data-testid={testId}>
-        {children}
-      </span>
+    <Html
+      calculatePosition={calculatePosition}
+      center
+      distanceFactor={7.3}
+      pointerEvents="none"
+      position={position}
+    >
+      <div className="inline-block" ref={measureRef}>
+        <span className={className} data-testid={testId}>
+          {children}
+        </span>
+      </div>
     </Html>
   );
 }
