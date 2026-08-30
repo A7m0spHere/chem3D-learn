@@ -167,6 +167,25 @@ test.describe("普通分子 3D-first 页面", () => {
     if (boxes.some((box) => !box)) throw new Error("1024px 普通分子布局未获得可测量边界");
     const [stageBox, railBox, toolbarBox, disclosureBox] = boxes as NonNullable<(typeof boxes)[number]>[];
 
+    // 临时诊断（run 33315699503 的 ±2px 抖动定位用，收口后移除）。
+    // eslint-disable-next-line no-console
+    console.log(
+      `[diag-molecule] ${JSON.stringify({
+        stageBox,
+        railBox,
+        toolbarBox,
+        disclosureBox,
+        transforms: await page.evaluate(() =>
+          [
+            ".chem-viewer-stage",
+            "[data-testid=molecule-control-rail]",
+            "[data-testid=module-toolbar]",
+            "[data-testid=structure-info-disclosure]",
+          ].map((selector) => getComputedStyle(document.querySelector(selector)!).transform),
+        ),
+      })}`,
+    );
+
     expect(Math.abs(railBox.x - stageBox.x)).toBeLessThanOrEqual(2);
     expect(Math.abs(railBox.width - stageBox.width)).toBeLessThanOrEqual(2);
     expect(railBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height);
