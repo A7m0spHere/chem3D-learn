@@ -10,8 +10,15 @@ async function expectNoHorizontalOverflow(page: Page) {
 // 页面进入动画：动画进行中测得的按钮 rect 会被等比例缩小（run 33308780225
 // 实测 44×0.98 = 43.12，此前误诊为 CJK 字体度量）。测量触控目标前先等字体
 // 交换与该容器的有限动画结束；reduced-motion 下动画被压到 0.01ms，立即通过。
+//
+// 必须先等元素挂载：page.reload() 后懒加载 chunk 可能晚于 fonts.ready 才挂载
+// 整页容器，提前 querySelector 拿到 null 会让动画等待整段跳过（run 33314825061
+// 实测动画 98.4% 进度时测量，43.986px）。
 async function waitForTouchTargetSettled(page: Page) {
   await page.evaluate(() => document.fonts.ready);
+  await page
+    .waitForSelector(".motion-page-enter", { state: "attached", timeout: 10_000 })
+    .catch(() => undefined);
   await page.evaluate(async () => {
     const pageEnter = document.querySelector(".motion-page-enter");
     if (!pageEnter) return;
