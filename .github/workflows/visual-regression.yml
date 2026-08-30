@@ -13,14 +13,25 @@ on:
         options:
           - verify
           - rebuild
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/visual-regression.yml"
 
 concurrency:
-  group: visual-regression
-  cancel-in-progress: false
+  # PR 各自排队、新提交取消旧运行；手动触发共用 manual 组且不互相取消
+  group: visual-regression-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'manual' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: write
   pull-requests: write
+
+env:
+  # PR 触发时 inputs.mode 为空，一律按 verify 执行；rebuild 仅限手动触发
+  RUN_MODE: ${{ inputs.mode || 'verify' }}
 
 jobs:
   visual:
@@ -47,18 +58,18 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run visual suite (verify)
-        if: inputs.mode == 'verify'
+        if: env.RUN_MODE == 'verify'
         run: npm run test:visual
 
       - name: Regenerate Linux snapshots (rebuild)
-        if: inputs.mode == 'rebuild'
+        if: env.RUN_MODE == 'rebuild'
         run: npm run test:visual:update
 
       - name: Upload failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-failures-${{ inputs.mode }}
+          name: playwright-failures-${{ env.RUN_MODE }}
           path: |
             frontend/test-results/
             frontend/playwright-report/
