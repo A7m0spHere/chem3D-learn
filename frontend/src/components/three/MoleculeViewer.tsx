@@ -54,7 +54,7 @@ export function MoleculeViewer({
     <ThreeViewerFrame
       className="min-h-[420px] transition-shadow duration-base ease-out-soft hover:shadow-lg lg:min-h-[620px]"
       loading={loading}
-      meta={`${displayName} · 自由探索`}
+      meta={displayName}
       stageTestId="molecule-viewer-canvas"
       summary="拖拽旋转、滚轮缩放；可用下方控制显示键角、孤电子对和原子标记。"
       title={`${molecule.formula}｜自由探索`}

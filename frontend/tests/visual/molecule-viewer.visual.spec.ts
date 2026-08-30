@@ -1,5 +1,21 @@
 import { expect, test } from "@playwright/test";
 
+async function waitForTouchTargetSettled(page: import("@playwright/test").Page) {
+  await page.evaluate(() => document.fonts.ready);
+  await page
+    .waitForSelector(".motion-page-enter", { state: "attached", timeout: 10_000 })
+    .catch(() => undefined);
+  await page.evaluate(async () => {
+    const pageEnter = document.querySelector(".motion-page-enter");
+    if (!pageEnter) return;
+    const finite = pageEnter.getAnimations().filter((animation) => {
+      const timing = animation.effect?.getTiming();
+      return !!timing && timing.iterations !== Infinity;
+    });
+    await Promise.all(finite.map((animation) => animation.finished.catch(() => {})));
+  });
+}
+
 async function assertNoHorizontalOverflow(page: import("@playwright/test").Page) {
   const widths = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
@@ -155,9 +171,10 @@ test.describe("普通分子 3D-first 页面", () => {
   test("NH₃ 在 1024px 下保持 Viewer、工具栏与结构信息纵向排列", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto("/module/pyramidal-nh3");
-    // ±2px 级别的布局等式断言必须等字体交换完成：回退字体更宽会把
-    // 工具栏与控制栏的宽度差推到 4.95px（run 33078407631 即此因）。
-    await page.evaluate(() => document.fonts.ready);
+    // ±2px 级别的布局等式断言必须等页面稳定：回退字体更宽会把宽度差推到
+    // 4.95px（run 33078407631）；加载未稳定窗口还会漂移 2-3px（run 33315699503），
+    // 测量前等字体交换、懒加载容器挂载与页面进入动画结束。
+    await waitForTouchTargetSettled(page);
 
     const stage = page.getByTestId("module-builder-transition-stage");
     const rail = page.getByTestId("molecule-control-rail");

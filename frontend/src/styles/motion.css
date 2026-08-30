@@ -283,3 +283,11 @@ html[data-organic-builder-transition="viewer-expand"]::view-transition-new(root)
     transition-duration: 1100ms !important;
   }
 }
+
+/* 打印 / 另存 PDF：滚动揭示区按已显示状态输出，避免未滚动到的内容整段空白。 */
+@media print {
+  .motion-scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

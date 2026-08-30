@@ -63,7 +63,11 @@ export function ThreeViewerFrame({
           className="flex min-h-12 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border bg-white px-4 py-2.5 text-sm leading-5 text-text-secondary sm:min-h-14 sm:px-5 sm:text-[15px]"
           data-testid={viewerTestId ? `${viewerTestId}-summary` : undefined}
         >
-          <div className="min-w-0 flex-1">{summary}</div>
+          {/* min-w 给摘要文本设 240px 下限：窄屏下宽图例（shrink-0）会把
+              flex-basis: 0 的文本挤到每行一两个字（MOF-5 实测摘要栏 721px 高）。
+              低于下限时 flex-wrap 让图例整体换行，文本独占整行；
+              min(15rem, 100%) 把下限钳在容器内，超窄视口不产生横向溢出。 */}
+          <div className="min-w-[min(15rem,100%)] flex-1">{summary}</div>
           {footerMeta ? <div className="shrink-0">{footerMeta}</div> : null}
         </div>
       ) : null}
