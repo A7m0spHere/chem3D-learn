@@ -13,7 +13,29 @@
 
 ## 待办（按优先级）
 
-### T-042 3D 引线标签防遮挡（已实现待基线评审，分支 `claude/t042-label-occlusion`）
+### T-043【最高优先级】3D 标签/标注系统全量审计与修复
+
+- **来源**：2026-08-31 维护者指出——站内有 23+ 个 3D 模型页，T-042 只修复了 CalloutLabel 子系统（7 个晶体 viewer 的引线标签）与极性页试点，**其余标签/标注体系全部未审计、未修复**，且 T-042 自身还有挂账缺陷。本任务将其余全部纳入，作为当前最重要任务。
+- **标签/标注体系全量清单（审计对象）**：
+  1. ~~CalloutLabel 引线标签 32 处（Mof5 15 / Mxene 7 / Ren3 3 / MetalClosePacking 4 / BaTiO3 2 / Pba 2 / ZincMetal 1）~~ —— **T-042 已修复**（钳制 + 分离 + 样式降噪）；
+  2. ~~极性 TinyDipoleLabel 7 处~~ —— **T-042 已试点接入钳制**；
+  3. 直挂 `<Html distanceFactor>` 标签：Mxene ~19 处、Ren3 ~20 处、Mof5 ~5 处——距离缩放字号，远看不可读、近看巨大压模，**未审计**；
+  4. `AngleArc` 键角标注（普通分子 5 页 + 专题多页）——**未审计**；
+  5. `LonePairMesh` 孤对电子标签、`AtomMesh` 原子符号标签（受「标记」开关控制）——**未审计**；
+  6. `TinyAtomLabel` / `ChargeMarker`（极性，未接入钳制——仅 TinyDipoleLabel 试点）——**未审计**；
+  7. `LayerBadge` / `FocusLabel`（MetalClosePacking、ZnSPolytype，zIndexRange 12/13，未接入任何防护）——**未审计**；
+  8. `SigmaPiBondCell` / `HybridOrbitalScene` 的 `<Html fullscreen>` 场景标签——**杂化顶部裁切为已确认未修缺陷**；
+  9. `AtomPullHandle` / `OrganicBuilderCanvas` 交互式标签——**未审计**。
+- **已知未修缺陷（随本任务收口）**：① 杂化专题移动端顶部标签裁切；② 密堆积配位视图「结构顶出画布上缘、画布下方大片空白」（main 上 1280 复现，疑与 CameraRig 预设或布局相关）；③ 重叠淡出机制默认关闭——待 ② 修正后逐 viewer 调参启用（D-050 第 4 条）。
+- **实施阶段**：
+  - **Phase 1 全量审计**：23+ 模型页 × 关键视口（360/390/768/1024/1280/1552）截图矩阵，逐页记录标签缺陷（出界裁切/相互叠印/压模/字号不可读），产出缺陷台账（本文件或独立文档）；
+  - **Phase 2 逐体系修复**：按台账逐体系接入 `useClampedHtmlPosition`（钳制/分离）与样式降噪；distanceFactor 标签逐个评估改恒定字号或钳制；fullscreen 场景标签单独处理；每体系独立小提交；
+  - **Phase 3 守卫断言**：仿照 T-042 的 360px 不出界守卫，为每个体系补自动化断言（含 ±2px 等式断言必配稳定等待的 D-049 惯例）；
+  - **Phase 4 基线收口**：与 T-041-B 的布局改动合并同一 rebuild + 人工逐张审核基线 PR。
+- **验收标准**：审计矩阵全页无出界裁切、无标签叠印、无明显压模（压模处按 D-050 淡出或避让处理）；全部标签体系有守卫断言；rebuild 基线经人工逐张审核合并；`verify` 连续两轮全绿。
+- **状态**：待办（Phase 1 未开始）。T-042 为本任务 Phase 0（CalloutLabel 子系统样板）。
+
+### T-042 3D 引线标签防遮挡（T-043 Phase 0，已实现待基线评审，分支 `claude/t042-label-occlusion`）
 
 - **来源**：2026-08-30 维护者针对 UI 审查提出的「标签遮挡 3D 模型」问题，选定组合拳路线（决策见 D-050）。
 - **已实现**：`useClampedHtmlPosition`（边界钳制 + 同画布碰撞分离，覆盖 CalloutLabel 32 处与极性 TinyDipoleLabel 7 处）；pill 样式不透明度 55-60% → 90%；`data-callout-label` 测试锚点；360px 不出界守卫测试；重叠淡出机制内置但默认关闭（误伤刻意贴原子标签，见 D-050 第 4 条）。
