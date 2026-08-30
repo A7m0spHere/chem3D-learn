@@ -64,6 +64,10 @@ test.describe("T-039C 普通晶体 3D-first 契约", () => {
     ]) {
       await page.setViewportSize(viewport);
       await page.goto("/module/caf2-fluorite");
+      // 三档宽度的 ±2px 等式在加载未稳定窗口会漂移（run 33314825061 / 33315699503
+      // 两轮分别漂 6.45 / 3.22px，诊断轮实测稳定值逐像素相等）：测量前等字体交换
+      // 与页面进入动画结束。
+      await waitForTouchTargetSettled(page);
 
       const stage = page.getByTestId("module-builder-transition-stage");
       const toolbar = page.getByTestId("module-toolbar");
@@ -76,23 +80,6 @@ test.describe("T-039C 普通晶体 3D-first 契约", () => {
       if (!stageBox || !toolbarBox || !disclosureBox) {
         throw new Error(`${viewport.width}px 晶体主区域未获得可测量布局`);
       }
-
-      // 临时诊断（run 33314825061 / 33315699503 的 ±2px 抖动定位用，收口后移除）：
-      // 输出全部实测 box 与各元素 computed transform，判断是否存在非均匀缩放。
-      // eslint-disable-next-line no-console
-      console.log(
-        `[diag-crystal] ${JSON.stringify({
-          viewport: viewport.width,
-          stageBox,
-          toolbarBox,
-          disclosureBox,
-          transforms: await page.evaluate(() =>
-            [".chem-viewer-stage", "[data-testid=module-toolbar]", "[data-testid=structure-info-disclosure]"].map(
-              (selector) => getComputedStyle(document.querySelector(selector)!).transform,
-            ),
-          ),
-        })}`,
-      );
 
       expect(stageBox.width).toBeGreaterThanOrEqual(viewport.width === 1024 ? 950 : 1200);
       expect(Math.abs(toolbarBox.x - stageBox.x)).toBeLessThanOrEqual(2);
