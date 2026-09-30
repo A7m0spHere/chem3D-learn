@@ -142,9 +142,6 @@ For documentation-only tasks:
 - [ ] Codex adapts drafts into Vite + React + TypeScript.
 - [ ] No Next.js, Firebase, login, Gemini API, RDKit runtime, or AI chat feature is introduced from a Gemini draft.
 
-## Final Response
+## Final Response / 最终回复
 
-- [ ] Changed files are listed.
-- [ ] Commands run are listed.
-- [ ] Build status is stated.
-- [ ] Known limitations are listed.
+- [ ] 用自然的语言连贯说明改动内容、验证结果与遗留事项；不强制固定模板或固定小节（2026-09-30 维护者决定，见 DECISIONS D-051）。

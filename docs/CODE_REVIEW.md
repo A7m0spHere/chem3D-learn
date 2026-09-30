@@ -67,4 +67,4 @@ Use this guide when reviewing Chem3D Learn changes.
 - Run lint and tests if scripts exist.
 - Backend code changes should run backend tests if available.
 - Documentation-only tasks should not run npm build unless requested.
-- Final review should note changed files, commands run, build status, and known limitations.
+- Final review summarizes what changed, how it was validated, and what remains — written as natural prose in Chinese, not a fixed template.
