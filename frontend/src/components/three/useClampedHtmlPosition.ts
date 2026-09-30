@@ -27,7 +27,6 @@ import { Raycaster, Vector2, Vector3 } from "three";
 // ---------------------------------------------------------------------------
 
 type HtmlScreenSize = { width: number; height: number };
-type Vec3 = [number, number, number];
 
 type RegisteredRect = {
   x: number;
@@ -184,7 +183,10 @@ export function useClampedHtmlPosition(options?: {
           registries.set(gl, registry);
         }
         if (rectIdRef.current < 0) rectIdRef.current = nextRectId++;
-        for (const [, rect] of registry) {
+        for (const [id, rect] of registry) {
+          // 跳过自己的上一帧矩形：相机不动时它与自己必然完全重叠，
+          // 不跳过则每帧自推 2·hh+2px，标签以帧频持续振荡（T-042 评审实测）
+          if (id === rectIdRef.current) continue;
           const overlapX = hw + rect.hw - Math.abs(x - rect.x);
           const overlapY = hh + rect.hh - Math.abs(y - rect.y);
           if (overlapX <= 0 || overlapY <= 0) continue;
@@ -200,5 +202,5 @@ export function useClampedHtmlPosition(options?: {
     };
 
     return { measureRef, calculatePosition };
-  }, [gl, measureRef, padding, collisionGroup, maxPush, fadeTo, minCovered]);
+  }, [gl, measureRef, padding, collisionGroup, maxPush]);
 }
