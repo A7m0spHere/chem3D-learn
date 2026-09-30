@@ -218,8 +218,9 @@ GitHub sync and delivery:
 - If the branches have diverged, conflicts exist, or uncommitted changes prevent a safe sync, stop and report the situation. Do not automatically stash, reset, overwrite files, or force-push.
 - After development and validation, review the diff, stage only files that belong to the current task, and create a clear commit.
 - Run `git fetch origin` again before pushing. If the upstream advanced during development, safely rebase the task commit onto the updated upstream only with a clean worktree; if conflicts occur, stop and report them.
-- Push the current branch to its upstream branch. If the branch has no upstream, use `git push -u origin <current-branch>`.
+- **直接 push 到 `main`，不开 PR**（2026-09-30 维护者决定，见 DECISIONS D-052）：验证通过后把任务提交直接推送到 `main`（在 `main` 上开发，或用短生命周期分支后合并回 `main` 再推）。历史遗留的未合并 PR 仍按其收口条件合并，但不新开。
 - Never use `--force` or `--force-with-lease`. If a normal push is rejected, fetch and safely integrate the remote updates before retrying.
+- 直接 push 意味着 PR 触发的视觉回归门禁不再自动运行：重要前端改动（影响渲染 / 布局 / 标签）落地后，手动跑一次 `gh workflow run visual-regression.yml --ref main -f mode=verify` 并确认结果。
 
 During coding:
 - Make one focused change per task

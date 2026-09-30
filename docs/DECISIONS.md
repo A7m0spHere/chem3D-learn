@@ -641,3 +641,11 @@
 - **背景**：AGENTS.md 自项目初期要求每次最终回复使用固定六段模板（Changed Files / Commands Run / Build Result / What Works / Known Limitations / Next Suggested Task）。随任务类型增多（代码评审、全量审计、纯讨论评估），模板在小任务与无代码改动的任务上产生大量「无改动 / 不适用」空段，形式盖过内容。
 - **决定**：取消固定模板。任务完成后仍用自然的中文连贯说明**改了什么、验证结果、遗留与建议下一步**——内容要点不变，形式不再强制；琐碎改动一两句话即可。已同步修改 `AGENTS.md`（Done Means）、`docs/QA_CHECKLIST.md`（Final Response）、`docs/CODE_REVIEW.md`（Build and Validation）三处。
 - **边界**：本决定只改对话汇报形式。git 提交信息仍遵循 conventional commits 中文风格；`docs/HANDOFF.md` 的交接结构、TASKS/审计台账等治理文档的既有格式不变。
+
+## D-052 交付流程改为直接 push 到 main，不再开 PR
+
+- **日期**：2026-09-30（维护者决定："以后不直接pr，能push就push"）
+- **背景**：项目自 2026-08 起的既成惯例是所有改动经 `claude/*` 分支开 PR 后人工合并（PR #1-#14）。单人维护者场景下 PR 的评审/合并往返成本高于收益，且 visual-regression 门禁只挂在 `pull_request` 触发上，直接 push 的改动本就不经过它。
+- **决定**：验证通过后把任务提交**直接 push 到 `main`**（可直接在 `main` 上开发，或用短生命周期分支合并回 `main` 后推送），不再新开 PR；已存在的未合并 PR 仍按其收口条件合并。安全规则不变：push 前 `git fetch`、分歧即停、绝不 force。
+- **连带影响**：PR 触发的视觉回归不再自动运行——重要前端改动（渲染/布局/标签）落地后手动执行 `gh workflow run visual-regression.yml --ref main -f mode=verify` 并确认结果（已写入 AGENTS.md 交付流程）。`deploy-pages.yml` 本就由 push main 触发，部署与 quality-gate（lint/logic）不受影响。
+- **边界**：baseline rebuild 类需要人工逐张审核的产出，仍走 `visual-regression.yml` rebuild 模式生成 PR 的既有通道（那是评审载体，不是交付流程）。
