@@ -80,6 +80,7 @@ export function useClampedHtmlPosition(options?: {
   minCovered?: number;
 }): ClampedHtmlPosition {
   const gl = useThree((state) => state.gl);
+  const invalidate = useThree((state) => state.invalidate);
   const padding = options?.padding ?? 8;
   const collisionGroup = options?.collisionGroup;
   const maxPush = options?.maxPush ?? 72;
@@ -100,6 +101,25 @@ export function useClampedHtmlPosition(options?: {
     if (Math.abs(current - opacity) > 0.01) element.style.opacity = String(opacity);
   }, []);
 
+  // 实测尺寸变化后主动触发几帧重渲染：demand 渲染模式下帧循环在 React 提交后
+  // 很快停止，而挂载首帧 pill 尚未量得尺寸（hw/hh=0），分离/钳制会按零尺寸点
+  // 跳过并不再有机会收敛（T-043 Phase 2 在杂化模式切换后实测冻结的 38% 叠印）。
+  const settleFramesRef = useRef(0);
+  const scheduleSettle = useCallback(() => {
+    if (settleFramesRef.current) return;
+    const tick = () => {
+      settleFramesRef.current -= 1;
+      invalidate();
+      if (settleFramesRef.current > 0) {
+        requestAnimationFrame(tick);
+      } else {
+        settleFramesRef.current = 0;
+      }
+    };
+    settleFramesRef.current = 3;
+    requestAnimationFrame(tick);
+  }, [invalidate]);
+
   const measureRef = useCallback(
     (element: HTMLDivElement | null) => {
       observerRef.current?.disconnect();
@@ -108,15 +128,24 @@ export function useClampedHtmlPosition(options?: {
       if (!element) return;
       const update = () => {
         const rect = element.getBoundingClientRect();
-        halfWidthRef.current = rect.width / 2;
-        halfHeightRef.current = rect.height / 2;
+        const halfWidth = rect.width / 2;
+        const halfHeight = rect.height / 2;
+        if (
+          Math.abs(halfWidth - halfWidthRef.current) < 0.5 &&
+          Math.abs(halfHeight - halfHeightRef.current) < 0.5
+        ) {
+          return;
+        }
+        halfWidthRef.current = halfWidth;
+        halfHeightRef.current = halfHeight;
+        scheduleSettle();
       };
       update();
       const observer = new ResizeObserver(update);
       observer.observe(element);
       observerRef.current = observer;
     },
-    [],
+    [scheduleSettle],
   );
 
   // 卸载时清理 registry，防止残留 rect 参与后续分离

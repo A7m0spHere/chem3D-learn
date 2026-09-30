@@ -7,6 +7,7 @@ import {
   Quaternion,
   Vector3,
 } from "three";
+import { useClampedHtmlPosition } from "@/components/three/useClampedHtmlPosition";
 import { useDisposable } from "@/components/three/useDisposable";
 
 export type OrbitalTone = "primary" | "warm" | "neutral" | "blue";
@@ -788,6 +789,9 @@ type AxisTriadProps = {
   length?: number;
   showLabels?: boolean;
   opacity?: number;
+  /** 传入时轴标签接入 useClampedHtmlPosition 的同组碰撞分离（T-043 Phase 2）；
+      不传则保持原渲染不变——SigmaPiBondCell 等既有基线页不受影响 */
+  labelCollisionGroup?: string;
 };
 
 export function AxisTriad({
@@ -795,6 +799,7 @@ export function AxisTriad({
   length = 1.5,
   showLabels = true,
   opacity = 0.52,
+  labelCollisionGroup,
 }: AxisTriadProps) {
   const axes = useMemo(
     (): Array<{ key: "x" | "y" | "z"; label: string; end: Vec3; points: [Vector3, Vector3] }> => [
@@ -817,18 +822,60 @@ export function AxisTriad({
             transparent
           />
           {showLabels ? (
-            <Html center distanceFactor={6.8} pointerEvents="none" position={scale(axis.end, 1.05)}>
-              <span
-                className="rounded-full bg-white/85 px-2 py-0.5 text-[11px] font-bold shadow-sm"
-                style={{ color: axisColors[axis.key] }}
-              >
-                {axis.label}
-              </span>
-            </Html>
+            labelCollisionGroup ? (
+              <ClampedAxisLabel
+                collisionGroup={labelCollisionGroup}
+                color={axisColors[axis.key]}
+                label={axis.label}
+                position={scale(axis.end, 1.05)}
+              />
+            ) : (
+              <Html center distanceFactor={6.8} pointerEvents="none" position={scale(axis.end, 1.05)}>
+                <span
+                  className="rounded-full bg-white/85 px-2 py-0.5 text-[11px] font-bold shadow-sm"
+                  style={{ color: axisColors[axis.key] }}
+                >
+                  {axis.label}
+                </span>
+              </Html>
+            )
           ) : null}
         </group>
       ))}
     </group>
+  );
+}
+
+function ClampedAxisLabel({
+  color,
+  collisionGroup,
+  label,
+  position,
+}: {
+  color: string;
+  collisionGroup: string;
+  label: string;
+  position: Vec3;
+}) {
+  const { measureRef, calculatePosition } = useClampedHtmlPosition({ collisionGroup });
+
+  return (
+    <Html
+      calculatePosition={calculatePosition}
+      center
+      distanceFactor={6.8}
+      pointerEvents="none"
+      position={position}
+    >
+      <span
+        className="rounded-full bg-white/85 px-2 py-0.5 text-[11px] font-bold shadow-sm"
+        data-scene-label
+        ref={measureRef}
+        style={{ color }}
+      >
+        {label}
+      </span>
+    </Html>
   );
 }
 
