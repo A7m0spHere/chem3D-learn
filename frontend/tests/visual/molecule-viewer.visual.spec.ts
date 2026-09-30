@@ -48,6 +48,8 @@ test.describe("普通分子 3D-first 页面", () => {
   test("NH₃ 桌面自由探索采用大 Viewer 与右侧控制栏，结构信息默认折叠", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/module/pyramidal-nh3");
+    // 紧容差布局断言按 D-049 惯例等页面稳定（同 run 36670393259 的 xl 用例教训）
+    await waitForTouchTargetSettled(page);
 
     const stage = page.getByTestId("module-builder-transition-stage");
     const viewer = page.getByTestId("molecule-viewer");
@@ -124,6 +126,9 @@ test.describe("普通分子 3D-first 页面", () => {
     for (const viewport of viewports) {
       await page.setViewportSize(viewport);
       await page.goto("/module/pyramidal-nh3");
+      // ±2px 级布局等式断言测量前等页面稳定：run 36670393273 实测裸 goto 后
+      // 在 page-enter 缩放动画窗口内测量，stage 高漂 3.39px。
+      await waitForTouchTargetSettled(page);
 
       const stage = page.getByTestId("module-builder-transition-stage");
       const rail = page.getByTestId("molecule-control-rail");
@@ -233,6 +238,8 @@ test.describe("普通分子 3D-first 页面", () => {
   test("手机端 Viewer、工具栏和折叠信息连续排列且控件满足触控边界", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/module/pyramidal-nh3", { waitUntil: "networkidle" });
+    // networkidle 不含页面进入动画：±2px 对齐断言测量前按 D-049 惯例等稳定
+    await waitForTouchTargetSettled(page);
 
     const stage = page.getByTestId("module-builder-transition-stage");
     const toolbar = page.getByTestId("module-toolbar");
