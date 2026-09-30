@@ -48,9 +48,8 @@ For documentation-only tasks:
 
 - [ ] 公开目录不展示无法进入的“建设中”内容；规划项保留在治理文档中。
 - [ ] 当前公开模块均有真实或专题 Viewer，不把防御性 placeholder 当作已交付内容。
-- [ ] 核心考试专题至少支持一次“作答—反馈—解释—重试”闭环，而不只是静态讲义。
-- [ ] 小范围 Alpha 前已收口发布范围内的 `TODO-CHEM-VERIFY`，并完成适用自动化验证。
-- [ ] Alpha 可以由维护者和少量朋友开展，不设置人数 KPI，也不把零 Issue 解释为稳定。
+- [ ] 小范围反馈收集前已收口发布范围内的 `TODO-CHEM-VERIFY`，并完成适用自动化验证。
+- [ ] 反馈收集按 T-031 恢复条件执行（待 `v0.1.0-rc.2` 发布后重启）；不自动启动朋友 / 同学 Alpha，不设人数 KPI，也不把零 Issue 解释为稳定。
 
 ## 3D Interaction
 
@@ -85,18 +84,21 @@ For documentation-only tasks:
 - [ ] canonical 组成计数、边界 display instance 与临时 ghost image 明确区分。
 - [ ] 配位引导线不写成共价键，离子晶体不暗示为离散分子。
 - [ ] 已核实的 `TODO-CHEM-VERIFY` 替换为可追溯说明；仍不确定的事实继续保留标记。
-- [ ] 涉及可见文案或布局变化时，在 macOS 审核 Darwin 快照；Windows 不更新基线。
+- [ ] 涉及可见文案或布局变化时，核对 Linux 基线影响面（默认模式渲染不变的取证说明放 PR 描述）；Windows 不更新基线。
 
-## Darwin visual regression / macOS 视觉回归
+## Visual regression / 视觉基线（2026-09-30 更新为 Linux CI 现实）
 
-- [ ] 用 Playwright 默认 Chromium 生成与审核 `*-darwin.png`；系统 Chrome 只作额外行为回归，不生成快照基线。
-- [ ] 更新前先完整运行一次无更新视觉测试，并检查 expected / actual / diff、trace、console 与 pageerror。
+- [ ] 现行基线为 Linux CI 维护的 78 张 `*-linux.png`（T-040）；`*-darwin.png` 78 张为历史遗留待清理，不再新增。
+- [ ] 任何平台的快照不得在 Windows 本机更新；Windows 跑 `playwright test` 必须带 `--ignore-snapshots`，并用系统 Chrome 通道（`PLAYWRIGHT_CHANNEL=chrome`）。
+- [ ] frontend 路径变化的 PR 自动触发 `verify` 门禁（T-041-A）；`rebuild` 仅限手动触发，新基线逐张人工审核后合并。
+- [ ] 更新基线前先完整运行一次无更新视觉测试，并检查 expected / actual / diff、trace、console 与 pageerror。
 - [ ] 逐项区分合理产品变化、真实回归、WebGL / 时序不稳定和平台天然差异；真实回归先修代码，不能用更新快照掩盖。
 - [ ] 只定向更新人工审核通过的快照；不使用全局 `--update-snapshots`，不放宽全局截图容差。
 - [ ] Canvas-ready 等待真实 `<canvas>` 可见；WebGL 点击用真实命中结果验证，不依赖固定中心像素或任意长 sleep。
+- [ ] 紧容差布局断言测量前调用 `waitForTouchTargetSettled`（D-049 惯例：字体 + 容器挂载 + 页面进入动画结束）。
 - [ ] 更新后完整视觉测试连续通过两次；高风险晶体 Viewer / Workspace 使用 `--repeat-each=3`。
 - [ ] 复核 1280px 课堂展示与 390px 移动端，无 Canvas 裁切、横向溢出、标签遮挡或信息层级破坏。
-- [ ] 最终确认仅有 `*-darwin.png`，没有新增 Windows / Linux 快照，也没有提交 test-results、report 或 trace。
+- [ ] 最终确认新增快照均为 `*-linux.png`，没有 Windows / darwin 新增，也没有提交 test-results、report 或 trace。
 
 ## GitHub Pages dynamic route recovery / 动态路由恢复
 

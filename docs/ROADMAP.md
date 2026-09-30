@@ -55,14 +55,13 @@
 - Reduce misleading placeholders where real 3D data is absent.
 - Review Chinese teaching copy and visual hierarchy.
 
-## Current - Product Completeness and Alpha Readiness
+## Current - Label/Annotation Hardening (T-043)
 
-- Keep the completed chemistry verification and public-placeholder cleanup as product quality gates.
-- Build one lightweight guided-observation sample around an existing core 3D viewer: observation goal, 3D operation, visible structural change, explanation, and comparison.
-- Treat rotate, zoom, click, highlight, isolate, compare, and step animation as the primary learning actions.
-- Do not use quizzes, grading, scores, retries, or question-bank scale as the core learning path.
-- After the single 3D sample passes its engineering checks, use the maintainer and a small group of friends for Alpha observation. Do not require a large tester cohort.
-- Treat `docs/PRODUCT_COMPLETENESS_AUDIT.md` and `docs/TASKS.md` as the detailed execution order.
+- Complete the label-system audit-and-fix arc: the Phase 1 audit ledger is `docs/LABEL_AUDIT_20260930.md` (three confirmed defects: fullscreen scene-label overlap, Ren3 legend/note occlusion, polarity atom-label overlap).
+- Phase 2 fixes them system by system; per-system guard assertions follow the ledger's methodology notes.
+- Treat `docs/TASKS.md` as the detailed execution order and `docs/PROJECT_STATUS.md` as the status snapshot.
+- Do not use quizzes, grading, scores, retries, or question-bank scale as the core learning path (T-035/T-036 remain cancelled).
+- Real-feedback collection restarts per T-031 after `v0.1.0-rc.2`; no friends/classmates Alpha auto-start and no tester-count KPI.
 
 ## v1.0 - Frontend Release Candidate
 
