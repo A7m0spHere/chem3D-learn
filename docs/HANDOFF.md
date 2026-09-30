@@ -17,7 +17,9 @@
 
 - 守卫与回归：polarity-labels 3/3、hybrid-scene-labels 3/3、ren3-callout（含新守卫）、mof5-callout、molecular-polarity、specialty-viewers、three-viewer-frame、crystal-viewer、molecule-viewer 合计 **99/99**；build / lint 通过。
 - 目检：Ren₃ 1280（注释成为卡片可读第三行）、极性 360（全部标签清晰、零遮挡）。
-- **基线预期**：`ren3-pressure-window-viewer.png` 将报告差异（注释从被遮盖变为可见，预期内改进）；极性三张基线（1280 默认视口无叠印）与另两张 ren3 基线预期零差异。**落地后需跑 verify 确认差异范围，再走 rebuild 通道更新 ren3 基线。**
+- **基线实测结果**：`verify` **success（run `36702864904`，零差异）——不需要 rebuild**。但这次"零差异"揭示了两个此前理解错误的机制，比修复本身更重要：
+  1. **CI 基线（Linux 1280×720）里注释本来可见、不叠**——"68-100% 遮盖"是 Windows 侧窄视口（390-800 高）的表现，遮盖是平台/视口相关的（distanceFactor 卡片尺度随投影环境变化）。合并在所有矩阵下仍是净改善（结构上消灭叠印）。
+  2. **基线截图包含 Html DOM 层**（卡片、注释都拍进基线图），但 `maxDiffPixelRatio: 0.01` 容差吸收了注释行的小面积变化（约 0.8% < 1%）——**视觉基线守"大形状"，小面积内容变化存在约 1% 面积盲区；HTML 标签系统的真正防线是 DOM 几何守卫断言**（本次的 ren3/polarity/hybrid 守卫正是这个角色）。T-043 全部标签修复都发生在基线的盲区内，这不是缺陷而是分工。
 
 ## 遗留问题
 
