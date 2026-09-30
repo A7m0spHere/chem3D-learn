@@ -164,6 +164,9 @@ test.describe("T-039B 专题展示 Viewer 3D-first 契约", () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/module/benzene-planar");
+    // 紧容差布局断言按 D-049 惯例等页面稳定：run 36669295273 实测裸 goto 后
+    // 在 page-enter 缩放动画 98.95% 进度处测量，rail 宽 304 → 300.82。
+    await waitForTouchTargetSettled(page);
 
     const stage = page.getByTestId("module-builder-transition-stage");
     const rail = page.getByTestId("specialty-control-rail");
@@ -186,6 +189,7 @@ test.describe("T-039B 专题展示 Viewer 3D-first 契约", () => {
 
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.reload();
+    await waitForTouchTargetSettled(page);
     const [mediumStageBox, mediumToolbarBox, mediumDisclosureBox] = await Promise.all([
       stage.boundingBox(),
       toolbar.boundingBox(),
