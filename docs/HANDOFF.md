@@ -7,7 +7,7 @@
 ## 本次改了什么
 
 - **删除零引用死代码 7 个文件（约 390 行）**：`components/motion/` 下 ChemistryCursor / CursorBenzeneFollower / FloatingChemistryBackground / MoleculeBackground（其中 ChemistryCursor 是全库唯一运行时性能异味：mousemove setState + 常驻无限旋转动画）+ `hooks/usePointerFollower` + `three/ViewerPlaceholder` + `common/PageShell`。删除前逐个 grep 复核（含 tests 目录）零外部引用；`motion/ScrollReveal.tsx` 是活文件保留。
-- **CI：quality-gate 补 backend `npm test`**（deploy-pages.yml）——直接 push 模式下每次推送都会跑 lint + logic + backend 测试，backend 22 个测试首次进入 CI。backend 零依赖无需安装步骤。
+- **CI：quality-gate 补 backend `npm test`**（deploy-pages.yml）——直接 push 模式下每次推送都会跑 lint + logic + backend 测试。**首战即拦截一个 6 周前的过时契约**：T-005 防漂移测试仍断言「前端 nacl 含 crystalTeaching」，而 T-039D（2026-08-13）已从全库移除该字段——后端测试从未进 CI、本地也长期没人跑，无人发现。已随现实更新契约（双方均无 crystalTeaching + 注释与 DATA_DEDUP_PLAN.md 失效引用一并修正为 BACKEND_DATA_SYNC.md），本地 22/22。
 - **文档**：HANDOFF（本文件）。
 
 ## 体检报告的两处误报澄清（未改动，避免过度整理）

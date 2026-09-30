@@ -21,11 +21,11 @@ import { molecules } from "../src/molecules.js";
 // 明确排除在契约外（允许两边各自维护、不参与相等断言）：
 //   - 教学文案：summaryZh / lessonSteps / keyAngles / rendering / metadata
 //     （后端服务的是更精简的课堂文案，前端是完整教学脚本，二者本就不同）
-//   - nacl：后端是 15 原子的极简教学晶胞、无 crystalTeaching；前端是 27 原子
-//     完整晶胞 + crystalTeaching。这是**有意的教学简化**，不是漂移，
+//   - nacl：后端是 15 原子的极简教学晶胞；前端是 27 原子完整晶胞（T-039D 起
+//     双方都不再携带 crystalTeaching）。这是**有意的教学简化**，不是漂移，
 //     因此 nacl 不纳入结构相等契约，仅断言双方都存在、都是 crystal。
 //
-// 详见 docs/DATA_DEDUP_PLAN.md（T-005 设计）。
+// 详见 docs/BACKEND_DATA_SYNC.md（T-005 设计，原 DATA_DEDUP_PLAN.md）。
 // ---------------------------------------------------------------------------
 
 // 参与「结构核心逐字相等」契约的 5 个 VSEPR 分子。
@@ -90,10 +90,12 @@ describe("T-005 前后端结构数据防漂移契约", () => {
     assert.equal(backend.category, "crystal");
     assert.equal(frontend.category, "crystal");
 
-    // 记录当前的有意差异（后端精简、无 crystalTeaching）。若哪天两边被统一，
-    // 这些断言会失败，提醒维护者回来更新契约与 DATA_DEDUP_PLAN.md。
-    assert.equal(backend.crystalTeaching, undefined, "后端 nacl 目前有意不含 crystalTeaching");
-    assert.ok(frontend.crystalTeaching, "前端 nacl 含完整 crystalTeaching");
+    // 记录当前的有意差异（后端精简教学晶胞；T-039D 起双方都不再携带
+    // crystalTeaching——2026-09-30 backend 测试进入 CI 时发现原断言仍要求
+    // 前端含 crystalTeaching，已随 T-039D 现实更新契约）。若哪天两边被统一
+    // 或字段回归，这些断言会失败，提醒维护者回来更新契约与数据同步文档。
+    assert.equal(backend.crystalTeaching, undefined, "后端 nacl 目前不含 crystalTeaching");
+    assert.equal(frontend.crystalTeaching, undefined, "前端 nacl 自 T-039D 起移除了 crystalTeaching");
     assert.ok(
       backend.atoms.length < frontend.atoms.length,
       "后端 nacl 目前是更精简的教学晶胞（原子数少于前端完整晶胞）",
