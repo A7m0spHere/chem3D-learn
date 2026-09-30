@@ -2,36 +2,35 @@
 
 ## 当前任务
 
-- **任务**：全库文档整理（2026-09-30，Claude Code，分支 `claude/docs-tidy-20260930`，**PR #12**）。前序同日工作：T-042 合并（PR #10，含评审修复自反馈振荡 P1）与 T-043 Phase 1 审计落档（PR #11）。
-- **来源**：维护者要求「整理下项目的文档」。整理前用探索代理对 `docs/` 全量扫描，逐文件核对陈旧断言、矛盾与引用完整性。
+- **任务**：T-043 Phase 2 第一个体系——杂化专题 fullscreen 场景标签全视口叠印修复（2026-09-30，Claude Code，分支 `claude/t043-phase2-hybrid-labels`，**PR #13**）。前序同日：T-042 合并（PR #10）、T-043 Phase 1 审计（PR #11）、文档整理（PR #12）。
+- **来源**：维护者指示按台账启动 Phase 2，先修 `docs/LABEL_AUDIT_20260930.md` 缺陷 1（杂化 `Y×p1` 43-67%、`p1×180°` 26-67%、`Z×p2` 33% 全视口叠印）。
 
-## 本次改了什么（文档整理）
+## 本次改了什么
 
-- **状态三件套对齐现实**：
-  - `PROJECT_STATUS.md`：最后更新改为 2026-09-30；任务面改写为「T-042 已合并（PR #10）+ T-043 Phase 1 已完成（PR #11）+ 当前最重要任务是 T-043 Phase 2」；verify 数字更新为最新 169/169（run `36671342932`）；里程碑表补 2026-08-27 ~ 09-30 两行。
-  - `TASKS.md`：进行中段刷新；**T-042 详情块从待办移除**（内容由 D-050 评审更正 + LABEL_AUDIT + 本文件承载），完成索引新增 T-041-A / T-042 / T-043 Phase 1 三行；T-043 已知缺陷①按台账修正为「fullscreen 场景标签全 6 视口叠印，不止移动端」。
-  - `HANDOFF.md`：本文件。
-- **矛盾与过时断言清理**：
-  - `QA_CHECKLIST.md`：移除已取消的自测闭环检查项（T-035/036 取消、D-039/D-044 方向）与「少量朋友 Alpha」表述（对齐 T-031：rc.2 后重启、不自动启动朋友/同学 Alpha）；**Darwin 视觉回归整节重写为 Linux CI 现实**（保留仍然有效的通用原则，新增 D-049 稳定等待惯例）。
-  - `README.md`：修正「视觉快照以 macOS 基线为准」→ Linux CI 基线；「步骤讲解 / 分步讲解」措辞改为「精简中文讲解 / 右侧控制栏」（T-039A 已移除普通分子的课程步骤）。
-  - `AGENTS.md`：修正「当前没有根 README」（T-025 已于 2026-07-29 建立）；目录树补 README 与 docs/ 下此前漏列的 CHEMISTRY_VERIFICATION / LABEL_AUDIT / RC_FEEDBACK / BACKEND_DATA_SYNC / guided-observation / releases。
-  - `ROADMAP.md`：Current 段由「Product Completeness and Alpha Readiness」改写为「Label/Annotation Hardening (T-043)」，移除朋友 Alpha 句与指向已归档审计的「执行顺序」指针。
-  - `CHEMISTRY_VERIFICATION.md`：移除「T-029B macOS 视觉回归仍待执行」（实际已于 2026-07-29 执行 146/146）；头部标注文件清单为检索时点快照（`*Panel.tsx` 已在 T-039B 删除）。
-- **归档**：`docs/PRODUCT_COMPLETENESS_AUDIT.md` → `docs/archive/PRODUCT_COMPLETENESS_AUDIT_20260810.md`（内容冻结于 2026-08-10，加归档横幅；引用方 ROADMAP / CHEMISTRY_VERIFICATION 已同步更新）。
-- **有意不动**：治理文档间的受控重复（保护 ID / Avoid 风格清单在 PROJECT_BRIEF、CODE_REVIEW、QA_CHECKLIST、UI_SPEC、DESIGN_SYSTEM 各出现一次）——各文档面向不同读者需可独立阅读；`docs/guided-observation/` 两个历史审计保留原位（DECISIONS D-040 以路径引用，append-only 不改写历史记录）；`gemini-ui-draft.md` 保留（PROJECT_BRIEF / CODE_REVIEW 指定的 Gemini 草稿存放地）；`BACKEND_DATA_SYNC.md` 保留（后端接线设计参考，步骤 1-2 未实施标记属实）。
+- **`HybridOrbitalScene.tsx`**：
+  - `SceneBadge`（p1/p2/180° 等场景徽章）**去掉 distanceFactor 改恒定字号**并接入 `useClampedHtmlPosition`（collisionGroup `hybrid-scene`）——distanceFactor 徽章在 360px 视口宽达 57-78px，是与轴标签结构性挤压的根源之一；徽章不出现在任何截图基线，恒定字号同时改善移动端可读性。
+  - sp 模式 **180° 徽章从弧顶移到弧 45° 外推 0.24 处**：弧顶正上方是 Y 轴标签与 p1 徽章锚点带，三个 pill 沿 +Y 堆叠间距小于高度和，碰撞分离在数学上无解（推开 180° 离开 Y 就撞进 p1）；45° 位置同样在标注的弧上、语义不变，且外推到主瓣梨形轮廓（45° 方向约 0.5）之外的净空，amber 底不再与青色瓣叠出发淡。
+  - `SharedAxisTriad` 传入新 prop `labelCollisionGroup="hybrid-scene"`。
+- **`OrbitalPrimitives.tsx`**：`AxisTriad` 新增**可选** `labelCollisionGroup` prop——传入时轴标签走新的 `ClampedAxisLabel` 分支（hook + `data-scene-label` 锚点），不传时渲染逐字节不变；**SigmaPiBondCell（有截图基线）与 electron-cloud 系列零影响**。
+- **`useClampedHtmlPosition.ts`（通用修复，惠及全部接入体系）**：`measureRef` 实测尺寸变化时触发 3 帧 `invalidate`。根因：demand 渲染模式下挂载首帧 pill 未量得尺寸（hw/hh=0），分离/钳制按零尺寸点跳过，帧循环停止后**冻结在未收敛状态**（杂化模式切换后实测 38% 叠印冻结；T-042 场景靠拖拽连续渲染掩盖）。
+- **守卫**：新增 `hybrid-scene-labels.visual.spec.ts`——sp/sp²/sp³ 三模式（进度固定 80）× 360/390/1280 视口，断言全部场景标签不出界、两两重叠 ≤25%（台账缺陷定义阈值）。
+- **文档**：TASKS T-043 状态更新（Phase 2 ①已修）；HANDOFF（本文件）。
 
 ## 验证
 
-- 纯文档改动，`npm run build` 不适用（AGENTS.md：documentation-only 任务不跑 build）。
-- 全库 docs 交叉引用经检索复核：无断链；唯一失效的代码路径引用（CHEMISTRY_VERIFICATION 中的 `*Panel.tsx`）已加时点标注。
+- 守卫 **3 / 3**；标签相关回归（mof5-callout、molecular-polarity、specialty-viewers、sigma-pi-bonds、three-viewer-frame、electron-cloud-labels、module-state-reset）**69 / 69**（Windows 系统 Chrome + `--ignore-snapshots`）。
+- `npm run build`（tsc + vite）通过；lint 通过。
+- 目检：1280/360 sp、360 sp² 截图——六标签零叠印、徽章恒定字号后不再压模型、180° 徽章在瓣外净空处清晰可读。
+- 基线预期：杂化 source 态基线（three-viewer-frame `hybrid-orbitals-source-state-viewer.png`）只含远离的 X/Y/Z 轴标签（无徽章、钳制 no-op、scheduleSettle 不改像素），sigma-pi 基线组件未触碰——预期 verify 零差异。
 
 ## 遗留问题
 
-- **T-043 Phase 2 未开始**——当前最高优先级，按 `docs/LABEL_AUDIT_20260930.md` 第 5 节排序：杂化 fullscreen 叠印 → Ren₃ 注释层 → 极性原子标签接入 collisionGroup。T-041-B/C/D 待办不变。
-- 远端约 22 个历史分支与 darwin 78 张遗留快照待清理（均为维护者操作）。
-- ROADMAP v0.x 章节命名与已发布 `v0.1.0-rc.1` 的统一（PROJECT_STATUS「其他待确认」既有项）。
+- **T-043 Phase 2 其余两项**：② Ren₃ 注释层被图例完全遮盖（内容不可达类）；③ 极性 `TinyAtomLabel`/`ChargeMarker` 接入 collisionGroup（与 D-050 第 4 条淡出启用前提相关）。
+- **本次新发现（建议入台账）**：360px 下 sp/sp² 的 p1 徽章会躲进左上信息卡（`SceneOverlay`）背后——信息卡与场景标签的遮挡是另一类关系，本次守卫只覆盖标签×标签；后续可评估窄视口收窄信息卡或为徽章避让卡片矩形。
+- T-041-B/C/D 待办不变；远端约 22 个历史分支与 darwin 快照待维护者清理。
 
 ## 下一步建议
 
-1. T-043 Phase 2 按台账排序实施（每体系独立小提交 + 守卫断言）。
-2. 远端分支与 darwin 基线清理（维护者操作，前者可在 GitHub 合并时勾选自动删除）。
+1. 维护者合并本 PR 后继续 Phase 2：Ren₃ 注释层重排 → 极性原子标签接入 collisionGroup。
+2. 把「信息卡遮挡场景标签」补进台账（可并入 ③ 的极性/杂化收尾或单列）。
+3. 每体系收口后跑一次 ledger 第 4 节方法的复核扫描，防新欠账。

@@ -24,6 +24,7 @@ import {
   teachingSceneLabelClass,
 } from "@/components/three/teachingLabelStyles";
 import { useDisposable } from "@/components/three/useDisposable";
+import { useClampedHtmlPosition } from "@/components/three/useClampedHtmlPosition";
 import type {
   BondingBasicsMode,
   HybridOrbitalControls,
@@ -80,7 +81,9 @@ export function HybridOrbitalScene({
     <>
       <SceneOverlay config={config} controls={controls} />
       <ReferenceFloor />
-      {controls.showAxes ? <SharedAxisTriad length={1.52} opacity={0.54} /> : null}
+      {controls.showAxes ? (
+        <SharedAxisTriad labelCollisionGroup="hybrid-scene" length={1.52} opacity={0.54} />
+      ) : null}
       {config.mode === "sp2" && progress > 0.18 ? <Sp2Plane opacity={0.08 + progress * 0.12} /> : null}
       {config.mode === "sp3" && progress > 0.26 ? (
         <TetrahedralGuide directions={config.directions} opacity={0.18 + progress * 0.24} />
@@ -535,11 +538,22 @@ function HybridAngleGuide({
       const theta = (Math.PI * index) / 28;
       return new Vector3(Math.cos(theta) * radius, Math.sin(theta) * radius, 0.06);
     });
+    // 标签放在弧 45° 处而不是弧顶：弧顶正上方是 Y 轴标签与未杂化 p1 徽章的
+    // 锚点带，三个 pill 沿 +Y 堆叠在窄视口下间距小于高度和，碰撞分离无解
+    //（台账缺陷 1 的根因之一）；45° 位置同样在标注的弧上且语义不变。
+    const labelTheta = Math.PI * 0.25;
+    // 半径取弧外 0.24：45° 方向上主瓣梨形轮廓约延伸到 0.5，弧半径 0.78 处
+    // 徽章仍压在瓣缘上（amber 底与青色瓣叠加发淡），再外推到瓣外净空处。
+    const labelRadius = radius + 0.24;
 
     return (
       <group>
         <Line color={accentDark} lineWidth={2.2} points={points} />
-        <SceneBadge color={accentDark} position={[0, radius + 0.16, 0.06]} text={label} />
+        <SceneBadge
+          color={accentDark}
+          position={[Math.cos(labelTheta) * labelRadius, Math.sin(labelTheta) * labelRadius, 0.06]}
+          text={label}
+        />
       </group>
     );
   }
@@ -611,10 +625,27 @@ function DashedGuideLine({ start, end, opacity }: { start: Vec3; end: Vec3; opac
 }
 
 function SceneBadge({ position, text, color }: { position: Vec3; text: string; color: string }) {
+  // T-043 Phase 2（台账缺陷 1）：p1/p2/180° 徽章与轴标签在全视口互相叠印。
+  // 两层治理：① 去掉 distanceFactor 改恒定字号——distanceFactor 徽章在 360px
+  // 视口下宽达 57-78px，是与轴标签结构性挤压的根源之一，恒定字号同时改善
+  // 移动端可读性（徽章不出现在任何截图基线）；② 接入钳制 + "hybrid-scene"
+  // 同组碰撞分离兜底。source 态只有远离的 X/Y/Z 轴标签（仍走 distanceFactor
+  // 的 AxisTriad 默认分支），渲染不变。
+  const { measureRef, calculatePosition } = useClampedHtmlPosition({
+    collisionGroup: "hybrid-scene",
+  });
+
   return (
-    <Html center distanceFactor={7.2} pointerEvents="none" position={position}>
+    <Html
+      calculatePosition={calculatePosition}
+      center
+      pointerEvents="none"
+      position={position}
+    >
       <span
         className={color === accentDark ? teachingAccentLabelClass : teachingSceneLabelClass}
+        data-scene-label
+        ref={measureRef}
         style={{ color }}
       >
         {text}
