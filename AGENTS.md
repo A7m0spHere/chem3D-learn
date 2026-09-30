@@ -92,11 +92,15 @@ chem3D-learn/
 ├─ AGENTS.md            # 共享 AI 协作规则（本文件）
 ├─ CLAUDE.md            # Claude Code 专用补充，首行 @AGENTS.md 导入本文件
 ├─ PLANS.md             # 多步任务的一次性暂存区，完成后清空
+├─ README.md            # 公开仓库门面（在线地址、核心能力、参与方式）
 ├─ docs/                # 项目文档与治理文件
 │  ├─ PROJECT_BRIEF.md / DESIGN_SYSTEM.md / UI_SPEC.md
 │  ├─ MOLECULE_DATA_SCHEMA.md / CODE_REVIEW.md / QA_CHECKLIST.md
 │  ├─ ROADMAP.md / ORGANIC_BUILDER_NAMING_SCOPE.md
 │  ├─ ELECTRON_CLOUD_VISUAL_BASELINES.md / gemini-ui-draft.md
+│  ├─ CHEMISTRY_VERIFICATION.md / LABEL_AUDIT_20260930.md
+│  ├─ RC_FEEDBACK.md / RC_FEEDBACK_LOG.md / BACKEND_DATA_SYNC.md
+│  ├─ guided-observation/ releases/    # 历史专项审计与 release notes
 │  ├─ PROJECT_STATUS.md # 当前进度（完成 / 进行中 / 下一步）
 │  ├─ TASKS.md          # 待办任务、优先级、状态、验收标准
 │  ├─ DECISIONS.md      # 重要技术决策及理由
@@ -131,7 +135,7 @@ chem3D-learn/
 
 结构说明与偏差（重要，避免 Agent 误判）:
 
-- 当前**没有根 README**，也**没有 `tools/` 目录**（早期文档曾提及，尚未创建）。
+- 根 `README.md` 已由 T-025 于 2026-07-29 建立（公开门面，含在线地址与参与方式）；`tools/` 目录不存在（早期文档曾提及，尚未创建）。
 - `frontend/src/data/generated/` 目前不存在；23 个分子 / 晶体结构 JSON 位于 `data/manual/`，但模块目录、考试专题、轨道/极性/有机拼装等教学数据还分布在 `data/*.ts`。
 - `video/` 用 React 19，`frontend/` 用 React 18，二者依赖独立，**不要混装或互相升级**。
 - `frontend/node_modules` 需单独安装才能通过类型检查（见安装命令）。

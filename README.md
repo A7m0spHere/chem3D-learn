@@ -24,7 +24,7 @@
   <a href="#验证与测试">验证与测试</a>
 </p>
 
-Chem3D Learn（结构化学 3D 学习站）是一个面向中国高中生和化学教师的中文结构化学学习网站。它用可旋转的三维模型、简洁的步骤讲解和课堂友好的控制，把分子构型、晶体结构、化学键与有机立体结构从平面图变成可以直接观察的空间关系。
+Chem3D Learn（结构化学 3D 学习站）是一个面向中国高中生和化学教师的中文结构化学学习网站。它用可旋转的三维模型、精简的中文讲解和课堂友好的控制，把分子构型、晶体结构、化学键与有机立体结构从平面图变成可以直接观察的空间关系。
 
 当前产品以前端实现为准；不需要启动后端，也能完整浏览主要学习体验。
 
@@ -47,7 +47,7 @@ Chem3D Learn（结构化学 3D 学习站）是一个面向中国高中生和化�
 </p>
 
 <p align="center">
-  <img src="./docs/ui-refactor/nh3-desktop-after.png" width="49%" alt="NH3 三角锥形 3D 学习页，包含大尺寸模型与分步讲解">
+  <img src="./docs/ui-refactor/nh3-desktop-after.png" width="49%" alt="NH3 三角锥形 3D 学习页，包含大尺寸模型与右侧控制栏">
   <img src="./assets/readme/organic-builder.png" width="49%" alt="有机分子 3D 拼装实验室中的乙烯结构">
 </p>
 
@@ -158,7 +158,7 @@ npm test
 - `npm run build` 会先执行 TypeScript 类型检查，再生成 Vite 生产构建。
 - `npm run test:logic` 运行不依赖浏览器截图的逻辑回归。
 - `npm run test:production` 用真实生产预览验证首页不会提前下载重型 3D 资源。
-- 视觉快照当前以 macOS 基线为准；在 Windows 或 Linux 上不要直接更新这些快照。
+- 视觉快照以 Linux CI 维护的基线为准（78 张 `*-linux.png`）；任何平台都不要在 Windows 本机更新快照。
 
 ## 内容与产品边界
 

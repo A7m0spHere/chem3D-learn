@@ -3,6 +3,7 @@
 > 最后复核：2026-08-01（T-033）
 > 复核对象：BF₃ 缺电子边界、CaF₂ 萤石晶胞、芳环—乙烯基共面教学模型，以及既有 NaCl 周期模型
 > 结论状态：T-033 的“来源—结论—文案—代码—测试”映射已建立；旧 NaCl 核验记录继续保留。
+> 注：下文文件清单为 2026-08-01 检索时点快照，其中 `*Panel.tsx` 组件已在 T-039B（2026-08-13）删除；化学结论本身不受影响。
 
 ## T-033：三处化学内容核验
 
@@ -12,7 +13,7 @@
 
 - **直接决定 T-033 页面内容与几何**：`frontend/src/data/manual/bf3.json`、`caf2.json`、`learningModules.ts`、`mockMolecules.ts`、`molecularPolarity.ts`、`organicBuilderSeeds.ts`、`organicCoplanar.ts`、`frontend/src/components/three/CaF2Cell.tsx`、`frontend/src/components/learning/OrganicCoplanarPanel.tsx`、`frontend/src/pages/ModuleDetailPage.tsx`、`frontend/src/data/examTopics.ts`。
 - **直接或相邻测试**：`frontend/tests/logic/chemistry-content.logic.spec.ts`、`crystal-geometry.logic.spec.ts`、`organic-builder-fixes.logic.spec.ts`；`frontend/tests/visual/molecule-viewer.visual.spec.ts`、`crystal-viewer.visual.spec.ts`、`organic-coplanar.visual.spec.ts`、`molecular-polarity.visual.spec.ts`、`core-learning-pages.visual.spec.ts`、`module-state-reset.visual.spec.ts`、`three-viewer-frame.visual.spec.ts`、`crystal-atom-legend.visual.spec.ts`。其余乙烯、乙炔、苯专题测试只命中通用“共面”术语，不是本轮争议结论。
-- **数据副本、目录与说明文档**：`backend/src/molecules.js` 及 `backend/test/{api,data-parity,server.integration}.test.js` 含 BF₃ 结构副本，但没有本轮缺电子结论；`backend/README.md`、根 `README.md`、`CHANGELOG.md`、`docs/releases/v0.1.0-rc.1.md` 只列模块或版本；`docs/PRODUCT_COMPLETENESS_AUDIT.md`、`PROJECT_STATUS.md`、`TASKS.md`、`DECISIONS.md`、`HANDOFF.md`、`ROADMAP.md` 记录任务状态；`PROJECT_BRIEF.md`、`UI_SPEC.md`、`MOLECULE_DATA_SCHEMA.md`、`CODE_REVIEW.md`、`QA_CHECKLIST.md`、`RC_FEEDBACK.md`、`BACKEND_DATA_SYNC.md` 和 `AGENTS.md` 只命中项目规则或通用术语。
+- **数据副本、目录与说明文档**：`backend/src/molecules.js` 及 `backend/test/{api,data-parity,server.integration}.test.js` 含 BF₃ 结构副本，但没有本轮缺电子结论；`backend/README.md`、根 `README.md`、`CHANGELOG.md`、`docs/releases/v0.1.0-rc.1.md` 只列模块或版本；`docs/PRODUCT_COMPLETENESS_AUDIT.md`（2026-09-30 起归档于 `docs/archive/`）、`PROJECT_STATUS.md`、`TASKS.md`、`DECISIONS.md`、`HANDOFF.md`、`ROADMAP.md` 记录任务状态；`PROJECT_BRIEF.md`、`UI_SPEC.md`、`MOLECULE_DATA_SCHEMA.md`、`CODE_REVIEW.md`、`QA_CHECKLIST.md`、`RC_FEEDBACK.md`、`BACKEND_DATA_SYNC.md` 和 `AGENTS.md` 只命中项目规则或通用术语。
 
 检索还命中 `AcetyleneLinearPanel.tsx`、`BenzenePlanarPanel.tsx`、`BenzenePlanarToolbar.tsx`、`EthylenePlanarPanel.tsx`、`EthylenePlanarToolbar.tsx`、`MolecularPolarityPanel.tsx`、`MolecularPolarityToolbar.tsx`、`CrystalAtomLegend.tsx`，以及 `acetyleneLinear.ts`、`benzenePlanar.ts`、`bondingBasics.ts`、`ethylenePlanar.ts`、`ethylene-planar.json`、`zns.json`、`useOrganicPlanarControls.ts`、`organicBuilderChemistry.ts`。逐项检查后，这些内容只涉及通用平面 / 共线教学、BF₃ 极性或其他晶体，不承载 T-033 需要纠正的三条结论，因此未改动。
 
@@ -225,4 +226,4 @@ ghost 的判定还依赖当前选中的显示身份 `siteId + periodicImageShift
 - 本页不选定某一温度、压力下的 NaCl 精确物理晶格常数；Viewer 也不展示物理单位。
 - 不覆盖高压相变、缺陷、表面、声子、能量或稳定性预测。
 - 不扩展到本页 T-033 之外的其他化学主题。
-- T-029B 的 macOS Darwin 视觉回归仍待执行；Windows 不更新该基线。
+- （已完成备案）T-029B 的 macOS Darwin 视觉回归已于 2026-07-29 执行（146/146，见 TASKS 索引）；现行视觉基线为 Linux CI `*-linux.png`（T-040，见 QA_CHECKLIST）。
