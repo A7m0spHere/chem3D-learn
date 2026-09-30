@@ -71,3 +71,36 @@ for (const { mode, labels } of MODE_LABELS) {
     }
   });
 }
+
+// ---------------------------------------------------------------------------
+// T-043 Phase 2 守卫（台账缺陷 2）：高压窗口的模型边界注释原为独立悬浮层，
+// 锚点落在压力图例卡视觉足迹内被 68-100% 完全遮盖（内容不可达）。修复后
+// 注释并入图例卡第三行：断言注释恰好出现一次、可见，且是图例卡的后代节点
+// ——结构上不可能再被卡片遮挡。
+// ---------------------------------------------------------------------------
+test("高压窗口的模型边界注释并入图例卡且可见", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.goto(REN3_ROUTE);
+  await page.evaluate(() => document.fonts.ready);
+
+  const stage = page.getByTestId(STAGE);
+  await expect(stage).toBeVisible();
+
+  const note = stage.getByText("预测稳定 ≠ 已实验确认；晶格不按压力条比例形变", {
+    exact: true,
+  });
+  await expect(note).toHaveCount(1);
+  await expect(note).toBeVisible();
+
+  // 注释必须是含「计算稳定区」的图例卡的后代节点（DOM 结构断言，
+  // 防止未来有人把注释重新拆成独立悬浮层）
+  const containedInLegendCard = await note.evaluate((element) => {
+    let node: HTMLElement | null = element.parentElement;
+    while (node) {
+      if (node.textContent?.includes("计算稳定区")) return true;
+      node = node.parentElement;
+    }
+    return false;
+  });
+  expect(containedInLegendCard, "注释应位于图例卡内部").toBe(true);
+});

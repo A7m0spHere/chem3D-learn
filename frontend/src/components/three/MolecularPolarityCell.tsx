@@ -400,9 +400,21 @@ function getSceneOverlayInfo(mode: MolecularPolarityMode): SceneOverlayInfo {
 }
 
 function TinyAtomLabel({ label, position }: { label: string; position: Vec3 }) {
+  // T-043 Phase 2（台账缺陷 3）：原子符号标签与偶极标签同组碰撞分离，
+  // 默认视角无重叠时位置不变（1280 基线视口经审计确认无叠印）。
+  const { measureRef, calculatePosition } = useClampedHtmlPosition({
+    collisionGroup: "polarity-callout",
+  });
+
   return (
-    <Html center distanceFactor={7.4} pointerEvents="none" position={position}>
-      <span className={teachingCompactLabelClass}>
+    <Html
+      calculatePosition={calculatePosition}
+      center
+      distanceFactor={7.4}
+      pointerEvents="none"
+      position={position}
+    >
+      <span className={teachingCompactLabelClass} data-polarity-label ref={measureRef}>
         {label}
       </span>
     </Html>
@@ -410,9 +422,23 @@ function TinyAtomLabel({ label, position }: { label: string; position: Vec3 }) {
 }
 
 function ChargeMarker({ charge, position }: { charge: string; position: Vec3 }) {
+  const { measureRef, calculatePosition } = useClampedHtmlPosition({
+    collisionGroup: "polarity-callout",
+  });
+
   return (
-    <Html center distanceFactor={7.8} pointerEvents="none" position={position}>
-      <span className="inline-flex select-none items-center rounded-full border border-primary/25 bg-white/92 px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-dark shadow-[0_2px_6px_rgba(31,111,104,0.12)] ring-1 ring-white/80">
+    <Html
+      calculatePosition={calculatePosition}
+      center
+      distanceFactor={7.8}
+      pointerEvents="none"
+      position={position}
+    >
+      <span
+        className="inline-flex select-none items-center rounded-full border border-primary/25 bg-white/92 px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-dark shadow-[0_2px_6px_rgba(31,111,104,0.12)] ring-1 ring-white/80"
+        data-polarity-label
+        ref={measureRef}
+      >
         {charge}
       </span>
     </Html>
@@ -452,7 +478,7 @@ function TinyDipoleLabel({
       position={position}
     >
       <div className="inline-block" ref={measureRef}>
-        <span className={className} data-testid={testId}>
+        <span className={className} data-polarity-label data-testid={testId}>
           {children}
         </span>
       </div>

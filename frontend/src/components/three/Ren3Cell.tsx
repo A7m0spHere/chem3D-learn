@@ -163,10 +163,13 @@ function PressureWindowScene() {
             <span>0 GPa 松弛参考结构</span>
             <span className="font-semibold text-amber-700">计算稳定区</span>
           </div>
+          {/* T-043 Phase 2（台账缺陷 2）：原为独立悬浮注释层，锚点落在卡片视觉足迹内
+              被 68-100% 完全遮盖（内容不可达）；注释本就是在解释压力条，并入卡片
+              后内容可达且叠印从结构上不可能 */}
+          <p className="mt-1.5 border-t border-slate-100 pt-1.5 text-[11px] leading-4 text-slate-500">
+            预测稳定 ≠ 已实验确认；晶格不按压力条比例形变
+          </p>
         </div>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.88, 0]}>
-        <span className={htmlOverlaySubtleWideLabelClass}>预测稳定 ≠ 已实验确认；晶格不按压力条比例形变</span>
       </Html>
     </>
   );

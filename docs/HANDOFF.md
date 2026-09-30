@@ -2,27 +2,29 @@
 
 ## 当前任务
 
-- **任务**：交付流程改为直接 push 到 main，不再开 PR（2026-09-30，Claude Code）。维护者原话："以后不直接pr，能push就push"。决策记录：DECISIONS D-052；本提交即为新流程的首次执行（直接 push）。
-- **同日已完成**：输出模式改为自然汇报（D-051，PR #14 已合并清账）；T-043 Phase 2 首个体系（杂化场景标签，PR #13 已合并）；文档整理（PR #12）；T-042（PR #10）；T-043 Phase 1（PR #11）。
+- **任务**：T-043 Phase 2 收口——Ren₃ 注释层 + 极性原子标签碰撞组（2026-09-30，Claude Code，直接 push）。至此 Phase 2 三项缺陷全部修复。
+- **前序同日**：T-042（PR #10）、Phase 1 审计（PR #11）、文档整理（PR #12）、杂化体系（PR #13）、输出模式 D-051（PR #14）、交付流程 D-052（直接 push）。
 
 ## 本次改了什么
 
-- `AGENTS.md`（GitHub sync and delivery）：新增「直接 push 到 main，不开 PR」条目，含两条配套规则——历史未合并 PR 仍按收口条件合并但不再新开；PR 触发的视觉回归不再自动运行，重要前端改动落地后手动跑 `verify` 确认。
-- `docs/DECISIONS.md`：新增 D-052（背景、决定、连带影响、边界）。
-- `docs/HANDOFF.md`：本文件。
+- **`Ren3Cell.tsx`（台账缺陷 2）**：压力窗口的模型边界注释「预测稳定 ≠ 已实验确认；晶格不按压力条比例形变」原为独立悬浮层，锚点落在压力图例卡视觉足迹内被 68-100% 完全遮盖。修复：**注释并入图例卡第三行**（分隔线 + 11px slate-500），独立层删除——注释本就是在解释压力条，合并后内容可达、叠印从结构上不可能。守卫：ren3-callout 新增断言（注释恰好一次 + 可见 + 是图例卡后代节点）。
+- **`MolecularPolarityCell.tsx`（台账缺陷 3）**：`TinyAtomLabel` / `ChargeMarker` 接入 `useClampedHtmlPosition`（`polarity-callout` 碰撞组，与 TinyDipoleLabel 同组），三个组件统一挂 `data-polarity-label` 测试锚点。修复前「电子云偏向 F」×「F」45-61%、「B」×「F 更吸电子」27-31%（360/390/768）。
+- **`useClampedHtmlPosition.ts`（算法语义修正）**：分离改为**严格单向让位**——只让位于更早注册（id 更小）的标签。原双向互推会让 A 推开 B 后 B 又推开 A，逐帧互赶、随 demand 帧数冻结在任意中间态（极性页实测同一对标签先后采样 25% / 31%）；单向化后一次确定收敛，D-050「后计算者让先计算者」的本意至此才真正成立（已补 D-050 实现勘误）。注意：id 顺序 = 挂载顺序，先挂载者保持锚点、后挂载者让位。
+- **守卫**：新增 `polarity-labels.visual.spec.ts`（360/390/768 × 出界 0 + 互叠 **≤5%**——阈值取 5% 而非 25%，白底 pill 叠白底时 25% 面积重叠就足以盖断文字）；ren3-callout 追加上述注释守卫。
+- **文档**：TASKS T-043 状态（Phase 2 完成）、DECISIONS D-050 勘误第 3 条、HANDOFF（本文件）。
 
 ## 验证
 
-- 纯文档改动，`npm run build` 不适用；本提交直接 push 到 main（新流程首次执行），deploy-pages 的 quality-gate（lint/logic）随部署自动运行。
+- 守卫与回归：polarity-labels 3/3、hybrid-scene-labels 3/3、ren3-callout（含新守卫）、mof5-callout、molecular-polarity、specialty-viewers、three-viewer-frame、crystal-viewer、molecule-viewer 合计 **99/99**；build / lint 通过。
+- 目检：Ren₃ 1280（注释成为卡片可读第三行）、极性 360（全部标签清晰、零遮挡）。
+- **基线预期**：`ren3-pressure-window-viewer.png` 将报告差异（注释从被遮盖变为可见，预期内改进）；极性三张基线（1280 默认视口无叠印）与另两张 ren3 基线预期零差异。**落地后需跑 verify 确认差异范围，再走 rebuild 通道更新 ren3 基线。**
 
 ## 遗留问题
 
-- 全项目体检报告（2026-09-30 会话）的优化清单待排期：第一梯队（死代码删除、CI 门禁补口、仓库卫生）、第二梯队（测试 helpers、mockMolecules 瘦身 + JSON 懒加载）、第三梯队与子系统决策项（backend 命运、video 采集管线修复）。
-- T-043 Phase 2 剩余：Ren₃ 注释层、极性原子标签接入 collisionGroup。T-041-B/C/D 待办不变。
-- 标签×信息卡遮挡（360px 下 p1 徽章躲进信息卡）待入台账处理。
-- 仓库分支已整理（2026-09-30）：23 个已合并远端分支与本地遗留分支已删除；保留 2 个含独特工作的未合并分支（`codex/motion-performance-audit`、`codex/t039a-3d-first`）——确认废弃后可一并删除。main 历史不可重写（绝不 force），PR 时代的合并节点是诚实记录。
+- T-043 收尾两件：密堆积配位视图布局缺陷（原缺陷②，随 T-041-B rebuild 周期）→ 修完后逐 viewer 启用 fadeTo；「标签×信息卡」遮挡（360px 下 p1 徽章躲进杂化信息卡）待入台账。
+- T-041-B/C/D、全项目体检优化清单、video 采集管线、rc.2 发布路径——见前次 HANDOFF 与体检报告。
 
 ## 下一步建议
 
-1. 全项目体检第一梯队快速赢（半天内）。
-2. T-043 Phase 2 第二项：Ren₃ 注释层重排。
+1. 跑 `verify` 确认基线差异仅 ren3-pressure-window，触发 rebuild 更新该基线并人工审核。
+2. 第二步：体检第一梯队快速赢（死代码删除、仓库卫生、CI 补 backend 测试）。

@@ -33,7 +33,7 @@
   - **Phase 3 守卫断言**：仿照 T-042 的 360px 不出界守卫，为每个体系补自动化断言（含 ±2px 等式断言必配稳定等待的 D-049 惯例）；
   - **Phase 4 基线收口**：与 T-041-B 的布局改动合并同一 rebuild + 人工逐张审核基线 PR。
 - **验收标准**：审计矩阵全页无出界裁切、无标签叠印、无明显压模（压模处按 D-050 淡出或避让处理）；全部标签体系有守卫断言；rebuild 基线经人工逐张审核合并；`verify` 连续两轮全绿。
-- **状态**：**Phase 1 已完成（2026-09-30，台账见 `docs/LABEL_AUDIT_20260930.md`）**——33 路由 × 6 视口默认模式矩阵扫描 + 新鲜加载复核 + 目检，确认 3 项预存缺陷（杂化 fullscreen 场景标签全视口叠印、Ren₃ 注释层被图例完全遮盖、极性 F/B 原子标签互叠），T-042 影响面无回归。**Phase 2 进行中（2026-09-30 起）**：① 杂化 fullscreen 场景标签叠印**已修复**（SceneBadge 恒定字号 + sp 180° 徽章移到弧 45° 外推处 + AxisTriad 可选碰撞组 + hook 收敛修复，守卫 `hybrid-scene-labels.visual.spec.ts`）；② Ren₃ 注释层、③ 极性原子标签待修。交互模式矩阵随 Phase 2 逐体系补齐。T-042 为本任务 Phase 0（CalloutLabel 子系统样板）。
+- **状态**：**Phase 1 已完成（2026-09-30，台账见 `docs/LABEL_AUDIT_20260930.md`）**——33 路由 × 6 视口默认模式矩阵扫描 + 新鲜加载复核 + 目检，确认 3 项预存缺陷（杂化 fullscreen 场景标签全视口叠印、Ren₃ 注释层被图例完全遮盖、极性 F/B 原子标签互叠），T-042 影响面无回归。**Phase 2 已完成（2026-09-30）**：① 杂化 fullscreen 场景标签叠印已修复（SceneBadge 恒定字号 + sp 180° 徽章移到弧 45° 外推处 + AxisTriad 可选碰撞组 + hook 收敛修复，守卫 `hybrid-scene-labels.visual.spec.ts`）；② Ren₃ 注释层**并入压力图例卡第三行**（独立悬浮层删除，内容可达且叠印从结构上不可能，守卫见 ren3-callout）；③ 极性 TinyAtomLabel/ChargeMarker 接入 `polarity-callout` 碰撞组（守卫 `polarity-labels.visual.spec.ts`，阈值 ≤5%——白底 pill 叠白底时 25% 面积重叠就足以盖断文字）。配套：hook 分离算法改为**严格单向让位**（只让位于更早注册的标签，消除双向互推的帧数依赖振荡，见 D-050 勘误）。遗留：密堆积配位视图布局缺陷（原缺陷②）随 T-041-B rebuild 周期；「标签×信息卡」遮挡关系待入台账。
 
 ### T-041 Code review 收口：移动端主视区、数据触达与测试时序
 

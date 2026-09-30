@@ -213,9 +213,11 @@ export function useClampedHtmlPosition(options?: {
         }
         if (rectIdRef.current < 0) rectIdRef.current = nextRectId++;
         for (const [id, rect] of registry) {
-          // 跳过自己的上一帧矩形：相机不动时它与自己必然完全重叠，
-          // 不跳过则每帧自推 2·hh+2px，标签以帧频持续振荡（T-042 评审实测）
-          if (id === rectIdRef.current) continue;
+          // 只让位于更早注册的标签（id 更小）：单向让位保证确定收敛。若双向
+          // 互推，A 推开 B 后 B 又推开 A，逐帧互赶、随帧数冻结在任意中间态
+          // （T-043 Phase 2 在极性页实测同一对标签先后采样 25%/31%）。
+          // 这也是 D-050「后计算者让先计算者」的本意。
+          if (id >= rectIdRef.current) continue;
           const overlapX = hw + rect.hw - Math.abs(x - rect.x);
           const overlapY = hh + rect.hh - Math.abs(y - rect.y);
           if (overlapX <= 0 || overlapY <= 0) continue;
