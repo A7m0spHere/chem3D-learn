@@ -619,3 +619,18 @@
 - **决定**：对按钮 / 布局做二值阈值测量（如 44×44 触控目标）的用例，测量前使用 `waitForTouchTargetSettled`：先 `document.fonts.ready`，再等 `.motion-page-enter`（`ModuleDetailPage.tsx` 整页容器，350ms `scale(0.98→1)`、`both` 填充）上的**有限动画**全部 `finished`（过滤 `iterations === Infinity` 的动画避免悬挂；reduced-motion 下动画时长被压到 0.01ms，等待立即通过）。已应用于 `specialty-viewers` 2 处、`crystal-3d-first` 1 处；带容差的相对几何断言（均匀缩放下差值不变）不强制。
 - **教训**：run `33308780225` 的诊断输出（7 个按钮 43.12px = 44×0.98、105.84px = 108×0.98）揭示真正根因是整页缩放动画，而非此前归因的「CJK 回退字体度量」——PR #6 的字体等待修复是误诊。这是继 T-040 C 组「软件渲染超时」误判之后第二例「把平台时序差异错误归因」：Windows 本机字体解析慢于 350ms 所以动画已完成，Linux CI 上 fonts.ready 秒回所以测量落在动画窗口内，差异是时序而非字体渲染本身。诊断式断言（失败时输出实测 rect JSON）是定位关键，后续新增二值尺寸断言时沿用。
 - **验证**：Windows 系统 Chrome 通道两 spec 12 / 12；Linux `verify` 连续两轮 168 / 168（runs `33309722930`、`33310145143`）。截图断言不受影响（`toHaveScreenshot` 默认禁用动画）。
+
+## D-050 3D 引线标签防遮挡采用「钳制 + 分离 + 样式降噪」，重叠淡出机制内置但默认关闭
+
+- **日期**：2026-08-30（Claude Code，T-042；维护者选定组合拳路线）
+- **背景**：D-016 当年明确「引线极端角度可能穿过结构，本轮不追求完美避让」；T-041-B 挂账的三处现场（极性移动端左缘裁切、杂化顶部裁切、MOF-5「虚线末端」叠印）即该账。根因是 `<Html>` DOM 层永远画在画布之上 + 无边界钳制 + 无标签间避让。
+- **决定**：
+  1. 新增 `useClampedHtmlPosition`：覆盖 `<Html calculatePosition>`，pill 出画布时按实测半宽/半高钳回界内（`min(15rem,100%)` 式防御，极窄视口不溢出）；同画布同 `collisionGroup` 标签单次 O(n²) 相交检测、沿 y 分离（限 maxPush 72）。`CalloutLabel` 全部 32 处与极性 `TinyDipoleLabel` 7 处接入。**默认视角不出界/不重叠时位置逐像素不变**——这是基线影响可控的关键。
+  2. `CalloutLabel` 增加 `data-callout-label` 测试锚点。
+  3. 样式降噪：compact/subtle/amber/sp2 与晶体徽章的半透明背景（55-60%）提升到 90%——半透明 pill 会让 canvas 引线透出文字（MOF-5 叠印观感的成分之一），不透明化后 pill 盖线干净利落；徽章教学配色保留仅提升不透明度。
+  4. **重叠淡出（压模时半透明让模型透出）机制已实现并验证（密堆积配位视图阳性对照：3 个压模标签全部淡到 0.3），但默认关闭、由调用方显式传 `fadeTo` 启用**。原因：密堆积配位视图的标签是刻意贴原子布置的（T-014 保留的教学语言），≥1/3 覆盖即淡出会把它们误伤成幽灵；该视图还存在结构顶出画布上缘的预存布局缺陷（main 上复现，非本改动引入），需随 T-041-B 修正布局后逐 viewer 调参启用。
+- **过程教训（spike 三轮）**：drei `occlude="blending"` 会劫持 canvas z-index 并把内容等比缩放成纹理（标签变迷你不可读），不可用于本项目；`occlude="raycast"` 是二元 display:none 且粗射线会误伤引线；自写射线必须设置 `Raycaster.camera`——`LineSegments2` 射线检测缺它会抛 `reading 'near'` 并**中断 R3F 整个帧循环**（后果是同帧后续订阅者全部冻结，症状极具迷惑性）。
+- **验证边界**：7 个 callout spec（文本 + 偏移断言，无截图）+ crystal-viewer + molecule-viewer + specialty-viewers + molecular-polarity 断言共 **59 / 59** 通过；logic 163/163、build、lint 通过。新增 360px 极窄视口 pill 不出界守卫测试。基线影响：样式不透明度变化会触碰拍到 callout 的 crystal canvas 基线（mof5/ren3/metal-close-packing/batio3 系列），随 T-041-B 同一 rebuild + 人工逐张审核周期收口。
+- **评审更正（2026-09-30，PR #10 评审）**：
+  1. 上条「基线影响」预判偏保守——PR #10 首轮 verify 门禁实际通过。实测各晶体基线截图均为默认模式，而 callout 标签只在特定子模式（配位视图、八面体视图等）下渲染（batio3 默认模式实测 0 个 callout），基线没有拍到 pill；「随 T-041-B 同一 rebuild」对 T-042 自身改动已无必要，rebuild 仅随 T-041-B 自身布局改动需要。
+  2. 评审发现并修复碰撞分离**自反馈振荡**：registry 残留标签自身上一帧矩形，固定相机下每帧与自己判定重叠并被自推 `2·hh+2`px（评审探针实测 26px 交替、Node 算法复现确认），任何连续渲染交互（拖拽旋转等）期间全部接入标签以帧频抖动。修复为分离循环跳过自身条目；新增「固定相机位姿连续重渲染 y 稳定」守卫测试固化该防线。多标签互推的收敛性未系统验证（受 maxPush 限幅，D-016 不追求完美避让），留 T-043 Phase 2 观察。
