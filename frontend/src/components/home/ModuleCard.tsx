@@ -10,6 +10,11 @@ type ModuleCardProps = {
 
 export function ModuleCard({ module }: ModuleCardProps) {
   const primaryFact = module.geometryName ?? module.bondAngle ?? module.polarity ?? module.hybridization;
+  // T-041-B 挂账修复：无 formula 且标题不含「：」的专题模块（σ 键 / π 键 /
+  // 离子键形成等），大字行回退 title.split("：")[0] 会渲染出与 h3 相同的
+  // 完整标题，卡片出现两行重复标题——此时不再渲染大字行。
+  const displayFormula = module.formula
+    ?? (module.title.includes("：") ? module.title.split("：")[0] : undefined);
   const hasInteractiveModel =
     module.hasInteractiveViewer === true || module.representativeModels.length > 0;
 
@@ -20,9 +25,11 @@ export function ModuleCard({ module }: ModuleCardProps) {
       className="group flex h-full flex-col rounded-xl border border-border bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-panel sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="mb-2 text-2xl font-black leading-none text-primary-dark">
-            {module.formula ?? module.title.split("：")[0]}
-          </div>
+          {displayFormula ? (
+            <div className="mb-2 text-2xl font-black leading-none text-primary-dark">
+              {displayFormula}
+            </div>
+          ) : null}
           <h3 className="text-lg font-bold leading-snug text-text-primary transition-colors group-hover:text-primary">
             {module.title}
           </h3>

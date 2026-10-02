@@ -84,7 +84,11 @@ export function useClampedHtmlPosition(options?: {
   const padding = options?.padding ?? 8;
   const collisionGroup = options?.collisionGroup;
   const maxPush = options?.maxPush ?? 72;
-  const fadeTo = options?.fadeTo ?? 0.3;
+  // 默认 undefined（关闭）：重叠淡出会误伤「刻意贴原子布置」的教学标签
+  //（密堆积配位视图实测见 DECISIONS D-050），由调用方显式传 fadeTo 启用。
+  // 修复（T-043 Phase 2）：原实现 `?? 0.3` 使淡出对全部接入标签默认开启，
+  // 与 D-050 决策相反——配位视图三个教学徽章被淡成 0.3 不可读。
+  const fadeTo = options?.fadeTo;
   const minCovered = options?.minCovered ?? 3;
 
   const halfWidthRef = useRef(0);

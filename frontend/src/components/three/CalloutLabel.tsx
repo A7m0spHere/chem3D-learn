@@ -33,12 +33,18 @@ type Vec3 = [number, number, number];
 export type CalloutLabelProps = {
   /** 引线所指的目标点（结构上的锚点），世界坐标。 */
   anchor: Vec3;
-  /** 标签相对锚点的外推偏移，把标签推到结构外不挡视野处。 */
+  /** 标签相对锚点的外推偏移，把标签推到结构外围不挡视野处。 */
   offset: Vec3;
   /** 标签内容（通常是带 htmlOverlay* 样式类的 span）。 */
   children: ReactNode;
   /** 引线颜色，默认中性灰。 */
   lineColor?: string;
+  /** 传入（如 0.3）启用重叠淡出：pill 压在模型上时半透明让模型透出。
+      默认不启用（undefined）——会误伤刻意贴原子布置的教学标签，
+      按 viewer 评估后显式开启（D-050）。 */
+  fadeTo?: number;
+  /** 判定压模的最少射线命中采样数（9 点中），默认 3。 */
+  minCovered?: number;
 };
 
 /**
@@ -50,6 +56,8 @@ export function CalloutLabel({
   offset,
   children,
   lineColor = "#94A3B8",
+  fadeTo,
+  minCovered,
 }: CalloutLabelProps) {
   const labelPosition = useMemo<Vec3>(
     () => [anchor[0] + offset[0], anchor[1] + offset[1], anchor[2] + offset[2]],
@@ -58,6 +66,8 @@ export function CalloutLabel({
 
   const { measureRef, calculatePosition } = useClampedHtmlPosition({
     collisionGroup: "callout",
+    fadeTo,
+    minCovered,
   });
 
   // 引线不一直画到标签正中心，留一小段间隙，避免线头戳进文字。

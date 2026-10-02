@@ -35,7 +35,7 @@ export function ThreeViewerFrame({
     <section
       className={immersive
         ? `grid h-full min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden bg-surface ${className}`
-        : `grid h-full min-h-[500px] flex-1 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-2xl border border-border bg-surface ${className}`}
+        : `grid h-full min-h-[500px] flex-1 grid-rows-[auto_minmax(340px,1fr)_auto] overflow-hidden rounded-2xl border border-border bg-surface ${className}`}
       data-testid={viewerTestId}
       style={transitionStyle}
     >
@@ -51,6 +51,9 @@ export function ThreeViewerFrame({
         </div>
       ) : null}
 
+      {/* 舞台行 minmax(340px,1fr)（T-041-B）：窄屏下顶栏与摘要行换行后曾把舞台压到
+          177-333px（屏高 21-39%）；340px 保证 390×844 下画布 ≥40% 屏高、360×744 下
+          ≥45%。桌面现有舞台均 ≥388px，不受该下限影响，渲染逐像素不变。 */}
       <div className="chem-viewer-stage relative min-h-0" data-testid={stageTestId}>
         {loading ? (
           <div className="motion-skeleton absolute inset-0 z-10 flex items-center justify-center bg-white/60" />
