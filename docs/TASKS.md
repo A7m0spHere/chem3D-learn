@@ -26,26 +26,25 @@
   7. `LayerBadge` / `FocusLabel`（MetalClosePacking、ZnSPolytype，zIndexRange 12/13，未接入任何防护）——**未审计**；
   8. `SigmaPiBondCell` / `HybridOrbitalScene` 的 `<Html fullscreen>` 场景标签——**杂化顶部裁切为已确认未修缺陷**；
   9. `AtomPullHandle` / `OrganicBuilderCanvas` 交互式标签——**未审计**。
-- **已知未修缺陷（随本任务收口）**：① 杂化专题 fullscreen 场景标签互叠（Phase 1 实测为**全 6 视口**叠印，不止移动端，见台账）；② 密堆积配位视图「结构顶出画布上缘、画布下方大片空白」（main 上 1280 复现，疑与 CameraRig 预设或布局相关）；③ 重叠淡出机制默认关闭——待 ② 修正后逐 viewer 调参启用（D-050 第 4 条）。
+- **已知缺陷收口（2026-09-30 批次 A 全部闭环）**：① 杂化专题 fullscreen 场景标签互叠——**已修**（Phase 2 ①，见下）；② 密堆积配位视图「结构顶出画布上缘、画布下方大片空白」——**未复现闭环**：批次 A 以 1280×800 / 1280×720 × 新加载 / 模式切换共 6 种配置复测全部正常（结构实测居中，截图留证），推定随 PR #9 布局修复 incidental 解决；③ 重叠淡出「默认关闭」——**实现与决策相反的 bug 已修**：`fadeTo ?? 0.3` 使淡出对全部 CalloutLabel 暗中开启，配位视图三个教学徽章被淡成 0.3 幽灵不可读（span opacity 实测），现默认关闭 + `CalloutLabel` 显式 `fadeTo` / `minCovered` 通道（D-050 勘误第 4 条），按 viewer 需求启用留待台账。
 - **实施阶段**：
   - **Phase 1 全量审计**：23+ 模型页 × 关键视口（360/390/768/1024/1280/1552）截图矩阵，逐页记录标签缺陷（出界裁切/相互叠印/压模/字号不可读），产出缺陷台账（本文件或独立文档）；
   - **Phase 2 逐体系修复**：按台账逐体系接入 `useClampedHtmlPosition`（钳制/分离）与样式降噪；distanceFactor 标签逐个评估改恒定字号或钳制；fullscreen 场景标签单独处理；每体系独立小提交；
   - **Phase 3 守卫断言**：仿照 T-042 的 360px 不出界守卫，为每个体系补自动化断言（含 ±2px 等式断言必配稳定等待的 D-049 惯例）；
   - **Phase 4 基线收口**：与 T-041-B 的布局改动合并同一 rebuild + 人工逐张审核基线 PR。
 - **验收标准**：审计矩阵全页无出界裁切、无标签叠印、无明显压模（压模处按 D-050 淡出或避让处理）；全部标签体系有守卫断言；rebuild 基线经人工逐张审核合并；`verify` 连续两轮全绿。
-- **状态**：**Phase 1 已完成（2026-09-30，台账见 `docs/LABEL_AUDIT_20260930.md`）**——33 路由 × 6 视口默认模式矩阵扫描 + 新鲜加载复核 + 目检，确认 3 项预存缺陷（杂化 fullscreen 场景标签全视口叠印、Ren₃ 注释层被图例完全遮盖、极性 F/B 原子标签互叠），T-042 影响面无回归。**Phase 2 已完成（2026-09-30）**：① 杂化 fullscreen 场景标签叠印已修复（SceneBadge 恒定字号 + sp 180° 徽章移到弧 45° 外推处 + AxisTriad 可选碰撞组 + hook 收敛修复，守卫 `hybrid-scene-labels.visual.spec.ts`）；② Ren₃ 注释层**并入压力图例卡第三行**（独立悬浮层删除，内容可达且叠印从结构上不可能，守卫见 ren3-callout）；③ 极性 TinyAtomLabel/ChargeMarker 接入 `polarity-callout` 碰撞组（守卫 `polarity-labels.visual.spec.ts`，阈值 ≤5%——白底 pill 叠白底时 25% 面积重叠就足以盖断文字）。配套：hook 分离算法改为**严格单向让位**（只让位于更早注册的标签，消除双向互推的帧数依赖振荡，见 D-050 勘误）。遗留：密堆积配位视图布局缺陷（原缺陷②）随 T-041-B rebuild 周期；「标签×信息卡」遮挡关系待入台账。
+- **状态**：**Phase 1 已完成（2026-09-30，台账见 `docs/LABEL_AUDIT_20260930.md`）**——33 路由 × 6 视口默认模式矩阵扫描 + 新鲜加载复核 + 目检，确认 3 项预存缺陷（杂化 fullscreen 场景标签全视口叠印、Ren₃ 注释层被图例完全遮盖、极性 F/B 原子标签互叠），T-042 影响面无回归。**Phase 2 已完成（2026-09-30）**：① 杂化 fullscreen 场景标签叠印已修复（SceneBadge 恒定字号 + sp 180° 徽章移到弧 45° 外推处 + AxisTriad 可选碰撞组 + hook 收敛修复，守卫 `hybrid-scene-labels.visual.spec.ts`）；② Ren₃ 注释层**并入压力图例卡第三行**（独立悬浮层删除，内容可达且叠印从结构上不可能，守卫见 ren3-callout）；③ 极性 TinyAtomLabel/ChargeMarker 接入 `polarity-callout` 碰撞组（守卫 `polarity-labels.visual.spec.ts`，阈值 ≤5%——白底 pill 叠白底时 25% 面积重叠就足以盖断文字）。配套：hook 分离算法改为**严格单向让位**（只让位于更早注册的标签，消除双向互推的帧数依赖振荡，见 D-050 勘误）+ fadeTo 默认关闭落实（D-050 勘误第 4 条）。原缺陷②（密堆积配位视图）已闭环——批次 A 六配置矩阵未复现，见上。遗留：「标签×信息卡」遮挡关系待入台账。
 
 ### T-041 Code review 收口：移动端主视区、数据触达与测试时序
 
 - **来源**：2026-08-28 Claude Code 对 T-040 合并后 `main` 的 code review（已修复项见 `docs/HANDOFF.md`）。
-- **A（高，已完成 2026-08-30）**：质量门禁落地（维护者选定方案③，决策与边界见 `docs/DECISIONS.md` D-048，实现见 PR #7）——`visual-regression.yml` 增加 `pull_request` 触发（目标 `main`，路径限 `frontend/**` 与 workflow 自身；PR 事件一律 verify 模式，rebuild 仅限手动），`deploy-pages.yml` 新增 `quality-gate` 作业（`npm run lint` + `npm run test:logic`）并令 `build` 依赖它。仓库未配置 branch protection，检查目前「可见但不强制」，是否设为必需检查由维护者在 Settings → Branches 决定。
-- **B（中）：移动端 3D 主视区被压到 177px**
-  - 现状：390×844 视口下 MOF-5 canvas 实测 177px，占屏高约 21%。`ThreeViewerFrame` 外框 `min-h-[500px]`，内部 `grid-rows-[auto_minmax(0,1fr)_auto]`；窄屏下顶栏与摘要栏因 `flex-wrap` 换行合计吃掉约 323px。
-  - **测试稳定化（2026-08-30，PR #9）**：PR 门禁首次实战暴露两类 flake 并修复——`waitForTouchTargetSettled` 补懒加载容器挂载等待；晶体三宽度与 NH₃ 1024 的 ±2px 等式断言补「字体 + 挂载 + 动画」稳定等待（此前 `goto` 后裸测量，加载窗口内漂 2-6.5px）。教训：新增紧容差断言必须配套稳定等待。
-  - **已修（2026-08-30，PR #9）**：摘要栏文本挤压——`ThreeViewerFrame` 摘要文本原为 `flex-1`（basis 0）+ `min-w-0`，被宽图例 `footerMeta`（shrink-0）挤到每行 1-4 字（MOF-5 摘要栏实测 721px 高）；改为 `min-w-[min(15rem,100%)]` 后文本独占整行、图例换行，MOF-5 摘要栏 721px → 125px，全站移动端无横向溢出。桌面渲染不变（图例与文本同行时下限不生效），经取证基线零冲突，无需 rebuild。
-  - **同批挂账（随本项 rebuild 周期一起修）**：① `CalloutLabel` 引线标签出界裁切与叠印（极性移动端左缘裁切、杂化移动端顶部裁切、MOF-5 桌面「虚线末端」被引线穿过）——标签位置随相机旋转变化，固定偏移无法根治，需边界钳制；② 相关推荐卡标题=副标题重复（specialty 模块 name 与 title 同值，σ 键 / 离子键形成 / π 键卡可见）——修复会触碰 `modules-molecular-geometry-filter-linux.png` 基线。
+- **A（高，已完成 2026-08-30）**：质量门禁落地（维护者选定方案③，决策与边界见 `docs/DECISIONS.md` D-048，实现见 PR #7）——`visual-regression.yml` 增加 `pull_request` 触发（目标 `main`，路径限 `frontend/**` 与 workflow 自身；PR 事件一律 verify 模式，rebuild 仅限手动），`deploy-pages.yml` 新增 `quality-gate` 作业（`npm run lint` + `npm run test:logic`）并令 `build` 依赖它。仓库未配置 branch protection，检查目前「可见但不强制」，是否设为必需检查由维护者在 Settings → Branches 决定。**2026-09-30 补充**：quality-gate 再加 backend `npm test`（D-052 直接 push 后随部署流水线每次运行；首战即拦截 T-005 契约的过时断言并已修正）。
+- **B（中，主体已完成 2026-09-30，基线 rebuild 收口中）**：
+  - 原「现状」：390×844 下 MOF-5 canvas 实测 177px（占屏 21%）——**该数字是 PR #9 修复摘要栏挤压之前的快照**；PR #9 的 `min-w-[min(15rem,100%)]` 把摘要栏 721 → 125px 时画布已回到 357px（42.3%，达标）。2026-09-30 批次 A 复测发现其余晶体页仍差一线：NaCl 39%、密堆积 37%、CaF₂ 39%。
+  - **已修（批次 A）**：`ThreeViewerFrame` 舞台行 `minmax(0,1fr)` → `minmax(340px,1fr)`——任何视口下画布 ≥340px（390×844 达 40.3%、360×744 达 45.7%），桌面现有舞台均 ≥388px 渲染逐像素不变。全部晶体页移动端画布统一抬到 340px。
+  - **挂账②已修（批次 A）**：推荐卡标题重复——无 formula 且标题不含「：」的专题模块（σ 键 / π 键 / 离子键形成等），ModuleCard 大字行回退 `title.split("：")[0]` 渲染出与 h3 相同的完整标题；改为无「：」时不渲染大字行，σ 键卡实证唯一标题。
   - 与 `AGENTS.md` 的「Large 3D viewer area」「不要把 3D viewer 缩成小装饰卡片」冲突。T-040 把测试下限从 200 调到 150 让测试转绿，等于把现状固化为预期。
-  - 验收：窄屏下 canvas 占比回到可用区间（建议 ≥40% 屏高），且不引入横向溢出；改动会影响 Linux 截图基线，需走 `rebuild` 流程。
+  - 验收：窄屏下 canvas 占比回到可用区间（≥40% 屏高 ✓），且不引入横向溢出（批次 A 截图复检 ✓）；改动影响 Linux 截图基线，随批次 A 的 rebuild 人工审核收口。
 - **C（中）：23 份手写 JSON 的 `metadata.notesZh` 全库无消费者**
   - 现状：23 / 23 份 JSON 都写了经 `docs/CHEMISTRY_VERIFICATION.md` 核验的模型边界说明（例如 CaF₂ 的「本模型使用分数坐标和统一视觉尺度，画面单位不等于 Å」「Ca-F 连线仅表示最近邻接触，不是共价键」），但 `src/` 中除类型定义外零引用，学生从未看到。
   - 同时 UI 上的「模型边界」是 `ModuleDetailPage.tsx` 里硬编码的短句（约 8 处），只覆盖专题模块，与 JSON 数据源完全脱节。
