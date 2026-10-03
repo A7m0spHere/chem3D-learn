@@ -110,11 +110,10 @@ import {
 import { useOrganicPlanarControls } from "@/hooks/useOrganicPlanarControls";
 import { useBondingControls } from "@/hooks/useBondingControls";
 import type { OrganicBuilderNavigationState } from "@/types/organicBuilder";
+import type { MoleculeRecord } from "@/types/molecule";
 import {
-  getMockMolecule,
-  getRealMoleculeData,
-  mergeMoleculeData,
-  type MockMoleculeRecord,
+  loadMoleculeData,
+  moleculeGeometryZh,
 } from "@/data/mockMolecules";
 import { ModuleCard } from "@/components/home/ModuleCard";
 import { learningModules } from "@/data/learningModules";
@@ -282,6 +281,13 @@ function deriveViewerKind(
   return "placeholder";
 }
 
+// 手写 JSON 的加载状态：loading 时渲染骨架（与 chunk 加载的 Suspense fallback
+// 同款视觉），missing 才进入 placeholder——避免懒加载窗口闪现「引导学习」面板。
+type MoleculeState =
+  | { status: "loading" }
+  | { status: "missing" }
+  | { status: "ready"; molecule: MoleculeRecord & { geometryZh: string } };
+
 export function ModuleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -289,31 +295,31 @@ export function ModuleDetailPage() {
 
   // 3D logic
   const representativeModelId = moduleData?.representativeModels[0] ?? "";
-  const mockMolecule = useMemo(() => {
-    // Attempt to match the old ID if this module uses a real 3D model.
-    // e.g. "tetrahedral-ch4" uses "ch4"
-    return getMockMolecule(representativeModelId) ?? null;
+  // 手写 JSON 按模块懒加载（体检第二梯队）：加载中渲染骨架而不是占位视图，
+  // 避免闪现「引导学习」面板；只有确认无数据时才走 placeholder。
+  const [moleculeState, setMoleculeState] = useState<MoleculeState>({ status: "loading" });
+  useEffect(() => {
+    let cancelled = false;
+    setMoleculeState({ status: "loading" });
+    if (!representativeModelId) {
+      setMoleculeState({ status: "missing" });
+      return undefined;
+    }
+    loadMoleculeData(representativeModelId).then((real) => {
+      if (cancelled) return;
+      setMoleculeState(
+        real
+          ? { status: "ready", molecule: { ...real, geometryZh: moleculeGeometryZh(real) } }
+          : { status: "missing" },
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [representativeModelId]);
 
-  const realMolecule = useMemo(() => {
-    if (!representativeModelId) return undefined;
-    return getRealMoleculeData(representativeModelId);
-  }, [representativeModelId]);
-
-  const usesRealViewer = Boolean(realMolecule);
-  const molecule = useMemo(() => {
-    if (mockMolecule) return mergeMoleculeData(mockMolecule, realMolecule);
-    if (!realMolecule) return null;
-
-    return {
-      ...realMolecule,
-      geometryZh: realMolecule.crystal?.typeZh ?? "晶体结构",
-      categoryLabelZh: "晶体结构",
-      centralAtomZh: realMolecule.crystal?.coordination ?? "不适用",
-      lonePairsTextZh: "不适用",
-      commonMistakeZh: "",
-    } satisfies MockMoleculeRecord;
-  }, [mockMolecule, realMolecule]);
+  const molecule = moleculeState.status === "ready" ? moleculeState.molecule : null;
+  const usesRealViewer = moleculeState.status === "ready";
 
   const [autoRotate, setAutoRotate] = useState(false);
   const [showAngles, setShowAngles] = useState(false);
@@ -1144,12 +1150,15 @@ export function ModuleDetailPage() {
         ) : null,
     },
     placeholder: {
-      viewer: () => (
-        <ModulePlaceholderViewer
-          category={moduleData.category}
-          visualFocus={moduleData.visualFocus}
-        />
-      ),
+      viewer: () =>
+        moleculeState.status === "loading" ? (
+          <ViewerChunkFallback />
+        ) : (
+          <ModulePlaceholderViewer
+            category={moduleData.category}
+            visualFocus={moduleData.visualFocus}
+          />
+        ),
       toolbar: () => null,
       panel: () => (
         <div className="rounded-3xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-sm flex-1">

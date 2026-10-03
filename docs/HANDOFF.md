@@ -2,31 +2,33 @@
 
 ## 当前任务
 
-- **任务**：批次 A——移动端主视区 + 推荐卡重复 + 缺陷②闭环 + fadeTo 决策-实现背离修复（2026-09-30，Claude Code，直接 push，三个提交）。**T-043 三项已知缺陷全部闭环，T-041-B 主体达标**，待 verify + rebuild 基线人工审核收口。
-- **前序同日**：T-042（PR #10）、Phase 1 审计（PR #11）、文档整理（PR #12）、杂化体系（PR #13）、D-051/D-052、Phase 2 收口（Ren₃ + 极性 + 单向让位）。
+- **任务**：体检第二梯队——mock 层退役 + 23 份 JSON 按模块懒加载（2026-09-30，Claude Code，直接 push）。ModuleDetailPage chunk **165.5KB → 80.4KB（gzip 42.4 → 23.4）**，23 份结构 JSON 变为按需加载的独立小 chunk。
+- **前序同日**：T-042、Phase 1 审计、文档整理、杂化体系、D-051/D-052、Phase 2 收口（含算法单向让位 + fadeTo 默认关闭落实）、backend 门禁、批次 A（移动端 340px 下限 + 推荐卡去重）。
 
 ## 本次改了什么
 
-- **T-041-B 主体（`ThreeViewerFrame.tsx`）**：舞台行 `minmax(0,1fr)` → `minmax(340px,1fr)`。诊断发现台账的「177px」是 PR #9 修复摘要栏之前的快照——MOF-5 现已 357px（42.3% 达标），但其余晶体页仍差一线（NaCl 39% / 密堆积 37% / CaF₂ 39%）。340px 下限使全部页面移动端画布 ≥40% 屏高（390 达 40.3%、360 达 45.7%）；桌面现有舞台均 ≥388px 逐像素不变。
-- **挂账②推荐卡重复（`ModuleCard.tsx`）**：无 formula 且标题不含「：」的专题模块（σ 键 / π 键 / 离子键形成等），大字行回退 `title.split("：")[0]` 渲染出与 h3 相同的完整标题（σ 键卡两张「σ 键」叠放，维护者审查截图 08 号即此）。改为无「：」时不渲染大字行；σ 键卡 DOM 断言 + 目检确认唯一标题。分子模块有 formula，渲染不变。
-- **T-043 缺陷②闭环**：批次 A 以 1280×800 / 1280×720 × 新加载 / 模式切换共 6 种配置复测密堆积配位视图，**全部正常**（结构实测居中，截图留证）——「顶出上缘」推定随 PR #9 布局修复 incidental 解决。留证闭环，不修。
-- **T-043 ③ fadeTo 决策-实现背离修复（`useClampedHtmlPosition.ts` + `CalloutLabel.tsx`，D-050 勘误第 4 条）**：探针实锤配位视图三个教学徽章 span opacity = 0.3（幽灵不可读）——`fadeTo ?? 0.3` 的默认值使淡出对全部 CalloutLabel **暗中开启**，与 D-050「默认关闭」决策相反。修复为 `options?.fadeTo`（undefined 即关闭）；`CalloutLabel` 新增 `fadeTo` / `minCovered` 透传 prop 作为按 viewer 显式启用通道。配位徽章恢复 opacity 1（目检清晰可读）。
-- **文档**：TASKS（T-041-B 主体完成、T-043 三缺陷闭环）、DECISIONS D-050 勘误第 4 条、HANDOFF（本文件）。
+- **`data/mockMolecules.ts` 重写为懒加载器（约 425 行 → 40 行）**：
+  - 删除 9 个 mock 记录（约 300 行）——`mergeMoleculeData` 本就无条件用 JSON 覆盖全部结构字段，mock 只贡献 5 个 UI 元数据字段，其中 **4 个零消费**（commonMistakeZh / centralAtomZh / lonePairsTextZh / categoryLabelZh 无任何渲染点），唯一活字段 geometryZh（vsepr 分子）提取为 9 条短语查表 `GEOMETRY_ZH_BY_ID`，晶体分子继续走 `crystal.typeZh`。
+  - 新 API：`loadMoleculeData(id)`（`import.meta.glob` 非急速加载，未知 id 返回 undefined）+ `moleculeGeometryZh(record)`。
+- **`ModuleDetailPage.tsx` 异步化**：同步查表改 `useEffect` + 三态 `MoleculeState`（loading / missing / ready）——loading 渲染 `ViewerChunkFallback` 骨架（与 chunk 加载的 Suspense fallback 同视觉），**只有确认 missing 才进 placeholder**，消除懒加载窗口闪现「引导学习」面板的问题。`molecule` 对象在 ready 态附加 geometryZh，下游 viewer/panel/FactBox 全部兼容。
+- **`src/vite-env.d.ts` 新建**：`/// <reference types="vite/client" />`——项目首次使用 `import.meta.glob`，此前没有 Vite 客户端类型声明。
+- **glob pattern 教训（重要）**：必须用 **root 绝对 pattern** `/src/data/manual/*.json`——相对 pattern（`./manual/*.json`）在 dev 下返回模块相对 key、build 下返回 root 绝对 key，查找只匹配其一时另一环境必然查不到（首跑实测：build 正常、dev 全部模块 404 到 placeholder、visual 套件 96 失败 52 分钟）。
+- **`tests/logic/chemistry-content.logic.spec.ts`**：BF₃ 守卫原读取 mockMolecules **源码文本**钉住「所有原子都缺电子」句——mock 层退役后改为断言 `bf3.json`（该句在 JSON 中本就存在，T-033 核验文案的双载体只保留 JSON 一侧）。
+- **文档**：AGENTS.md 更新 mockMolecules 描述（注册制 → glob 自动生效）；HANDOFF（本文件）。
 
 ## 验证
 
-- build / lint 通过；受影响 spec **95/95**（crystal-viewer、three-viewer-frame、specialty-viewers、core-learning-pages、module-state-reset、hybrid-scene-labels、mof5/molecular-polarity/ren3/polarity 守卫与断言）。
-- 目检：MCP 配位 1280（徽章 opacity 1 清晰可读）、MCP-390（画布 340px = 40%）、σ 键卡（唯一标题）、极性 360（此前已验）。
-- **基线预期**：rebuild 将触碰——① 桌面 crystal 基线中 mcp 配位视图（徽章 0.3 → 1）；② Modules 页含 specialty 卡片的基线（大字行移除）；③ molecule 页面基线**预期零差异**（frame 高度不变）。落地后跑 verify 确认差异范围，再 rebuild + 人工逐张审核。
+- `npm run build` 通过：**ModuleDetailPage chunk 165.5 → 80.4KB**；ch4/mof5/nacl 等 JSON 成为独立懒加载 chunk（dist/assets/ch4-*.js 等）。
+- lint 通过；logic **163/163**；visual 全套 **177/177**（11.2 分钟；32 条路由全部走新的异步数据路径，含 module-state-reset / preload-recovery / organic-builder 转场等交互测试）。
+- vite-env.d.ts 为标准 Vite 脚手架声明，不引入运行时代码。
 
 ## 遗留问题
 
 - 「标签×信息卡」遮挡（360px 下 p1 徽章躲进杂化信息卡）待入台账处理。
-- T-041-C notesZh 接入（待维护者拍板接入方式）、T-041-D mxene 等待反模式。
-- 体检第二梯队：mockMolecules 瘦身 + JSON 懒加载、测试 helpers 去重、tsconfig 强化；第三梯队：TeachingHtml、晶体样板合并、ChemCanvas、three chunk 隔离、11 路由基线补齐。
-- video 采集管线修复 + 素材重采 → rc.2 发布 → T-031 反馈重启。
+- 体检第三梯队：TeachingHtml 包装器（79 处 Html 样板）、晶体 cell 样板合并（~600 行）、ChemCanvas wrapper、ModuleDetailPage registry 表格化、three chunk 函数式 manualChunks 隔离 + 体积守卫、11 条路由基线补齐、tsconfig 强化。
+- video 采集管线修复 + 素材重采 → rc.2 发布 → T-031 反馈重启；backend 冻结决策。
 
 ## 下一步建议
 
-1. 跑 verify 确认差异范围 → 触发 rebuild → 人工逐张审核基线 PR（批次 A 收口）。
-2. 体检第二梯队（mockMolecules 瘦身 + JSON 懒加载）。
+1. 体检第三梯队第一批：TeachingHtml 包装器 + 晶体样板合并（约 600 行收益，需过一遍视觉基线 QA）。
+2. three chunk 函数式 manualChunks 隔离 + CI 体积守卫（S）。

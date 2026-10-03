@@ -144,7 +144,7 @@ chem3D-learn/
 
 - 前端启动链：`frontend/index.html` → `src/main.tsx` → `src/router.tsx` → `src/App.tsx`。
 - `frontend/src/data/learningModules.ts` 是模块卡片、学习路径和 `/module/:id` 语义的目录真源。
-- `frontend/src/data/mockMolecules.ts` 显式导入并注册 23 个手写 JSON；只新增 JSON 而不注册，不会启用真实 3D viewer。
+- `frontend/src/data/mockMolecules.ts` 通过 `import.meta.glob` 按需加载 `data/manual/` 下的 23 份手写 JSON——新增 `<id>.json` 即自动生效，无需注册；页面只在进入模块时下载对应的一份 JSON（体检第二梯队，2026-09-30）。
 - `frontend/src/pages/ModuleDetailPage.tsx` 的 `deriveViewerKind` / `viewerRegistry` 负责 viewer、toolbar、panel 的统一分发，新增模块时必须保持三者一致。
 - `frontend/src/lib/organicBuilderChemistry.ts`、`organicBuilderNomenclature.ts` 和 `organicBuilderGeometry.ts` 共同承担拼装、识别、命名和键角逻辑，属于教学准确性高风险文件。
 - 当前前端没有调用 `backend/` API；后端数据仍是 6 条结构的独立副本。未来接线前必须单独设计数据同步方案。

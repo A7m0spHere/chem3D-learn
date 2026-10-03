@@ -20,17 +20,14 @@ function readMoleculeJson(fileName: string): MoleculeRecord {
 test("BF₃ 文案把中心 B 的六电子、八隅体例外与路易斯酸边界说清", () => {
   const bf3 = readMoleculeJson("bf3.json");
   const module = learningModules.find((item) => item.id === "planar-bf3");
-  const mockSource = readFileSync(
-    new URL("../../src/data/mockMolecules.ts", import.meta.url),
-    "utf8",
-  );
   const copy = JSON.stringify({ bf3, module });
 
   expect(module?.keyPoints).toContain("常用中性路易斯结构中，中心 B 周围计入 6 个价层电子");
   expect(module?.keyPoints).toContain("中心 B 未满足八隅体，可接受电子对，表现为路易斯酸");
   expect(module?.description).toContain("键角 120°");
-  expect(mockSource).toContain("所有原子都缺电子");
-  expect(mockSource).not.toContain("缺电子表述后续复核");
+  // 2026-09-30 体检第二梯队：mock 层退役，BF₃ 边界文案的载体改为 bf3.json
+  expect(JSON.stringify(bf3)).toContain("所有原子都缺电子");
+  expect(copy).not.toContain("缺电子表述后续复核");
   expect(copy).not.toContain("缺电子分子");
   expect(copy).not.toContain("TODO-CHEM-VERIFY");
 });
