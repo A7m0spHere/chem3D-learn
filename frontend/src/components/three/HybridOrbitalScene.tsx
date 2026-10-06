@@ -24,7 +24,7 @@ import {
   teachingSceneLabelClass,
 } from "@/components/three/teachingLabelStyles";
 import { useDisposable } from "@/components/three/useDisposable";
-import { useClampedHtmlPosition } from "@/components/three/useClampedHtmlPosition";
+import { useClampedHtmlPosition, useStaticHtmlObstacle } from "@/components/three/useClampedHtmlPosition";
 import type {
   BondingBasicsMode,
   HybridOrbitalControls,
@@ -142,10 +142,19 @@ function SceneOverlay({
   controls: HybridOrbitalControls;
 }) {
   const isSourceState = controls.progress <= 4;
+  // 台账遗留缺陷④「标签×信息卡」：两张覆盖卡登记为碰撞障碍物，场景标签
+  // （轴标签 + 徽章）完全让出卡片区域——此前 Y/Z 轴标签在全部视口被信息卡
+  // 遮挡 56-100%，桌面 1280 也不可见
+  const infoCardRef = useStaticHtmlObstacle();
+  const legendCardRef = useStaticHtmlObstacle();
 
   return (
     <Html fullscreen pointerEvents="none">
-      <div className="absolute left-3 top-3 max-w-[min(330px,calc(100%-24px))] rounded-xl border border-white/70 bg-white/85 px-3 py-2.5 text-left shadow-sm backdrop-blur-sm sm:left-4 sm:top-4 sm:px-4">
+      <div
+        className="absolute left-3 top-3 max-w-[min(330px,calc(100%-24px))] rounded-xl border border-white/70 bg-white/85 px-3 py-2.5 text-left shadow-sm backdrop-blur-sm sm:left-4 sm:top-4 sm:px-4"
+        data-testid="hybrid-scene-info-card"
+        ref={infoCardRef}
+      >
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-xs font-semibold tracking-wide text-primary-dark">
             {config.displayLabel} 杂化模拟
@@ -170,7 +179,11 @@ function SceneOverlay({
         </div>
       </div>
 
-      <div className="absolute right-3 top-3 hidden rounded-xl border border-white/70 bg-white/80 px-3 py-2 text-[11px] font-semibold text-text-secondary shadow-sm backdrop-blur-sm sm:block">
+      <div
+        className="absolute right-3 top-3 hidden rounded-xl border border-white/70 bg-white/80 px-3 py-2 text-[11px] font-semibold text-text-secondary shadow-sm backdrop-blur-sm sm:block"
+        data-testid="hybrid-scene-legend-card"
+        ref={legendCardRef}
+      >
         <div className="flex items-center gap-2">
           {isSourceState ? (
             <>

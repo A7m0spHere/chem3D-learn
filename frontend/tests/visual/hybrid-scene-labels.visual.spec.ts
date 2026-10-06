@@ -1,13 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 
 // ---------------------------------------------------------------------------
-// T-043 Phase 2 守卫（台账缺陷 1，LABEL_AUDIT_20260930）：杂化专题场景标签 =
+// T-043 Phase 2 + 遗留缺陷④守卫（LABEL_AUDIT_20260930）：杂化专题场景标签 =
 // SharedAxisTriad 轴标签（X/Y/Z）+ SceneBadge 轨道/键角徽章（p1/p2/180° 等），
 // 均接入 useClampedHtmlPosition（collisionGroup "hybrid-scene"）。
-// 修复前任意视口下 Y×p1 43-67%、p1×180° 26-67%、Z×p2 33% 叠印。
+// 修复前任意视口下 Y×p1 43-67%、p1×180° 26-67%、Z×p2 33% 叠印；覆盖卡避让
+// 修复前 Y/Z 轴标签与徽章被顶部信息卡遮盖 22-100%（全视口，含桌面 1280）。
 //
 // 守卫：sp / sp² / sp³ 三种模式（进度固定 80，保证徽章全部在场）下，
-// 所有场景标签不出画布、两两重叠面积 ≤ 25%（台账的缺陷定义阈值）。
+// 所有场景标签不出画布、两两重叠面积 ≤ 25%（台账的缺陷定义阈值）、
+// 被信息卡/图例卡遮盖 ≤ 5%（躲进半透明卡片即内容不可达）。
 // 本文件不含 toHaveScreenshot，可在 Windows 系统 Chrome 通道运行。
 // ---------------------------------------------------------------------------
 
@@ -76,7 +78,33 @@ for (const viewport of VIEWPORTS) {
             worst = Math.max(worst, (ox * oy) / smaller);
           }
         }
-        return { count: rects.length, outside, worst: Math.round(worst * 100) };
+        // 台账遗留缺陷④（LABEL_AUDIT_20260930）：场景标签被顶部覆盖卡遮盖——
+        // 修复前 Y/Z 轴标签与徽章在全部视口被信息卡遮住 22-100%，桌面 1280 也不可见。
+        const cardRects = [
+          ...document.querySelectorAll(
+            '[data-testid="hybrid-scene-info-card"], [data-testid="hybrid-scene-legend-card"]',
+          ),
+        ]
+          .map((el) => el.getBoundingClientRect())
+          .filter((r) => r.width > 0 && r.height > 0);
+        let worstCard = 0;
+        for (const label of rects) {
+          for (const card of cardRects) {
+            const ox = Math.min(label.right, card.right) - Math.max(label.x, card.x);
+            const oy = Math.min(label.bottom, card.bottom) - Math.max(label.y, card.y);
+            if (ox <= 0 || oy <= 0) continue;
+            worstCard = Math.max(
+              worstCard,
+              (ox * oy) / (label.width * label.height),
+            );
+          }
+        }
+        return {
+          count: rects.length,
+          outside,
+          worst: Math.round(worst * 100),
+          worstCard: Math.round(worstCard * 100),
+        };
       });
 
       expect(scan.count, `${mode} 场景标签数量（${viewport.width}px）`).toBeGreaterThanOrEqual(4);
@@ -85,6 +113,10 @@ for (const viewport of VIEWPORTS) {
         scan.worst,
         `${mode} 最大互叠比例 %（${viewport.width}px）`,
       ).toBeLessThanOrEqual(25);
+      expect(
+        scan.worstCard,
+        `${mode} 标签被覆盖卡遮盖比例 %（${viewport.width}px）`,
+      ).toBeLessThanOrEqual(5);
     }
   });
 }
