@@ -1,5 +1,7 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { CameraRig } from "@/components/three/CameraRig";
 import {
@@ -141,9 +143,9 @@ function MaxToMxeneScene() {
         <span className={htmlOverlayLabelClass}>二维片层｜Ti₃C₂Tₓ</span>
       </CalloutLabel>
       {/* 全局工艺说明，不指向单一结构：保持 <Html> */}
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[0, -1.78, 0]}>
+      <TeachingHtml position={[0, -1.78, 0]} distanceFactor={7.2}>
         <span className={htmlOverlayAmberCompactLabelClass}>选择性移除 Al + 剥离 →</span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -180,9 +182,9 @@ function FiveLayerScene({ showLabels }: { showLabels: boolean }) {
   return (
     <>
       <MxenePatchModel patch={fullPatch} showBonds showPlanes />
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 1.02, 0]}>
+      <TeachingHtml position={[0, 1.02, 0]} distanceFactor={7}>
         <span className={htmlOverlayLabelClass}>厚度方向：Ti–C–Ti–C–Ti</span>
-      </Html>
+      </TeachingHtml>
       {showLabels ? (
         <>
           <LayerLabel label="代表性表面 Ti" position={[-1.56, 0.68, 0.08]} tone="ti" />
@@ -229,9 +231,9 @@ function CarbonCoordinationScene() {
         <span className={htmlOverlayCompactLabelClass}>Ti₆ 八面体轮廓</span>
       </CalloutLabel>
       {/* 全局说明，不指向单一结构，保持 Html */}
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[0, -0.84, 0]}>
+      <TeachingHtml position={[0, -0.84, 0]} distanceFactor={6.8}>
         <span className={htmlOverlaySubtleWideLabelClass}>辅助线表示局部配位，不增加新的化学键</span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -246,13 +248,13 @@ function TerminationScene({ showLabels }: { showLabels: boolean }) {
         <span className={htmlOverlayLabelClass}>O / OH / F 混合端基示意</span>
       </CalloutLabel>
       {/* 全局说明，不指向单一结构，保持 Html */}
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.1, 0]}>
+      <TeachingHtml position={[0, -1.1, 0]} distanceFactor={7}>
         <span className={htmlOverlaySubtleWideLabelClass}>端基位于片层两侧的外层 Ti 表面</span>
-      </Html>
+      </TeachingHtml>
       {showLabels ? (
-        <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.34, 0]}>
+        <TeachingHtml position={[0, -1.34, 0]} distanceFactor={7}>
           <span className={htmlOverlayAmberCompactLabelClass}>位置与比例不代表真实样品</span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </>
   );
@@ -279,16 +281,16 @@ function RestackingScene() {
       <WaterMolecule position={[-0.46, -0.42, -0.18]} />
       <AtomSphere color="#60A5FA" position={[0.02, 0.42, -0.42]} radius={0.075} />
       {/* 描述整场景朝向的标题，不指向单一结构，保持 Html */}
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 1.42, 0]}>
+      <TeachingHtml position={[0, 1.42, 0]} distanceFactor={7}>
         <span className={htmlOverlayLabelClass}>端基化片层重新堆叠</span>
-      </Html>
+      </TeachingHtml>
       {/* 锚点落在层间水分子，标签往右外推更远，真正推到结构外围留白 */}
       <CalloutLabel anchor={[0.56, 0.42, 0.2]} offset={[1.05, 0.5, 0]}>
         <span className={htmlOverlayCompactLabelClass}>层间水 / 离子（示意）</span>
       </CalloutLabel>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.4, 0]}>
+      <TeachingHtml position={[0, -1.4, 0]} distanceFactor={7}>
         <span className={htmlOverlaySubtleWideLabelClass}>层间距受端基、含水状态和插层物种影响</span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -300,27 +302,27 @@ function FormulaScene() {
         <MxenePatchModel patch={compactPatch} showBonds showPlanes />
         <TerminationMarkers sites={compactTerminations} />
       </group>
-      <Html center distanceFactor={7} pointerEvents="none" position={[-1.22, 0.86, 0]}>
+      <TeachingHtml position={[-1.22, 0.86, 0]} distanceFactor={7}>
         <span className={htmlOverlayAmberStrongLabelClass}>Ti₃AlC₂</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[-1.22, 0.47, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[-1.22, 0.47, 0]} distanceFactor={7}>
         <span className={htmlOverlayCompactLabelClass}>− Al</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[-1.22, 0.08, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[-1.22, 0.08, 0]} distanceFactor={7}>
         <span className={htmlOverlayLabelClass}>Ti₃C₂</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[-1.22, -0.34, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[-1.22, -0.34, 0]} distanceFactor={7}>
         <span className={htmlOverlayCompactLabelClass}>+ 可变表面端基 Tₓ</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[-1.22, -0.78, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[-1.22, -0.78, 0]} distanceFactor={7}>
         <span className={htmlOverlayLabelClass}>Ti₃C₂Tₓ</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 1.34, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[0, 1.34, 0]} distanceFactor={7}>
         <span className={htmlOverlayAmberCompactLabelClass}>通式：Mₙ₊₁XₙTₓ</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.3, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[0, -1.3, 0]} distanceFactor={7}>
         <span className={htmlOverlaySubtleWideLabelClass}>Ti:C = 3:2 固定；Tₓ 的种类与数量可变</span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -420,14 +422,9 @@ function TerminationMarkers({
               </>
             ) : null}
             {shouldLabel ? (
-              <Html
-                center
-                distanceFactor={6.8}
-                pointerEvents="none"
-                position={translate(site.hydrogen ?? site.atom, [0.08, 0.12, 0.04])}
-              >
+              <TeachingHtml position={translate(site.hydrogen ?? site.atom, [0.08, 0.12, 0.04])} distanceFactor={6.8}>
                 <span className={htmlOverlayCompactLabelClass}>{site.kind}</span>
-              </Html>
+              </TeachingHtml>
             ) : null}
           </group>
         );
@@ -486,11 +483,11 @@ function LayerLabel({
   tone: "ti" | "c";
 }) {
   return (
-    <Html center distanceFactor={7} pointerEvents="none" position={position}>
+    <TeachingHtml position={position} distanceFactor={7}>
       <span className={tone === "ti" ? htmlOverlayLabelClass : htmlOverlayCompactLabelClass}>
         {label}
       </span>
-    </Html>
+    </TeachingHtml>
   );
 }
 

@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
@@ -154,11 +156,11 @@ function HostSphere({ atom, viewMode, showLabel }: HostSphereProps) {
         />
       </mesh>
       {showLabel ? (
-        <Html center distanceFactor={6.8} pointerEvents="none" position={[0, radius + 0.1, 0]}>
+        <TeachingHtml position={[0, radius + 0.1, 0]} distanceFactor={6.8}>
           <span className={htmlOverlayLabelClass}>
             {atom.label}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
@@ -191,11 +193,11 @@ function VoidMarker({ atom, filled, showLabel }: VoidMarkerProps) {
         <meshBasicMaterial color="#F4A261" opacity={filled ? 0.15 : 0.1} transparent />
       </mesh>
       {showLabel ? (
-        <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.16, 0]}>
+        <TeachingHtml position={[0, radius + 0.16, 0]} distanceFactor={7.2}>
           <span className={htmlOverlayAmberStrongLabelClass}>
             {filled ? "填入小球" : "空隙中心"}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );

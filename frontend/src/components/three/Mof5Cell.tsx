@@ -1,5 +1,7 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { CameraRig } from "@/components/three/CameraRig";
 import { CalloutLabel } from "@/components/three/CalloutLabel";
 import {
@@ -207,9 +209,9 @@ function BuildingUnitOverview() {
         <span className={htmlOverlayAmberStrongLabelClass}>有机连接体｜BDC</span>
       </CalloutLabel>
       {/* 这条是整幅对比图的总结，不指向单一结构，保持底部留白处的普通标签。 */}
-      <Html center pointerEvents="none" position={[0, -0.92, 0]}>
+      <TeachingHtml position={[0, -0.92, 0]}>
         <span className={htmlOverlaySubtleWideLabelClass}>两类构筑单元周期连接 → 开放框架</span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -458,7 +460,8 @@ function TopologyLinker({ linker, showLabel }: { linker: PcuLinker; showLabel: b
       ))}
       {showLabel ? (
         <CalloutLabel
-          anchor={midpoint(linker.start, linker.end)}
+          anchor={midpoint(linker.start, linker.end)}
+
           offset={[0, 0.42, 0]}
         >
           <span className={htmlOverlayAmberCompactLabelClass}>BDC 拓扑边</span>
@@ -480,9 +483,9 @@ function TopologyNode({ position, showLabel = false }: { position: Vec3; showLab
         <meshStandardMaterial color={OXYGEN_COLOR} roughness={0.38} />
       </mesh>
       {showLabel ? (
-        <Html center pointerEvents="none" position={[0, 0.25, 0]}>
+        <TeachingHtml position={[0, 0.25, 0]}>
           <span className={htmlOverlayLabelClass}>Zn₄O SBU 节点</span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
@@ -558,12 +561,12 @@ function CountingLabels() {
       <CalloutLabel anchor={[0.88, 0, 0.88]} offset={[0.5, -0.12, 0]}>
         <span className={htmlOverlayAmberStrongLabelClass}>12×1/4 = 3 BDC</span>
       </CalloutLabel>
-      <Html center pointerEvents="none" position={[-1.02, -1.22, 0]}>
+      <TeachingHtml position={[-1.02, -1.22, 0]}>
         <span className={htmlOverlayLabelClass}>Zn₄O(BDC)₃</span>
-      </Html>
-      <Html center pointerEvents="none" position={[0, 1.28, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[0, 1.28, 0]}>
         <span className={htmlOverlayCompactLabelClass}>Fm-3m 常规晶胞：Z = 8</span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }

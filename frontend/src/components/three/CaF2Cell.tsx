@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
@@ -344,11 +346,11 @@ function IonSphere({ atom, viewMode, voidStage, showLabel, useCompactLabelSet }:
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={useCompactLabelSet ? 7.4 : 6.8} pointerEvents="none" position={[0, radius + 0.08, 0]}>
+        <TeachingHtml position={[0, radius + 0.08, 0]} distanceFactor={useCompactLabelSet ? 7.4 : 6.8}>
           <span className={htmlOverlayCompactLabelClass}>
             {labelText}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
@@ -461,9 +463,9 @@ function GhostFluoride({ position, showLabel }: { position: [number, number, num
       </mesh>
       <StaticCylinder color="#2A9D8F" end={linkToFocusCa} opacity={0.55} radius={0.0045} start={[0, 0, 0]} />
       {showLabel ? (
-        <Html center distanceFactor={7.2} pointerEvents="none" position={[0, 0.17, 0]}>
+        <TeachingHtml position={[0, 0.17, 0]} distanceFactor={7.2}>
           <span className={htmlOverlayAmberCompactLabelClass}>相邻晶胞 F⁻</span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
@@ -493,11 +495,11 @@ function TetrahedralVoidMarker({ position, stage, showLabel }: TetrahedralVoidMa
         <meshBasicMaterial color={color} opacity={isFilledStage ? 0.28 : 0.5} transparent />
       </mesh>
       {showLabel ? (
-        <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.08, 0]}>
+        <TeachingHtml position={[0, radius + 0.08, 0]} distanceFactor={7.2}>
           <span className={htmlOverlayAmberCompactLabelClass}>
             {isFilledStage ? "F⁻ 已填入" : "四面体空隙 ×8"}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );

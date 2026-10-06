@@ -1,7 +1,9 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import { BufferGeometry, DoubleSide, Float32BufferAttribute } from "three";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { CameraRig } from "@/components/three/CameraRig";
 import {
@@ -143,10 +145,10 @@ function PressureWindowScene() {
       <group position={[0, 0.34, 0]} scale={0.7}>
         <CellModel showFrame />
       </group>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 1.52, 0]}>
+      <TeachingHtml position={[0, 1.52, 0]} distanceFactor={7}>
         <span className={htmlOverlayLabelClass}>Imm2-ReN₃｜理论预测相</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.28, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[0, -1.28, 0]} distanceFactor={7}>
         <div className="w-[290px] rounded-xl border border-slate-200 bg-white/95 px-4 py-3 text-slate-700 shadow-sm">
           <div className="mb-2 flex items-center justify-between text-xs font-semibold">
             <span>0 GPa</span>
@@ -170,7 +172,7 @@ function PressureWindowScene() {
             预测稳定 ≠ 已实验确认；晶格不按压力条比例形变
           </p>
         </div>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -188,12 +190,12 @@ function OrthorhombicCellScene({ showLabels }: { showLabels: boolean }) {
         radius={0.008}
         start={cartesianToScene(reAtoms[0].cartesian)}
       />
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 1.66, 0]}>
+      <TeachingHtml position={[0, 1.66, 0]} distanceFactor={7}>
         <span className={htmlOverlayLabelClass}>Imm2｜I 心正交常规晶胞</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.66, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[0, -1.66, 0]} distanceFactor={7}>
         <span className={htmlOverlaySubtleWideLabelClass}>a = 5.25 Å｜b = 2.81 Å｜c = 4.75 Å（0 GPa 松弛参考）</span>
-      </Html>
+      </TeachingHtml>
       <CellAxisLabels />
       {showLabels ? <RepresentativeSiteLabels /> : null}
     </>
@@ -228,9 +230,9 @@ function TriNitrogenScene({ showLabels }: { showLabels: boolean }) {
         <span className={htmlOverlayAmberStrongLabelClass}>两条短 N–N 距离 ≈ 1.36 Å</span>
       </CalloutLabel>
       {/* 全局说明，不指向单一结构，保持 Html */}
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[0, -1.5, 0]}>
+      <TeachingHtml position={[0, -1.5, 0]} distanceFactor={6.8}>
         <span className={htmlOverlaySubtleWideLabelClass}>晶体网络中的折线形连接单元，不是自由小分子</span>
-      </Html>
+      </TeachingHtml>
       {showLabels ? (
         <>
           <SiteLabel label="N2 2b" position={[0.06, 0.28, 0]} />
@@ -276,13 +278,13 @@ function ReSevenCoordinationScene({ showLabels }: { showLabels: boolean }) {
         <span className={htmlOverlayLabelClass}>Re 中心｜7 个 N 最近邻</span>
       </CalloutLabel>
       {/* 全局说明，不指向单一结构，保持 Html */}
-      <Html center distanceFactor={6.8} pointerEvents="none" position={[0, -1.38, 0]}>
+      <TeachingHtml position={[0, -1.38, 0]} distanceFactor={6.8}>
         <span className={htmlOverlayAmberCompactLabelClass}>ReN₇ 是局部七配位，不是化学式</span>
-      </Html>
+      </TeachingHtml>
       {showLabels ? (
-        <Html center distanceFactor={6.8} pointerEvents="none" position={[1.05, 0.18, 0]}>
+        <TeachingHtml position={[1.05, 0.18, 0]} distanceFactor={6.8}>
           <span className={htmlOverlayCompactLabelClass}>N1 × 6｜N2 × 1</span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </>
   );
@@ -323,16 +325,16 @@ function PolyhedralNetworkScene({ showLabels }: { showLabels: boolean }) {
           radius={atom.element === "Re" ? 0.14 : 0.085}
         />
       ))}
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 2.02, 0]}>
+      <TeachingHtml position={[0, 2.02, 0]} distanceFactor={7}>
         <span className={htmlOverlayLabelClass}>ReN₇ 多面体｜三维周期延展</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[-1.36, -1.7, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[-1.36, -1.7, 0]} distanceFactor={7}>
         <span className={htmlOverlaySubtleWideLabelClass}>共享 N 位点 + N₃ 连接单元 → 延展晶体网络</span>
-      </Html>
+      </TeachingHtml>
       {showLabels ? (
-        <Html center distanceFactor={7} pointerEvents="none" position={[1.28, 0.12, 0.2]}>
+        <TeachingHtml position={[1.28, 0.12, 0.2]} distanceFactor={7}>
           <span className={htmlOverlayAmberCompactLabelClass}>暖橙：短 N–N 连接</span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </>
   );
@@ -344,22 +346,22 @@ function CountingAndPropertyScene() {
       <group position={[1.05, 0.1, 0]} scale={0.62}>
         <CellModel showFrame />
       </group>
-      <Html center distanceFactor={7} pointerEvents="none" position={[-1.22, 0.45, 0]}>
+      <TeachingHtml position={[-1.22, 0.45, 0]} distanceFactor={7}>
         <div className="w-[210px] space-y-2 rounded-xl border border-slate-200 bg-white/95 p-3 text-sm font-semibold text-slate-700 shadow-sm">
           <div className="rounded-md bg-slate-50 px-3 py-2">Re 2b → 2</div>
           <div className="rounded-md bg-slate-50 px-3 py-2">N 4c + 2b → 4 + 2 = 6</div>
           <div className="rounded-md bg-teal-50 px-3 py-2 text-teal-800">2 Re + 6 N = 2 ReN₃</div>
         </div>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, 1.52, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[0, 1.52, 0]} distanceFactor={7}>
         <span className={htmlOverlayLabelClass}>常规晶胞含 2 个化学式单位</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.48, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[0, -1.48, 0]} distanceFactor={7}>
         <span className={htmlOverlaySubtleWideLabelClass}>氮富集 + Re–N / N–N 方向性网络 → 预测力学增强</span>
-      </Html>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, -1.9, 0]}>
+      </TeachingHtml>
+      <TeachingHtml position={[0, -1.9, 0]} distanceFactor={7}>
         <span className={htmlOverlayAmberCompactLabelClass}>按 Wyckoff multiplicity 计数，不数补画的周期球</span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -492,9 +494,9 @@ function AtomSphere({
 
 function SiteLabel({ label, position }: { label: string; position: Vec3 }) {
   return (
-    <Html center distanceFactor={7} pointerEvents="none" position={position}>
+    <TeachingHtml position={position} distanceFactor={7}>
       <span className={htmlOverlayCompactLabelClass}>{label}</span>
-    </Html>
+    </TeachingHtml>
   );
 }
 

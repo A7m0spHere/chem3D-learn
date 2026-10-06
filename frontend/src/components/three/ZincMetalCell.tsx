@@ -1,5 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Html, Instance, Instances, OrbitControls } from "@react-three/drei";
+import { Instance, Instances, OrbitControls } from "@react-three/drei";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
 import { useMemo, useRef } from "react";
 import { Group, Quaternion, Vector3 } from "three";
 import { CalloutLabel } from "@/components/three/CalloutLabel";
@@ -354,11 +355,11 @@ function ZincAtom({ atom, viewMode, modelStyle, showLabel }: ZincAtomProps) {
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={6.8} pointerEvents="none" position={[0, atom.radius + 0.1, 0]}>
+        <TeachingHtml position={[0, atom.radius + 0.1, 0]} distanceFactor={6.8}>
           <span className={htmlOverlayLabelClass}>
             {getAtomLabel(atom, viewMode)}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
@@ -425,9 +426,9 @@ function LayerBadge({
   tone: "same" | "upper" | "lower" | "center" | "note";
 }) {
   return (
-    <Html center distanceFactor={7.2} pointerEvents="none" position={position}>
+    <TeachingHtml position={position} distanceFactor={7.2}>
       <BadgeSpan label={label} tone={tone} />
-    </Html>
+    </TeachingHtml>
   );
 }
 

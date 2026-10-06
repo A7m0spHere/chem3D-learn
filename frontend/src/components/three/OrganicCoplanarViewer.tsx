@@ -2,6 +2,8 @@ import { Canvas } from "@react-three/fiber";
 import { Html, Instance, Instances, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
   htmlOverlaySubtleLabelClass,
@@ -444,11 +446,11 @@ function OrganicAtomMesh({
         />
       </mesh>
       {labelShouldShow ? (
-        <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.14, 0]}>
+        <TeachingHtml position={[0, radius + 0.14, 0]} distanceFactor={7}>
           <span className={htmlOverlaySubtleLabelClass}>
             {atom.label}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
       {onPullIntent && !isPulling ? (
         <AtomPullHandle atomId={atom.id} label={atom.label} onPullIntent={onPullIntent} />

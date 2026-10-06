@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, Line, OrbitControls } from "@react-three/drei";
+import { Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { AtomMesh } from "@/components/three/AtomMesh";
@@ -162,14 +164,14 @@ function LineOverlay({ lineView }: { lineView: AcetyleneLineView }) {
           <meshBasicMaterial color="#2A9D8F" opacity={0.42} transparent />
         </mesh>
       ) : null}
-      <Html center distanceFactor={6.4} pointerEvents="none" position={[0, -0.34, 0.34]}>
+      <TeachingHtml position={[0, -0.34, 0.34]} distanceFactor={6.4}>
         <span
           className={teachingSceneLabelClass}
           data-testid="acetylene-line-label"
         >
           H–C≡C–H 共线
         </span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -193,14 +195,14 @@ function AngleOverlay() {
         radius={0.006}
         start={[0.08, 0.28, 0]}
       />
-      <Html center distanceFactor={6.2} pointerEvents="none" position={[-0.36, 0.56, 0.22]}>
+      <TeachingHtml position={[-0.36, 0.56, 0.22]} distanceFactor={6.2}>
         <span
           className={teachingAccentLabelClass}
           data-testid="acetylene-angle-label"
         >
           180°
         </span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -265,14 +267,14 @@ function TripleBondOverlay() {
         radius={0.016}
         start={[-0.72, 0, 0]}
       />
-      <Html center distanceFactor={6.6} pointerEvents="none" position={[0, -0.52, 0.42]}>
+      <TeachingHtml position={[0, -0.52, 0.42]} distanceFactor={6.6}>
         <span
           className={teachingSceneLabelClass}
           data-testid="acetylene-triple-label"
         >
           1σ + 2π
         </span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }

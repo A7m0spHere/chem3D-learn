@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useMemo, useState } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { Button } from "@/components/ui/button";
 import { CameraRig } from "@/components/three/CameraRig";
 import { SceneLighting } from "@/components/three/SceneLighting";
@@ -313,11 +315,11 @@ function CrystalAtom({
         </mesh>
       ) : null}
       {showLabel || forceLabel ? (
-        <Html center distanceFactor={7.1} pointerEvents="none" position={labelPosition}>
+        <TeachingHtml position={labelPosition} distanceFactor={7.1}>
           <span className={forceLabel ? htmlOverlayLabelClass : htmlOverlayCompactLabelClass}>
             {labelText}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
@@ -350,16 +352,16 @@ function BaCoordinationCluster({ showLabels }: { showLabels: boolean }) {
               <meshStandardMaterial color="#DC2626" opacity={0.82} roughness={0.28} transparent />
             </mesh>
             {showLabels && index === 11 ? (
-              <Html center distanceFactor={7.2} pointerEvents="none" position={[0, 0.16, 0]}>
+              <TeachingHtml position={[0, 0.16, 0]} distanceFactor={7.2}>
                 <span className={htmlOverlayAmberCompactLabelClass}>O²⁻ · 周期延展</span>
-              </Html>
+              </TeachingHtml>
             ) : null}
           </group>
         </group>
       ))}
-      <Html center distanceFactor={7.1} pointerEvents="none" position={[0.42, -0.58, 0.42]}>
+      <TeachingHtml position={[0.42, -0.58, 0.42]} distanceFactor={7.1}>
         <span className={htmlOverlayAmberCompactLabelClass}>12 个最近邻 O²⁻</span>
-      </Html>
+      </TeachingHtml>
     </group>
   );
 }
@@ -382,11 +384,11 @@ function OriginShiftGuide({ shifted }: { shifted: boolean }) {
         <sphereGeometry args={[0.025, 20, 20]} />
         <meshBasicMaterial color="#F4A261" />
       </mesh>
-      <Html center distanceFactor={7.2} pointerEvents="none" position={[0.42, -0.56, 0.18]}>
+      <TeachingHtml position={[0.42, -0.56, 0.18]} distanceFactor={7.2}>
         <span className={htmlOverlayAmberCompactLabelClass}>
           {shifted ? "新原点：Ti⁴⁺ 顶点" : "原点平移 (½, ½, ½)"}
         </span>
-      </Html>
+      </TeachingHtml>
     </group>
   );
 }

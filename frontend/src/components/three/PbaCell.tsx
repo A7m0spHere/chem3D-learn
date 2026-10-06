@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
@@ -261,11 +263,11 @@ function PbaAtom({ atom, viewMode, voidStage, showLabel }: PbaAtomProps) {
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={6.8} pointerEvents="none" position={[0, radius + 0.08, 0]}>
+        <TeachingHtml position={[0, radius + 0.08, 0]} distanceFactor={6.8}>
           <span className={isGuest ? htmlOverlayAmberLabelClass : htmlOverlayLabelClass}>
             {labelText}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
@@ -361,9 +363,9 @@ function FrameworkComparisonGuide() {
         <sphereGeometry args={[0.17, 32, 32]} />
         <meshBasicMaterial color="#F4A261" opacity={0.08} transparent />
       </mesh>
-      <Html center distanceFactor={7.4} pointerEvents="none" position={[0, -0.78, 0]}>
+      <TeachingHtml position={[0, -0.78, 0]} distanceFactor={7.4}>
         <span className={htmlOverlaySubtleWideLabelClass}>节点-桥-节点</span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }

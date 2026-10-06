@@ -1,5 +1,7 @@
-import { Html, Line } from "@react-three/drei";
+import { Line } from "@react-three/drei";
 import { useMemo } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { AtomPullHandle } from "@/components/three/AtomPullHandle";
 import { htmlOverlayLabelClass } from "@/components/three/htmlOverlayStyles";
 import type { Atom } from "@/types/molecule";
@@ -66,11 +68,11 @@ export function AtomMesh({
             points={[[0, radius * 0.86, 0], [0, radius + 0.24, 0]]}
             transparent
           />
-          <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.34, 0]}>
+          <TeachingHtml position={[0, radius + 0.34, 0]} distanceFactor={7}>
           <span className={htmlOverlayLabelClass}>
             {atom.label}
           </span>
-          </Html>
+          </TeachingHtml>
         </>
       ) : null}
       {onPullIntent && !isPulling ? (

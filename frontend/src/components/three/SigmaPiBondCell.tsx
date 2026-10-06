@@ -2,6 +2,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { useRef } from "react";
 import { type Group } from "three";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { CameraRig } from "@/components/three/CameraRig";
 import {
   AxisTriad,
@@ -288,14 +290,14 @@ function BondAxis({ showLabel }: { showLabel: boolean }) {
 
 function SceneLabel({ position, text, color }: { position: Vec3; text: string; color: string }) {
   return (
-    <Html center distanceFactor={4.5} pointerEvents="none" position={position}>
+    <TeachingHtml position={position} distanceFactor={4.5}>
       <span
         className={teachingSceneLabelClass}
         style={{ color }}
       >
         {text}
       </span>
-    </Html>
+    </TeachingHtml>
   );
 }
 

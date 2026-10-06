@@ -1,7 +1,9 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { type ReactNode, useMemo, useRef } from "react";
 import { Group, Vector3 } from "three";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { htmlOverlayCompactLabelClass } from "@/components/three/htmlOverlayStyles";
@@ -301,11 +303,11 @@ function LayeredHexAtom({ atom, focusState, layer, viewMode, showLabel }: Layere
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.08, 0]}>
+        <TeachingHtml position={[0, radius + 0.08, 0]} distanceFactor={7.2}>
           <span className={htmlOverlayCompactLabelClass}>
             {labelText}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );

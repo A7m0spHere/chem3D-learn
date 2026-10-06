@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import {
@@ -299,11 +301,11 @@ function CarbonAtom({ atom, viewMode, voidStage, showLabel, useCompactLabelSet }
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={useCompactLabelSet ? 7.4 : 6.8} pointerEvents="none" position={[0, radius + 0.08, 0]}>
+        <TeachingHtml position={[0, radius + 0.08, 0]} distanceFactor={useCompactLabelSet ? 7.4 : 6.8}>
           <span className={htmlOverlayCompactLabelClass}>
             {labelText}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
@@ -468,11 +470,11 @@ function TetrahedralVoidMarker({ site, stage, showLabel }: TetrahedralVoidMarker
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={7.2} pointerEvents="none" position={[0, radius + 0.08, 0]}>
+        <TeachingHtml position={[0, radius + 0.08, 0]} distanceFactor={7.2}>
           <span className={htmlOverlayAmberCompactLabelClass}>
             {site.label}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );

@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, Line, OrbitControls } from "@react-three/drei";
+import { Line, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { AngleArc } from "@/components/three/AngleArc";
@@ -269,14 +271,14 @@ function DiagonalOverlay() {
         radius={0.014}
         start={benzeneAtoms.find((atom) => atom.id === "h4")!.position}
       />
-      <Html center distanceFactor={6.4} pointerEvents="none" position={[0, -0.22, 0.34]}>
+      <TeachingHtml position={[0, -0.22, 0.34]} distanceFactor={6.4}>
         <span
           className={teachingAccentLabelClass}
           data-testid="benzene-diagonal-label"
         >
           H–C–C–H 共线
         </span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }
@@ -308,14 +310,14 @@ function PiBondOverlay() {
         ))}
       <PiCloud center={[0, 0, 0.52]} />
       <PiCloud center={[0, 0, -0.52]} />
-      <Html center distanceFactor={7.8} pointerEvents="none" position={[0.92, 0.72, 0.78]}>
+      <TeachingHtml position={[0.92, 0.72, 0.78]} distanceFactor={7.8}>
         <span
           className={teachingCloudLabelClass}
           data-testid="benzene-pi-label"
         >
           大 π 电子云
         </span>
-      </Html>
+      </TeachingHtml>
     </>
   );
 }

@@ -1,5 +1,7 @@
-import { Html } from "@react-three/drei";
+
 import { Vector3 } from "three";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { htmlOverlayLonePairLabelClass } from "@/components/three/htmlOverlayStyles";
 import { LonePairOrbital } from "@/components/three/OrbitalPrimitives";
 import type { Atom, LonePair } from "@/types/molecule";
@@ -30,9 +32,9 @@ export function LonePairMesh({ atomsById, lonePair, showLabel = true }: LonePair
         width={0.19}
       />
       {showLabel && lonePair.label ? (
-        <Html center distanceFactor={7} pointerEvents="none" position={labelPosition}>
+        <TeachingHtml position={labelPosition} distanceFactor={7}>
           <span className={htmlOverlayLonePairLabelClass}>{lonePair.label}</span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );

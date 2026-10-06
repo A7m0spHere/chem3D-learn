@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Quaternion, Vector3 } from "three";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { CameraRig } from "@/components/three/CameraRig";
@@ -244,14 +246,14 @@ function ReferencePlane() {
 
 function SceneLabel({ position, text, color }: { position: Vec3; text: string; color: string }) {
   return (
-    <Html center distanceFactor={6.5} pointerEvents="none" position={position}>
+    <TeachingHtml position={position} distanceFactor={6.5}>
       <span
         className={teachingSceneLabelClass}
         style={{ color }}
       >
         {text}
       </span>
-    </Html>
+    </TeachingHtml>
   );
 }
 

@@ -2,6 +2,8 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber"
 import { Html, Line, OrbitControls } from "@react-three/drei";
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { Plane, Quaternion, Vector3, type Group } from "three";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { AngleArc } from "@/components/three/AngleArc";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -373,12 +375,12 @@ export function OrganicBuilderCanvas({
         ) : null}
 
         {molecule.atoms.length === 0 ? (
-          <Html center pointerEvents="none" position={[0, 0, 0]}>
+          <TeachingHtml position={[0, 0, 0]}>
             <div className="w-64 rounded-2xl border border-border bg-white/90 px-5 py-4 text-center shadow-panel">
               <div className="font-semibold text-text-primary">这里还是空的</div>
               <div className="mt-1 text-sm text-text-secondary">打开模型盒，选择一个原子或常用片段开始拼装。</div>
             </div>
-          </Html>
+          </TeachingHtml>
         ) : null}
 
         <OrbitControls
@@ -535,11 +537,11 @@ function BuilderAtomMesh({
           roughness={0.34}
         />
       </mesh>
-      <Html center distanceFactor={7} pointerEvents="none" position={[0, radius + 0.22, 0]}>
+      <TeachingHtml position={[0, radius + 0.22, 0]} distanceFactor={7}>
         <span className="rounded-md border border-border bg-white/90 px-1.5 py-0.5 text-xs font-bold text-text-primary shadow-sm">
           {atom.label ?? atom.element}
         </span>
-      </Html>
+      </TeachingHtml>
       <BuilderAtomDragHandle
         atom={atom}
         onDragEnd={onDomDragEnd}

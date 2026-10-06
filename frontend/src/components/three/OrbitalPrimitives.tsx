@@ -7,6 +7,8 @@ import {
   Quaternion,
   Vector3,
 } from "three";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { useClampedHtmlPosition } from "@/components/three/useClampedHtmlPosition";
 import { useDisposable } from "@/components/three/useDisposable";
 
@@ -830,14 +832,14 @@ export function AxisTriad({
                 position={scale(axis.end, 1.05)}
               />
             ) : (
-              <Html center distanceFactor={6.8} pointerEvents="none" position={scale(axis.end, 1.05)}>
+              <TeachingHtml position={scale(axis.end, 1.05)} distanceFactor={6.8}>
                 <span
                   className="rounded-full bg-white/85 px-2 py-0.5 text-[11px] font-bold shadow-sm"
                   style={{ color: axisColors[axis.key] }}
                 >
                   {axis.label}
                 </span>
-              </Html>
+              </TeachingHtml>
             )
           ) : null}
         </group>

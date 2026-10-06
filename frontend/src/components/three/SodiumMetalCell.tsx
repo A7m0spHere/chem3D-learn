@@ -1,6 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { TeachingHtml } from "@/components/three/TeachingHtml";
+
 import { StickCylinder } from "@/components/three/StickCylinder";
 import { SceneLighting } from "@/components/three/SceneLighting";
 import { htmlOverlayLabelClass } from "@/components/three/htmlOverlayStyles";
@@ -212,11 +214,11 @@ function SodiumAtom({ atom, viewMode, showLabel }: SodiumAtomProps) {
         </mesh>
       ) : null}
       {shouldShowLabel ? (
-        <Html center distanceFactor={6.8} pointerEvents="none" position={[0, radius + 0.08, 0]}>
+        <TeachingHtml position={[0, radius + 0.08, 0]} distanceFactor={6.8}>
           <span className={htmlOverlayLabelClass}>
             {labelText}
           </span>
-        </Html>
+        </TeachingHtml>
       ) : null}
     </group>
   );
