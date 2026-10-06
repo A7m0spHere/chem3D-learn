@@ -73,6 +73,8 @@ export function VoidStructureCell({
           ambient={0.72}
           cameraFov={42}
           cameraPosition={[2.8, 2.4, 3.2]}
+          maxDistance={6}
+          minDistance={1.7}
           molecule={molecule}
           secondaryIntensity={0.42}
         >
