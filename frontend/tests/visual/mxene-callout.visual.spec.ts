@@ -50,6 +50,26 @@ async function offsetFromStageCenter(stage: Locator, label: Locator) {
   };
 }
 
+// T-041-D（2026-10-06）：原 `waitForTimeout(1000)` 固定等待改为事件驱动——
+// 标签 boundingBox 受 CJK 字体度量影响（T-040 勘误），等 fonts.ready +
+// 页面进入动画结束（与 hybrid-scene-labels 等 3 处守卫同款，CI 已验证）。
+async function settle(page: Page) {
+  await page.evaluate(() => document.fonts.ready);
+  await page
+    .waitForSelector(".motion-page-enter", { state: "attached", timeout: 10_000 })
+    .catch(() => undefined);
+  await page.evaluate(async () => {
+    const pageEnter = document.querySelector(".motion-page-enter");
+    if (!pageEnter) return;
+    await Promise.all(
+      pageEnter
+        .getAnimations()
+        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+        .map((animation) => animation.finished.catch(() => {})),
+    );
+  });
+}
+
 for (const { mode, labels } of MODE_LABELS) {
   test(`MXene「${mode}」的引线标签仍可见且偏离结构中心`, async ({ page }) => {
     test.setTimeout(60_000);
@@ -59,12 +79,7 @@ for (const { mode, labels } of MODE_LABELS) {
     await expect(stage).toBeVisible();
 
     await switchMode(page, mode);
-
-    // 标签是 HTML overlay，boundingBox 受 CJK 字体度量影响（T-040 勘误：
-    // 「重新堆叠」用的是静态 offsets，此处并没有补间动画）。仍用固定等待而
-    // 非 fonts.ready，是因为无法在 Windows 复现 CI 时序；改为事件驱动前
-    // 需先在 CI 上验证，见 TASKS.md T-041。
-    await page.waitForTimeout(1000);
+    await settle(page);
 
     for (const text of labels) {
       const label = stage.getByText(text, { exact: true });
