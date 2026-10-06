@@ -47,10 +47,18 @@
 - 体检第三梯队第二批：three chunk 函数式 manualChunks 隔离 + CI 体积守卫、ModuleDetailPage registry 表格化、ChemCanvas wrapper、11 条路由基线补齐、tsconfig 强化。
 - T-041-C：`metadata.notesZh` 无消费者（待维护者决策短字段 vs 折叠渲染）。
 - video 采集管线修复 + 素材重采 → rc.2 → T-031 反馈重启；backend 冻结决策。
-- 本机 `ui-review-20260830/` 目录未跟踪未删除（维护者本地产物，`.mimosa/` 已加 .gitignore）。
+- 本机 `ui-review-20260830/`（8-30 的 UI 评审截图，1.1MB，其中问题均已修复）待维护者决定去留；`.mimosa/` 已加 .gitignore。
 
 ## 下一步建议
 
 1. 体检第三梯队第二批，优先 **three chunk 函数式 manualChunks 隔离 + CI 体积守卫（S）**——守住 mock 退役后的加载成果。
 2. T-041-C 决策后接入 notesZh。
 3. video 管线修复 → rc.2 发布 → T-031 反馈重启。
+
+## 附：分支清理记录（2026-10-06）
+
+- 上次整理（2026-09-30，commit `90fbdea`）保留的 2 个未合并分支已**确认废弃并删除**：
+  - `codex/motion-performance-audit`（tip `6c7737d2ee9281a95166409b67877cb6c8a99e1b`）——其改动 4 个文件中 3 个（ChemistryCursor / FloatingChemistryBackground / MoleculeBackground）已被死代码清理（`ffa379b`）删除，剩余 ScrollReveal 微调属弃案；`git cherry` 确认从未进 main。
+  - `codex/t039a-3d-first`（tip `80dd25227bacf9702c59a604cb01849ddfcaeffc`）——T-039A 最终版经 PR #2（`5f3606a`）以另一形态合并，本分支是被取代的旧迭代，且含与现状相悖的「移除 Claude 协作入口」提交。
+- 恢复锚点：上述两个 tip SHA 可用于 `git fetch origin pull/<n>/head` 或从 GitHub 事件日志找回；main 历史未重写。
+- 远端现状：仅 `main` + GitHub 自动保留的 `refs/pull/*` PR 存档；本地仅 `main`；无 stash。
