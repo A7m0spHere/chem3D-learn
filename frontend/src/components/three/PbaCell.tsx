@@ -1,11 +1,10 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { CrystalSceneCanvas } from "@/components/three/CrystalSceneCanvas";
+import { unitCellEdges } from "@/components/three/crystalEdges";
 import { TeachingHtml } from "@/components/three/TeachingHtml";
 
 import { CalloutLabel } from "@/components/three/CalloutLabel";
 import { StickCylinder } from "@/components/three/StickCylinder";
-import { SceneLighting } from "@/components/three/SceneLighting";
 import {
   htmlOverlayAmberLabelClass,
   htmlOverlayLabelClass,
@@ -31,20 +30,7 @@ type PbaCellProps = {
   loading?: boolean;
 };
 
-const cellEdges: Array<[[number, number, number], [number, number, number]]> = [
-  [[-0.68, -0.68, -0.68], [0.68, -0.68, -0.68]],
-  [[-0.68, -0.68, 0.68], [0.68, -0.68, 0.68]],
-  [[-0.68, 0.68, -0.68], [0.68, 0.68, -0.68]],
-  [[-0.68, 0.68, 0.68], [0.68, 0.68, 0.68]],
-  [[-0.68, -0.68, -0.68], [-0.68, 0.68, -0.68]],
-  [[0.68, -0.68, -0.68], [0.68, 0.68, -0.68]],
-  [[-0.68, -0.68, 0.68], [-0.68, 0.68, 0.68]],
-  [[0.68, -0.68, 0.68], [0.68, 0.68, 0.68]],
-  [[-0.68, -0.68, -0.68], [-0.68, -0.68, 0.68]],
-  [[0.68, -0.68, -0.68], [0.68, -0.68, 0.68]],
-  [[-0.68, 0.68, -0.68], [-0.68, 0.68, 0.68]],
-  [[0.68, 0.68, -0.68], [0.68, 0.68, 0.68]],
-];
+const cellEdges = unitCellEdges(0.68);
 
 const octahedronEdges: Array<[[number, number, number], [number, number, number]]> = [
   [[0.6, 0, 0], [0, 0.6, 0]],
@@ -77,8 +63,6 @@ export function PbaCell({
   );
   const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const activeStage = molecule.crystalControls?.voidStages?.find((stage) => stage.id === voidStage);
-  const cameraPosition = molecule.rendering?.cameraPosition ?? [2.55, 2.15, 2.85];
-  const cameraFov = molecule.rendering?.cameraFov ?? 38;
   const isVoidMode = viewMode === "voids";
   const displayTitle = isVoidMode && activeStage
     ? `${activeMode?.labelZh ?? "空位水合"}｜${activeStage.labelZh}`
@@ -94,8 +78,13 @@ export function PbaCell({
       title={`PBA｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-      <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
-        <SceneLighting ambient={0.7} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.4} secondaryPosition={[-3, 2, -4]} />
+      <CrystalSceneCanvas
+        ambient={0.7}
+        cameraFov={38}
+        cameraPosition={[2.55, 2.15, 2.85]}
+        molecule={molecule}
+        secondaryIntensity={0.4}
+      >
         <group position={[0, -0.03, 0]} rotation={[0.18, -0.48, 0]} scale={1.88}>
           <CellFrame isMuted={viewMode === "voids" || viewMode === "comparison"} />
           {viewMode === "coordination" ? <OctahedralGuide /> : null}
@@ -131,14 +120,7 @@ export function PbaCell({
           {isVoidMode && voidStage !== "framework" ? <VacancyMarker voidStage={voidStage} /> : null}
           {isVoidMode && voidStage === "filled" ? <WaterHydrationGuides atomsById={atomsById} /> : null}
         </group>
-        <OrbitControls
-          enableDamping
-          enablePan={false}
-          maxDistance={6}
-          minDistance={1.8}
-          target={[0, 0, 0]}
-        />
-      </Canvas>
+      </CrystalSceneCanvas>
     </ThreeViewerFrame>
   );
 }

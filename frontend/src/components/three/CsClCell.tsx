@@ -1,10 +1,9 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { CrystalSceneCanvas } from "@/components/three/CrystalSceneCanvas";
+import { unitCellEdges } from "@/components/three/crystalEdges";
 import { TeachingHtml } from "@/components/three/TeachingHtml";
 
 import { StickCylinder } from "@/components/three/StickCylinder";
-import { SceneLighting } from "@/components/three/SceneLighting";
 import { htmlOverlayLabelClass } from "@/components/three/htmlOverlayStyles";
 import { ThreeViewerFrame } from "@/components/three/ThreeViewerFrame";
 import { CrystalAtomLegend } from "@/components/three/CrystalAtomLegend";
@@ -30,20 +29,7 @@ const siteLabels: Partial<Record<CrystalSiteType, string>> = {
   "body-center": "体心",
 };
 
-const cellEdges: Array<[[number, number, number], [number, number, number]]> = [
-  [[-0.5, -0.5, -0.5], [0.5, -0.5, -0.5]],
-  [[-0.5, -0.5, 0.5], [0.5, -0.5, 0.5]],
-  [[-0.5, 0.5, -0.5], [0.5, 0.5, -0.5]],
-  [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]],
-  [[-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5]],
-  [[0.5, -0.5, -0.5], [0.5, 0.5, -0.5]],
-  [[-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5]],
-  [[0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
-  [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5]],
-  [[0.5, -0.5, -0.5], [0.5, -0.5, 0.5]],
-  [[-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5]],
-  [[0.5, 0.5, -0.5], [0.5, 0.5, 0.5]],
-];
+const cellEdges = unitCellEdges(0.5);
 
 export function CsClCell({
   molecule,
@@ -56,8 +42,6 @@ export function CsClCell({
     () => new Map(molecule.atoms.map((atom) => [atom.id, atom])),
     [molecule.atoms],
   );
-  const cameraPosition = molecule.rendering?.cameraPosition ?? [2.9, 2.35, 3.35];
-  const cameraFov = molecule.rendering?.cameraFov ?? 42;
   const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const showStrongCoordination = viewMode === "coordination";
   const showMutedCoordination = viewMode === "comparison";
@@ -72,8 +56,13 @@ export function CsClCell({
       title={`${molecule.formula}｜${activeMode?.labelZh ?? "晶胞结构"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
-          <SceneLighting ambient={0.68} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.38} secondaryPosition={[-3, 2, -4]} />
+        <CrystalSceneCanvas
+          ambient={0.68}
+          cameraFov={42}
+          cameraPosition={[2.9, 2.35, 3.35]}
+          molecule={molecule}
+          secondaryIntensity={0.38}
+        >
           <group position={[0, -0.05, 0]} rotation={[0.18, -0.48, 0]} scale={1.75}>
             <CellFrame isMuted={viewMode === "counting"} />
             {(showStrongCoordination || showMutedCoordination)
@@ -97,14 +86,7 @@ export function CsClCell({
               />
             ))}
           </group>
-          <OrbitControls
-            enableDamping
-            enablePan={false}
-            maxDistance={6}
-            minDistance={1.8}
-            target={[0, 0, 0]}
-          />
-        </Canvas>
+        </CrystalSceneCanvas>
     </ThreeViewerFrame>
   );
 }

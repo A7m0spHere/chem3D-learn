@@ -1,10 +1,9 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
 import { TeachingHtml } from "@/components/three/TeachingHtml";
 
 import { StickCylinder } from "@/components/three/StickCylinder";
-import { SceneLighting } from "@/components/three/SceneLighting";
+import { CrystalSceneCanvas } from "@/components/three/CrystalSceneCanvas";
+import { unitCellEdges } from "@/components/three/crystalEdges";
 import {
   htmlOverlayAmberCompactLabelClass,
   htmlOverlayCompactLabelClass,
@@ -34,20 +33,7 @@ const siteLabels: Partial<Record<CrystalSiteType, string>> = {
   "face-center": "面心",
 };
 
-const cellEdges: Array<[[number, number, number], [number, number, number]]> = [
-  [[-0.5, -0.5, -0.5], [0.5, -0.5, -0.5]],
-  [[-0.5, -0.5, 0.5], [0.5, -0.5, 0.5]],
-  [[-0.5, 0.5, -0.5], [0.5, 0.5, -0.5]],
-  [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]],
-  [[-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5]],
-  [[0.5, -0.5, -0.5], [0.5, 0.5, -0.5]],
-  [[-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5]],
-  [[0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
-  [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5]],
-  [[0.5, -0.5, -0.5], [0.5, -0.5, 0.5]],
-  [[-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5]],
-  [[0.5, 0.5, -0.5], [0.5, 0.5, 0.5]],
-];
+const cellEdges = unitCellEdges(0.5);
 
 // Ca²⁺ 8 配位焦点：面心 ca-face-z-pos，本晶胞内 4 个 F⁻ + 相邻晶胞 4 个虚影 F⁻
 const caCoordinationFocusAtomIds = new Set(["ca-face-z-pos", "f-1", "f-3", "f-5", "f-7"]);
@@ -110,8 +96,6 @@ export function CaF2Cell({
   showLabels,
   loading = false,
 }: CaF2CellProps) {
-  const cameraPosition = molecule.rendering?.cameraPosition ?? [2.95, 2.35, 3.45];
-  const cameraFov = molecule.rendering?.cameraFov ?? 42;
   const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const activeStage = molecule.crystalControls?.voidStages?.find((stage) => stage.id === voidStage);
   const useCompactLabels = useCompactCrystalLabels();
@@ -151,8 +135,13 @@ export function CaF2Cell({
       title={`${molecule.formula}｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-      <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
-        <SceneLighting ambient={0.72} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
+      <CrystalSceneCanvas
+        ambient={0.72}
+        cameraFov={42}
+        cameraPosition={[2.95, 2.35, 3.45]}
+        molecule={molecule}
+        secondaryIntensity={0.42}
+      >
         {/* 1.78 只用于课堂可见性，不代表 5.463 Å 的物理晶格常数。 */}
         <group position={[0, -0.04, 0]} rotation={[0.2, -0.5, 0]} scale={1.78}>
           <CellFrame isMuted={viewMode === "counting" || viewMode === "comparison" || isVoidMode} />
@@ -199,14 +188,7 @@ export function CaF2Cell({
             />
           ))}
         </group>
-        <OrbitControls
-          enableDamping
-          enablePan={false}
-          maxDistance={6}
-          minDistance={1.8}
-          target={[0, 0, 0]}
-        />
-      </Canvas>
+      </CrystalSceneCanvas>
     </ThreeViewerFrame>
   );
 }

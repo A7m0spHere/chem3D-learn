@@ -1,10 +1,9 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
+import { CrystalSceneCanvas } from "@/components/three/CrystalSceneCanvas";
+import { unitCellEdges } from "@/components/three/crystalEdges";
 import { TeachingHtml } from "@/components/three/TeachingHtml";
 
 import { StickCylinder } from "@/components/three/StickCylinder";
-import { SceneLighting } from "@/components/three/SceneLighting";
 import {
   htmlOverlayAmberCompactLabelClass,
   htmlOverlayCompactLabelClass,
@@ -34,20 +33,7 @@ const siteLabels: Partial<Record<CrystalSiteType, string>> = {
   "face-center": "面心",
 };
 
-const cellEdges: Array<[[number, number, number], [number, number, number]]> = [
-  [[-0.5, -0.5, -0.5], [0.5, -0.5, -0.5]],
-  [[-0.5, -0.5, 0.5], [0.5, -0.5, 0.5]],
-  [[-0.5, 0.5, -0.5], [0.5, 0.5, -0.5]],
-  [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]],
-  [[-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5]],
-  [[0.5, -0.5, -0.5], [0.5, 0.5, -0.5]],
-  [[-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5]],
-  [[0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
-  [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5]],
-  [[0.5, -0.5, -0.5], [0.5, -0.5, 0.5]],
-  [[-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5]],
-  [[0.5, 0.5, -0.5], [0.5, 0.5, 0.5]],
-];
+const cellEdges = unitCellEdges(0.5);
 
 const coordinationFocusAtomIds = new Set([
   "c-inner-1",
@@ -102,8 +88,6 @@ export function DiamondCell({
     () => new Map(molecule.atoms.map((atom) => [atom.id, atom])),
     [molecule.atoms],
   );
-  const cameraPosition = molecule.rendering?.cameraPosition ?? [2.95, 2.35, 3.45];
-  const cameraFov = molecule.rendering?.cameraFov ?? 42;
   const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const activeStage = molecule.crystalControls?.voidStages?.find((stage) => stage.id === voidStage);
   const useCompactLabels = useCompactCrystalLabels();
@@ -127,8 +111,13 @@ export function DiamondCell({
       title={`${molecule.formula}｜${displayTitle}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
-          <SceneLighting ambient={0.72} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
+        <CrystalSceneCanvas
+          ambient={0.72}
+          cameraFov={42}
+          cameraPosition={[2.95, 2.35, 3.45]}
+          molecule={molecule}
+          secondaryIntensity={0.42}
+        >
           <group position={[0, -0.04, 0]} rotation={[0.2, -0.5, 0]} scale={1.78}>
             <CellFrame isMuted={viewMode === "counting" || viewMode === "comparison" || isVoidMode} />
             {visibleBonds.map((bond) => (
@@ -161,14 +150,7 @@ export function DiamondCell({
               />
             ))}
           </group>
-          <OrbitControls
-            enableDamping
-            enablePan={false}
-            maxDistance={6}
-            minDistance={1.8}
-            target={[0, 0, 0]}
-          />
-        </Canvas>
+        </CrystalSceneCanvas>
     </ThreeViewerFrame>
   );
 }

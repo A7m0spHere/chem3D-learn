@@ -1,10 +1,8 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
+import { CrystalSceneCanvas } from "@/components/three/CrystalSceneCanvas";
 import { TeachingHtml } from "@/components/three/TeachingHtml";
 
 import { StickCylinder } from "@/components/three/StickCylinder";
-import { SceneLighting } from "@/components/three/SceneLighting";
 import {
   htmlOverlayAmberStrongLabelClass,
   htmlOverlayLabelClass,
@@ -41,8 +39,6 @@ export function VoidStructureCell({
     () => new Map(molecule.atoms.map((atom) => [atom.id, atom])),
     [molecule.atoms],
   );
-  const cameraPosition = molecule.rendering?.cameraPosition ?? [2.8, 2.4, 3.2];
-  const cameraFov = molecule.rendering?.cameraFov ?? 42;
   const activeMode = molecule.crystalControls?.viewModes.find((mode) => mode.id === viewMode);
   const isVoidMode = viewMode === "voids";
   const showCenterMarker = isVoidMode
@@ -73,8 +69,13 @@ export function VoidStructureCell({
       title={`${molecule.nameZh}｜${activeMode?.labelZh ?? "空间骨架"}`}
       viewerTestId={`${molecule.id}-viewer`}
     >
-        <Canvas camera={{ position: cameraPosition, fov: cameraFov }} frameloop="demand" style={{ height: "100%", width: "100%" }}>
-          <SceneLighting ambient={0.72} mainIntensity={1.35} mainPosition={[4, 5, 4]} secondaryIntensity={0.42} secondaryPosition={[-3, 2, -4]} />
+        <CrystalSceneCanvas
+          ambient={0.72}
+          cameraFov={42}
+          cameraPosition={[2.8, 2.4, 3.2]}
+          molecule={molecule}
+          secondaryIntensity={0.42}
+        >
           <group position={[0, -0.03, 0]} rotation={[0.24, -0.48, 0]} scale={groupScale}>
             {molecule.bonds.map((bond) => (
               <OutlineEdge
@@ -116,14 +117,7 @@ export function VoidStructureCell({
               );
             })}
           </group>
-          <OrbitControls
-            enableDamping
-            enablePan={false}
-            maxDistance={6}
-            minDistance={1.7}
-            target={[0, 0, 0]}
-          />
-        </Canvas>
+        </CrystalSceneCanvas>
     </ThreeViewerFrame>
   );
 }
