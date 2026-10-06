@@ -1,21 +1,21 @@
 # PROJECT_STATUS.md
 
 > 项目当前状态快照。供 Codex 每次开工前快速了解全局。
-> 最后更新：2026-09-30（T-042 引线标签防遮挡合并，PR #10；T-043 Phase 1 全量审计完成并落档台账，PR #11；全库文档整理）
-> 上一次实质进展更新：2026-08-30（T-040 收口关闭 + T-041-A 质量门禁落地，PR #7）；更早的进度文档整理记录亦见本文件
+> 最后更新：2026-10-06（批次 B + 批次 C：T-043 遗留缺陷④修复闭环、T-041-B/D 收口、D-053 基线收口决策、C-1 TeachingHtml、C-2 晶体样板合并）
+> 上一次实质进展更新：2026-09-30（T-042 引线标签防遮挡合并，PR #10；T-043 Phase 1 全量审计完成并落档台账，PR #11；全库文档整理）
 
 ## 一句话定位
 
 Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学教师课堂演示的前端优先 3D 结构化学学习网站。详见 `docs/PROJECT_BRIEF.md`。
 
-## 当前阶段（2026-09-30 快照）
+## 当前阶段（2026-10-06 快照）
 
-- **版本**：`v0.1.0-rc.1` prerelease 已发布并部署 GitHub Pages（2026-07-29），此后未发新版本。
+- **版本**：`v0.1.0-rc.1` prerelease 已发布并部署 GitHub Pages（2026-07-29），此后未发新版本；`v0.1.0-rc.2` 的前置是 video 采集管线修复 + 素材重采。
 - **产品形态**：全站完成 T-039 的 3D-first 收缩——普通分子为大 Viewer + 右侧控制栏 + 折叠结构信息；专题使用精简 Inspector；晶体统一全宽 Viewer → 模式工具栏 → 折叠「晶体信息」；拼装实验室为实时摘要 + 默认折叠诊断。
-- **任务面**：T-040「视觉基线迁移至 ubuntu CI」（2026-08-30 收口，PR #4）与 T-041-A 质量门禁（PR #7）已落地；**T-042「3D 引线标签防遮挡」已于 2026-09-30 合并（PR #10）**——`useClampedHtmlPosition` 边界钳制 + 碰撞分离接入 CalloutLabel 32 处与极性 TinyDipoleLabel 7 处，评审修复自反馈振荡 P1（见 D-050 评审更正）；**T-043 Phase 1 全量审计已完成（PR #11，台账 `docs/LABEL_AUDIT_20260930.md`）**——确认 3 项预存缺陷（杂化 fullscreen 场景标签全视口叠印、Ren₃ 注释层被图例完全遮盖、极性 F/B 原子标签互叠）。**当前最重要任务：T-043 Phase 2 逐体系修复**（按台账第 5 节排序）。T-041 B/C/D 同见 TASKS.md。
+- **任务面**：**T-043 标签体系审计与修复已全部闭环**——Phase 1 审计（台账 `LABEL_AUDIT_20260930.md`）、Phase 2 三缺陷修复、遗留缺陷④「标签×信息卡」（Y/Z 轴标签与徽章在全部视口被信息卡遮盖 22-100%）已于 2026-10-06 以 `useStaticHtmlObstacle` 障碍物避让修复并加守卫。**T-041-B/D 已完成**（移动端画布 340px 下限 + mxene 测试事件驱动）。**D-053**：基线收口以 verify 结果为准，零差异即关闭 rebuild 前置。**体检第三梯队第一批完成**（C-1 TeachingHtml 收敛 69 处 Html 样板、C-2 晶体 Canvas/棱线样板合并 6 页）。当前最重要任务：**体检第三梯队第二批**（three chunk 体积守卫优先）。
 - **两项决策已定**（2026-08-27 维护者确认）：
-  1. 过期 Darwin 快照 → 迁移到可复现 ubuntu CI（`visual-regression` workflow 的 rebuild 模式生成 `-linux.png` 基线并开评审 PR），见 T-040（已收口）；
-  2. T-031 真实用户反馈 → 待 `v0.1.0-rc.2` 发布后重启，rc.2 前置为 T-040 完成（已满足）。
+  1. 过期 Darwin 快照 → 迁移到可复现 ubuntu CI（已收口，T-040）；
+  2. T-031 真实用户反馈 → 待 `v0.1.0-rc.2` 发布后重启。
 
 ## 技术栈（已核实）
 
@@ -30,7 +30,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 - 23 个手写结构 JSON 位于 `frontend/src/data/manual/` 并全部注册；17 份晶体记录使用最小 `crystalControls` + `CrystalInfo`，无生产消费者 `crystalTeaching`。
 - `organicBuilderNomenclature.ts` 为 1959 行；`knownOrganicMolecules` 当前为 **16** 个（甲烷、乙烷、乙烯、乙炔、丙烷、丙烯、丙炔、甲醇、乙醇、甲醛、乙醛、甲酸、乙酸、二甲醚、甲胺、乙胺）。新增或删除条目时必须同步 T-001 表驱动测试的中文名期望表。
 - `ModuleDetailPage.tsx` 的专题控制状态由 `useCrystalControls` / `useOrganicPlanarControls` / `useBondingControls` 三个 typed hook 管理，通过 `deriveViewerKind` / `viewerRegistry` 统一分发 viewer、toolbar、panel。
-- 测试基线：logic **163 / 163**（2026-09-30 于 Windows 复跑通过）、ESLint 零警告、`tsc --noEmit` 通过；视觉基线两套——Linux **78 张** `*-linux.png` 为现行基线（CI 维护，verify 最新全量 **169 / 169** 全绿，run `36671342932`；紧容差断言已全量配套稳定等待），darwin 78 张为历史遗留待清理；backend 最近记录 22 / 22。
+- 测试基线：logic **163 / 163**、ESLint 零警告、`tsc --noEmit` 通过（2026-10-06 于 Windows 复跑）；visual 全套（chrome 通道 `--ignore-snapshots`）**177 / 177**；Linux 基线 78 张由 CI 维护，2026-10-06 verify 全绿（run `37458457980` / `37459897092`）；darwin 78 张为历史遗留待清理；backend 最近记录 22 / 22。
 - 后端提供 `/health`、`/api/molecules`、`/api/molecules/:id` 及 `/api/structures` 别名；前端当前没有调用后端 API。
 - `video/` 配置为 1950 帧、30 fps，即 65 秒演示视频。
 
@@ -46,6 +46,7 @@ Chem3D Learn / 结构化学 3D 学习站 —— 面向中国高中生和化学�
 | 2026-08-10 ~ 08-13 | T-039A～D 全站 3D-first 收缩分四个 PR 阶段合并 |
 | 2026-08-27 ~ 08-30 | 门禁与基线收尾：T-040 ubuntu 基线合并（PR #4）、T-041-A 质量门禁（PR #7）、摘要栏挤压修复（PR #9） |
 | 2026-08-30 ~ 09-30 | T-042 引线标签防遮挡合并（PR #10，含评审修复自反馈振荡）+ T-043 Phase 1 全量审计与文档整理（PR #11） |
+| 2026-09-30 ~ 10-06 | 批次 A（移动端 340px + Phase 2 三缺陷）与批次 B/C（缺陷④闭环、D-053、TeachingHtml 69 处、晶体样板合并、mock 层退役） |
 
 ## 已知风险
 
