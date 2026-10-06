@@ -651,3 +651,10 @@
 - **决定**：验证通过后把任务提交**直接 push 到 `main`**（可直接在 `main` 上开发，或用短生命周期分支合并回 `main` 后推送），不再新开 PR；已存在的未合并 PR 仍按其收口条件合并。安全规则不变：push 前 `git fetch`、分歧即停、绝不 force。
 - **连带影响**：PR 触发的视觉回归不再自动运行——重要前端改动（渲染/布局/标签）落地后手动执行 `gh workflow run visual-regression.yml --ref main -f mode=verify` 并确认结果（已写入 AGENTS.md 交付流程）。`deploy-pages.yml` 本就由 push main 触发，部署与 quality-gate（lint/logic）不受影响。
 - **边界**：baseline rebuild 类需要人工逐张审核的产出，仍走 `visual-regression.yml` rebuild 模式生成 PR 的既有通道（那是评审载体，不是交付流程）。
+
+## D-053 基线收口以 verify 结果为准：零差异即关闭 rebuild 前置，有差异才走 rebuild + 人工审核
+
+- **日期**：2026-10-06（Claude Code 提案，批次 B 落档；依据 2026-08-30 以来 verify 零差异的机制认知，见 commit `a1a9f5c`）
+- **背景**：T-043 Phase 4 与 T-041-B 的验收标准原文都要求「rebuild 基线经人工逐张审核合并」。但批次 A（移动端 340px 下限 + 标签修复）落地后对既有 Linux 基线跑 `verify` 连续**零差异**——基线本就包含 Html 层，`maxDiffPixelRatio 1%` + 单像素阈值 0.2 吸收小面积标签位移；零差异意味着旧基线渲染 == 新 UI，rebuild 只会产出逐像素相同的图片，人工逐张审核是纯仪式成本。
+- **决定**：布局/标签类改动落地后，以 `visual-regression.yml --mode verify` 的结果作为基线收口依据：**verify 全绿（含零差异）即视为基线同步，关闭 rebuild 前置**；verify 出现真实差异时，才走 rebuild 模式生成基线 PR 并逐张人工审核。本决策追溯关闭 T-041-B 与 T-043 Phase 4 的 rebuild 前置。
+- **边界**：不改变 D-052 的 rebuild 通道定位（评审载体）；darwin 历史基线清理仍是独立任务；若未来某次 verify 的「零差异」被证实是容差掩盖了不可接受的真实变化（目检发现），以目检为准恢复 rebuild 要求。
