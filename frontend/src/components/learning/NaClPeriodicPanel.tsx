@@ -14,6 +14,8 @@ type NaClPeriodicPanelProps = {
   cellFrameMode: CrystalCellFrameMode;
   cluster: NaClCoordinationDisplayCluster | null;
   isolateCoordination: boolean;
+  /** nacl.json 的 metadata.notesZh：经化学核验的模型边界说明，透传给结构信息面板。 */
+  modelBoundary?: string;
 };
 
 const frameModeLabel: Record<CrystalCellFrameMode, string> = {
@@ -27,6 +29,7 @@ export function NaClPeriodicPanel({
   cellFrameMode,
   cluster,
   isolateCoordination,
+  modelBoundary,
 }: NaClPeriodicPanelProps) {
   const N = supercellSize;
   const cellCount = N ** 3;
@@ -135,6 +138,7 @@ export function NaClPeriodicPanel({
 
       <StructureInfoDisclosure
         facts={facts}
+        modelBoundary={modelBoundary}
         summaryItems={[
           { label: "单胞", value: "1 个单胞" },
           { label: "复制", value: `沿 a、b、c 各复制 ${N} 次` },

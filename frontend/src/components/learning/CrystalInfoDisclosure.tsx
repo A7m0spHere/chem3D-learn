@@ -40,6 +40,7 @@ export function CrystalInfoDisclosure({
           { label: "当前模式", value: modeLabel },
           { label: "结构概览", value: molecule.summaryZh },
         ]}
+        modelBoundary={molecule.metadata?.notesZh}
         summaryItems={[
           { label: "晶体", value: molecule.nameZh },
           { label: "模式", value: modeLabel },
@@ -63,6 +64,7 @@ export function CrystalInfoDisclosure({
   return (
     <StructureInfoDisclosure
       facts={facts}
+      modelBoundary={molecule.metadata?.notesZh}
       summaryItems={[
         { label: "类型", value: info.typeZh },
         { label: "模式", value: modeLabel },

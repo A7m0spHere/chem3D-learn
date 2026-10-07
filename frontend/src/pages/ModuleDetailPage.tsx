@@ -587,6 +587,7 @@ export function ModuleDetailPage() {
       cellFrameMode={cellFrameMode}
       cluster={coordinationCluster}
       isolateCoordination={isolateCoordination}
+      modelBoundary={molecule?.metadata?.notesZh}
       supercellSize={supercellSize}
     />
   );
@@ -1139,7 +1140,10 @@ export function ModuleDetailPage() {
               { label: "典型键角", value: molecule.keyAngles[0]?.label ?? "未标注" },
             ]}
             key={moduleData.id}
-            modelBoundary="键角为典型值，模型用于观察原子、化学键与孤电子对的空间关系。"
+            modelBoundary={
+              molecule.metadata?.notesZh ??
+              "键角为典型值，模型用于观察原子、化学键与孤电子对的空间关系。"
+            }
             summaryItems={[
               { label: "分子式", value: molecule.formula },
               { label: "名称", value: molecule.nameZh },
