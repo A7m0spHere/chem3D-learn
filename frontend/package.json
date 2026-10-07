@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "build:pages": "tsc --noEmit && vite build --base=/chem3D-learn/",
+    "build": "tsc --noEmit && vite build && node scripts/check-bundle-budget.mjs",
+    "build:pages": "tsc --noEmit && vite build --base=/chem3D-learn/ && node scripts/check-bundle-budget.mjs",
     "build:sites": "npm run build && node scripts/prepare-sites-build.mjs",
     "lint": "eslint .",
     "check": "npm run build && npm run test:visual",
