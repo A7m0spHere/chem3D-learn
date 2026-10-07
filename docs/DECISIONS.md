@@ -658,3 +658,24 @@
 - **背景**：T-043 Phase 4 与 T-041-B 的验收标准原文都要求「rebuild 基线经人工逐张审核合并」。但批次 A（移动端 340px 下限 + 标签修复）落地后对既有 Linux 基线跑 `verify` 连续**零差异**——基线本就包含 Html 层，`maxDiffPixelRatio 1%` + 单像素阈值 0.2 吸收小面积标签位移；零差异意味着旧基线渲染 == 新 UI，rebuild 只会产出逐像素相同的图片，人工逐张审核是纯仪式成本。
 - **决定**：布局/标签类改动落地后，以 `visual-regression.yml --mode verify` 的结果作为基线收口依据：**verify 全绿（含零差异）即视为基线同步，关闭 rebuild 前置**；verify 出现真实差异时，才走 rebuild 模式生成基线 PR 并逐张人工审核。本决策追溯关闭 T-041-B 与 T-043 Phase 4 的 rebuild 前置。
 - **边界**：不改变 D-052 的 rebuild 通道定位（评审载体）；darwin 历史基线清理仍是独立任务；若未来某次 verify 的「零差异」被证实是容差掩盖了不可接受的真实变化（目检发现），以目检为准恢复 rebuild 要求。
+
+## D-054 `metadata.notesZh` 以折叠面板渲染原文接入 UI，不另立短字段
+
+- **日期**：2026-10-07（Claude Code，T-041-C 收口；维护者指示「完成待办」后按既定选项自行决策）
+- **背景**：T-041-C 挂账两案待决：(a) 把 `notesZh` 接入 `StructureInfoDisclosure.modelBoundary`（需处理长度——多为 1～3 句）；(b) 在 JSON 另立短字段。23/23 份 JSON 的 `notesZh` 均经 `docs/CHEMISTRY_VERIFICATION.md` 化学核验，而 UI 硬编码的「模型边界」短句只覆盖专题模块、与数据源脱节。
+- **决定**：选 (a)——`CrystalInfoDisclosure` 两个分支、NaCl 周期工作台面板（新增 prop 透传）与普通分子分支（`notesZh` 优先、原硬编码句兜底）全部渲染 `notesZh` **原文**。不做短字段改写：对核验过的化学表述做二次缩写有引入事实漂移的风险，违背「不确定的化学事实不得编造」的项目红线。
+- **与 3D-first 的关系**：这些面板默认折叠、展开才渲染，3D 主视区不受影响；「模型边界」属于结构信息的组成部分，不是首屏教学文案。
+- **边界**：专题模块（无 JSON 记录）继续使用 ModuleDetailPage 硬编码短句，本轮不动。
+
+## D-055 three chunk 函数式 manualChunks 隔离 + 构建体积守卫预算
+
+- **日期**：2026-10-07（Claude Code，体检第三梯队第二批优先项；HANDOFF 前序建议）
+- **背景**：T-024 后 three/r3f 依赖图随 Rollup 自动分包落在 `ThreeViewerFrame` chunk（≈838 KB / gzip 225），App 代码任何改动都会使其 hash 失效，three 系依赖无法长期缓存；且体积无守卫，mock 层退役后的加载成果可能悄悄回涨。config 既有注释记载对象式 manualChunks 会「吸收共享 React 运行时，让首页静态依赖 3D vendor」。
+- **决定**：
+  1. `vite.config.ts` 改用**函数式** manualChunks：`three / three-stdlib / @react-three` → 稳定命名 `three` chunk。实测发现对象式的「吸收」教训在函数式同样存在，且有两个不同机制，必须显式阻断——
+     - **react / react-dom 被吸收**进 manual three chunk（入口静态 import 992 KB three chunk，prefetch 回归变红）；
+     - **vite 的 `__vitePreload` 助手**被共享归组进 three chunk（入口为一个 <1 KB 助手静态依赖 3D vendor）。
+     解法：两者显式指派 `react-vendor` chunk；`react-reconciler / scheduler / zustand` 等仅被 fiber 使用的依赖不指派，由默认归组进 three chunk。
+  2. 新增 `frontend/scripts/check-bundle-budget.mjs` 体积守卫，接线进 `build` / `build:pages`（`test:production`、`test:pages`、`test:sites`、deploy-pages CI 自动继承）。预算（2026-10-07 实测校准，留 ~10-15% 余量）：**three chunk raw ≤ 1100 KB / gzip ≤ 310 KB；其余单 chunk raw ≤ 260 KB / gzip ≤ 80 KB**；并断言 three 恰好一个。超限 exit 1；上调预算必须是显式决定并在提交说明记录。
+- **实测**（2026-10-07）：three 847.6 KB / gzip 229.2（纯 3D）；首页入口 215.0 / 69.0 + react-vendor 144.7 / 46.6。首页 JS 入口 gzip 总量与旧自动分包基本持平（116 → 115.6 KB），但 three chunk hash 此后不随 App 改动失效；旧入口里混入的 react-reconciler / scheduler / zustand（fiber 独占运行时）移出首页加载路径。`test:production` 4/4、prefetch 守卫全绿。
+- **边界**：three chunk 仍触发 Vite large chunk 警告（>500 KB），与既有基线说明一致；预算针对生产构建产物，dev 模式不经过守卫。
